@@ -1,3 +1,22 @@
+/*
+ * TEPSONIC
+ * Copyright 2009 Dan Vratil <vratil@progdansoft.com>
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 3
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Cambridge, MA 02110-1301, USA.
+ */
+
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
@@ -5,6 +24,9 @@
 #include <QDesktopServices>
 #include <QUrl>
 #include <QCloseEvent>
+#include <QFileDialog>
+
+#include <QDebug>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), ui(new Ui::MainWindow)
@@ -34,16 +56,22 @@ MainWindow::MainWindow(QWidget *parent)
 
 }
 
+
+
 MainWindow::~MainWindow()
 {
     delete ui;
 }
+
+
 
  /* Show "About Qt" dialog */
 void MainWindow::on_actionAbout_Qt_triggered()
 {
     QMessageBox::aboutQt(this,tr("About Qt"));
 }
+
+
 
  /* Show "About Tepsonic" dialog */
 void MainWindow::on_actionAbout_TepSonic_triggered()
@@ -53,10 +81,14 @@ void MainWindow::on_actionAbout_TepSonic_triggered()
     aboutDlg.about(this,tr("About TepSonic"),tr(str.toAscii()));
 }
 
+
+
 void MainWindow::on_actionReport_a_bug_triggered()
 {
     QDesktopServices::openUrl(QUrl("http://bugzilla.progdan.homelinux.net/index.php?project=5&do=index&switch=1", QUrl::TolerantMode));
 }
+
+
 
 void MainWindow::trayClicked(QSystemTrayIcon::ActivationReason reason)
 {
@@ -69,6 +101,8 @@ void MainWindow::trayClicked(QSystemTrayIcon::ActivationReason reason)
     }
 }
 
+
+
 void MainWindow::closeEvent(QCloseEvent* event)
 {
         // if tray is visible hide the windows and ignore the event
@@ -78,13 +112,38 @@ void MainWindow::closeEvent(QCloseEvent* event)
     }
 }
 
+
+
 void MainWindow::on_actionQuit_TepSonic_triggered()
 {
     canClose = true;
     this->close();
 }
 
-void MainWindow::on_actionLoad_file_triggered()
+
+
+void MainWindow::on_actionShow_Hide_triggered()
 {
     trayClicked(QSystemTrayIcon::Trigger);
 }
+
+
+
+void MainWindow::on_actionAdd_file_triggered()
+{
+    QStringList fileNames = QFileDialog::getOpenFileNames(this,tr("Select file"),"",
+                                                          tr("Supported audio files (*.mp3 *.wav *.ogg *.flac);;All files (*.*)"));
+    addFilesToPlaylist(&fileNames);
+}
+
+
+ void MainWindow::addFilesToPlaylist(const QStringList *filesList)
+ {
+   QTreeWidgetItem item;
+     // Add all files to the playlist
+    for (int i=0;i<filesList->count();i++)
+    {
+         // Append the item to playlist
+        ui->playlistBrowser->addTopLevelItem(new QTreeWidgetItem(QStringList() << filesList->at(i) << "" << "" << "" << "" << "" << "" << "" << ""));
+    }
+ }
