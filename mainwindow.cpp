@@ -18,6 +18,7 @@
  */
 
 #include "mainwindow.h"
+#include "preferencesdialog.h"
 #include "ui_mainwindow.h"
 
 #include <QMessageBox>
@@ -54,12 +55,16 @@ MainWindow::MainWindow(QWidget *parent)
 
     canClose = false;
 
+   restoreGeometry(settings.value("Window/Geometry", saveGeometry()).toByteArray());
+
 }
 
 
 
 MainWindow::~MainWindow()
 {
+    settings.setValue("Window/Geometry", saveGeometry());
+
     delete ui;
 }
 
@@ -147,3 +152,11 @@ void MainWindow::on_actionAdd_file_triggered()
         ui->playlistBrowser->addTopLevelItem(new QTreeWidgetItem(QStringList() << filesList->at(i) << "" << "" << "" << "" << "" << "" << "" << ""));
     }
  }
+
+void MainWindow::on_actionPreferences_triggered()
+{
+    // Show preferences dialog
+    PreferencesDialog *prefDlg = new PreferencesDialog(settings,this);
+    prefDlg->exec();
+
+}

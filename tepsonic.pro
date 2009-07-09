@@ -9,9 +9,12 @@ TEMPLATE = app
 SOURCES += main.cpp \
     mainwindow.cpp \
     collectionbrowser.cpp \
-    playlistbrowser.cpp
+    playlistbrowser.cpp \
+    preferencesdialog.cpp
 HEADERS += mainwindow.h \
     collectionbrowser.h \
-    playlistbrowser.h
-FORMS += mainwindow.ui
+    playlistbrowser.h \
+    preferencesdialog.h
+FORMS += mainwindow.ui \
+    preferencesdialog.ui
 RESOURCES += icons.qrc

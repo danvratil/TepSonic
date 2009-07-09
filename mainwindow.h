@@ -23,6 +23,7 @@
 #include <QtGui/QMainWindow>
 #include <QtGui/QActionGroup>
 #include <QtGui/QSystemTrayIcon>
+#include <QSettings>
 
 namespace Ui
 {
@@ -54,6 +55,8 @@ private:
     QSystemTrayIcon *trayIcon;
     QIcon *appIcon;
 
+    QSettings settings;
+
 protected:
     /**
      * Executed when trying to close main window (eg. close application). According
@@ -66,6 +69,7 @@ protected:
 private slots:
 
 
+    void on_actionPreferences_triggered();
     void on_actionAdd_file_triggered();
 
     /**
