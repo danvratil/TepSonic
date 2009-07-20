@@ -8,13 +8,17 @@ TARGET = tepsonic
 TEMPLATE = app
 SOURCES += main.cpp \
     mainwindow.cpp \
-    collectionbrowser.cpp \
+    preferencesdialog.cpp \
+    playlistmodel.cpp \
     playlistbrowser.cpp \
-    preferencesdialog.cpp
+    collectionbrowser.cpp \
+    playlistitem.cpp
 HEADERS += mainwindow.h \
-    collectionbrowser.h \
+    preferencesdialog.h \
+    playlistmodel.h \
     playlistbrowser.h \
-    preferencesdialog.h
+    collectionbrowser.h \
+    playlistitem.h
 FORMS += mainwindow.ui \
     preferencesdialog.ui
 RESOURCES += icons.qrc

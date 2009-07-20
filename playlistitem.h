@@ -17,33 +17,32 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Cambridge, MA 02110-1301, USA.
  */
 
-/** Playlist Browser
- *    QTreeView with implemented DROP action
- *
- * Thanks to David Watzke
- *
- */
 
-#ifndef PLAYLISTBROWSER_H
-#define PLAYLISTBROWSER_H
+#ifndef PLAYLISTITEM_H
+#define PLAYLISTITEM_H
 
-#include <QTreeView>
+#include <QList>
+#include <QVariant>
 
-class PlaylistBrowser : public QTreeView
+class PlaylistItem
 {
     public:
-        PlaylistBrowser(QWidget* = 0);
-        ~PlaylistBrowser();
+        PlaylistItem(const QList<QVariant> &data, PlaylistItem *parent = 0);
+        ~PlaylistItem();
 
-        void addTracks(QStringList *filesList);
+        void appendChild(PlaylistItem *item);
 
-    protected:
-        void dropEvent(QDropEvent*);
-        void dragEnterEvent(QDragEnterEvent*);
-        void dragMoveEvent(QDragMoveEvent*);
+        PlaylistItem *child(int row);
+        int childCount() const;
+        int columnCount() const;
+        QVariant data(int column) const;
+        int row() const;
+        PlaylistItem *parent();
 
     private:
-        //PlaylistItem *rootItem;
+        QList<PlaylistItem*> m_childItems;
+        QList<QVariant> m_itemData;
+        PlaylistItem *m_parentItem;
 };
 
-#endif // PLAYLISTBROWSER_H
+#endif // PLAYLISTITEM_H

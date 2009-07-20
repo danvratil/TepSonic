@@ -25,6 +25,8 @@
 #include <QtGui/QSystemTrayIcon>
 #include <QSettings>
 
+#include "playlistmodel.h"
+
 namespace Ui
 {
     class MainWindow;
@@ -44,7 +46,6 @@ public:
      * will be terminated.*/
     bool canClose;
 
-    void addFilesToPlaylist(const QStringList *playlist);
 
 private:
     Ui::MainWindow *ui;
@@ -52,7 +53,11 @@ private:
     QActionGroup *randomPlaybackGroup;
     QActionGroup *repeatPlaybackGroup;
 
+    PlaylistModel *playlistModel;
+
     QSystemTrayIcon *trayIcon;
+    QMenu *trayIconMenu;
+
     QIcon *appIcon;
 
     QSettings settings;
@@ -68,8 +73,14 @@ protected:
 
 private slots:
 
-
+    /**
+     * Open Preferences dialog
+     */
     void on_actionPreferences_triggered();
+
+    /**
+     * Open Add file dialog
+     */
     void on_actionAdd_file_triggered();
 
     /**

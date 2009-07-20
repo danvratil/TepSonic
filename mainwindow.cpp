@@ -53,9 +53,29 @@ MainWindow::MainWindow(QWidget *parent)
                 this, SLOT(trayClicked(QSystemTrayIcon::ActivationReason)));
     trayIcon->setVisible(true);
 
+    trayIconMenu = new QMenu(this);
+    trayIconMenu->addAction(ui->actionShow_Hide);
+    trayIconMenu->addSeparator();
+    trayIconMenu->addAction(ui->actionPrevious_track);
+    trayIconMenu->addAction(ui->actionPlay_pause);
+    trayIconMenu->addAction(ui->actionStop);
+    trayIconMenu->addAction(ui->actionNext_track);
+    trayIconMenu->addSeparator();
+    trayIconMenu->addAction(ui->actionQuit_TepSonic);
+    trayIcon->setContextMenu(trayIconMenu);
+
+
+    playlistModel = new PlaylistModel(QString());
+    ui->playlistBrowser->setModel(playlistModel);
+    // hide the first column (with filename)
+    ui->playlistBrowser->hideColumn(0);
+
     canClose = false;
 
-   restoreGeometry(settings.value("Window/Geometry", saveGeometry()).toByteArray());
+    restoreGeometry(settings.value("Window/Geometry", saveGeometry()).toByteArray());
+
+    if (settings.value("Collections/EnableCollections",true).toBool()==false)
+        ui->collectionBrowser->hide();
 
 }
 
@@ -138,20 +158,9 @@ void MainWindow::on_actionAdd_file_triggered()
 {
     QStringList fileNames = QFileDialog::getOpenFileNames(this,tr("Select file"),"",
                                                           tr("Supported audio files (*.mp3 *.wav *.ogg *.flac);;All files (*.*)"));
-    addFilesToPlaylist(&fileNames);
+    ui->playlistBrowser->addTracks(&fileNames);
 }
 
-
- void MainWindow::addFilesToPlaylist(const QStringList *filesList)
- {
-   QTreeWidgetItem item;
-     // Add all files to the playlist
-    for (int i=0;i<filesList->count();i++)
-    {
-         // Append the item to playlist
-        ui->playlistBrowser->addTopLevelItem(new QTreeWidgetItem(QStringList() << filesList->at(i) << "" << "" << "" << "" << "" << "" << "" << ""));
-    }
- }
 
 void MainWindow::on_actionPreferences_triggered()
 {

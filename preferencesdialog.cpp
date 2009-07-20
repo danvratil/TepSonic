@@ -10,6 +10,7 @@ PreferencesDialog::PreferencesDialog(QSettings& settings, QWidget *parent) :
     m_ui->setupUi(this);
     m_settings = &settings;
 
+    m_ui->enableCollectionsCheckbox->setChecked(m_settings->value("Collections/EnableCollections",true).toBool());
     m_ui->autoRebuildCheckbox->setChecked(m_settings->value("Collections/AutoRebuildAfterStart",true).toBool());
     m_ui->rememberLastSessionCheckbox->setChecked(m_settings->value("Preferences/RestoreSession",true).toBool());
 }
@@ -32,8 +33,8 @@ void PreferencesDialog::changeEvent(QEvent *e)
 
 void PreferencesDialog::on_buttonBox_accepted()
 {
+    m_settings->setValue("Collections/EnableCollections",m_ui->enableCollectionsCheckbox->isChecked());
     m_settings->setValue("Collections/AutoRebuildAfterStart",m_ui->autoRebuildCheckbox->isChecked());
-
     m_settings->setValue("Preferences/RestoreSession",m_ui->rememberLastSessionCheckbox->isChecked());
 
     this->close();

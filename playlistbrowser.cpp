@@ -21,10 +21,21 @@
 #include "playlistbrowser.h"
 
 #include <QDropEvent>
+#include <QDebug>
 
-PlaylistBrowser::PlaylistBrowser(QWidget* parent): QTreeWidget(parent)
+PlaylistBrowser::PlaylistBrowser(QWidget* parent):
+          QTreeView(parent)
 {
     setAcceptDrops(true);
+}
+
+PlaylistBrowser::~PlaylistBrowser()
+{
+}
+
+void PlaylistBrowser::addTracks(QStringList *filesList)
+{
+    //lunch thread and give it list of files,
 }
 
 // Event: item is dragged over the widget

@@ -17,30 +17,16 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Cambridge, MA 02110-1301, USA.
  */
 
-/**
- * Collection Browser
- *    QTreeWidget with implemented DRAG action
- *
- * Thanks to David Watzke
- *
- */
-
 #ifndef COLLECTIONBROWSER_H
 #define COLLECTIONBROWSER_H
 
-#include <QTreeWidget>
+#include <QTreeView>
 
-class CollectionBrowser : public QTreeWidget
+class CollectionBrowser : public QTreeView
 {
     public:
         CollectionBrowser(QWidget* = 0);
-
-    private:
-        QPoint dragStartPosition;
-
-    protected:
-        void mousePressEvent(QMouseEvent*);
-        void mouseMoveEvent(QMouseEvent*);
+        ~CollectionBrowser();
 };
 
 #endif // COLLECTIONBROWSER_H

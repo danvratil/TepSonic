@@ -78,6 +78,16 @@
        <widget class="QWidget" name="collections_page">
         <layout class="QVBoxLayout" name="verticalLayout_2">
          <item>
+          <widget class="QCheckBox" name="enableCollectionsCheckbox">
+           <property name="text">
+            <string>Enable collections</string>
+           </property>
+           <property name="checked">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
           <widget class="QCheckBox" name="autoRebuildCheckbox">
            <property name="text">
             <string>Automatically update collections after start</string>
