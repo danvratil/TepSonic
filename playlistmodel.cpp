@@ -25,7 +25,7 @@
 PlaylistModel::PlaylistModel(const QString &data, QObject *parent)
         : QAbstractItemModel(parent)
 {
-    QList<QVariant> rootData;
+    QStringList rootData;
 
     rootData << "Filename" << "Track" << "Title" << "Artist" << "Album" << "Year" << "Length";
     rootItem = new PlaylistItem(rootData);
@@ -38,7 +38,7 @@ PlaylistModel::~PlaylistModel()
 }
 
 
-int PlaylistModel::columnCount(const QModelIndex &parent) const
+int PlaylistModel::columnCount(const QModelIndex &parent) const //make it easier
 {
     if (parent.isValid())
         return static_cast<PlaylistItem*>(parent.internalPointer())->columnCount();
@@ -58,7 +58,7 @@ QVariant PlaylistModel::data(const QModelIndex &index, int role) const
 
     PlaylistItem *item = static_cast<PlaylistItem*>(index.internalPointer());
 
-    return item->data(index.column());
+    //return item->data(index.column());
 }
 
 
@@ -75,7 +75,7 @@ QVariant PlaylistModel::headerData(int section, Qt::Orientation orientation,
                                 int role) const
 {
     if (orientation == Qt::Horizontal && role == Qt::DisplayRole)
-        return rootItem->data(section);
+        //return rootItem->data(section);
 
     return QVariant();
 }
@@ -84,7 +84,7 @@ QVariant PlaylistModel::headerData(int section, Qt::Orientation orientation,
 QModelIndex PlaylistModel::index(int row, int column, const QModelIndex &parent)
             const
 {
-    if (!hasIndex(row, column, parent))
+    /*if (!hasIndex(row, column, parent))
         return QModelIndex();
 
     PlaylistItem *parentItem;
@@ -98,7 +98,7 @@ QModelIndex PlaylistModel::index(int row, int column, const QModelIndex &parent)
     if (childItem)
         return createIndex(row, column, childItem);
     else
-        return QModelIndex();
+        return QModelIndex();*/
 }
 
 QModelIndex PlaylistModel::parent(const QModelIndex &index) const
@@ -118,6 +118,7 @@ QModelIndex PlaylistModel::parent(const QModelIndex &index) const
 
 int PlaylistModel::rowCount(const QModelIndex &parent) const
 {
+    /*
     PlaylistItem *parentItem;
     if (parent.column() > 0)
         return 0;
@@ -126,8 +127,10 @@ int PlaylistModel::rowCount(const QModelIndex &parent) const
         parentItem = rootItem;
     else
         parentItem = static_cast<PlaylistItem*>(parent.internalPointer());
-
     return parentItem->childCount();
+    */
+    //return itemList.count();
+    return 0;
 }
 
 

@@ -23,6 +23,7 @@
 #include <QAbstractItemModel>
 #include <QModelIndex>
 #include <QVariant>
+#include <QList>
 
 #include "playlistitem.h"
 
@@ -45,8 +46,8 @@ class PlaylistModel : public QAbstractItemModel
         int rowCount(const QModelIndex &parent = QModelIndex()) const;
         int columnCount(const QModelIndex &parent = QModelIndex()) const;
     private:
-        PlaylistItem *rootItem;
-
+        //QList<PlayListItem*> itemList;
+        PlaylistItem* rootItem;
 };
 
 #endif // PLAYLISTMODEL_H
