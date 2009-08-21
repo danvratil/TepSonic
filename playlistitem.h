@@ -22,27 +22,33 @@
 #define PLAYLISTITEM_H
 
 #include <QList>
+#include <QStringList>
 #include <QVariant>
+//#include <qDebug>
+
+//TODO: sorting
 
 class PlaylistItem
 {
     public:
-        PlaylistItem(const QList<QVariant> &data, PlaylistItem *parent = 0);
+        PlaylistItem(const QStringList data, PlaylistItem *parent = 0);
         ~PlaylistItem();
 
-        void appendChild(PlaylistItem *item);
-
-        PlaylistItem *child(int row);
-        int childCount() const;
         int columnCount() const;
-        QVariant data(int column) const;
-        int row() const;
-        PlaylistItem *parent();
+        void setRow(int);
+        PlaylistItem* parent() const;
+        PlaylistItem* data(int row) const;  //for root Item
+        void setData(QStringList);          //set data
+        QStringList data();                 //return data
+        void setPlaylistItem(PlaylistItem*);//add some item to list in this root pointer
+        int row() const;                    //return row of current item
+        QList<PlaylistItem*> list();        //return whole list of items
+        void setList(QList<PlaylistItem*>);  //set whole list at oneshot
 
     private:
-        QList<PlaylistItem*> m_childItems;
-        QList<QVariant> m_itemData;
-        PlaylistItem *m_parentItem;
+        QStringList myData;        //data for current item
+        QList<PlaylistItem*> playlistList;  //used only by one rootItem (pokud jsem to pochopil dobre)
+        PlaylistItem *myParent;     //parent of current pointer
 };
 
 #endif // PLAYLISTITEM_H

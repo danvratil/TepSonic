@@ -20,49 +20,71 @@
 #include <QStringList>
 #include "playlistitem.h"
 
-PlaylistItem::PlaylistItem(const QList<QVariant> &data, PlaylistItem *parent)
+PlaylistItem::PlaylistItem(const QStringList data, PlaylistItem *parent)
 {
-    m_parentItem = parent;
-    m_itemData = data;
+    myParent = parent;
+    myData = data;
 }
 
-PlaylistItem::~PlaylistItem()
-{
-    qDeleteAll(m_childItems);
-}
+PlaylistItem::~PlaylistItem() {}
 
-void PlaylistItem::appendChild(PlaylistItem *item)
+/*void PlaylistItem::appendChild(PlaylistItem *item)
 {
     m_childItems.append(item);
-}
+}*/
 
-PlaylistItem *PlaylistItem::child(int row)
+/*PlaylistItem *PlaylistItem::child(int row)
 {
     return m_childItems.value(row);
-}
+}*/
 
-int PlaylistItem::childCount() const
+/*int PlaylistItem::childCount() const
 {
     return m_childItems.count();
-}
+}*/
 
 int PlaylistItem::columnCount() const
 {
-    return m_itemData.count();
+    return playlistList.count();
 }
 
-QVariant PlaylistItem::data(int column) const
+PlaylistItem* PlaylistItem::data(int row) const
 {
-    return m_itemData.value(column);
+    return playlistList.at(row);
 }
 
-PlaylistItem *PlaylistItem::parent()
+PlaylistItem* PlaylistItem::parent() const
 {
-    return m_parentItem;
+    return myParent;
 }
 
 int PlaylistItem::row() const
 {
-    if (m_parentItem)
-        return m_parentItem->m_childItems.indexOf(const_cast<PlaylistItem*>(this));
+    if (myParent)
+        return playlistList.indexOf(const_cast<PlaylistItem*>(this));
 }
+
+ void PlaylistItem::setData(QStringList listOfData)
+ {
+     myData = listOfData;
+ }
+
+ QStringList PlaylistItem::data()
+ {
+     return myData;
+ }
+
+ void PlaylistItem::setPlaylistItem(PlaylistItem* item)
+ {
+    playlistList << item;
+ }
+
+ QList<PlaylistItem*> PlaylistItem::list()
+ {
+    return playlistList;
+ }
+
+ void PlaylistItem::setList(QList<PlaylistItem*> list)
+ {
+     playlistList = list;
+ }
