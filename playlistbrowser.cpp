@@ -35,7 +35,9 @@ PlaylistBrowser::~PlaylistBrowser()
 
 void PlaylistBrowser::addTracks(QStringList *filesList)
 {
-    //lunch thread and give it list of files,
+    //lunch thread and give it list of files
+    //TODO: remove this, write some code :-)
+    Q_UNUSED(filesList);
 }
 
 // Event: item is dragged over the widget

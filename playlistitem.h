@@ -1,6 +1,7 @@
 /*
  * TEPSONIC
  * Copyright 2009 Dan Vratil <vratil@progdansoft.com>
+ * Copyright 2009 Petr Los <petr_los@centrum.cz>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -24,31 +25,38 @@
 #include <QList>
 #include <QStringList>
 #include <QVariant>
-//#include <qDebug>
 
 //TODO: sorting
 
 class PlaylistItem
 {
     public:
-        PlaylistItem(const QStringList data, PlaylistItem *parent = 0);
+        PlaylistItem(const QString data, int colCount = 0 , PlaylistItem * mainParent = 0,PlaylistItem *parent = 0);
         ~PlaylistItem();
 
+        int rowCount() const;
         int columnCount() const;
         void setRow(int);
         PlaylistItem* parent() const;
-        PlaylistItem* data(int row) const;  //for root Item
-        void setData(QStringList);          //set data
-        QStringList data();                 //return data
-        void setPlaylistItem(PlaylistItem*);//add some item to list in this root pointer
-        int row() const;                    //return row of current item
-        QList<PlaylistItem*> list();        //return whole list of items
-        void setList(QList<PlaylistItem*>);  //set whole list at oneshot
+         //for root Item
+        PlaylistItem* item(int row);
+         //add some item to list in this root pointer
+        void setPlaylistItem(PlaylistItem* item,PlaylistItem* parent);
+         //return whole list of items
+        QList<PlaylistItem*> list(PlaylistItem* parent);
+         //set whole list at one shot
+        void setList(QList<PlaylistItem*>);
+        QStringList data(PlaylistItem* parent);
 
     private:
-        QStringList myData;        //data for current item
-        QList<PlaylistItem*> playlistList;  //used only by one rootItem (pokud jsem to pochopil dobre)
-        PlaylistItem *myParent;     //parent of current pointer
+         //data for current item
+        QString m_myData;
+          //used only by one rootItem (pokud jsem to pochopil dobre)
+        QList< PlaylistItem* > m_playlistList;
+         //parent of current pointer
+        PlaylistItem *m_myParent;
+        PlaylistItem* m_mainParent;
+        int m_colCount;
 };
 
 #endif // PLAYLISTITEM_H

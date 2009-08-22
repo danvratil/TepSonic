@@ -1,6 +1,7 @@
 /*
  * TEPSONIC
  * Copyright 2009 Dan Vratil <vratil@progdansoft.com>
+ * Copyright 2009 Petr Los <petr_los@centrum.cz>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -20,71 +21,55 @@
 #include <QStringList>
 #include "playlistitem.h"
 
-PlaylistItem::PlaylistItem(const QStringList data, PlaylistItem *parent)
+PlaylistItem::PlaylistItem(const QString data, int colCount, PlaylistItem * mainParent, PlaylistItem *parent)
 {
-    myParent = parent;
-    myData = data;
+    this->m_mainParent = mainParent;
+    m_myParent = parent;
+    m_myData = data;
+    m_colCount = colCount;
 }
 
 PlaylistItem::~PlaylistItem() {}
 
-/*void PlaylistItem::appendChild(PlaylistItem *item)
+int PlaylistItem::rowCount() const
 {
-    m_childItems.append(item);
-}*/
-
-/*PlaylistItem *PlaylistItem::child(int row)
-{
-    return m_childItems.value(row);
-}*/
-
-/*int PlaylistItem::childCount() const
-{
-    return m_childItems.count();
-}*/
-
-int PlaylistItem::columnCount() const
-{
-    return playlistList.count();
+    return m_playlistList.count();
 }
 
-PlaylistItem* PlaylistItem::data(int row) const
+PlaylistItem* PlaylistItem::item(int row)
 {
-    return playlistList.at(row);
+    return m_mainParent->m_playlistList.at(row);
 }
 
 PlaylistItem* PlaylistItem::parent() const
 {
-    return myParent;
+    return m_myParent;
 }
 
-int PlaylistItem::row() const
+ void PlaylistItem::setPlaylistItem(PlaylistItem* item,PlaylistItem* parent)
+ {
+    parent->m_playlistList << item;
+ }
+
+ void PlaylistItem::setList(QList< PlaylistItem*> list)
+ {
+     m_playlistList = list;
+ }
+
+ int PlaylistItem::columnCount() const
+ {
+    return m_colCount;
+ }
+
+QStringList PlaylistItem::data(PlaylistItem* parent)
 {
-    if (myParent)
-        return playlistList.indexOf(const_cast<PlaylistItem*>(this));
+    QStringList childData;
+    for(int i = 0; i < parent->m_playlistList.count();i++)
+        childData << parent->m_myData;
+    return childData;
 }
 
- void PlaylistItem::setData(QStringList listOfData)
- {
-     myData = listOfData;
- }
-
- QStringList PlaylistItem::data()
- {
-     return myData;
- }
-
- void PlaylistItem::setPlaylistItem(PlaylistItem* item)
- {
-    playlistList << item;
- }
-
- QList<PlaylistItem*> PlaylistItem::list()
- {
-    return playlistList;
- }
-
- void PlaylistItem::setList(QList<PlaylistItem*> list)
- {
-     playlistList = list;
- }
+QList<PlaylistItem*> PlaylistItem::list(PlaylistItem* parent)
+{
+    return parent->m_playlistList;
+}

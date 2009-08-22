@@ -26,6 +26,8 @@
 #include <QUrl>
 #include <QCloseEvent>
 #include <QFileDialog>
+//#include <QStringList>
+//#include <QVariant>
 
 #include <QDebug>
 
@@ -65,7 +67,7 @@ MainWindow::MainWindow(QWidget *parent)
     trayIcon->setContextMenu(trayIconMenu);
 
 
-    playlistModel = new PlaylistModel(QString());
+    playlistModel = new PlaylistModel(this);
     ui->playlistBrowser->setModel(playlistModel);
     // hide the first column (with filename)
     ui->playlistBrowser->hideColumn(0);

@@ -1,6 +1,7 @@
 /*
  * TEPSONIC
  * Copyright 2009 Dan Vratil <vratil@progdansoft.com>
+ * Copyright 2009 Petr Los <petr_los@centrum.cz>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -33,21 +34,28 @@ class PlaylistModel : public QAbstractItemModel
 {
     Q_OBJECT
     public:
-        PlaylistModel(const QString &data, QObject *parent = 0);
+         //overloading constructor!
+        PlaylistModel(QObject *parent = 0);
+        PlaylistModel(const QStringList data, QObject *parent = 0);
         ~PlaylistModel();
 
-        QVariant data(const QModelIndex &index, int role) const;
-        //Qt::ItemFlags flags(const QModelIndex &index) const;
-        QVariant headerData(int section, Qt::Orientation orientation,
-                            int role = Qt::DisplayRole) const;
+        QVariant data(const QModelIndex &index, int role) const;            //virtual
         QModelIndex index(int row, int column,
-                          const QModelIndex &parent = QModelIndex()) const;
+                          const QModelIndex &parent = QModelIndex()) const; //virtual
         QModelIndex parent(const QModelIndex &index) const;
-        int rowCount(const QModelIndex &parent = QModelIndex()) const;
-        int columnCount(const QModelIndex &parent = QModelIndex()) const;
+        void setModelData( QList<QStringList>);
+        int rowCount(const QModelIndex &parent = QModelIndex()) const;      //virtual
+        int columnCount(const QModelIndex &parent = QModelIndex()) const;   //virtual
+        Qt::ItemFlags flags(const QModelIndex &index) const;
+        PlaylistItem* root() const;
+        bool setData( const QModelIndex & index, const QVariant & value, int role = Qt::EditRole );
+        PlaylistItem* getItem(const QModelIndex &index) const;
+
+    public slots:
+        void addLines(QList<QStringList>);
+
     private:
-        //QList<PlayListItem*> itemList;
-        PlaylistItem* rootItem;
+        PlaylistItem* m_rootItem;
 };
 
 #endif // PLAYLISTMODEL_H

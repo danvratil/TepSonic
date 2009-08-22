@@ -1,6 +1,7 @@
 /*
  * TEPSONIC
  * Copyright 2009 Dan Vratil <vratil@progdansoft.com>
+ * Copyright 2009 Petr Los <petr_los@centrum.cz>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -21,29 +22,40 @@
 
 #include "playlistmodel.h"
 #include "playlistitem.h"
+#include <QStringList>
+#include <QString>
+#include <QDebug>
+#include <QMap>
 
-PlaylistModel::PlaylistModel(const QString &data, QObject *parent)
+PlaylistModel::PlaylistModel(const QStringList data, QObject *parent)
+        : QAbstractItemModel(parent)
+{
+    QStringList rootData = data;
+    if(data.count() < 1)
+        rootData << "Filename" << "Track" << "Title" << "Artist" << "Album" << "Year" << "Length"; //header
+    m_rootItem = new PlaylistItem(QString());
+}
+
+PlaylistModel::PlaylistModel(QObject *parent)
         : QAbstractItemModel(parent)
 {
     QStringList rootData;
-
-    rootData << "Filename" << "Track" << "Title" << "Artist" << "Album" << "Year" << "Length";
-    rootItem = new PlaylistItem(rootData);
-
+    rootData <<"Filename" << "Track" << "Title" << "Artist" << "Album" << "Year" << "Length";
+    m_rootItem = new PlaylistItem(QString());
 }
 
 PlaylistModel::~PlaylistModel()
 {
-    delete rootItem;
+    delete m_rootItem;
 }
 
 
-int PlaylistModel::columnCount(const QModelIndex &parent) const //make it easier
+int PlaylistModel::columnCount(const QModelIndex &parent) const
 {
     if (parent.isValid())
         return static_cast<PlaylistItem*>(parent.internalPointer())->columnCount();
     else
-        return rootItem->columnCount();
+        return m_rootItem->columnCount();
 }
 
 
@@ -58,47 +70,34 @@ QVariant PlaylistModel::data(const QModelIndex &index, int role) const
 
     PlaylistItem *item = static_cast<PlaylistItem*>(index.internalPointer());
 
-    //return item->data(index.column());
+    return QVariant(item->data(item->parent()));
 }
 
 
-/*Qt::ItemFlags PlaylistModel::flags(const QModelIndex &index) const
+Qt::ItemFlags PlaylistModel::flags(const QModelIndex &index) const
 {
     if (!index.isValid())
         return 0;
 
     return Qt::ItemIsEnabled | Qt::ItemIsSelectable;
-}*/
-
-
-QVariant PlaylistModel::headerData(int section, Qt::Orientation orientation,
-                                int role) const
-{
-    if (orientation == Qt::Horizontal && role == Qt::DisplayRole)
-        //return rootItem->data(section);
-
-    return QVariant();
 }
 
 
 QModelIndex PlaylistModel::index(int row, int column, const QModelIndex &parent)
             const
 {
-    /*if (!hasIndex(row, column, parent))
+    if (!hasIndex(row, column, parent))
         return QModelIndex();
 
     PlaylistItem *parentItem;
 
-    if (!parent.isValid())
-        parentItem = rootItem;
-    else
-        parentItem = static_cast<PlaylistItem*>(parent.internalPointer());
+    parentItem = m_rootItem;
 
-    PlaylistItem *childItem = parentItem->child(row);
+    PlaylistItem *childItem = parentItem->list(m_rootItem).at(row)->list(m_rootItem->list(m_rootItem).at(row)).at(column);
     if (childItem)
         return createIndex(row, column, childItem);
     else
-        return QModelIndex();*/
+        return QModelIndex();
 }
 
 QModelIndex PlaylistModel::parent(const QModelIndex &index) const
@@ -109,76 +108,68 @@ QModelIndex PlaylistModel::parent(const QModelIndex &index) const
     PlaylistItem *childItem = static_cast<PlaylistItem*>(index.internalPointer());
     PlaylistItem *parentItem = childItem->parent();
 
-    if (parentItem == rootItem)
+    if (parentItem == m_rootItem)
         return QModelIndex();
 
-    return createIndex(parentItem->row(), 0, parentItem);
+    return createIndex(0, 0, parentItem);
 }
 
 
 int PlaylistModel::rowCount(const QModelIndex &parent) const
 {
-    /*
+
     PlaylistItem *parentItem;
     if (parent.column() > 0)
         return 0;
 
     if (!parent.isValid())
-        parentItem = rootItem;
+        parentItem = m_rootItem;
     else
         parentItem = static_cast<PlaylistItem*>(parent.internalPointer());
-    return parentItem->childCount();
-    */
-    //return itemList.count();
-    return 0;
+    return parentItem->rowCount();
 }
 
-
-/*void PlaylistModel::setupModelData(const QStringList &lines, PlaylistItem *parent)
+void PlaylistModel::setModelData(QList<QStringList> lines)
 {
-    QList<PlaylistItem*> parents;
-    QList<int> indentations;
-    parents << parent;
-    indentations << 0;
+    int i;
+    for(i = 0; i < lines.count();i++)     //initialize parent group and add it to the rootparent list
+        m_rootItem->setPlaylistItem(new PlaylistItem(QString(),lines[i].count(),m_rootItem),m_rootItem);
 
-    int number = 0;
-
-    while (number < lines.count()) {
-        int position = 0;
-        while (position < lines[number].length()) {
-            if (lines[number].mid(position, 1) != " ")
-                break;
-            position++;
+    for(i = 0; i < lines.count();i++)
+        for(int a = 0; a < lines[i].count();i++)
+        {
+            PlaylistItem *item = new PlaylistItem(lines.at(i).at(a),lines[i].count(),m_rootItem, m_rootItem->item(i));
+            m_rootItem->list(m_rootItem).at(i)->setPlaylistItem(item, m_rootItem->list(m_rootItem).at(i));
+            (void) index(i,a,QModelIndex());
         }
+}
 
-        QString lineData = lines[number].mid(position).trimmed();
+PlaylistItem* PlaylistModel::root() const
+{
+    return m_rootItem;
+}
 
-        if (!lineData.isEmpty()) {
-            // Read the column data from the rest of the line.
-            QStringList columnStrings = lineData.split("\t", QString::SkipEmptyParts);
-            QList<QVariant> columnData;
-            for (int column = 0; column < columnStrings.count(); ++column)
-                columnData << columnStrings[column];
+ // virtual method!
+bool PlaylistModel::setData( const QModelIndex & index, const QVariant & value, int role)
+{
+     // For nicer gcc output :-)
+    Q_UNUSED(index);
+    Q_UNUSED(value);
+    Q_UNUSED(role);
+    return 0;    
+}
 
-            if (position > indentations.last()) {
-                // The last child of the current parent is now the new parent
-                // unless the current parent has no children.
+PlaylistItem* PlaylistModel::getItem(const QModelIndex &index) const
+{
+    if (index.isValid()) {
+         PlaylistItem *item = static_cast<PlaylistItem*>(index.internalPointer());
+         if (item) return item;
+     }
+     return m_rootItem;
+     qDebug() << "m_rootItem returned";
+ }
 
-                if (parents.last()->childCount() > 0) {
-                    parents << parents.last()->child(parents.last()->childCount()-1);
-                    indentations << position;
-                }
-            } else {
-                while (position < indentations.last() && parents.count() > 0) {
-                    parents.pop_back();
-                    indentations.pop_back();
-                }
-            }
-
-            // Append a new item to the current parent's list of children.
-            parents.last()->appendChild(new PlaylistItem(columnData, parents.last()));
-        }
-
-        number++;
-    }
-}*/
+void PlaylistModel::addLines(QList<QStringList>list)
+{
+    setModelData(list);
+}
