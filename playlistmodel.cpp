@@ -132,16 +132,20 @@ int PlaylistModel::rowCount(const QModelIndex &parent) const
 void PlaylistModel::setModelData(QList<QStringList> lines)
 {
     int i;
+    PlaylistItem *item;
+    PlaylistItem *subitem;
     for(i = 0; i < lines.count();i++)     //initialize parent group and add it to the rootparent list
-        m_rootItem->setPlaylistItem(new PlaylistItem(QString(),lines[i].count(),m_rootItem),m_rootItem);
-
-    for(i = 0; i < lines.count();i++)
+    {
+        item  = new PlaylistItem(QString("subparent"),lines[i].count(),m_rootItem);
+        m_rootItem->setPlaylistItem(item,m_rootItem);
         for(int a = 0; a < lines[i].count();i++)
         {
-            PlaylistItem *item = new PlaylistItem(lines.at(i).at(a),lines[i].count(),m_rootItem, m_rootItem->item(i));
-            m_rootItem->list(m_rootItem).at(i)->setPlaylistItem(item, m_rootItem->list(m_rootItem).at(i));
+            subitem = new PlaylistItem(lines[i].at(a),lines[i].count(),m_rootItem, item);
+            m_rootItem->list(m_rootItem).at(i)->setPlaylistItem(subitem, m_rootItem->list(m_rootItem).at(i));
+            qDebug() << "not yet asser";
             (void) index(i,a,QModelIndex());
         }
+    }
 }
 
 PlaylistItem* PlaylistModel::root() const
