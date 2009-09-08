@@ -22,6 +22,8 @@
 
 #include <QDropEvent>
 #include <QDebug>
+#include <QList>
+#include <QStringList>
 
 PlaylistBrowser::PlaylistBrowser(QWidget* parent):
           QTreeView(parent)

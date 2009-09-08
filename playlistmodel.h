@@ -55,7 +55,7 @@ class PlaylistModel : public QAbstractItemModel
         void addLines(QList<QStringList>);
 
     private:
-        PlaylistItem* m_rootItem;
+        PlaylistItem* _rootItem;
 };
 
 #endif // PLAYLISTMODEL_H

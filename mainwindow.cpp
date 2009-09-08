@@ -160,7 +160,11 @@ void MainWindow::on_actionAdd_file_triggered()
 {
     QStringList fileNames = QFileDialog::getOpenFileNames(this,tr("Select file"),"",
                                                           tr("Supported audio files (*.mp3 *.wav *.ogg *.flac);;All files (*.*)"));
-    ui->playlistBrowser->addTracks(&fileNames);
+    QList<QStringList> mydata;
+    mydata.append(QStringList()<<"A"<<"B"<<"C"<<"D"<<"E");
+    playlistModel->setModelData(mydata);
+
+    //ui->playlistBrowser->addTracks(&fileNames);
 }
 
 

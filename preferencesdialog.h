@@ -21,9 +21,9 @@ protected:
     virtual void changeEvent(QEvent *e);
 
 private:
-    Ui::PreferencesDialog *m_ui;
+    Ui::PreferencesDialog *_ui;
 
-    QSettings *m_settings;
+    QSettings *_settings;
 
 private slots:
 

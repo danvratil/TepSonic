@@ -50,13 +50,13 @@ class PlaylistItem
 
     private:
          //data for current item
-        QString m_myData;
+        QString _myData;
           //used only by one rootItem (pokud jsem to pochopil dobre)
-        QList< PlaylistItem* > m_playlistList;
+        QList< PlaylistItem* > _playlistList;
          //parent of current pointer
-        PlaylistItem *m_myParent;
-        PlaylistItem* m_mainParent;
-        int m_colCount;
+        PlaylistItem *_myParent;
+        PlaylistItem* _mainParent;
+        int _colCount;
 };
 
 #endif // PLAYLISTITEM_H

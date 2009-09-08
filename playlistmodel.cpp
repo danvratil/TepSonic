@@ -33,7 +33,7 @@ PlaylistModel::PlaylistModel(const QStringList data, QObject *parent)
     QStringList rootData = data;
     if(data.count() < 1)
         rootData << "Filename" << "Track" << "Title" << "Artist" << "Album" << "Year" << "Length"; //header
-    m_rootItem = new PlaylistItem(QString());
+    _rootItem = new PlaylistItem(QString());
 }
 
 PlaylistModel::PlaylistModel(QObject *parent)
@@ -41,12 +41,12 @@ PlaylistModel::PlaylistModel(QObject *parent)
 {
     QStringList rootData;
     rootData <<"Filename" << "Track" << "Title" << "Artist" << "Album" << "Year" << "Length";
-    m_rootItem = new PlaylistItem(QString());
+    _rootItem = new PlaylistItem(QString());
 }
 
 PlaylistModel::~PlaylistModel()
 {
-    delete m_rootItem;
+    delete _rootItem;
 }
 
 
@@ -55,7 +55,7 @@ int PlaylistModel::columnCount(const QModelIndex &parent) const
     if (parent.isValid())
         return static_cast<PlaylistItem*>(parent.internalPointer())->columnCount();
     else
-        return m_rootItem->columnCount();
+        return _rootItem->columnCount();
 }
 
 
@@ -91,9 +91,9 @@ QModelIndex PlaylistModel::index(int row, int column, const QModelIndex &parent)
 
     PlaylistItem *parentItem;
 
-    parentItem = m_rootItem;
+    parentItem = _rootItem;
 
-    PlaylistItem *childItem = parentItem->list(m_rootItem).at(row)->list(m_rootItem->list(m_rootItem).at(row)).at(column);
+    PlaylistItem *childItem = parentItem->list(_rootItem).at(row)->list(_rootItem->list(_rootItem).at(row)).at(column);
     if (childItem)
         return createIndex(row, column, childItem);
     else
@@ -108,7 +108,7 @@ QModelIndex PlaylistModel::parent(const QModelIndex &index) const
     PlaylistItem *childItem = static_cast<PlaylistItem*>(index.internalPointer());
     PlaylistItem *parentItem = childItem->parent();
 
-    if (parentItem == m_rootItem)
+    if (parentItem == _rootItem)
         return QModelIndex();
 
     return createIndex(0, 0, parentItem);
@@ -123,7 +123,7 @@ int PlaylistModel::rowCount(const QModelIndex &parent) const
         return 0;
 
     if (!parent.isValid())
-        parentItem = m_rootItem;
+        parentItem = _rootItem;
     else
         parentItem = static_cast<PlaylistItem*>(parent.internalPointer());
     return parentItem->rowCount();
@@ -136,13 +136,12 @@ void PlaylistModel::setModelData(QList<QStringList> lines)
     PlaylistItem *subitem;
     for(i = 0; i < lines.count();i++)     //initialize parent group and add it to the rootparent list
     {
-        item  = new PlaylistItem(QString("subparent"),lines[i].count(),m_rootItem);
-        m_rootItem->setPlaylistItem(item,m_rootItem);
-        for(int a = 0; a < lines[i].count();i++)
+        item  = new PlaylistItem(QString("subparent"),lines[i].count(),_rootItem);
+        _rootItem->setPlaylistItem(item,_rootItem);
+        for(int a = 0; a < lines[i].count();a++)
         {
-            subitem = new PlaylistItem(lines[i].at(a),lines[i].count(),m_rootItem, item);
-            m_rootItem->list(m_rootItem).at(i)->setPlaylistItem(subitem, m_rootItem->list(m_rootItem).at(i));
-            qDebug() << "not yet asser";
+            subitem = new PlaylistItem(lines[i].at(a),lines[i].count(),_rootItem, item);
+            _rootItem->list(_rootItem).at(i)->setPlaylistItem(subitem, _rootItem->list(_rootItem).at(i));
             (void) index(i,a,QModelIndex());
         }
     }
@@ -150,7 +149,7 @@ void PlaylistModel::setModelData(QList<QStringList> lines)
 
 PlaylistItem* PlaylistModel::root() const
 {
-    return m_rootItem;
+    return _rootItem;
 }
 
  // virtual method!
@@ -169,8 +168,8 @@ PlaylistItem* PlaylistModel::getItem(const QModelIndex &index) const
          PlaylistItem *item = static_cast<PlaylistItem*>(index.internalPointer());
          if (item) return item;
      }
-     return m_rootItem;
-     qDebug() << "m_rootItem returned";
+     return _rootItem;
+     //qDebug() << "_rootItem returned";
  }
 
 void PlaylistModel::addLines(QList<QStringList>list)

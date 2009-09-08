@@ -23,53 +23,53 @@
 
 PlaylistItem::PlaylistItem(const QString data, int colCount, PlaylistItem * mainParent, PlaylistItem *parent)
 {
-    this->m_mainParent = mainParent;
-    m_myParent = parent;
-    m_myData = data;
-    m_colCount = colCount;
+    this->_mainParent = mainParent;
+    _myParent = parent;
+    _myData = data;
+    _colCount = colCount;
 }
 
 PlaylistItem::~PlaylistItem() {}
 
 int PlaylistItem::rowCount() const
 {
-    return m_playlistList.count();
+    return _playlistList.count();
 }
 
 PlaylistItem* PlaylistItem::item(int row)
 {
-    return m_mainParent->m_playlistList.at(row);
+    return _mainParent->_playlistList.at(row);
 }
 
 PlaylistItem* PlaylistItem::parent() const
 {
-    return m_myParent;
+    return _myParent;
 }
 
  void PlaylistItem::setPlaylistItem(PlaylistItem* item,PlaylistItem* parent)
  {
-    parent->m_playlistList << item;
+    parent->_playlistList << item;
  }
 
  void PlaylistItem::setList(QList< PlaylistItem*> list)
  {
-     m_playlistList = list;
+     _playlistList = list;
  }
 
  int PlaylistItem::columnCount() const
  {
-    return m_colCount;
+    return _colCount;
  }
 
 QStringList PlaylistItem::data(PlaylistItem* parent)
 {
     QStringList childData;
-    for(int i = 0; i < parent->m_playlistList.count();i++)
-        childData << parent->m_myData;
+    for(int i = 0; i < parent->_playlistList.count();i++)
+        childData << parent->_myData;
     return childData;
 }
 
 QList<PlaylistItem*> PlaylistItem::list(PlaylistItem* parent)
 {
-    return parent->m_playlistList;
+    return parent->_playlistList;
 }
