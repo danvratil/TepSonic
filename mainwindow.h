@@ -76,6 +76,7 @@ private slots:
     /**
      * Open Preferences dialog
      */
+    void on_clearPlaylistButton_clicked();
     void on_actionPreferences_triggered();
 
     /**

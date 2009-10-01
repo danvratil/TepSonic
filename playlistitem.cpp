@@ -73,3 +73,10 @@ QList<PlaylistItem*> PlaylistItem::list(PlaylistItem* parent)
 {
     return parent->_playlistList;
 }
+
+void PlaylistItem::removeRow(int row)
+{
+    if ((row >= 0) && (row < _playlistList.size())) {
+        _playlistList.removeAt(row);
+    }
+}

@@ -161,10 +161,10 @@ void MainWindow::on_actionAdd_file_triggered()
     QStringList fileNames = QFileDialog::getOpenFileNames(this,tr("Select file"),"",
                                                           tr("Supported audio files (*.mp3 *.wav *.ogg *.flac);;All files (*.*)"));
     QList<QStringList> mydata;
-    mydata.append(QStringList()<<"A"<<"B"<<"C"<<"D"<<"E");
+    mydata.append(QStringList()<<"A"<<"B"<<"C"<<"D"<<"E" << "F" << "G");
     playlistModel->setModelData(mydata);
-
-    //ui->playlistBrowser->addTracks(&fileNames);
+//    ui->playlistBrowser->addTracks(&fileNames);
+    qDebug() << playlistModel->rowCount();
 }
 
 
@@ -174,4 +174,9 @@ void MainWindow::on_actionPreferences_triggered()
     PreferencesDialog *prefDlg = new PreferencesDialog(settings,this);
     prefDlg->exec();
 
+}
+
+void MainWindow::on_clearPlaylistButton_clicked()
+{
+    playlistModel->removeRows(0,playlistModel->rowCount());
 }

@@ -37,6 +37,7 @@ class PlaylistItem
         int rowCount() const;
         int columnCount() const;
         void setRow(int);
+        void removeRow(int row);
         PlaylistItem* parent() const;
          //for root Item
         PlaylistItem* item(int row);

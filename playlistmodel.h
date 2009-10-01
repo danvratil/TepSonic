@@ -50,6 +50,7 @@ class PlaylistModel : public QAbstractItemModel
         PlaylistItem* root() const;
         bool setData( const QModelIndex & index, const QVariant & value, int role = Qt::EditRole );
         PlaylistItem* getItem(const QModelIndex &index) const;
+        bool removeRows(int row, int count, const QModelIndex &parent = QModelIndex()) const; //virtual
 
     public slots:
         void addLines(QList<QStringList>);

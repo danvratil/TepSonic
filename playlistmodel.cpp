@@ -142,6 +142,7 @@ void PlaylistModel::setModelData(QList<QStringList> lines)
         {
             subitem = new PlaylistItem(lines[i].at(a),lines[i].count(),_rootItem, item);
             _rootItem->list(_rootItem).at(i)->setPlaylistItem(subitem, _rootItem->list(_rootItem).at(i));
+            // Re-index the list
             (void) index(i,a,QModelIndex());
         }
     }
@@ -169,10 +170,38 @@ PlaylistItem* PlaylistModel::getItem(const QModelIndex &index) const
          if (item) return item;
      }
      return _rootItem;
-     //qDebug() << "_rootItem returned";
  }
 
 void PlaylistModel::addLines(QList<QStringList>list)
 {
     setModelData(list);
+}
+
+bool PlaylistModel::removeRows(int row, int count, const QModelIndex &parent) const
+{
+    PlaylistItem *parentItem;
+
+    if (parent.column()==0) {
+        return 0;
+    }
+    if (!parent.isValid()) {
+        parentItem = _rootItem;
+    } else {
+        parentItem =  static_cast<PlaylistItem*>(parent.internalPointer());
+    }
+
+    int oldCount = rowCount(parent);
+
+    for (int i = 0; i < count; i++) {
+        /* Keep removing the first row. When the row is removed a following row replaces it. We remove that
+           row for count-times, so we remove all required rows */
+        parentItem->removeRow(row);
+    }
+
+    // If all rows were removed, return true
+    if (rowCount(parent)+count == oldCount) {
+        return true;
+    } else {
+        return false;
+    }
 }
