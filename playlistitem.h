@@ -23,41 +23,32 @@
 #define PLAYLISTITEM_H
 
 #include <QList>
-#include <QStringList>
 #include <QVariant>
+#include <QVector>
 
 //TODO: sorting
 
-class PlaylistItem
-{
-    public:
-        PlaylistItem(const QString data, int colCount = 0 , PlaylistItem * mainParent = 0,PlaylistItem *parent = 0);
-        ~PlaylistItem();
+ class PlaylistItem
+ {
+ public:
+     PlaylistItem(const QVector<QVariant> &data, PlaylistItem *parent = 0);
+     ~PlaylistItem();
 
-        int rowCount() const;
-        int columnCount() const;
-        void setRow(int);
-        void removeRow(int row);
-        PlaylistItem* parent() const;
-         //for root Item
-        PlaylistItem* item(int row);
-         //add some item to list in this root pointer
-        void setPlaylistItem(PlaylistItem* item,PlaylistItem* parent);
-         //return whole list of items
-        QList<PlaylistItem*> list(PlaylistItem* parent);
-         //set whole list at one shot
-        void setList(QList<PlaylistItem*>);
-        QStringList data(PlaylistItem* parent);
+     PlaylistItem *child(int number);
+     int childCount() const;
+     int columnCount() const;
+     QVariant data(int column) const;
+     bool insertChildren(int position, int count, int columns);
+     bool insertColumns(int position, int columns);
+     PlaylistItem *parent();
+     bool removeChildren(int position, int count);
+     bool removeColumns(int position, int columns);
+     int childNumber() const;
+     bool setData(int column, const QVariant &value);
 
-    private:
-         //data for current item
-        QString _myData;
-          //used only by one rootItem (pokud jsem to pochopil dobre)
-        QList< PlaylistItem* > _playlistList;
-         //parent of current pointer
-        PlaylistItem *_myParent;
-        PlaylistItem* _mainParent;
-        int _colCount;
-};
-
+ private:
+     QList<PlaylistItem*> childItems;
+     QVector<QVariant> itemData;
+     PlaylistItem *parentItem;
+ };
 #endif // PLAYLISTITEM_H

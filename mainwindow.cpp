@@ -26,6 +26,7 @@
 #include <QUrl>
 #include <QCloseEvent>
 #include <QFileDialog>
+#include <QFileInfo>
 //#include <QStringList>
 //#include <QVariant>
 
@@ -66,8 +67,8 @@ MainWindow::MainWindow(QWidget *parent)
     trayIconMenu->addAction(ui->actionQuit_TepSonic);
     trayIcon->setContextMenu(trayIconMenu);
 
-
-    playlistModel = new PlaylistModel(this);
+    QStringList headers = QStringList()<<"Filename"<<"Track #"<<"Interpret"<<"Track name"<<"Album"<<"Genre"<<"Year";
+    playlistModel = new PlaylistModel(headers,QString(),this);
     ui->playlistBrowser->setModel(playlistModel);
     // hide the first column (with filename)
     ui->playlistBrowser->hideColumn(0);
@@ -160,11 +161,27 @@ void MainWindow::on_actionAdd_file_triggered()
 {
     QStringList fileNames = QFileDialog::getOpenFileNames(this,tr("Select file"),"",
                                                           tr("Supported audio files (*.mp3 *.wav *.ogg *.flac);;All files (*.*)"));
-    QList<QStringList> mydata;
-    mydata.append(QStringList()<<"A"<<"B"<<"C"<<"D"<<"E" << "F" << "G");
-    playlistModel->setModelData(mydata);
-//    ui->playlistBrowser->addTracks(&fileNames);
-    qDebug() << playlistModel->rowCount();
+    // Select the root item
+    QModelIndex index = ui->playlistBrowser->selectionModel()->currentIndex();
+    QAbstractItemModel *model = ui->playlistBrowser->model();
+
+    for (int file = 0; file < fileNames.count(); file++) {
+        // Insert new row
+        if (!model->insertRow(index.row()+1, index.parent()))
+             return;
+
+        // Child item
+        QModelIndex child;
+        // Store the filename into the first column. The other columns will be filled by separated thread
+        child = model->index(index.row()+1, 0, index.parent());
+        model->setData(child, QVariant(fileNames.at(file)), Qt::EditRole);
+        // Default track number
+        child = model->index(index.row()+1, 1, index.parent());
+        model->setData(child, QVariant(0), Qt::EditRole);
+        // Extract filename from the path and insert it as a trackname
+        child = model->index(index.row()+1, 3, index.parent());
+        model->setData(child, QVariant(QFileInfo(fileNames.at(file)).fileName()),Qt::EditRole);
+    }
 }
 
 

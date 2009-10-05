@@ -24,39 +24,52 @@
 #include <QAbstractItemModel>
 #include <QModelIndex>
 #include <QVariant>
-#include <QList>
 
 #include "playlistitem.h"
 
-class PlaylistItem;
+ class PlaylistItem;
 
-class PlaylistModel : public QAbstractItemModel
-{
-    Q_OBJECT
-    public:
-         //overloading constructor!
-        PlaylistModel(QObject *parent = 0);
-        PlaylistModel(const QStringList data, QObject *parent = 0);
-        ~PlaylistModel();
+ class PlaylistModel : public QAbstractItemModel
+ {
+     Q_OBJECT
 
-        QVariant data(const QModelIndex &index, int role) const;            //virtual
-        QModelIndex index(int row, int column,
-                          const QModelIndex &parent = QModelIndex()) const; //virtual
-        QModelIndex parent(const QModelIndex &index) const;
-        void setModelData( QList<QStringList>);
-        int rowCount(const QModelIndex &parent = QModelIndex()) const;      //virtual
-        int columnCount(const QModelIndex &parent = QModelIndex()) const;   //virtual
-        Qt::ItemFlags flags(const QModelIndex &index) const;
-        PlaylistItem* root() const;
-        bool setData( const QModelIndex & index, const QVariant & value, int role = Qt::EditRole );
-        PlaylistItem* getItem(const QModelIndex &index) const;
-        bool removeRows(int row, int count, const QModelIndex &parent = QModelIndex()) const; //virtual
+ public:
+     PlaylistModel(const QStringList &headers, const QString &data,
+               QObject *parent = 0);
+     ~PlaylistModel();
 
-    public slots:
-        void addLines(QList<QStringList>);
+     QVariant data(const QModelIndex &index, int role) const;
+     QVariant headerData(int section, Qt::Orientation orientation,
+                         int role = Qt::DisplayRole) const;
 
-    private:
-        PlaylistItem* _rootItem;
-};
+     QModelIndex index(int row, int column,
+                       const QModelIndex &parent = QModelIndex()) const;
+     QModelIndex parent(const QModelIndex &index) const;
+
+     int rowCount(const QModelIndex &parent = QModelIndex()) const;
+     int columnCount(const QModelIndex &parent = QModelIndex()) const;
+
+     Qt::ItemFlags flags(const QModelIndex &index) const;
+     bool setData(const QModelIndex &index, const QVariant &value,
+                  int role = Qt::EditRole);
+     bool setHeaderData(int section, Qt::Orientation orientation,
+                        const QVariant &value, int role = Qt::EditRole);
+
+     bool insertColumns(int position, int columns,
+                        const QModelIndex &parent = QModelIndex());
+     bool removeColumns(int position, int columns,
+                        const QModelIndex &parent = QModelIndex());
+     bool insertRows(int position, int rows,
+                     const QModelIndex &parent = QModelIndex());
+     bool removeRows(int position, int rows,
+                     const QModelIndex &parent = QModelIndex());
+
+ private:
+     void setupModelData(const QStringList &lines, PlaylistItem *parent);
+     PlaylistItem *getItem(const QModelIndex &index) const;
+
+     PlaylistItem *rootItem;
+ };
+
 
 #endif // PLAYLISTMODEL_H

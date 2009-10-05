@@ -21,62 +21,108 @@
 #include <QStringList>
 #include "playlistitem.h"
 
-PlaylistItem::PlaylistItem(const QString data, int colCount, PlaylistItem * mainParent, PlaylistItem *parent)
+PlaylistItem::PlaylistItem(const QVector<QVariant> &data, PlaylistItem *parent)
 {
-    this->_mainParent = mainParent;
-    _myParent = parent;
-    _myData = data;
-    _colCount = colCount;
+     parentItem = parent;
+     itemData = data;
 }
 
-PlaylistItem::~PlaylistItem() {}
-
-int PlaylistItem::rowCount() const
+PlaylistItem::~PlaylistItem()
 {
-    return _playlistList.count();
+     qDeleteAll(childItems);
 }
 
-PlaylistItem* PlaylistItem::item(int row)
+PlaylistItem *PlaylistItem::child(int number)
 {
-    return _mainParent->_playlistList.at(row);
+     return childItems.value(number);
 }
 
-PlaylistItem* PlaylistItem::parent() const
+int PlaylistItem::childCount() const
 {
-    return _myParent;
+     return childItems.count();
 }
 
- void PlaylistItem::setPlaylistItem(PlaylistItem* item,PlaylistItem* parent)
- {
-    parent->_playlistList << item;
- }
-
- void PlaylistItem::setList(QList< PlaylistItem*> list)
- {
-     _playlistList = list;
- }
-
- int PlaylistItem::columnCount() const
- {
-    return _colCount;
- }
-
-QStringList PlaylistItem::data(PlaylistItem* parent)
+int PlaylistItem::childNumber() const
 {
-    QStringList childData;
-    for(int i = 0; i < parent->_playlistList.count();i++)
-        childData << parent->_myData;
-    return childData;
+     if (parentItem)
+         return parentItem->childItems.indexOf(const_cast<PlaylistItem*>(this));
+
+     return 0;
 }
 
-QList<PlaylistItem*> PlaylistItem::list(PlaylistItem* parent)
+int PlaylistItem::columnCount() const
 {
-    return parent->_playlistList;
+     return itemData.count();
 }
 
-void PlaylistItem::removeRow(int row)
+QVariant PlaylistItem::data(int column) const
 {
-    if ((row >= 0) && (row < _playlistList.size())) {
-        _playlistList.removeAt(row);
-    }
+     return itemData.value(column);
+}
+
+bool PlaylistItem::insertChildren(int position, int count, int columns)
+{
+     if (position < 0 || position > childItems.size())
+         return false;
+
+     for (int row = 0; row < count; ++row) {
+         QVector<QVariant> data(columns);
+         PlaylistItem *item = new PlaylistItem(data, this);
+         childItems.insert(position, item);
+     }
+
+     return true;
+}
+
+bool PlaylistItem::insertColumns(int position, int columns)
+{
+     if (position < 0 || position > itemData.size())
+         return false;
+
+     for (int column = 0; column < columns; ++column)
+         itemData.insert(position, QVariant());
+
+     foreach (PlaylistItem *child, childItems)
+         child->insertColumns(position, columns);
+
+     return true;
+}
+
+PlaylistItem *PlaylistItem::parent()
+{
+     return parentItem;
+}
+
+bool PlaylistItem::removeChildren(int position, int count)
+{
+     if (position < 0 || position + count > childItems.size())
+         return false;
+
+     for (int row = 0; row < count; ++row)
+         delete childItems.takeAt(position);
+
+     return true;
+}
+
+bool PlaylistItem::removeColumns(int position, int columns)
+{
+     if (position < 0 || position + columns > itemData.size())
+         return false;
+
+     for (int column = 0; column < columns; ++column)
+         itemData.remove(position);
+
+     foreach (PlaylistItem *child, childItems)
+         child->removeColumns(position, columns);
+
+     return true;
+}
+
+bool PlaylistItem::setData(int column, const QVariant &value)
+{
+     if (column < 0 || column >= itemData.size())
+         return false;
+
+     itemData[column] = value;
+     return true;
 }
