@@ -41,7 +41,7 @@ class PlaylistBrowser : public QTreeView
         void dropEvent(QDropEvent*);
         void dragEnterEvent(QDragEnterEvent*);
         void dragMoveEvent(QDragMoveEvent*);
-
+        void keyPressEvent(QKeyEvent*);
     private:
         //PlaylistItem *rootItem;
 };

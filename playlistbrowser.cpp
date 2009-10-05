@@ -70,3 +70,13 @@ void PlaylistBrowser::dropEvent(QDropEvent* event)
         /*if(!text.isEmpty())
                 addItem(event->mimeData()->text());*/
 }
+
+void PlaylistBrowser::keyPressEvent(QKeyEvent* event)
+{
+    // When 'delete' pressed, remove selected row from playlist
+    if (event->matches(QKeySequence::Delete)) {
+        QModelIndex index = selectionModel()->currentIndex();
+        model()->removeRow(index.row(),index.parent());
+    }
+
+}
