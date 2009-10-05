@@ -73,10 +73,15 @@ protected:
 
 private slots:
 
+
+    /**
+     * Remove all items from playlist
+     */
+    void on_actionClear_playlist_triggered();
+
     /**
      * Open Preferences dialog
      */
-    void on_clearPlaylistButton_clicked();
     void on_actionPreferences_triggered();
 
     /**

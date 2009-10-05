@@ -193,7 +193,7 @@ void MainWindow::on_actionPreferences_triggered()
 
 }
 
-void MainWindow::on_clearPlaylistButton_clicked()
+void MainWindow::on_actionClear_playlist_triggered()
 {
     playlistModel->removeRows(0,playlistModel->rowCount());
 }
