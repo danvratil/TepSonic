@@ -24,6 +24,8 @@
 #include <QDebug>
 #include <QList>
 #include <QStringList>
+#include <QUrl>
+#include <QFileInfo>
 
 PlaylistBrowser::PlaylistBrowser(QWidget* parent):
           QTreeView(parent)
@@ -33,13 +35,6 @@ PlaylistBrowser::PlaylistBrowser(QWidget* parent):
 
 PlaylistBrowser::~PlaylistBrowser()
 {
-}
-
-void PlaylistBrowser::addTracks(QStringList *filesList)
-{
-    //lunch thread and give it list of files
-    //TODO: remove this, write some code :-)
-    Q_UNUSED(filesList);
 }
 
 // Event: item is dragged over the widget
@@ -59,16 +54,17 @@ void PlaylistBrowser::dragMoveEvent(QDragMoveEvent* event)
  // Drop event (item is dropped on the widget)
 void PlaylistBrowser::dropEvent(QDropEvent* event)
 {
-
-         //TODO: Accept QTreeWidgetItem
-         // Get text from informations about the event
-        QString text = event->mimeData()->text();
-
-
-        // TODO: QTreeWidgetItem was accepted - add it into the playlist browser
-        // If the text is not emtpy add it to the list
-        /*if(!text.isEmpty())
-                addItem(event->mimeData()->text());*/
+    if (event->mimeData()->hasUrls()) {
+        QList<QUrl> urls = event->mimeData()->urls();
+        for (int i = 0; i < urls.size(); i++) {
+            if (QFileInfo(urls.at(i).toLocalFile()).isFile()) {
+                addItem(urls.at(i).toLocalFile());
+            }
+        }
+        event->setAccepted(true);
+    } else {
+        event->setAccepted(false);
+    }
 }
 
 void PlaylistBrowser::keyPressEvent(QKeyEvent* event)
@@ -76,7 +72,45 @@ void PlaylistBrowser::keyPressEvent(QKeyEvent* event)
     // When 'delete' pressed, remove selected row from playlist
     if (event->matches(QKeySequence::Delete)) {
         QModelIndex index = selectionModel()->currentIndex();
-        model()->removeRow(index.row(),index.parent());
+        removeItem(index.row());
+        //model()->removeRow(index.row(),index.parent());
     }
 
+}
+
+
+void PlaylistBrowser::addItem(QString file) //SLOT
+{
+    // Select the root item
+    QModelIndex index = selectionModel()->currentIndex();
+
+    // Insert new row
+    if (!model()->insertRow(index.row()+1, index.parent()))
+        return;
+
+    // Child item
+    QModelIndex child;
+    // Store the filename into the first column. The other columns will be filled by separated thread
+    child = model()->index(index.row()+1, 0, index.parent());
+    model()->setData(child, QVariant(file), Qt::EditRole);
+    // Default track number
+    child = model()->index(index.row()+1, 1, index.parent());
+    model()->setData(child, QVariant(0), Qt::EditRole);
+    // Extract filename from the path and insert it as a trackname
+    child = model()->index(index.row()+1, 3, index.parent());
+    model()->setData(child, QVariant(QFileInfo(file).fileName()),Qt::EditRole);
+}
+
+void PlaylistBrowser::removeItem(int row) //SLOT
+{
+        model()->removeRow(row,QModelIndex());
+}
+
+void PlaylistBrowser::removeItems(int row, int count) // SLOT
+{
+    /* When row removed the following row takes its place and therefor by deleting row no. "row" for "count"-time
+       all the lines are removed */
+    for (int i = 0; i<count; i++) {
+        removeItem(row);
+    }
 }

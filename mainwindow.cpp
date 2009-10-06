@@ -161,26 +161,8 @@ void MainWindow::on_actionAdd_file_triggered()
 {
     QStringList fileNames = QFileDialog::getOpenFileNames(this,tr("Select file"),"",
                                                           tr("Supported audio files (*.mp3 *.wav *.ogg *.flac);;All files (*.*)"));
-    // Select the root item
-    QModelIndex index = ui->playlistBrowser->selectionModel()->currentIndex();
-    QAbstractItemModel *model = ui->playlistBrowser->model();
-
     for (int file = 0; file < fileNames.count(); file++) {
-        // Insert new row
-        if (!model->insertRow(index.row()+1, index.parent()))
-             return;
-
-        // Child item
-        QModelIndex child;
-        // Store the filename into the first column. The other columns will be filled by separated thread
-        child = model->index(index.row()+1, 0, index.parent());
-        model->setData(child, QVariant(fileNames.at(file)), Qt::EditRole);
-        // Default track number
-        child = model->index(index.row()+1, 1, index.parent());
-        model->setData(child, QVariant(0), Qt::EditRole);
-        // Extract filename from the path and insert it as a trackname
-        child = model->index(index.row()+1, 3, index.parent());
-        model->setData(child, QVariant(QFileInfo(fileNames.at(file)).fileName()),Qt::EditRole);
+        ui->playlistBrowser->addItem(fileNames.at(file));
     }
 }
 
@@ -195,5 +177,12 @@ void MainWindow::on_actionPreferences_triggered()
 
 void MainWindow::on_actionClear_playlist_triggered()
 {
-    playlistModel->removeRows(0,playlistModel->rowCount());
+    ui->playlistBrowser->removeItems(0,playlistModel->rowCount());
+}
+
+void MainWindow::on_actionAdd_folder_triggered()
+{
+    //open folder dialog
+    QString dirName = QFileDialog::getExistingDirectory(this,tr("Add directory"), QString(), QFileDialog::ShowDirsOnly);
+
 }

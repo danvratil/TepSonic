@@ -73,6 +73,10 @@ protected:
 
 private slots:
 
+    /**
+     * Add folder to playlist
+     */
+    void on_actionAdd_folder_triggered();
 
     /**
      * Remove all items from playlist

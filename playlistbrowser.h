@@ -35,15 +35,18 @@ class PlaylistBrowser : public QTreeView
         PlaylistBrowser(QWidget* = 0);
         ~PlaylistBrowser();
 
-        void addTracks(QStringList *filesList);
-
     protected:
         void dropEvent(QDropEvent*);
         void dragEnterEvent(QDragEnterEvent*);
         void dragMoveEvent(QDragMoveEvent*);
         void keyPressEvent(QKeyEvent*);
-    private:
-        //PlaylistItem *rootItem;
+
+
+    public slots:
+        void addItem(QString fileName);
+        void removeItem(int row);
+        void removeItems(int row, int count);
+
 };
 
 #endif // PLAYLISTBROWSER_H
