@@ -24,8 +24,11 @@
 #include <QtGui/QActionGroup>
 #include <QtGui/QSystemTrayIcon>
 #include <QSettings>
+#include <Phonon/SeekSlider>
+#include <Phonon/VolumeSlider>
 
 #include "playlistmodel.h"
+#include "player.h"
 
 namespace Ui
 {
@@ -61,6 +64,10 @@ private:
     QIcon *appIcon;
 
     QSettings settings;
+    Player *player;
+
+    Phonon::SeekSlider *seekSlider;
+    Phonon::VolumeSlider *volumeSlider;
 
 protected:
     /**
@@ -76,6 +83,7 @@ private slots:
     /**
      * Add folder to playlist
      */
+    void on_playlistBrowser_doubleClicked(QModelIndex index);
     void on_actionAdd_folder_triggered();
 
     /**
@@ -119,9 +127,22 @@ private slots:
     void on_actionAbout_TepSonic_triggered();
 
     /**
-     * Show 'About Qt' dialog (just tribute to Qt :-)
+     * Show 'About Qt' dialog (just a tribute to Qt :-)
      */
     void on_actionAbout_Qt_triggered();
+
+    /**
+     * Set new track to player
+     */
+    void updatePlayerTrack();
+
+
+  public slots:
+
+    /**
+     * Update action bar
+     */
+    void updateActionBar(int progress, QString actionTitle = QString());
 
 };
 
