@@ -32,6 +32,9 @@ Player::Player()
     phononPlayer = new Phonon::MediaObject();
     audioOutput = new Phonon::AudioOutput(Phonon::MusicCategory);
     Phonon::createPath(phononPlayer,audioOutput);
+
+    _randomMode = false;
+    _repeatMode = RepeatOff;
 }
 
 Player::~Player()
@@ -48,8 +51,26 @@ void Player::setTrack(const QString fileName)
 void Player::setTrack(const QString fileName, bool autoPlay)
 {
     setTrack(fileName);
-    if (autoplay==true) {
+    if (autoPlay==true) {
         phononPlayer->play();
     }
 }
+
+void Player::setRandomMode(bool randomMode)
+{
+    if (_randomMode != randomMode) {
+        _randomMode = randomMode;
+        emit randomModeChanged(randomMode);
+    }
+}
+
+void Player::setRepeatMode(RepeatMode repeatMode)
+{
+    if (_repeatMode != repeatMode) {
+        _repeatMode = repeatMode;
+        emit repeatModeChanged(repeatMode);
+    }
+}
+
+
 

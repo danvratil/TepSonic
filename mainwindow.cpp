@@ -232,3 +232,28 @@ void MainWindow::on_playlistBrowser_doubleClicked(QModelIndex index)
    QVariant row = playlistModel->data(index.sibling(index.row(),0), Qt::DisplayRole);
    player->setTrack(row.toString(),true);
 }
+
+void MainWindow::on_actionRandom_ON_triggered()
+{
+    player->setRandomMode(true);
+}
+
+void MainWindow::on_actionRandom_OFF_triggered()
+{
+    player->setRandomMode(false);
+}
+
+void MainWindow::on_actionRepeat_track_triggered()
+{
+    player->setRepeatMode(Player::RepeatTrack);
+}
+
+void MainWindow::on_actionRepeat_OFF_triggered()
+{
+    player->setRepeatMode(Player::RepeatOff);
+}
+
+void MainWindow::on_actionRepeat_playlist_triggered()
+{
+    player->setRepeatMode(Player::RepeatAll);
+}

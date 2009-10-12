@@ -49,7 +49,6 @@ public:
      * will be terminated.*/
     bool canClose;
 
-
 private:
     Ui::MainWindow *ui;
 
@@ -81,9 +80,22 @@ protected:
 private slots:
 
     /**
-     * Add folder to playlist
+     * Update some player properties
+     */
+    void on_actionRepeat_playlist_triggered();
+    void on_actionRepeat_OFF_triggered();
+    void on_actionRepeat_track_triggered();
+    void on_actionRandom_OFF_triggered();
+    void on_actionRandom_ON_triggered();
+
+    /**
+     * Activate item in playlist
      */
     void on_playlistBrowser_doubleClicked(QModelIndex index);
+
+    /**
+     * Add folder to playlist
+     */
     void on_actionAdd_folder_triggered();
 
     /**

@@ -21,22 +21,39 @@
 #ifndef PLAYER_H
 #define PLAYER_H
 
+#include <QObject>
 #include <Phonon/MediaSource>
 #include <Phonon/AudioOutput>
 #include <Phonon/MediaObject>
 
-class Player
+class Player: public QObject
 {
+    Q_OBJECT
+    Q_ENUMS(RepeatMode)
+
   public:
+    enum RepeatMode { RepeatOff, RepeatTrack, RepeatAll };
     Player();
     ~Player();
     Phonon::MediaObject *phononPlayer;
     Phonon::AudioOutput *audioOutput;
     void setTrack(const QString fileName);
     void setTrack(const QString fileName, bool autoPlay);
+    RepeatMode repeatMode() { return _repeatMode; }
+    bool randomMode() { return _randomMode; }
 
   private:
-    Phonon::MediaSource *mediaSource;
+    RepeatMode _repeatMode;
+    bool _randomMode;
+
+ public slots:
+    void setRepeatMode(RepeatMode);
+    void setRandomMode(bool);
+
+ signals:
+    void repeatModeChanged(RepeatMode repeatMode);
+    void randomModeChanged(bool randomMode);
+
 };
 
 #endif // PLAYER_H
