@@ -88,13 +88,8 @@ MainWindow::MainWindow(QWidget *parent)
     player = new Player();
     connect(player->phononPlayer,SIGNAL(finished()),this,SLOT(updatePlayerTrack()));
 
-    seekSlider = new Phonon::SeekSlider(this);
-    volumeSlider = new Phonon::VolumeSlider(this);
-    seekSlider->setMediaObject(player->phononPlayer);
-    volumeSlider->setAudioOutput(player->audioOutput);
-    volumeSlider->setFixedWidth(150);
-    ui->playerControlLayout->addWidget(seekSlider);
-    ui->playerControlLayout->addWidget(volumeSlider);
+    ui->seekSlider->setMediaObject(player->phononPlayer);
+    ui->volumeSlider->setAudioOutput(player->audioOutput);
 
 }
 

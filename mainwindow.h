@@ -24,8 +24,6 @@
 #include <QtGui/QActionGroup>
 #include <QtGui/QSystemTrayIcon>
 #include <QSettings>
-#include <Phonon/SeekSlider>
-#include <Phonon/VolumeSlider>
 
 #include "playlistmodel.h"
 #include "player.h"
@@ -64,9 +62,6 @@ private:
 
     QSettings settings;
     Player *player;
-
-    Phonon::SeekSlider *seekSlider;
-    Phonon::VolumeSlider *volumeSlider;
 
 protected:
     /**
