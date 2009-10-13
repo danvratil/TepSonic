@@ -2,6 +2,7 @@
 #include "ui_preferencesdialog.h"
 
 #include <QTreeWidgetItem>
+#include <QDebug>
 
 PreferencesDialog::PreferencesDialog(QSettings& settings, QWidget *parent) :
     QDialog(parent),
@@ -13,6 +14,7 @@ PreferencesDialog::PreferencesDialog(QSettings& settings, QWidget *parent) :
     _ui->enableCollectionsCheckbox->setChecked(_settings->value("Collections/EnableCollections",true).toBool());
     _ui->autoRebuildCheckbox->setChecked(_settings->value("Collections/AutoRebuildAfterStart",true).toBool());
     _ui->rememberLastSessionCheckbox->setChecked(_settings->value("Preferences/RestoreSession",true).toBool());
+
 }
 
 PreferencesDialog::~PreferencesDialog()
@@ -44,3 +46,4 @@ void PreferencesDialog::on_buttonBox_rejected()
 {
     this->close();
 }
+

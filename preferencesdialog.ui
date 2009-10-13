@@ -13,70 +13,49 @@
   <property name="windowTitle">
    <string>Dialog</string>
   </property>
+  <property name="modal">
+   <bool>false</bool>
+  </property>
   <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <widget class="Line" name="line">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+    </widget>
+   </item>
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
-      <widget class="QTreeWidget" name="tabsList">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Fixed" vsizetype="Expanding">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
+      <widget class="QToolBox" name="toolBox">
+       <property name="frameShape">
+        <enum>QFrame::NoFrame</enum>
        </property>
-       <property name="maximumSize">
-        <size>
-         <width>150</width>
-         <height>16777215</height>
-        </size>
+       <property name="frameShadow">
+        <enum>QFrame::Plain</enum>
        </property>
-       <property name="editTriggers">
-        <set>QAbstractItemView::NoEditTriggers</set>
+       <property name="lineWidth">
+        <number>0</number>
        </property>
-       <property name="showDropIndicator" stdset="0">
-        <bool>false</bool>
+       <property name="midLineWidth">
+        <number>0</number>
        </property>
-       <property name="animated">
-        <bool>true</bool>
-       </property>
-       <property name="headerHidden">
-        <bool>true</bool>
-       </property>
-       <property name="columnCount">
-        <number>1</number>
-       </property>
-       <column>
-        <property name="text">
-         <string>Column 1</string>
-        </property>
-       </column>
-       <item>
-        <property name="text">
-         <string extracomment="Collections configuration">Collections</string>
-        </property>
-        <property name="flags">
-         <set>ItemIsSelectable|ItemIsEnabled</set>
-        </property>
-        <item>
-         <property name="text">
-          <string extracomment="Set path to create the collection from">Path</string>
-         </property>
-        </item>
-       </item>
-       <item>
-        <property name="text">
-         <string extracomment="Other preferences">Preferences</string>
-        </property>
-       </item>
-      </widget>
-     </item>
-     <item>
-      <widget class="QStackedWidget" name="configuration_pages">
        <property name="currentIndex">
         <number>0</number>
        </property>
-       <widget class="QWidget" name="collections_page">
-        <layout class="QVBoxLayout" name="verticalLayout_2">
+       <widget class="QWidget" name="collections_path">
+        <property name="geometry">
+         <rect>
+          <x>0</x>
+          <y>0</y>
+          <width>489</width>
+          <height>224</height>
+         </rect>
+        </property>
+        <attribute name="label">
+         <string>Collections</string>
+        </attribute>
+        <layout class="QVBoxLayout" name="verticalLayout_3">
          <item>
           <widget class="QCheckBox" name="enableCollectionsCheckbox">
            <property name="text">
@@ -105,7 +84,7 @@
            <property name="sizeHint" stdset="0">
             <size>
              <width>20</width>
-             <height>40</height>
+             <height>128</height>
             </size>
            </property>
           </spacer>
@@ -136,9 +115,12 @@
          </item>
         </layout>
        </widget>
-       <widget class="QWidget" name="path_page">
-        <layout class="QGridLayout" name="gridLayout">
-         <item row="0" column="0">
+       <widget class="QWidget" name="collections_path_tab">
+        <attribute name="label">
+         <string>Collections path</string>
+        </attribute>
+        <layout class="QVBoxLayout" name="verticalLayout_4">
+         <item>
           <widget class="QTreeView" name="pathSelect">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
@@ -150,43 +132,51 @@
          </item>
         </layout>
        </widget>
-       <widget class="QWidget" name="preferences_page">
-        <layout class="QVBoxLayout" name="verticalLayout_3">
+       <widget class="QWidget" name="configuration_page">
+        <property name="geometry">
+         <rect>
+          <x>0</x>
+          <y>0</y>
+          <width>489</width>
+          <height>224</height>
+         </rect>
+        </property>
+        <attribute name="label">
+         <string>Configuration</string>
+        </attribute>
+        <layout class="QVBoxLayout" name="verticalLayout_5">
          <item>
-          <widget class="QCheckBox" name="rememberLastSessionCheckbox">
-           <property name="text">
-            <string>Remember last session</string>
-           </property>
-           <property name="checked">
-            <bool>true</bool>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <spacer name="verticalSpacer_2">
-           <property name="orientation">
-            <enum>Qt::Vertical</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>20</width>
-             <height>40</height>
-            </size>
-           </property>
-          </spacer>
+          <layout class="QVBoxLayout" name="verticalLayout_2">
+           <item>
+            <widget class="QCheckBox" name="rememberLastSessionCheckbox">
+             <property name="text">
+              <string>Remember last session</string>
+             </property>
+             <property name="checked">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <spacer name="verticalSpacer_2">
+             <property name="orientation">
+              <enum>Qt::Vertical</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>20</width>
+               <height>40</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+          </layout>
          </item>
         </layout>
        </widget>
       </widget>
      </item>
     </layout>
-   </item>
-   <item>
-    <widget class="Line" name="line">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-    </widget>
    </item>
    <item>
     <widget class="QDialogButtonBox" name="buttonBox">
