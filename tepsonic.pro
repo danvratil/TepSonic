@@ -15,7 +15,9 @@ HEADERS += collectionbrowser.h \
     playlistitem.h \
     playlistmodel.h \
     preferencesdialog.h \
-    player.h
+    player.h \
+    collectionmodel.h \
+    collectionitem.h
 FORMS += mainwindow.ui \
     preferencesdialog.ui
 SOURCES += collectionbrowser.cpp \
@@ -25,5 +27,7 @@ SOURCES += collectionbrowser.cpp \
     playlistitem.cpp \
     playlistmodel.cpp \
     preferencesdialog.cpp \
-    player.cpp
+    player.cpp \
+    collectionmodel.cpp \
+    collectionitem.cpp
 RESOURCES += icons.qrc

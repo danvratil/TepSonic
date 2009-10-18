@@ -27,6 +27,19 @@ class CollectionBrowser : public QTreeView
     public:
         CollectionBrowser(QWidget* = 0);
         ~CollectionBrowser();
+
+    protected:
+        void dropEvent(QDropEvent*);
+        void dragEnterEvent(QDragEnterEvent*);
+        void dragMoveEvent(QDragMoveEvent*);
+        void keyPressEvent(QKeyEvent*);
+
+
+    public slots:
+        QModelIndex addItem(QString fileName);
+        void removeItem(int row);
+        void removeItems(int row, int count);
+
 };
 
 #endif // COLLECTIONBROWSER_H
