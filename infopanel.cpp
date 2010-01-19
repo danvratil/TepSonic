@@ -1,7 +1,6 @@
 /*
  * TEPSONIC
- * Copyright 2009 Dan Vratil <vratil@progdansoft.com>
- * Copyright 2009 Petr Los <petr_los@centrum.cz>
+ * Copyright 2010 Dan Vratil <vratil@progdansoft.com>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
