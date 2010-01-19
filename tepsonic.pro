@@ -6,7 +6,8 @@ TEMPLATE = app
 TARGET = 
 DEPENDPATH += .
 INCLUDEPATH += . \
-    /usr/include/phonon
+    /usr/include/KDE \
+    /usr/include/Phonon
 
 # Input
 HEADERS += collectionbrowser.h \
@@ -17,7 +18,8 @@ HEADERS += collectionbrowser.h \
     preferencesdialog.h \
     player.h \
     collectionmodel.h \
-    collectionitem.h
+    collectionitem.h \
+    infopanel.h
 FORMS += mainwindow.ui \
     preferencesdialog.ui
 SOURCES += collectionbrowser.cpp \
@@ -29,5 +31,6 @@ SOURCES += collectionbrowser.cpp \
     preferencesdialog.cpp \
     player.cpp \
     collectionmodel.cpp \
-    collectionitem.cpp
+    collectionitem.cpp \
+    infopanel.cpp
 RESOURCES += icons.qrc
