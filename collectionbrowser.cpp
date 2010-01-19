@@ -110,7 +110,7 @@ void CollectionBrowser::removeItem(int row) //SLOT
 
 void CollectionBrowser::removeItems(int row, int count) // SLOT
 {
-    /* When row removed the following row takes its place and therefor by deleting row no. "row" for "count"-time
+    /* When row removed the following row takes its place and therefor by deleting row number "row" for "count"-times
        all the lines are removed */
     for (int i = 0; i<count; i++) {
         removeItem(row);
