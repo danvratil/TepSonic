@@ -24,8 +24,10 @@
 #include <QtGui/QActionGroup>
 #include <QtGui/QSystemTrayIcon>
 #include <QSettings>
+#include <QItemSelectionModel>
 
 #include "playlistmodel.h"
+#include "infopanel.h"
 #include "player.h"
 
 namespace Ui
@@ -50,10 +52,14 @@ public:
 private:
     Ui::MainWindow *ui;
 
+    InfoPanel *infoPanel;
+
     QActionGroup *randomPlaybackGroup;
     QActionGroup *repeatPlaybackGroup;
 
     PlaylistModel *playlistModel;
+
+    QItemSelectionModel *selectionModel;
 
     QSystemTrayIcon *trayIcon;
     QMenu *trayIconMenu;
@@ -77,11 +83,17 @@ private slots:
     /**
      * Update some player properties
      */
+    void on_nextTrackButton_clicked();
+    void on_stopButton_clicked();
+    void on_playPauseButton_clicked();
+    void on_previousTrackButton_clicked();
     void on_actionRepeat_playlist_triggered();
     void on_actionRepeat_OFF_triggered();
     void on_actionRepeat_track_triggered();
     void on_actionRandom_OFF_triggered();
     void on_actionRandom_ON_triggered();
+
+    void on_playerStatusChanged(Phonon::State newState, Phonon::State oldState);
 
     /**
      * Activate item in playlist

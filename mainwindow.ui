@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>673</width>
-    <height>334</height>
+    <width>669</width>
+    <height>330</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -96,6 +96,9 @@
       </item>
       <item>
        <widget class="QPushButton" name="stopButton">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
         <property name="maximumSize">
          <size>
           <width>32</width>
@@ -229,12 +232,19 @@
      </layout>
     </item>
     <item>
+     <widget class="QLabel" name="trackTitleLabel">
+      <property name="text">
+       <string>Player is stopped</string>
+      </property>
+     </widget>
+    </item>
+    <item>
      <layout class="QHBoxLayout" name="playerControlLayout">
       <item>
-       <widget class="Phonon::SeekSlider" name="seekSlider"/>
+       <widget class="Phonon::SeekSlider" name="seekSlider" native="true"/>
       </item>
       <item>
-       <widget class="Phonon::VolumeSlider" name="volumeSlider">
+       <widget class="Phonon::VolumeSlider" name="volumeSlider" native="true">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
           <horstretch>0</horstretch>
@@ -306,8 +316,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>673</width>
-     <height>22</height>
+     <width>669</width>
+     <height>20</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu_TepSonic">

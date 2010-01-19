@@ -19,6 +19,7 @@
 
 #include "mainwindow.h"
 #include "preferencesdialog.h"
+#include "infopanel.h"
 #include "ui_mainwindow.h"
 
 #include <QMessageBox>
@@ -28,8 +29,8 @@
 #include <QFileDialog>
 #include <QFileInfo>
 #include <QItemSelectionModel>
-#include <Phonon/SeekSlider>
-#include <Phonon/VolumeSlider>
+#include <KDE/Phonon/SeekSlider>
+#include <KDE/Phonon/VolumeSlider>
 
 
 #include <QDebug>
@@ -69,11 +70,17 @@ MainWindow::MainWindow(QWidget *parent)
     trayIconMenu->addAction(ui->actionQuit_TepSonic);
     trayIcon->setContextMenu(trayIconMenu);
 
+    infoPanel = new InfoPanel(this);
+    infoPanel->hide();
+    ui->centralWidget->layout()->addWidget(infoPanel);
+
     QStringList headers = QStringList()<<"Filename"<<"Track"<<"Interpret"<<"Track name"<<"Album"<<"Genre"<<"Year"<<"Length";
     playlistModel = new PlaylistModel(headers,QString(),this);
     ui->playlistBrowser->setModel(playlistModel);
     // hide the first column (with filename)
     ui->playlistBrowser->hideColumn(0);
+
+    selectionModel = ui->playlistBrowser->selectionModel();
 
     canClose = false;
 
@@ -87,6 +94,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     player = new Player();
     connect(player->phononPlayer,SIGNAL(finished()),this,SLOT(updatePlayerTrack()));
+    connect(player->phononPlayer,SIGNAL(stateChanged(Phonon::State,Phonon::State)),this,SLOT(on_playerStatusChanged(Phonon::State,Phonon::State)));
 
     ui->seekSlider->setMediaObject(player->phononPlayer);
     ui->volumeSlider->setAudioOutput(player->audioOutput);
@@ -235,6 +243,7 @@ void MainWindow::on_actionRandom_ON_triggered()
 
 void MainWindow::on_actionRandom_OFF_triggered()
 {
+    // Select previous file
     player->setRandomMode(false);
 }
 
@@ -251,4 +260,76 @@ void MainWindow::on_actionRepeat_OFF_triggered()
 void MainWindow::on_actionRepeat_playlist_triggered()
 {
     player->setRepeatMode(Player::RepeatAll);
+}
+
+void MainWindow::on_playerStatusChanged(Phonon::State newState, Phonon::State oldState)
+{
+    Q_UNUSED(oldState);
+
+    switch (newState) {
+        case Phonon::PlayingState:
+            ui->playPauseButton->setIcon(QIcon(":/icons/pause"));
+            ui->stopButton->setEnabled(true);
+            ui->trackTitleLabel->setText(player->phononPlayer->currentSource().fileName());
+            break;
+        case Phonon::PausedState:
+            ui->playPauseButton->setIcon(QIcon(":/icons/start"));
+            ui->stopButton->setEnabled(true);
+            ui->trackTitleLabel->setText(ui->trackTitleLabel->text().append(tr(" [paused]")));
+            break;
+        case Phonon::StoppedState:
+            ui->playPauseButton->setIcon(QIcon(":/icons/start"));
+            ui->stopButton->setEnabled(false);
+            ui->trackTitleLabel->setText(tr("Player is stopped"));
+            break;
+        case Phonon::ErrorState:
+            infoPanel->setMode(InfoPanel::ErrorMode);
+            infoPanel->setMessage(player->phononPlayer->errorString());
+            infoPanel->show();
+            break;
+        case Phonon::LoadingState:
+            break;
+        case Phonon::BufferingState:
+            break;
+    }
+}
+
+void MainWindow::on_previousTrackButton_clicked()
+{
+    QModelIndexList selected = selectionModel->selectedRows(0);
+    // Only when there is an item above
+    if ((selected.count() > 0) && (selected.at(0).row()>0)) {
+        QModelIndex topLeft = playlistModel->index(selected.at(0).row()-1,0,QModelIndex());
+        QModelIndex bottomRight = playlistModel->index(selected.at(0).row()-1,playlistModel->columnCount(QModelIndex())-1, QModelIndex());
+        // First cancel all selections
+        for(int i=0;i<selected.count();i++) {
+            selectionModel->select(selected.at(i),QItemSelectionModel::Clear);
+        }
+        // And then highlight the new selection
+        selectionModel->select(QItemSelection(topLeft,bottomRight),
+                               QItemSelectionModel::Select);
+    }
+}
+
+void MainWindow::on_playPauseButton_clicked()
+{
+    if (player->phononPlayer->state() == Phonon::PlayingState) {
+        player->phononPlayer->pause();
+    } else {
+        player->phononPlayer->play();
+    }
+}
+
+void MainWindow::on_stopButton_clicked()
+{
+    player->phononPlayer->stop();
+}
+
+void MainWindow::on_nextTrackButton_clicked()
+{
+    if (player->randomMode()) {
+        // select random row
+    } else {
+        // select next row
+    }
 }
