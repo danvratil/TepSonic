@@ -17,6 +17,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Cambridge, MA 02110-1301, USA.
  */
 
+#include <cstdlib>
+#include <ctime>
+
 #include "mainwindow.h"
 #include "preferencesdialog.h"
 #include "infopanel.h"
@@ -38,6 +41,9 @@
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), ui(new Ui::MainWindow)
 {
+    // Initialize pseudo-random numbers generator
+    srand(time(NULL));
+
     ui->setupUi(this);
 
     appIcon = new QIcon(":/icons/mainIcon");
@@ -226,7 +232,11 @@ void MainWindow::updateActionBar(int progress, QString actionTitle)
 
 void MainWindow::updatePlayerTrack()
 {
-    // Select next track in playlist (random OR following)
+    if (player->repeatMode()==Player::RepeatTrack) {
+        player->phononPlayer->play();
+    } else {
+        on_nextTrackButton_clicked();
+    }
 }
 
 void MainWindow::on_playlistBrowser_doubleClicked(QModelIndex index)
@@ -300,12 +310,14 @@ void MainWindow::on_previousTrackButton_clicked()
     // Only when there is an item above
     if ((selected.count() > 0) && (selected.at(0).row()>0)) {
         QModelIndex topLeft = playlistModel->index(selected.at(0).row()-1,0,QModelIndex());
-        QModelIndex bottomRight = playlistModel->index(selected.at(0).row()-1,playlistModel->columnCount(QModelIndex())-1, QModelIndex());
+        QModelIndex bottomRight = playlistModel->index(selected.at(0).row()-1,
+                                                       playlistModel->columnCount(QModelIndex())-1,
+                                                       QModelIndex());
         // First cancel all selections
         for(int i=0;i<selected.count();i++) {
             selectionModel->select(selected.at(i),QItemSelectionModel::Clear);
         }
-        // And then highlight the new selection
+        // And then select the new row
         selectionModel->select(QItemSelection(topLeft,bottomRight),
                                QItemSelectionModel::Select);
     }
@@ -327,9 +339,58 @@ void MainWindow::on_stopButton_clicked()
 
 void MainWindow::on_nextTrackButton_clicked()
 {
-    if (player->randomMode()) {
-        // select random row
-    } else {
-        // select next row
-    }
+    QModelIndexList selected = selectionModel->selectedRows(0);
+    if (selected.count() > 0) {
+        // Is Random mode on?
+        if (player->randomMode()) {
+            // Choose random row (generator initialized in constructor)
+            int row = rand() % playlistModel->rowCount(QModelIndex())-1;
+            QModelIndex topLeft = playlistModel->index(row,
+                                                       0,
+                                                       QModelIndex());
+            QModelIndex bottomRight = playlistModel->index(row,
+                                                           playlistModel->columnCount(QModelIndex())-1,
+                                                           QModelIndex());
+            // Clear current selection(s)
+            for (int i=0;i<selected.count();i++) {
+                selectionModel->select(selected.at(i),QItemSelectionModel::Clear);
+            }
+            // Select the new item
+            selectionModel->select(QItemSelection(topLeft,bottomRight),
+                                   QItemSelectionModel::Select);
+        } else { // When random mode is off...
+            // Check if there is an item below the current
+            if (selected.at(0).row()<playlistModel->rowCount(QModelIndex())) {
+                QModelIndex topLeft = playlistModel->index(selected.at(0).row()+1,0,QModelIndex());
+                QModelIndex bottomRight = playlistModel->index(selected.at(0).row()+1,
+                                                               playlistModel->columnCount(QModelIndex())-1,
+                                                               QModelIndex());
+                // First clear current selection
+                for (int i=0;i<selected.count();i++) {
+                    selectionModel->select(selected.at(i),QItemSelectionModel::Clear);
+                }
+                // Select the next item
+                selectionModel->select(QItemSelection(topLeft,bottomRight),
+                                       QItemSelectionModel::Select);
+                // If there is now row below, but player is set to "RepeatAll" then jump to the first track
+            } else {
+                if(player->repeatMode() == Player::RepeatAll) {
+                    QModelIndex topLeft = playlistModel->index(0,0,QModelIndex());
+                    QModelIndex bottomRight = playlistModel->index(0,
+                                                                   playlistModel->columnCount(QModelIndex())-1,
+                                                                   QModelIndex());
+                    // First clear current selection
+                    for (int i=0;i<selected.count();i++) {
+                        selectionModel->select(selected.at(i),QItemSelectionModel::Clear);
+                    }
+                    // Now select the first item in playlist
+                    selectionModel->select(QItemSelection(topLeft,bottomRight),
+                                           QItemSelectionModel::Select);
+                } // if (player->repeatMode() == Player::RepeatAll)
+            } // if (selected.at(0).row() == playlistModel->rowCount(QModelIndex()))
+        } // if (player->randomMode() == false)
+    } // if (selected.count() == 0)
+
+    // Now set the selected item as mediasource into Phonon player
+    player->setTrack(selectionModel->selectedRows(0).at(0).data().toString(),true);
 }
