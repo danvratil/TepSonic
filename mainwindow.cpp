@@ -194,6 +194,7 @@ void MainWindow::on_actionAdd_file_triggered()
     for (int file = 0; file < fileNames.count(); file++) {
         ui->playlistBrowser->addItem(fileNames.at(file));
     }
+    launchPlaylistParser();
 }
 
 
@@ -217,7 +218,8 @@ void MainWindow::on_actionAdd_folder_triggered()
 
     // Fire file iterator thread
     TracksIterator tracksIterator(dirName);
-    //connect(tracksIterator,SIGNAL(fileFound(QString)),ui->playlistBrowser,SLOT(addItem(QString)));
+    connect(&tracksIterator,SIGNAL(fileFound(QString)),this,SLOT(addPlaylistItem(QString)));
+    connect(&tracksIterator,SIGNAL(finished()),this,SLOT(launchPlaylistParser()));
     tracksIterator.run();
 }
 
@@ -248,7 +250,7 @@ void MainWindow::updatePlayerTrack()
 
 void MainWindow::on_playlistBrowser_doubleClicked(QModelIndex index)
 {
-   // Play item on double click
+   // Play item on row double click
    QVariant row = playlistModel->data(index.sibling(index.row(),0), Qt::DisplayRole);
    player->setTrack(row.toString(),true);
 }
@@ -260,7 +262,6 @@ void MainWindow::on_actionRandom_ON_triggered()
 
 void MainWindow::on_actionRandom_OFF_triggered()
 {
-    // Select previous file
     player->setRandomMode(false);
 }
 
@@ -342,6 +343,8 @@ void MainWindow::on_playPauseButton_clicked()
     if (player->phononPlayer->state() == Phonon::PlayingState) {
         player->phononPlayer->pause();
     } else {
+        /* When the source is empty there are some files in playlist, select the
+           first row and load it as current source */
         if ((player->phononPlayer->currentSource().fileName().isEmpty()) &&
             (playlistModel->rowCount() > 0)) {
             QModelIndex topLeft = playlistModel->index(0,0,QModelIndex());
@@ -358,6 +361,7 @@ void MainWindow::on_playPauseButton_clicked()
 void MainWindow::on_stopButton_clicked()
 {
     player->phononPlayer->stop();
+    // Empty source
     player->phononPlayer->setCurrentSource(Phonon::MediaSource());
 }
 
@@ -417,4 +421,14 @@ void MainWindow::on_nextTrackButton_clicked()
         player->setTrack(selectionModel->selectedRows(0).at(0).data().toString(),true);
     } // if (selected.count() == 0)
 
+}
+
+void MainWindow::addPlaylistItem(QString filename)
+{
+    ui->playlistBrowser->addItem(filename);
+}
+
+void MainWindow::launchPlaylistParser()
+{
+    qDebug() << "fixme: MainWindow::launchPlaylistParser (stub!)";
 }

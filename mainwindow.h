@@ -93,7 +93,7 @@ private slots:
     void on_actionRandom_OFF_triggered();
     void on_actionRandom_ON_triggered();
 
-    void on_playerStatusChanged(Phonon::State newState, Phonon::State oldState);
+    void on_playerStatusChanged(Phonon::State, Phonon::State);
 
     /**
      * Activate item in playlist
@@ -155,6 +155,15 @@ private slots:
      */
     void updatePlayerTrack();
 
+    /**
+     * Add new track to playlist
+     */
+    void addPlaylistItem(QString);
+
+    /**
+     * Go through playlist and check if any rows can be parsed
+     */
+    void launchPlaylistParser();
 
   public slots:
 

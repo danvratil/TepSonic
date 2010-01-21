@@ -27,6 +27,7 @@
 #ifndef PLAYLISTBROWSER_H
 #define PLAYLISTBROWSER_H
 
+#include <QObject>
 #include <QTreeView>
 
 class PlaylistBrowser : public QTreeView
@@ -43,9 +44,9 @@ class PlaylistBrowser : public QTreeView
 
 
     public slots:
-        void addItem(QString fileName);
-        void removeItem(int row);
-        void removeItems(int row, int count);
+        void addItem(QString);
+        void removeItem(int);
+        void removeItems(int, int);
 
 };
 

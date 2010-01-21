@@ -23,6 +23,8 @@
 #include <QDirIterator>
 #include <QFileInfo>
 
+#include <QDebug>
+
 TracksIterator::TracksIterator(QString  topDir)
 {
     rootDir = topDir;
@@ -44,7 +46,6 @@ void TracksIterator::listDir(QString dir)
     filters << "*.mp3" << "*.mp4" << "*.wav" << "*.flac";
     QDir dirlist(dir);
     dirlist.setNameFilters(filters);
-
     QFileInfo fileInfo;
 
     QDirIterator dirIterator(dirlist,QDirIterator::Subdirectories);
@@ -53,5 +54,6 @@ void TracksIterator::listDir(QString dir)
         if (fileInfo.isFile()) {
             emit fileFound(fileInfo.absoluteFilePath());
         }
+        dirIterator.next();
     }
 }
