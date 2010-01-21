@@ -24,6 +24,7 @@
 #include "preferencesdialog.h"
 #include "infopanel.h"
 #include "ui_mainwindow.h"
+#include "tracksiterator.h"
 
 #include <QMessageBox>
 #include <QDesktopServices>
@@ -104,6 +105,10 @@ MainWindow::MainWindow(QWidget *parent)
 
     ui->seekSlider->setMediaObject(player->phononPlayer);
     ui->volumeSlider->setAudioOutput(player->audioOutput);
+
+    connect(ui->loadFileButton,SIGNAL(clicked()),ui->actionAdd_file,SLOT(trigger()));
+    connect(ui->loadFolderButton,SIGNAL(clicked()),ui->actionAdd_folder,SLOT(trigger()));
+    connect(ui->clearPlaylistButton,SIGNAL(clicked()),ui->actionClear_playlist,SLOT(trigger()));
 
 }
 
@@ -210,8 +215,10 @@ void MainWindow::on_actionAdd_folder_triggered()
     //open folder dialog
     QString dirName = QFileDialog::getExistingDirectory(this,tr("Add directory"), QString(), QFileDialog::ShowDirsOnly);
 
-    /* Here we should fire a thread that will create (recursively of course) list of files in dir (and subdirs) and put it
-       into the playlist */
+    // Fire file iterator thread
+    TracksIterator tracksIterator(dirName);
+    //connect(tracksIterator,SIGNAL(fileFound(QString)),ui->playlistBrowser,SLOT(addItem(QString)));
+    tracksIterator.run();
 }
 
 void MainWindow::updateActionBar(int progress, QString actionTitle)
@@ -279,17 +286,23 @@ void MainWindow::on_playerStatusChanged(Phonon::State newState, Phonon::State ol
     switch (newState) {
         case Phonon::PlayingState:
             ui->playPauseButton->setIcon(QIcon(":/icons/pause"));
+            ui->actionPlay_pause->setIcon(QIcon(":/icons/pause"));
             ui->stopButton->setEnabled(true);
+            ui->actionStop->setEnabled(true);
             ui->trackTitleLabel->setText(player->phononPlayer->currentSource().fileName());
             break;
         case Phonon::PausedState:
             ui->playPauseButton->setIcon(QIcon(":/icons/start"));
+            ui->actionPlay_pause->setIcon(QIcon(":/icons/start"));
             ui->stopButton->setEnabled(true);
+            ui->actionStop->setEnabled(true);
             ui->trackTitleLabel->setText(ui->trackTitleLabel->text().append(tr(" [paused]")));
             break;
         case Phonon::StoppedState:
             ui->playPauseButton->setIcon(QIcon(":/icons/start"));
+            ui->actionPlay_pause->setIcon(QIcon(":/icons/start"));
             ui->stopButton->setEnabled(false);
+            ui->actionStop->setEnabled(false);
             ui->trackTitleLabel->setText(tr("Player is stopped"));
             break;
         case Phonon::ErrorState:
@@ -320,6 +333,7 @@ void MainWindow::on_previousTrackButton_clicked()
         // And then select the new row
         selectionModel->select(QItemSelection(topLeft,bottomRight),
                                QItemSelectionModel::Select);
+        player->setTrack(selectionModel->selectedRows(0).at(0).data().toString(),true);
     }
 }
 
@@ -328,6 +342,15 @@ void MainWindow::on_playPauseButton_clicked()
     if (player->phononPlayer->state() == Phonon::PlayingState) {
         player->phononPlayer->pause();
     } else {
+        if ((player->phononPlayer->currentSource().fileName().isEmpty()) &&
+            (playlistModel->rowCount() > 0)) {
+            QModelIndex topLeft = playlistModel->index(0,0,QModelIndex());
+            QModelIndex bottomRight = playlistModel->index(0,playlistModel->columnCount(QModelIndex())-1,QModelIndex());
+            selectionModel->select(QItemSelection(topLeft,bottomRight),
+                                   QItemSelectionModel::Select);
+            player->setTrack(selectionModel->selectedRows(0).at(0).data().toString(),true);
+
+        }
         player->phononPlayer->play();
     }
 }
@@ -335,6 +358,7 @@ void MainWindow::on_playPauseButton_clicked()
 void MainWindow::on_stopButton_clicked()
 {
     player->phononPlayer->stop();
+    player->phononPlayer->setCurrentSource(Phonon::MediaSource());
 }
 
 void MainWindow::on_nextTrackButton_clicked()
@@ -360,7 +384,7 @@ void MainWindow::on_nextTrackButton_clicked()
                                    QItemSelectionModel::Select);
         } else { // When random mode is off...
             // Check if there is an item below the current
-            if (selected.at(0).row()<playlistModel->rowCount(QModelIndex())) {
+            if (selected.at(0).row()<playlistModel->rowCount(QModelIndex())-1) {
                 QModelIndex topLeft = playlistModel->index(selected.at(0).row()+1,0,QModelIndex());
                 QModelIndex bottomRight = playlistModel->index(selected.at(0).row()+1,
                                                                playlistModel->columnCount(QModelIndex())-1,
@@ -389,8 +413,8 @@ void MainWindow::on_nextTrackButton_clicked()
                 } // if (player->repeatMode() == Player::RepeatAll)
             } // if (selected.at(0).row() == playlistModel->rowCount(QModelIndex()))
         } // if (player->randomMode() == false)
+        // Now set the selected item as mediasource into Phonon player
+        player->setTrack(selectionModel->selectedRows(0).at(0).data().toString(),true);
     } // if (selected.count() == 0)
 
-    // Now set the selected item as mediasource into Phonon player
-    player->setTrack(selectionModel->selectedRows(0).at(0).data().toString(),true);
 }

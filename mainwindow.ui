@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>669</width>
-    <height>330</height>
+    <width>667</width>
+    <height>328</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -316,7 +316,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>669</width>
+     <width>667</width>
      <height>20</height>
     </rect>
    </property>
@@ -568,7 +568,7 @@
    </property>
   </action>
   <action name="actionAbout_TepSonic">
-   <property name="icon">
+  <property name="icon">
     <iconset resource="icons.qrc">
      <normaloff>:/icons/about</normaloff>:/icons/about</iconset>
    </property>
@@ -631,118 +631,5 @@
  <resources>
   <include location="icons.qrc"/>
  </resources>
- <connections>
-  <connection>
-   <sender>loadFileButton</sender>
-   <signal>clicked()</signal>
-   <receiver>actionAdd_file</receiver>
-   <slot>trigger()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>270</x>
-     <y>51</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>loadFolderButton</sender>
-   <signal>clicked()</signal>
-   <receiver>actionAdd_folder</receiver>
-   <slot>trigger()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>373</x>
-     <y>51</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>clearPlaylistButton</sender>
-   <signal>clicked()</signal>
-   <receiver>actionClear_playlist</receiver>
-   <slot>trigger()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>489</x>
-     <y>51</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>previousTrackButton</sender>
-   <signal>clicked()</signal>
-   <receiver>actionPrevious_track</receiver>
-   <slot>trigger()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>25</x>
-     <y>51</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>playPauseButton</sender>
-   <signal>clicked()</signal>
-   <receiver>actionPlay_pause</receiver>
-   <slot>trigger()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>67</x>
-     <y>51</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>stopButton</sender>
-   <signal>clicked()</signal>
-   <receiver>actionStop</receiver>
-   <slot>trigger()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>109</x>
-     <y>51</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>nextTrackButton</sender>
-   <signal>clicked()</signal>
-   <receiver>actionNext_track</receiver>
-   <slot>trigger()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>151</x>
-     <y>51</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-   </hints>
-  </connection>
- </connections>
+ <connections/>
 </ui>

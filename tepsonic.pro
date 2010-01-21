@@ -19,7 +19,8 @@ HEADERS += collectionbrowser.h \
     player.h \
     collectionmodel.h \
     collectionitem.h \
-    infopanel.h
+    infopanel.h \
+    tracksiterator.h
 FORMS += mainwindow.ui \
     preferencesdialog.ui
 SOURCES += collectionbrowser.cpp \
@@ -32,5 +33,6 @@ SOURCES += collectionbrowser.cpp \
     player.cpp \
     collectionmodel.cpp \
     collectionitem.cpp \
-    infopanel.cpp
+    infopanel.cpp \
+    tracksiterator.cpp
 RESOURCES += icons.qrc
