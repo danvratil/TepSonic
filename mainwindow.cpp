@@ -217,10 +217,10 @@ void MainWindow::on_actionAdd_folder_triggered()
     QString dirName = QFileDialog::getExistingDirectory(this,tr("Add directory"), QString(), QFileDialog::ShowDirsOnly);
 
     // Fire file iterator thread
-    TracksIterator tracksIterator(dirName);
-    connect(&tracksIterator,SIGNAL(fileFound(QString)),this,SLOT(addPlaylistItem(QString)));
-    connect(&tracksIterator,SIGNAL(finished()),this,SLOT(launchPlaylistParser()));
-    tracksIterator.run();
+    tracksIterator = new TracksIterator(dirName);
+    connect(tracksIterator,SIGNAL(fileFound(QString)),this,SLOT(addPlaylistItem(QString)));
+    connect(tracksIterator,SIGNAL(finished()),this,SLOT(launchPlaylistParser()));
+    tracksIterator->start();
 }
 
 void MainWindow::updateActionBar(int progress, QString actionTitle)

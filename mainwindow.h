@@ -29,6 +29,7 @@
 #include "playlistmodel.h"
 #include "infopanel.h"
 #include "player.h"
+#include "tracksiterator.h"
 
 namespace Ui
 {
@@ -68,6 +69,8 @@ private:
 
     QSettings settings;
     Player *player;
+
+    TracksIterator *tracksIterator;
 
 protected:
     /**

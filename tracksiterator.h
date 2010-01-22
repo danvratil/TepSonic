@@ -32,8 +32,6 @@ class TracksIterator : public QThread
         void run();
 
     private:
-        void listDir(QString dir);
-
         QString rootDir;
 
     signals:

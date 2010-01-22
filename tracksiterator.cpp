@@ -32,19 +32,12 @@ TracksIterator::TracksIterator(QString  topDir)
 
 void TracksIterator::run()
 {
-    listDir(rootDir);
-
-    exec();
-}
-
-void TracksIterator::listDir(QString dir)
-{
-    /**
+/**
      * @todo: Complete list of supported extensions
      */
     QStringList filters;
     filters << "*.mp3" << "*.mp4" << "*.wav" << "*.flac";
-    QDir dirlist(dir);
+    QDir dirlist(rootDir);
     dirlist.setNameFilters(filters);
     QFileInfo fileInfo;
 
@@ -56,4 +49,6 @@ void TracksIterator::listDir(QString dir)
         }
         dirIterator.next();
     }
+
+    exec();
 }
