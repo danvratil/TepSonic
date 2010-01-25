@@ -4,6 +4,7 @@
 QT += phonon
 TEMPLATE = app
 TARGET = 
+LIBS += -ltag
 DEPENDPATH += .
 INCLUDEPATH += . \
     /usr/include/KDE \
