@@ -84,7 +84,14 @@ MainWindow::MainWindow(QWidget *parent)
     infoPanel->hide();
     ui->centralWidget->layout()->addWidget(infoPanel);
 
-    QStringList headers = QStringList()<<"Filename"<<"Track"<<"Interpret"<<"Track name"<<"Album"<<"Genre"<<"Year"<<"Length";
+    QStringList headers = QStringList()<< tr("Filename")
+                                       << tr("Track")
+                                       << tr("Interpret")
+                                       << tr("Track name")
+                                       << tr("Album")
+                                       << tr("Genre")
+                                       << tr("Year")
+                                       << tr("Length");
     playlistModel = new PlaylistModel(headers,QString(),this);
     ui->playlistBrowser->setModel(playlistModel);
     // hide the first column (with filename)
@@ -142,8 +149,13 @@ void MainWindow::on_actionAbout_Qt_triggered()
 void MainWindow::on_actionAbout_TepSonic_triggered()
 {
     QMessageBox aboutDlg;
-    QString str = QString("<h1>TepSonic</h1><i>Version ").append(QString(QApplication::applicationVersion())).append("</i><br><b>Author:</b> Dan \"ProgDan\" Vratil<br><b>Contact:</b> vratil@progdansoft.com<br/><b>Homepage:</b> www.progdan.homelinux.net<br/><br/>This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2 of the License, or (at your option) any later version.");
-    aboutDlg.about(this,tr("About TepSonic"),tr(str.toAscii()));
+
+    QString str = QString(tr("<h1>TepSonic</h1><i>Version %1</i><br>" \
+                             "<b>Author:</b> Dan \"ProgDan\" Vrátil<br>" \
+                             "<b>Contact:</b> vratil@progdansoft.com<br/>" \
+                             "<b>Homepage:</b> www.progdan.homelinux.net<br/><br/>" \
+                             "This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2 of the License, or (at your option) any later version.")).arg(QString(QApplication::applicationVersion()));
+    aboutDlg.about(this,tr("About TepSonic"),str.toAscii());
 }
 
 
@@ -196,7 +208,9 @@ void MainWindow::on_actionShow_Hide_triggered()
 
 void MainWindow::on_actionAdd_file_triggered()
 {
-    QStringList fileNames = QFileDialog::getOpenFileNames(this,tr("Select file"),"",
+    QStringList fileNames = QFileDialog::getOpenFileNames(this,
+                                                          tr("Select file"),
+                                                          "",
                                                           tr("Supported audio files (*.mp3 *.wav *.ogg *.flac);;All files (*.*)"));
     for (int file = 0; file < fileNames.count(); file++) {
         ui->playlistBrowser->addItem(fileNames.at(file));
@@ -220,7 +234,10 @@ void MainWindow::on_actionClear_playlist_triggered()
 void MainWindow::on_actionAdd_folder_triggered()
 {
     //open folder dialog
-    QString dirName = QFileDialog::getExistingDirectory(this,tr("Add directory"), QString(), QFileDialog::ShowDirsOnly);
+    QString dirName = QFileDialog::getExistingDirectory(this,
+                                                        tr("Add directory"),
+                                                        QString(),
+                                                        QFileDialog::ShowDirsOnly);
 
     // Fire file iterator thread
     tracksIterator = new TracksIterator(dirName);
@@ -303,7 +320,7 @@ void MainWindow::on_playerStatusChanged(Phonon::State newState, Phonon::State ol
             ui->actionPlay_pause->setIcon(QIcon(":/icons/start"));
             ui->stopButton->setEnabled(true);
             ui->actionStop->setEnabled(true);
-            ui->trackTitleLabel->setText(ui->trackTitleLabel->text().append(tr(" [paused]")));
+            ui->trackTitleLabel->setText(QString(tr("%1 [paused]")).arg(ui->trackTitleLabel->text()));
             break;
         case Phonon::StoppedState:
             ui->playPauseButton->setIcon(QIcon(":/icons/start"));
