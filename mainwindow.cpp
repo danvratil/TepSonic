@@ -33,8 +33,8 @@
 #include <QFileDialog>
 #include <QFileInfo>
 #include <QItemSelectionModel>
-#include <KDE/Phonon/SeekSlider>
-#include <KDE/Phonon/VolumeSlider>
+#include <Phonon/SeekSlider>
+#include <Phonon/VolumeSlider>
 
 
 #include <QDebug>
