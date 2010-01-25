@@ -27,9 +27,6 @@
 #include <QUrl>
 #include <QFileInfo>
 
-#include <Phonon/MediaObject>
-#include <Phonon/MediaSource>
-
 #include <taglib/taglib.h>
 #include <taglib/fileref.h>
 #include <taglib/tag.h>
