@@ -74,6 +74,9 @@ MainWindow::MainWindow(QWidget *parent)
     trayIconMenu->addAction(ui->actionStop);
     trayIconMenu->addAction(ui->actionNext_track);
     trayIconMenu->addSeparator();
+    trayIconMenu->addMenu(ui->menuRepeat);
+    trayIconMenu->addMenu(ui->menuRandom);
+    trayIconMenu->addSeparator();
     trayIconMenu->addAction(ui->actionQuit_TepSonic);
     trayIcon->setContextMenu(trayIconMenu);
 
@@ -109,6 +112,10 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->loadFileButton,SIGNAL(clicked()),ui->actionAdd_file,SLOT(trigger()));
     connect(ui->loadFolderButton,SIGNAL(clicked()),ui->actionAdd_folder,SLOT(trigger()));
     connect(ui->clearPlaylistButton,SIGNAL(clicked()),ui->actionClear_playlist,SLOT(trigger()));
+    connect(ui->previousTrackButton,SIGNAL(clicked()),ui->actionPrevious_track,SLOT(trigger()));
+    connect(ui->playPauseButton,SIGNAL(clicked()),ui->actionPlay_pause,SLOT(trigger()));
+    connect(ui->stopButton,SIGNAL(clicked()),ui->actionStop,SLOT(trigger()));
+    connect(ui->nextTrackButton,SIGNAL(clicked()),ui->actionNext_track,SLOT(trigger()));
 
 }
 
@@ -194,7 +201,6 @@ void MainWindow::on_actionAdd_file_triggered()
     for (int file = 0; file < fileNames.count(); file++) {
         ui->playlistBrowser->addItem(fileNames.at(file));
     }
-    launchPlaylistParser();
 }
 
 
@@ -244,7 +250,7 @@ void MainWindow::updatePlayerTrack()
     if (player->repeatMode()==Player::RepeatTrack) {
         player->phononPlayer->play();
     } else {
-        on_nextTrackButton_clicked();
+        on_actionNext_track_triggered();
     }
 }
 
@@ -318,7 +324,7 @@ void MainWindow::on_playerStatusChanged(Phonon::State newState, Phonon::State ol
     }
 }
 
-void MainWindow::on_previousTrackButton_clicked()
+void MainWindow::on_actionPrevious_track_triggered()
 {
     QModelIndexList selected = selectionModel->selectedRows(0);
     // Only when there is an item above
@@ -338,7 +344,7 @@ void MainWindow::on_previousTrackButton_clicked()
     }
 }
 
-void MainWindow::on_playPauseButton_clicked()
+void MainWindow::on_actionPlay_pause_triggered()
 {
     if (player->phononPlayer->state() == Phonon::PlayingState) {
         player->phononPlayer->pause();
@@ -358,14 +364,14 @@ void MainWindow::on_playPauseButton_clicked()
     }
 }
 
-void MainWindow::on_stopButton_clicked()
+void MainWindow::on_actionStop_triggered()
 {
     player->phononPlayer->stop();
     // Empty source
     player->phononPlayer->setCurrentSource(Phonon::MediaSource());
 }
 
-void MainWindow::on_nextTrackButton_clicked()
+void MainWindow::on_actionNext_track_triggered()
 {
     QModelIndexList selected = selectionModel->selectedRows(0);
     if (selected.count() > 0) {
@@ -426,9 +432,4 @@ void MainWindow::on_nextTrackButton_clicked()
 void MainWindow::addPlaylistItem(QString filename)
 {
     ui->playlistBrowser->addItem(filename);
-}
-
-void MainWindow::launchPlaylistParser()
-{
-    qDebug() << "fixme: MainWindow::launchPlaylistParser (stub!)";
 }

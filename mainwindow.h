@@ -86,10 +86,10 @@ private slots:
     /**
      * Update some player properties
      */
-    void on_nextTrackButton_clicked();
-    void on_stopButton_clicked();
-    void on_playPauseButton_clicked();
-    void on_previousTrackButton_clicked();
+    void on_actionNext_track_triggered();
+    void on_actionStop_triggered();
+    void on_actionPlay_pause_triggered();
+    void on_actionPrevious_track_triggered();
     void on_actionRepeat_playlist_triggered();
     void on_actionRepeat_OFF_triggered();
     void on_actionRepeat_track_triggered();
@@ -162,11 +162,6 @@ private slots:
      * Add new track to playlist
      */
     void addPlaylistItem(QString);
-
-    /**
-     * Go through playlist and check if any rows can be parsed
-     */
-    void launchPlaylistParser();
 
   public slots:
 

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>667</width>
-    <height>328</height>
+    <width>665</width>
+    <height>326</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -20,7 +20,7 @@
    <string>TepSonic</string>
   </property>
   <property name="windowIcon">
-   <iconset resource="icons.qrc">
+   <iconset>
     <normaloff>:/icons/mainIcon</normaloff>:/icons/mainIcon</iconset>
   </property>
   <widget class="QWidget" name="centralWidget">
@@ -54,7 +54,7 @@
          <string/>
         </property>
         <property name="icon">
-         <iconset resource="icons.qrc">
+         <iconset>
           <normaloff>:/icons/backward</normaloff>:/icons/backward</iconset>
         </property>
         <property name="iconSize">
@@ -80,7 +80,7 @@
          <string/>
         </property>
         <property name="icon">
-         <iconset resource="icons.qrc">
+         <iconset>
           <normaloff>:/icons/start</normaloff>:/icons/start</iconset>
         </property>
         <property name="iconSize">
@@ -109,7 +109,7 @@
          <string/>
         </property>
         <property name="icon">
-         <iconset resource="icons.qrc">
+         <iconset>
           <normaloff>:/icons/stop</normaloff>:/icons/stop</iconset>
         </property>
         <property name="iconSize">
@@ -135,7 +135,7 @@
          <string/>
         </property>
         <property name="icon">
-         <iconset resource="icons.qrc">
+         <iconset>
           <normaloff>:/icons/forward</normaloff>:/icons/forward</iconset>
         </property>
         <property name="iconSize">
@@ -171,7 +171,7 @@
          <string>Load file</string>
         </property>
         <property name="icon">
-         <iconset resource="icons.qrc">
+         <iconset>
           <normaloff>:/icons/openFile</normaloff>:/icons/openFile</iconset>
         </property>
         <property name="iconSize">
@@ -188,7 +188,7 @@
          <string>Load folder</string>
         </property>
         <property name="icon">
-         <iconset resource="icons.qrc">
+         <iconset>
           <normaloff>:/icons/openFolder</normaloff>:/icons/openFolder</iconset>
         </property>
         <property name="iconSize">
@@ -205,7 +205,7 @@
          <string>Clear playlist</string>
         </property>
         <property name="icon">
-         <iconset resource="icons.qrc">
+         <iconset>
           <normaloff>:/icons/clearList</normaloff>:/icons/clearList</iconset>
         </property>
         <property name="iconSize">
@@ -316,7 +316,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>667</width>
+     <width>665</width>
      <height>20</height>
     </rect>
    </property>
@@ -408,7 +408,7 @@
   </action>
   <action name="actionQuit_TepSonic">
    <property name="icon">
-    <iconset resource="icons.qrc">
+    <iconset>
      <normaloff>:/icons/quit</normaloff>:/icons/quit</iconset>
    </property>
    <property name="text">
@@ -420,7 +420,7 @@
   </action>
   <action name="actionAdd_file">
    <property name="icon">
-    <iconset resource="icons.qrc">
+    <iconset>
      <normaloff>:/icons/openFile</normaloff>:/icons/openFile</iconset>
    </property>
    <property name="text">
@@ -432,7 +432,7 @@
   </action>
   <action name="actionAdd_folder">
    <property name="icon">
-    <iconset resource="icons.qrc">
+    <iconset>
      <normaloff>:/icons/openFolder</normaloff>:/icons/openFolder</iconset>
    </property>
    <property name="text">
@@ -444,7 +444,7 @@
   </action>
   <action name="actionClear_playlist">
    <property name="icon">
-    <iconset resource="icons.qrc">
+    <iconset>
      <normaloff>:/icons/clearList</normaloff>:/icons/clearList</iconset>
    </property>
    <property name="text">
@@ -456,7 +456,7 @@
   </action>
   <action name="actionSave_playlist">
    <property name="icon">
-    <iconset resource="icons.qrc">
+    <iconset>
      <normaloff>:/icons/save</normaloff>:/icons/save</iconset>
    </property>
    <property name="text">
@@ -468,7 +468,7 @@
   </action>
   <action name="actionPrevious_track">
    <property name="icon">
-    <iconset resource="icons.qrc">
+    <iconset>
      <normaloff>:/icons/backward</normaloff>:/icons/backward</iconset>
    </property>
    <property name="text">
@@ -480,7 +480,7 @@
   </action>
   <action name="actionPlay_pause">
    <property name="icon">
-    <iconset resource="icons.qrc">
+    <iconset>
      <normaloff>:/icons/start</normaloff>:/icons/start</iconset>
    </property>
    <property name="text">
@@ -492,7 +492,7 @@
   </action>
   <action name="actionStop">
    <property name="icon">
-    <iconset resource="icons.qrc">
+    <iconset>
      <normaloff>:/icons/stop</normaloff>:/icons/stop</iconset>
    </property>
    <property name="text">
@@ -504,7 +504,7 @@
   </action>
   <action name="actionNext_track">
    <property name="icon">
-    <iconset resource="icons.qrc">
+    <iconset>
      <normaloff>:/icons/forward</normaloff>:/icons/forward</iconset>
    </property>
    <property name="text">
@@ -568,8 +568,8 @@
    </property>
   </action>
   <action name="actionAbout_TepSonic">
-  <property name="icon">
-    <iconset resource="icons.qrc">
+   <property name="icon">
+    <iconset>
      <normaloff>:/icons/about</normaloff>:/icons/about</iconset>
    </property>
    <property name="text">
@@ -578,7 +578,7 @@
   </action>
   <action name="actionAbout_Qt">
    <property name="icon">
-    <iconset resource="icons.qrc">
+    <iconset>
      <normaloff>:/icons/about</normaloff>:/icons/about</iconset>
    </property>
    <property name="text">
@@ -628,8 +628,6 @@
   <tabstop>loadFolderButton</tabstop>
   <tabstop>clearPlaylistButton</tabstop>
  </tabstops>
- <resources>
-  <include location="icons.qrc"/>
- </resources>
+ <resources/>
  <connections/>
 </ui>
