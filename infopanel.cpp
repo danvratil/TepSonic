@@ -30,15 +30,27 @@ InfoPanel::InfoPanel(QWidget *parent = 0)
 
     switch (mode) {
         case ErrorMode:
+        #ifdef WIN32
+            iconButton->setIcon(QIcon(":/icons/quit"));
+        #endif
+        #ifndef WIN32
             icon = new QIcon(":/icons/quit");
+        #endif
             break;
         case InfoMode:
+        #ifdef WIN32
+            iconButton->setIcon(QIcon(":/icons/quit"));
+        #endif
+        #ifndef WIN32
             icon = new QIcon(":/icons/about");
+        #endif
             break;
     }
 
     iconButton = new QPushButton(this);
-    iconButton->setIcon(*icon);
+    #ifndef WIN32
+        iconButton->setIcon(*icon);
+    #endif
     iconButton->setText("");
     layout->addWidget(iconButton);
 
