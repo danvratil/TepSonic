@@ -1,0 +1,56 @@
+ TEPSONIC
+==========
+ Author: Dan Vratil <vratil@progdansoft.com>
+ Contributors: Petr Los
+
+ TepSonic is just yet another audio player. It is based on Qt and as an audio 
+ backend it uses Phonon. For retrieving metadata from media files is used TagLib. 
+ This player should provide all the user-comfort functions such as collections, 
+ but it should not be as big as for example Amarok. 
+
+ This is just a development release - not everything is implementend and what is
+ implemented should be consider as unstable.
+ On http://git.progdan.homelinux.net/cgi-bin/cgit/cgit.cgi/tepsonic.git/about/ you can 
+ find a short list of intended features for first stable release and for following
+ releases.
+
+ Have fun with TepSonic!
+
+
+CONTENT
+--------
+ 1) Requirements
+ 2) Compiling
+ 3) Bugs
+ 4) Contributing
+ 
+
+1) REQUIREMENTS
+----------------
+ * Qt >= 4.5
+ * Phonon
+ * TagLib
+ * some music
+
+
+2) COMPILING
+-------------
+
+ qmake
+ make
+ make install
+
+
+3) BUGS
+--------
+
+ Currently, TepSonic is under heavy development and many things were not yet even implemented and most of the implemented stuff is still
+ considered unstable. 
+ Altough, if you find something you think that is a bug, please use bugizlla on http://bugzilla.progdan.homelinux.net
+
+
+4) CONTRIBUTING
+----------------
+ Please, feel free to contribute to TepSonic in any way. You can checkout current sources from git://progdan.homelinux.net/tepsonic.git and
+ start working on it. If you have any question, I'll be happy to answer it :-)
+
