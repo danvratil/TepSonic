@@ -242,7 +242,6 @@ void MainWindow::on_actionAdd_folder_triggered()
     // Fire file iterator thread
     tracksIterator = new TracksIterator(dirName);
     connect(tracksIterator,SIGNAL(fileFound(QString)),this,SLOT(addPlaylistItem(QString)));
-    connect(tracksIterator,SIGNAL(finished()),this,SLOT(launchPlaylistParser()));
     tracksIterator->start();
 }
 
