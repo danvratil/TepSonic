@@ -136,28 +136,28 @@ void PlaylistBrowser::addItem(QString file) //SLOT
     QModelIndex child;
     // Store the filename into the first column. The other columns will be filled by separated thread
     child = model()->index(index.row()+1, 0, index.parent());
-    model()->setData(child, QVariant(file), Qt::EditRole);
+    model()->setData(child, QVariant(file), Qt::DisplayRole);
     // Track number
     child = model()->index(index.row()+1, 1, index.parent());
-    model()->setData(child, QVariant(truckNumber), Qt::EditRole);
+    model()->setData(child, QVariant(truckNumber), Qt::DisplayRole);
     // Interpret
     child = model()->index(index.row()+1, 2, index.parent());
-    model()->setData(child, QVariant(QString(artist.toCString(true))), Qt::EditRole);
+    model()->setData(child, QVariant(QString(artist.toCString(true))), Qt::DisplayRole);
     // Track title
     child = model()->index(index.row()+1, 3, index.parent());
-    model()->setData(child, QVariant(QString(title.toCString(true))), Qt::EditRole);
+    model()->setData(child, QVariant(QString(title.toCString(true))), Qt::DisplayRole);
     // Album
     child = model()->index(index.row()+1, 4, index.parent());
-    model()->setData(child, QVariant(QString(album.toCString(true))), Qt::EditRole);
+    model()->setData(child, QVariant(QString(album.toCString(true))), Qt::DisplayRole);
     // Genre
     child = model()->index(index.row()+1, 5, index.parent());
-    model()->setData(child, QVariant(QString(genre.toCString(true))), Qt::EditRole);
+    model()->setData(child, QVariant(QString(genre.toCString(true))), Qt::DisplayRole);
     // Year
     child = model()->index(index.row()+1, 6, index.parent());
-    model()->setData(child, QVariant(year), Qt::EditRole);
+    model()->setData(child, QVariant(year), Qt::DisplayRole);
     // Total length
     child = model()->index(index.row()+1, 7, index.parent());
-    model()->setData(child, QVariant(hours.append(mins).append(secs)), Qt::EditRole);
+    model()->setData(child, QVariant(hours.append(mins).append(secs)), Qt::DisplayRole);
 }
 
 void PlaylistBrowser::removeItem(int row) //SLOT
