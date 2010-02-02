@@ -14,7 +14,7 @@ class PreferencesDialog : public QDialog {
     Q_OBJECT
     Q_DISABLE_COPY(PreferencesDialog)
 public:
-    PreferencesDialog(QSettings& settings, QWidget *parent = 0);
+    PreferencesDialog(QSettings* settings, QWidget *parent = 0);
     virtual ~PreferencesDialog();
 
 protected:
@@ -29,6 +29,7 @@ private slots:
 
 
 private slots:
+    void on_collectionsStorageEngine_combo_currentIndexChanged(QString newIndex);
     void on_buttonBox_rejected();
     void on_buttonBox_accepted();
 };

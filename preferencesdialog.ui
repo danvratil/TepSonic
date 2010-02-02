@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>509</width>
-    <height>364</height>
+    <width>505</width>
+    <height>360</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -41,15 +41,15 @@
         <number>0</number>
        </property>
        <property name="currentIndex">
-        <number>0</number>
+        <number>2</number>
        </property>
        <widget class="QWidget" name="collections_path">
         <property name="geometry">
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>489</width>
-          <height>224</height>
+          <width>491</width>
+          <height>223</height>
          </rect>
         </property>
         <attribute name="label">
@@ -74,6 +74,90 @@
            <property name="checked">
             <bool>true</bool>
            </property>
+          </widget>
+         </item>
+         <item>
+          <layout class="QGridLayout" name="gridLayout">
+           <item row="0" column="0">
+            <widget class="QLabel" name="label">
+             <property name="text">
+              <string>Collections storage engine</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="1">
+            <widget class="QComboBox" name="collectionsStorageEngine_combo">
+             <item>
+              <property name="text">
+               <string>SQLite</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>MySQL</string>
+              </property>
+             </item>
+            </widget>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <widget class="QGroupBox" name="mysqlStorageConfiguration_box">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
+           <property name="title">
+            <string>MySQL storage configuration</string>
+           </property>
+           <layout class="QGridLayout" name="gridLayout_2">
+            <item row="0" column="0">
+             <widget class="QLabel" name="mysqlServer_label">
+              <property name="text">
+               <string>Server:</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1">
+             <widget class="QLineEdit" name="mysqlServer_edit"/>
+            </item>
+            <item row="1" column="1">
+             <widget class="QLineEdit" name="mysqlUsername_edit"/>
+            </item>
+            <item row="1" column="0">
+             <widget class="QLabel" name="mysqlUsername_label">
+              <property name="text">
+               <string>Username:</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="2">
+             <widget class="QLabel" name="mysqlPassword_label">
+              <property name="text">
+               <string>Password:</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="2">
+             <widget class="QLabel" name="mysqlDatabase_label">
+              <property name="text">
+               <string>Database:</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="3">
+             <widget class="QLineEdit" name="mysqlDatabase_edit"/>
+            </item>
+            <item row="0" column="3">
+             <widget class="QLineEdit" name="mysqlPassword_edit">
+              <property name="text">
+               <string/>
+              </property>
+              <property name="echoMode">
+               <enum>QLineEdit::Password</enum>
+              </property>
+             </widget>
+            </item>
+           </layout>
           </widget>
          </item>
          <item>
@@ -116,6 +200,14 @@
         </layout>
        </widget>
        <widget class="QWidget" name="collections_path_tab">
+        <property name="geometry">
+         <rect>
+          <x>0</x>
+          <y>0</y>
+          <width>491</width>
+          <height>223</height>
+         </rect>
+        </property>
         <attribute name="label">
          <string>Collections path</string>
         </attribute>
@@ -137,8 +229,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>489</width>
-          <height>224</height>
+          <width>491</width>
+          <height>223</height>
          </rect>
         </property>
         <attribute name="label">
@@ -187,6 +279,19 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>enableCollectionsCheckbox</tabstop>
+  <tabstop>autoRebuildCheckbox</tabstop>
+  <tabstop>collectionsStorageEngine_combo</tabstop>
+  <tabstop>mysqlServer_edit</tabstop>
+  <tabstop>mysqlUsername_edit</tabstop>
+  <tabstop>mysqlPassword_edit</tabstop>
+  <tabstop>mysqlDatabase_edit</tabstop>
+  <tabstop>rebuildCollectionsNowBtn</tabstop>
+  <tabstop>pathSelect</tabstop>
+  <tabstop>rememberLastSessionCheckbox</tabstop>
+  <tabstop>buttonBox</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

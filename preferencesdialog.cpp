@@ -4,16 +4,29 @@
 #include <QTreeWidgetItem>
 #include <QDebug>
 
-PreferencesDialog::PreferencesDialog(QSettings& settings, QWidget *parent) :
+PreferencesDialog::PreferencesDialog(QSettings* settings, QWidget *parent) :
     QDialog(parent),
     _ui(new Ui::PreferencesDialog)
 {
     _ui->setupUi(this);
-    _settings = &settings;
+    _ui->toolBox->setCurrentIndex(0);
 
-    _ui->enableCollectionsCheckbox->setChecked(_settings->value("Collections/EnableCollections",true).toBool());
-    _ui->autoRebuildCheckbox->setChecked(_settings->value("Collections/AutoRebuildAfterStart",true).toBool());
-    _ui->rememberLastSessionCheckbox->setChecked(_settings->value("Preferences/RestoreSession",true).toBool());
+    _settings = settings;
+
+    _settings->beginGroup("Collections");
+    _ui->enableCollectionsCheckbox->setChecked(_settings->value("EnableCollections",true).toBool());
+    _ui->autoRebuildCheckbox->setChecked(_settings->value("AutoRebuildAfterStart",true).toBool());
+    _ui->collectionsStorageEngine_combo->setCurrentIndex(_settings->value("StorageEngine",0).toInt());
+    _settings->beginGroup("MySQL");
+    _ui->mysqlServer_edit->setText(_settings->value("Server","localhost").toString());
+    _ui->mysqlUsername_edit->setText(_settings->value("Username",QString()).toString());
+    _ui->mysqlPassword_edit->setText(_settings->value("Password",QString()).toString());
+    _ui->mysqlDatabase_edit->setText(_settings->value("Database",QString()).toString());
+    _settings->endGroup();
+    _settings->endGroup();
+    _settings->beginGroup("Preferences");
+    _ui->rememberLastSessionCheckbox->setChecked(_settings->value("RestoreSession",true).toBool());
+    _settings->endGroup();
 
 }
 
@@ -35,9 +48,21 @@ void PreferencesDialog::changeEvent(QEvent *e)
 
 void PreferencesDialog::on_buttonBox_accepted()
 {
-    _settings->setValue("Collections/EnableCollections",_ui->enableCollectionsCheckbox->isChecked());
-    _settings->setValue("Collections/AutoRebuildAfterStart",_ui->autoRebuildCheckbox->isChecked());
-    _settings->setValue("Preferences/RestoreSession",_ui->rememberLastSessionCheckbox->isChecked());
+    _settings->beginGroup("Collections");
+    _settings->setValue("EnableCollections",_ui->enableCollectionsCheckbox->isChecked());
+    _settings->setValue("AutoRebuildAfterStart",_ui->autoRebuildCheckbox->isChecked());
+    _settings->setValue("StorageEngine",_ui->collectionsStorageEngine_combo->currentIndex());
+    _settings->beginGroup("MySQL");
+    _settings->setValue("Server",_ui->mysqlServer_edit->text());
+    _settings->setValue("Username",_ui->mysqlUsername_edit->text());
+    // I'd like to have the password encrypted (but not hashed!) - I don't like password in plaintext...
+    _settings->setValue("Password",_ui->mysqlPassword_edit->text());
+    _settings->setValue("Database",_ui->mysqlDatabase_edit->text());
+    _settings->endGroup(); // MySQL group
+    _settings->endGroup(); // Collections group
+    _settings->beginGroup("Preferences");
+    _settings->setValue("RestoreSession",_ui->rememberLastSessionCheckbox->isChecked());
+    _settings->endGroup(); // Preferences group
 
     this->close();
 }
@@ -47,3 +72,11 @@ void PreferencesDialog::on_buttonBox_rejected()
     this->close();
 }
 
+void PreferencesDialog::on_collectionsStorageEngine_combo_currentIndexChanged(QString newIndex)
+{
+    if (newIndex == "MySQL") {
+        _ui->mysqlStorageConfiguration_box->setEnabled(true);
+    } else {
+        _ui->mysqlStorageConfiguration_box->setDisabled(true);
+    }
+}
