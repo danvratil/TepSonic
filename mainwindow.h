@@ -69,7 +69,7 @@ private:
 
     QIcon *appIcon;
 
-    QSettings settings;
+    QSettings *settings;
     Player *player;
 
     TracksIterator *tracksIterator;

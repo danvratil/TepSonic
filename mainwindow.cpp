@@ -29,6 +29,7 @@
 #include "collectionitem.h"
 
 #include <QMessageBox>
+#include <QDir>
 #include <QDesktopServices>
 #include <QUrl>
 #include <QCloseEvent>
@@ -37,6 +38,7 @@
 #include <QItemSelectionModel>
 #include <Phonon/SeekSlider>
 #include <Phonon/VolumeSlider>
+
 
 
 #include <QDebug>
@@ -112,9 +114,10 @@ MainWindow::MainWindow(QWidget *parent)
 
     canClose = false;
 
-    restoreGeometry(settings.value("Window/Geometry", saveGeometry()).toByteArray());
+    settings = new QSettings(QString(QDir::homePath()).append("/.tepsonic/main.conf"),QSettings::IniFormat,this);
+    restoreGeometry(settings->value("Window/Geometry", saveGeometry()).toByteArray());
 
-    if (settings.value("Collections/EnableCollections",true).toBool()==false)
+    if (settings->value("Collections/EnableCollections",true).toBool()==false)
         ui->collectionBrowser->hide();
 
     ui->actionLabel->hide();
@@ -141,7 +144,7 @@ MainWindow::MainWindow(QWidget *parent)
 
 MainWindow::~MainWindow()
 {
-    settings.setValue("Window/Geometry", saveGeometry());
+    settings->setValue("Window/Geometry", saveGeometry());
 
     delete ui;
 }
