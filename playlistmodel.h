@@ -65,7 +65,6 @@
                      const QModelIndex &parent = QModelIndex());
 
  private:
-     void setupModelData(const QStringList &lines, PlaylistItem *parent);
      PlaylistItem *getItem(const QModelIndex &index) const;
 
      PlaylistItem *rootItem;
