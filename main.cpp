@@ -24,7 +24,7 @@ int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
     a.setApplicationName("TepSonic");
-    a.setOrganizationDomain("ProgDan Soft");
+    a.setOrganizationName("Dan Vrátil");
     a.setApplicationVersion("0.8");
     MainWindow w;
     w.show();
