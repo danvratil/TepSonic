@@ -26,10 +26,8 @@
 #include <QVariant>
 #include <QVector>
 
-//TODO: sorting
-
- class CollectionItem
- {
+class CollectionItem
+{
  public:
      CollectionItem(const QVector<QVariant> &data, CollectionItem *parent = 0);
      ~CollectionItem();
@@ -50,5 +48,5 @@
      QList<CollectionItem*> childItems;
      QVector<QVariant> itemData;
      CollectionItem *parentItem;
- };
+};
 #endif // COLLECTIONITEM_H

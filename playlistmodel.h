@@ -34,8 +34,7 @@
      Q_OBJECT
 
  public:
-     PlaylistModel(const QStringList &headers, const QString &data,
-               QObject *parent = 0);
+     PlaylistModel(const QStringList &headers, QObject *parent = 0);
      ~PlaylistModel();
 
      QVariant data(const QModelIndex &index, int role) const;

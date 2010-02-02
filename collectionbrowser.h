@@ -36,9 +36,10 @@ class CollectionBrowser : public QTreeView
 
 
     public slots:
-        QModelIndex addItem(QString fileName);
-        void removeItem(int row);
-        void removeItems(int row, int count);
+        QModelIndex insertChild(QModelIndex index, QString title, QString filename = "");
+        QModelIndex insertRow(QModelIndex index, QString title, QString filename = "");
+        void removeRow(QModelIndex parent, int row);
+
 
 };
 

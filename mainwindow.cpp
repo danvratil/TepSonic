@@ -26,6 +26,8 @@
 #include "ui_mainwindow.h"
 #include "tracksiterator.h"
 
+#include "collectionitem.h"
+
 #include <QMessageBox>
 #include <QDesktopServices>
 #include <QUrl>
@@ -92,10 +94,19 @@ MainWindow::MainWindow(QWidget *parent)
                                        << tr("Genre")
                                        << tr("Year")
                                        << tr("Length");
-    playlistModel = new PlaylistModel(headers,QString(),this);
+    playlistModel = new PlaylistModel(headers,this);
     ui->playlistBrowser->setModel(playlistModel);
     // hide the first column (with filename)
     ui->playlistBrowser->hideColumn(0);
+
+    // Not translatable
+    headers = QStringList() << "title" << "filename";
+    collectionModel = new CollectionModel(headers,this);
+    ui->collectionBrowser->setModel(collectionModel);
+    // Hide the second column that contains real filename
+    ui->collectionBrowser->hideColumn(1);
+    // Hide the header
+    ui->collectionBrowser->header()->setHidden(true);
 
     selectionModel = ui->playlistBrowser->selectionModel();
 

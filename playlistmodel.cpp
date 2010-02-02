@@ -24,8 +24,7 @@
 #include "playlistitem.h"
 
 
-PlaylistModel::PlaylistModel(const QStringList &headers, const QString &data,
-                      QObject *parent)
+PlaylistModel::PlaylistModel(const QStringList &headers, QObject *parent)
      : QAbstractItemModel(parent)
 {
      QVector<QVariant> rootData;
@@ -33,7 +32,6 @@ PlaylistModel::PlaylistModel(const QStringList &headers, const QString &data,
          rootData << header;
 
      rootItem = new PlaylistItem(rootData);
-     setupModelData(data.split(QString("\n")), rootItem);
 }
 
 PlaylistModel::~PlaylistModel()

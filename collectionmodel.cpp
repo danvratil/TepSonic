@@ -17,15 +17,12 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Cambridge, MA 02110-1301, USA.
  */
-
 #include <QtGui>
 
 #include "collectionmodel.h"
 #include "collectionitem.h"
 
-
-CollectionModel::CollectionModel(const QStringList &headers, const QString &data,
-                      QObject *parent)
+CollectionModel::CollectionModel(const QStringList &headers, QObject *parent)
      : QAbstractItemModel(parent)
 {
      QVector<QVariant> rootData;
@@ -33,7 +30,6 @@ CollectionModel::CollectionModel(const QStringList &headers, const QString &data
          rootData << header;
 
      rootItem = new CollectionItem(rootData);
-     setupModelData(data.split(QString("\n")), rootItem);
 }
 
 CollectionModel::~CollectionModel()
@@ -76,8 +72,7 @@ CollectionItem *CollectionModel::getItem(const QModelIndex &index) const
      return rootItem;
 }
 
-QVariant CollectionModel::headerData(int section, Qt::Orientation orientation,
-                                int role) const
+QVariant CollectionModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
      if (orientation == Qt::Horizontal && role == Qt::DisplayRole)
          return rootItem->data(section);
@@ -87,7 +82,7 @@ QVariant CollectionModel::headerData(int section, Qt::Orientation orientation,
 
 QModelIndex CollectionModel::index(int row, int column, const QModelIndex &parent) const
 {
-    if (parent.isValid() && parent.column() != 0)
+     if (parent.isValid() && parent.column() != 0)
          return QModelIndex();
 
      CollectionItem *parentItem = getItem(parent);
@@ -97,7 +92,7 @@ QModelIndex CollectionModel::index(int row, int column, const QModelIndex &paren
          return createIndex(row, column, childItem);
      else
          return QModelIndex();
- }
+}
 
 bool CollectionModel::insertColumns(int position, int columns, const QModelIndex &parent)
 {
@@ -148,7 +143,7 @@ bool CollectionModel::removeColumns(int position, int columns, const QModelIndex
          removeRows(0, rowCount());
 
      return success;
- }
+}
 
 bool CollectionModel::removeRows(int position, int rows, const QModelIndex &parent)
 {
@@ -169,8 +164,7 @@ int CollectionModel::rowCount(const QModelIndex &parent) const
      return parentItem->childCount();
 }
 
-bool CollectionModel::setData(const QModelIndex &index, const QVariant &value,
-                         int role)
+bool CollectionModel::setData(const QModelIndex &index, const QVariant &value, int role)
 {
      if (role != Qt::EditRole)
          return false;
@@ -184,8 +178,7 @@ bool CollectionModel::setData(const QModelIndex &index, const QVariant &value,
      return result;
 }
 
-bool CollectionModel::setHeaderData(int section, Qt::Orientation orientation,
-                               const QVariant &value, int role)
+bool CollectionModel::setHeaderData(int section, Qt::Orientation orientation, const QVariant &value, int role)
 {
      if (role != Qt::EditRole || orientation != Qt::Horizontal)
          return false;
@@ -196,56 +189,4 @@ bool CollectionModel::setHeaderData(int section, Qt::Orientation orientation,
          emit headerDataChanged(orientation, section, section);
 
      return result;
-}
-
-void CollectionModel::setupModelData(const QStringList &lines, CollectionItem *parent)
-{
-     QList<CollectionItem*> parents;
-     QList<int> indentations;
-     parents << parent;
-     indentations << 0;
-
-     int number = 0;
-
-     while (number < lines.count()) {
-         int position = 0;
-         while (position < lines[number].length()) {
-             if (lines[number].mid(position, 1) != " ")
-                 break;
-             position++;
-         }
-
-         QString lineData = lines[number].mid(position).trimmed();
-
-         if (!lineData.isEmpty()) {
-             // Read the column data from the rest of the line.
-             QStringList columnStrings = lineData.split("\t", QString::SkipEmptyParts);
-             QVector<QVariant> columnData;
-             for (int column = 0; column < columnStrings.count(); ++column)
-                 columnData << columnStrings[column];
-
-             if (position > indentations.last()) {
-                 // The last child of the current parent is now the new parent
-                 // unless the current parent has no children.
-
-                 if (parents.last()->childCount() > 0) {
-                     parents << parents.last()->child(parents.last()->childCount()-1);
-                     indentations << position;
-                 }
-             } else {
-                 while (position < indentations.last() && parents.count() > 0) {
-                     parents.pop_back();
-                     indentations.pop_back();
-                 }
-             }
-
-             // Append a new item to the current parent's list of children.
-             CollectionItem *parent = parents.last();
-             parent->insertChildren(parent->childCount(), 1, rootItem->columnCount());
-             for (int column = 0; column < columnData.size(); ++column)
-                 parent->child(parent->childCount() - 1)->setData(column, columnData[column]);
-         }
-
-         number++;
-     }
 }

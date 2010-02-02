@@ -27,6 +27,7 @@
 #include <QItemSelectionModel>
 
 #include "playlistmodel.h"
+#include "collectionmodel.h"
 #include "infopanel.h"
 #include "player.h"
 #include "tracksiterator.h"
@@ -59,6 +60,7 @@ private:
     QActionGroup *repeatPlaybackGroup;
 
     PlaylistModel *playlistModel;
+    CollectionModel *collectionModel;
 
     QItemSelectionModel *selectionModel;
 

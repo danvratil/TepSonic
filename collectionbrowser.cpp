@@ -54,17 +54,7 @@ void CollectionBrowser::dragMoveEvent(QDragMoveEvent* event)
  // Drop event (item is dropped on the widget)
 void CollectionBrowser::dropEvent(QDropEvent* event)
 {
-    if (event->mimeData()->hasUrls()) {
-        QList<QUrl> urls = event->mimeData()->urls();
-        for (int i = 0; i < urls.size(); i++) {
-            if (QFileInfo(urls.at(i).toLocalFile()).isFile()) {
-                addItem(urls.at(i).toLocalFile());
-            }
-        }
-        event->setAccepted(true);
-    } else {
-        event->setAccepted(false);
-    }
+    qDebug() << "CollectionBrowser::dropEvent() : TODO!!!";
 }
 
 void CollectionBrowser::keyPressEvent(QKeyEvent* event)
@@ -72,47 +62,47 @@ void CollectionBrowser::keyPressEvent(QKeyEvent* event)
     // When 'delete' pressed, remove selected row from collections
     if (event->matches(QKeySequence::Delete)) {
         QModelIndex index = selectionModel()->currentIndex();
-        removeItem(index.row());
+        removeRow(index.parent(),index.row());
         //model()->removeRow(index.row(),index.parent());
     }
 
 }
 
 
-QModelIndex CollectionBrowser::addItem(QString file) //SLOT
+QModelIndex CollectionBrowser::insertChild(QModelIndex index, QString title, QString filename)
 {
-    // Select the root item
-    QModelIndex index = selectionModel()->currentIndex();
-
-    // Insert new row
-    if (!model()->insertRow(index.row()+1, index.parent()))
+    if (!model()->insertRow(0, index))
         return QModelIndex();
 
-    // Child item
     QModelIndex child;
-    // Store the filename into the first column. The other columns will be filled by separated thread
-    child = model()->index(index.row()+1, 0, index.parent());
-    model()->setData(child, QVariant(file), Qt::EditRole);
-    // Default track number
-    child = model()->index(index.row()+1, 1, index.parent());
-    model()->setData(child, QVariant(0), Qt::EditRole);
-    // Extract filename from the path and insert it as a trackname
-    child = model()->index(index.row()+1, 3, index.parent());
-    model()->setData(child, QVariant(QFileInfo(file).fileName()),Qt::EditRole);
+    // Some title like artist/album/track name
+    child = model()->index(0, 0, index);
+    model()->setData(child, title);
+    // Real file name (in hidden column)
+    child = model()->index(0, 1, index);
+    model()->setData(child, filename);
 
     return child;
 }
 
-void CollectionBrowser::removeItem(int row) //SLOT
+
+QModelIndex CollectionBrowser::insertRow(QModelIndex index, QString title, QString filename)
 {
-        model()->removeRow(row,QModelIndex());
+    if (!model()->insertRow(index.row()+1, index.parent()))
+        return QModelIndex();
+
+    QModelIndex child;
+    // Some title like artist/album/track name
+    child = model()->index(index.row()+1, 0, index.parent());
+    model()->setData(child, title, Qt::EditRole);
+    // Readl file name (in hidden column)
+    child = model()->index(index.row()+1, 1, index.parent());
+    model()->setData(child, filename, Qt::EditRole);
+
+    return model()->index(index.row()+1,0,index.parent());
 }
 
-void CollectionBrowser::removeItems(int row, int count) // SLOT
+void CollectionBrowser::removeRow(QModelIndex parent, int row)
 {
-    /* When row removed the following row takes its place and therefor by deleting row number "row" for "count"-times
-       all the lines are removed */
-    for (int i = 0; i<count; i++) {
-        removeItem(row);
-    }
-}
+    model()->removeRow(parent.child(row,0).row(), parent);
+ }
