@@ -3,6 +3,7 @@
 
 #include <QtGui/QDialog>
 
+#include <QDirModel>
 #include <QTreeWidgetItem>
 #include <QSettings>
 
@@ -29,6 +30,8 @@ private slots:
 
 
 private slots:
+    void on_addPathButton_clicked();
+    void on_removePathButton_clicked();
     void on_collectionsStorageEngine_combo_currentIndexChanged(QString newIndex);
     void on_buttonBox_rejected();
     void on_buttonBox_accepted();

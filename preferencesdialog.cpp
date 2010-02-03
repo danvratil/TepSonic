@@ -1,7 +1,7 @@
 #include "preferencesdialog.h"
 #include "ui_preferencesdialog.h"
 
-#include <QTreeWidgetItem>
+#include <QFileDialog>
 #include <QDebug>
 
 PreferencesDialog::PreferencesDialog(QSettings* settings, QWidget *parent) :
@@ -16,6 +16,7 @@ PreferencesDialog::PreferencesDialog(QSettings* settings, QWidget *parent) :
     _settings->beginGroup("Collections");
     _ui->enableCollectionsCheckbox->setChecked(_settings->value("EnableCollections",true).toBool());
     _ui->autoRebuildCheckbox->setChecked(_settings->value("AutoRebuildAfterStart",true).toBool());
+    _ui->pathsList->addItems(_settings->value("SourcePaths",QStringList()).toStringList());
     _ui->collectionsStorageEngine_combo->setCurrentIndex(_settings->value("StorageEngine",0).toInt());
     _settings->beginGroup("MySQL");
     _ui->mysqlServer_edit->setText(_settings->value("Server","localhost").toString());
@@ -51,6 +52,11 @@ void PreferencesDialog::on_buttonBox_accepted()
     _settings->beginGroup("Collections");
     _settings->setValue("EnableCollections",_ui->enableCollectionsCheckbox->isChecked());
     _settings->setValue("AutoRebuildAfterStart",_ui->autoRebuildCheckbox->isChecked());
+    QStringList items;
+    for (int i = 0; i < _ui->pathsList->count(); i++) {
+        items.append(_ui->pathsList->item(i)->text());
+    }
+    _settings->setValue("SourcePaths",items);
     _settings->setValue("StorageEngine",_ui->collectionsStorageEngine_combo->currentIndex());
     _settings->beginGroup("MySQL");
     _settings->setValue("Server",_ui->mysqlServer_edit->text());
@@ -78,5 +84,21 @@ void PreferencesDialog::on_collectionsStorageEngine_combo_currentIndexChanged(QS
         _ui->mysqlStorageConfiguration_box->setEnabled(true);
     } else {
         _ui->mysqlStorageConfiguration_box->setDisabled(true);
+    }
+}
+
+void PreferencesDialog::on_removePathButton_clicked()
+{
+    _ui->pathsList->takeItem(_ui->pathsList->currentRow());
+}
+
+void PreferencesDialog::on_addPathButton_clicked()
+{
+    QString dirName = QFileDialog::getExistingDirectory(this,
+                                                        tr("Add directory"),
+                                                        QString(),
+                                                        QFileDialog::ShowDirsOnly);
+    if(!dirName.isEmpty()) {
+        _ui->pathsList->addItem(dirName);
     }
 }
