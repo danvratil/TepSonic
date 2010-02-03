@@ -53,6 +53,12 @@
      bool insertRows(int position, int rows, const QModelIndex &parent = QModelIndex());
      bool removeRows(int position, int rows, const QModelIndex &parent = QModelIndex());
 
+     QModelIndex addChild(QModelIndex index, QString title, QString filename = "");
+     QModelIndex addRow(QModelIndex index, QString title, QString filename = "");
+
+ public slots:
+     void buildCollection();
+
  private:
      CollectionItem *getItem(const QModelIndex &index) const;
 

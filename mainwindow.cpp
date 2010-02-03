@@ -49,6 +49,8 @@ MainWindow::MainWindow(QWidget *parent)
     // Initialize pseudo-random numbers generator
     srand(time(NULL));
 
+    canClose = false;
+
     ui->setupUi(this);
 
     appIcon = new QIcon(":/icons/mainIcon");
@@ -100,6 +102,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->playlistBrowser->setModel(playlistModel);
     // hide the first column (with filename)
     ui->playlistBrowser->hideColumn(0);
+    selectionModel = ui->playlistBrowser->selectionModel();
 
     // Not translatable
     headers = QStringList() << "title" << "filename";
@@ -110,15 +113,17 @@ MainWindow::MainWindow(QWidget *parent)
     // Hide the header
     ui->collectionBrowser->header()->setHidden(true);
 
-    selectionModel = ui->playlistBrowser->selectionModel();
-
-    canClose = false;
-
     settings = new QSettings(QString(QDir::homePath()).append("/.tepsonic/main.conf"),QSettings::IniFormat,this);
     restoreGeometry(settings->value("Window/Geometry", saveGeometry()).toByteArray());
 
-    if (settings->value("Collections/EnableCollections",true).toBool()==false)
+    collectionsManager = new CollectionsManager(settings,this);
+    connect(collectionsManager,SIGNAL(collectionChanged()),collectionModel,SLOT(buildCollection()));
+
+    if (settings->value("Collections/EnableCollections",true).toBool()==false) {
         ui->collectionBrowser->hide();
+    } else {
+        collectionModel->buildCollection();
+    }
 
     ui->actionLabel->hide();
     ui->actionProgress->hide();
@@ -227,7 +232,7 @@ void MainWindow::on_actionAdd_file_triggered()
                                                           "",
                                                           tr("Supported audio files (*.mp3 *.wav *.ogg *.flac);;All files (*.*)"));
     for (int file = 0; file < fileNames.count(); file++) {
-        ui->playlistBrowser->addItem(fileNames.at(file));
+        playlistModel->addItem(fileNames.at(file));
     }
 }
 
@@ -236,13 +241,14 @@ void MainWindow::on_actionPreferences_triggered()
 {
     // Show preferences dialog
     PreferencesDialog *prefDlg = new PreferencesDialog(settings,this);
+    connect(prefDlg,SIGNAL(rebuildCollectionsRequested()),collectionsManager,SLOT(updateCollections()));
     prefDlg->exec();
 
 }
 
 void MainWindow::on_actionClear_playlist_triggered()
 {
-    ui->playlistBrowser->removeItems(0,playlistModel->rowCount());
+    playlistModel->removeRows(0,playlistModel->rowCount(QModelIndex()),QModelIndex());
 }
 
 void MainWindow::on_actionAdd_folder_triggered()
@@ -254,7 +260,7 @@ void MainWindow::on_actionAdd_folder_triggered()
                                                         QFileDialog::ShowDirsOnly);
 
     // Fire file iterator thread
-    tracksIterator = new TracksIterator(dirName);
+    tracksIterator = new TracksIterator(dirName,playlistModel);
     connect(tracksIterator,SIGNAL(fileFound(QString)),this,SLOT(addPlaylistItem(QString)));
     tracksIterator->start();
 }
@@ -461,5 +467,5 @@ void MainWindow::on_actionNext_track_triggered()
 
 void MainWindow::addPlaylistItem(QString filename)
 {
-    ui->playlistBrowser->addItem(filename);
+    playlistModel->addItem(filename);
 }

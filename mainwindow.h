@@ -31,6 +31,7 @@
 #include "infopanel.h"
 #include "player.h"
 #include "tracksiterator.h"
+#include "collectionsmanager.h"
 
 namespace Ui
 {
@@ -61,6 +62,8 @@ private:
 
     PlaylistModel *playlistModel;
     CollectionModel *collectionModel;
+
+    CollectionsManager *collectionsManager;
 
     QItemSelectionModel *selectionModel;
 

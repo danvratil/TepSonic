@@ -102,3 +102,8 @@ void PreferencesDialog::on_addPathButton_clicked()
         _ui->pathsList->addItem(dirName);
     }
 }
+
+void PreferencesDialog::on_rebuildCollectionsNowBtn_clicked()
+{
+    emit rebuildCollectionsRequested();
+}

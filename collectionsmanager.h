@@ -1,6 +1,5 @@
-/*
- * TEPSONIC
- * Copyright 2009 Dan Vratil <vratil@progdansoft.com>
+/* TEPSONIC
+ * Copyright 2010 Dan Vratil <vratil@progdansoft.com>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -17,32 +16,43 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Cambridge, MA 02110-1301, USA.
  */
 
-#ifndef COLLECTIONBROWSER_H
-#define COLLECTIONBROWSER_H
 
-#include <QTreeView>
+#ifndef COLLECTIONSMANAGER_H
+#define COLLECTIONSMANAGER_H
 
-class CollectionBrowser : public QTreeView
+#include <QObject>
+#include <QSettings>
+
+#include <QtSql/QSqlDatabase>
+
+class CollectionsUpdater;
+
+class CollectionsManager : public QObject
 {
+    Q_OBJECT
+    Q_ENUMS(DBType);
     public:
-        CollectionBrowser(QWidget* = 0);
-        ~CollectionBrowser();
+        enum DBType { SQLite, MySQL };
+        CollectionsManager(QSettings *settings, QObject *parent = 0);
+        ~CollectionsManager();
 
-    protected:
-        void dropEvent(QDropEvent*);
-        void dragEnterEvent(QDragEnterEvent*);
-        void dragMoveEvent(QDragMoveEvent*);
-        void keyPressEvent(QKeyEvent*);
-
+        QSqlDatabase sqlDb;
 
     public slots:
-        QModelIndex insertChild(QModelIndex index, QString title, QString filename = "");
-        QModelIndex insertRow(QModelIndex index, QString title, QString filename = "");
-        void removeRow(QModelIndex parent, int row);
+        void updateCollections();
+        void collectionsUpdated(bool updated);
 
-        void buildCollection();
+    signals:
+        void collectionChanged();
+
+    private:
+        QSettings *_settings;
+
+        CollectionsUpdater *_updater;
+
+        void initDb(CollectionsManager::DBType dbType);
 
 
 };
 
-#endif // COLLECTIONBROWSER_H
+#endif // COLLECTIONSMANAGER_H

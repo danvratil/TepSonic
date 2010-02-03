@@ -19,6 +19,7 @@
 
 #include "collectionbrowser.h"
 
+#include <QtSql/QSqlQuery>
 
 #include <QDropEvent>
 #include <QDebug>
@@ -54,7 +55,9 @@ void CollectionBrowser::dragMoveEvent(QDragMoveEvent* event)
  // Drop event (item is dropped on the widget)
 void CollectionBrowser::dropEvent(QDropEvent* event)
 {
-    qDebug() << "CollectionBrowser::dropEvent() : TODO!!!";
+    Q_UNUSED(event);
+
+    qDebug() << "err: CollectionBrowser::dropEvent(): stub";
 }
 
 void CollectionBrowser::keyPressEvent(QKeyEvent* event)
@@ -62,47 +65,11 @@ void CollectionBrowser::keyPressEvent(QKeyEvent* event)
     // When 'delete' pressed, remove selected row from collections
     if (event->matches(QKeySequence::Delete)) {
         QModelIndex index = selectionModel()->currentIndex();
-        removeRow(index.parent(),index.row());
-        //model()->removeRow(index.row(),index.parent());
+        model()->removeRow(selectionModel()->currentIndex().row(),selectionModel()->currentIndex().parent());
     }
 
 }
 
 
-QModelIndex CollectionBrowser::insertChild(QModelIndex index, QString title, QString filename)
-{
-    if (!model()->insertRow(0, index))
-        return QModelIndex();
-
-    QModelIndex child;
-    // Some title like artist/album/track name
-    child = model()->index(0, 0, index);
-    model()->setData(child, title);
-    // Real file name (in hidden column)
-    child = model()->index(0, 1, index);
-    model()->setData(child, filename);
-
-    return child;
-}
 
 
-QModelIndex CollectionBrowser::insertRow(QModelIndex index, QString title, QString filename)
-{
-    if (!model()->insertRow(index.row()+1, index.parent()))
-        return QModelIndex();
-
-    QModelIndex child;
-    // Some title like artist/album/track name
-    child = model()->index(index.row()+1, 0, index.parent());
-    model()->setData(child, title, Qt::EditRole);
-    // Readl file name (in hidden column)
-    child = model()->index(index.row()+1, 1, index.parent());
-    model()->setData(child, filename, Qt::EditRole);
-
-    return model()->index(index.row()+1,0,index.parent());
-}
-
-void CollectionBrowser::removeRow(QModelIndex parent, int row)
-{
-    model()->removeRow(parent.child(row,0).row(), parent);
- }

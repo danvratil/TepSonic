@@ -22,6 +22,8 @@
 #include "collectionmodel.h"
 #include "collectionitem.h"
 
+#include <QtSql/QSqlQuery>
+
 CollectionModel::CollectionModel(const QStringList &headers, QObject *parent)
      : QAbstractItemModel(parent)
 {
@@ -189,4 +191,55 @@ bool CollectionModel::setHeaderData(int section, Qt::Orientation orientation, co
          emit headerDataChanged(orientation, section, section);
 
      return result;
+}
+
+QModelIndex CollectionModel::addChild(QModelIndex root, QString title, QString filename)
+{
+    if (!insertRow(0, root))
+        return QModelIndex();
+
+    QModelIndex child;
+    // Some title like artist/album/track name
+    child = index(0, 0, root);
+    setData(child, title);
+    // Real file name (in hidden column)
+    child = index(0, 1, root);
+    setData(child, filename);
+
+    return index(0,0,root);
+}
+
+
+QModelIndex CollectionModel::addRow(QModelIndex root, QString title, QString filename)
+{
+    if (!insertRow(root.row()+1, root.parent()))
+        return QModelIndex();
+
+    QModelIndex child;
+    // Some title like artist/album/track name
+    child = index(root.row()+1, 0, root.parent());
+    setData(child, title, Qt::EditRole);
+    // Readl file name (in hidden column)
+    child = index(root.row()+1, 1, root.parent());
+    setData(child, filename, Qt::EditRole);
+
+    return index(root.row()+1,0,root.parent());
+}
+
+void CollectionModel::buildCollection()
+{
+    QModelIndex albumsParent;
+    QModelIndex tracksParent;
+    QSqlQuery artistsQuery("SELECT `artist` FROM `Tracks` GROUP BY `artist` ORDER BY `artist` DESC");
+    while (artistsQuery.next()) {
+        albumsParent = addRow(QModelIndex(),artistsQuery.value(0).toString(),QString());
+        QSqlQuery albumsQuery("SELECT `album` FROM `Tracks` WHERE `artist`='"+artistsQuery.value(0).toString()+"' GROUP BY `album` ORDER BY `album` DESC;");
+        while (albumsQuery.next()) {
+            tracksParent = addChild(albumsParent,albumsQuery.value(0).toString(),QString());
+            QSqlQuery tracksQuery("SELECT `title`,`filename` FROM `Tracks` WHERE `album`='"+albumsQuery.value(0).toString()+"' AND `artist`='"+artistsQuery.value(0).toString()+"' ORDER BY `trackNo` DESC;");
+            while (tracksQuery.next()) {
+                addChild(tracksParent,tracksQuery.value(0).toString(),tracksQuery.value(1).toString());
+            }
+        }
+    }
 }

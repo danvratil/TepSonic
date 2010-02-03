@@ -18,6 +18,9 @@ public:
     PreferencesDialog(QSettings* settings, QWidget *parent = 0);
     virtual ~PreferencesDialog();
 
+signals:
+    void rebuildCollectionsRequested();
+
 protected:
     virtual void changeEvent(QEvent *e);
 
@@ -30,6 +33,7 @@ private slots:
 
 
 private slots:
+    void on_rebuildCollectionsNowBtn_clicked();
     void on_addPathButton_clicked();
     void on_removePathButton_clicked();
     void on_collectionsStorageEngine_combo_currentIndexChanged(QString newIndex);
