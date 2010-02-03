@@ -18,6 +18,7 @@
  */
 
 #include "tracksiterator.h"
+#include "playlistmodel.h"
 
 #include <QDir>
 #include <QDirIterator>
@@ -25,9 +26,11 @@
 
 #include <QDebug>
 
-TracksIterator::TracksIterator(QString  topDir)
+
+TracksIterator::TracksIterator(QString  topDir, PlaylistModel *model)
 {
-    rootDir = topDir;
+    _rootDir = topDir;
+    _model = model;
 }
 
 void TracksIterator::run()
@@ -37,7 +40,7 @@ void TracksIterator::run()
      */
     QStringList filters;
     filters << "*.mp3" << "*.mp4" << "*.wav" << "*.flac";
-    QDir dirlist(rootDir);
+    QDir dirlist(_rootDir);
     dirlist.setNameFilters(filters);
     QFileInfo fileInfo;
 
@@ -45,7 +48,7 @@ void TracksIterator::run()
     while (dirIterator.hasNext()) {
         fileInfo = dirIterator.fileInfo();
         if (fileInfo.isFile()) {
-            emit fileFound(fileInfo.absoluteFilePath());
+            _model->addItem(fileInfo.filePath());
         }
         dirIterator.next();
     }

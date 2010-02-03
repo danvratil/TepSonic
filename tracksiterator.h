@@ -23,16 +23,19 @@
 #include <QObject>
 #include <QThread>
 
+class PlaylistModel;
+
 class TracksIterator : public QThread
 {
     Q_OBJECT
 
     public:
-        TracksIterator(QString topDir);
+        TracksIterator(QString topDir, PlaylistModel *model);
         void run();
 
     private:
-        QString rootDir;
+        QString _rootDir;
+        PlaylistModel *_model;
 
     signals:
         void fileFound(QString filename);

@@ -20,6 +20,11 @@
 
 #include <QtGui>
 
+#include <taglib/taglib.h>
+#include <taglib/fileref.h>
+#include <taglib/tag.h>
+#include <taglib/tstring.h>
+
 #include "playlistmodel.h"
 #include "playlistitem.h"
 
@@ -194,4 +199,89 @@ bool PlaylistModel::setHeaderData(int section, Qt::Orientation orientation,
          emit headerDataChanged(orientation, section, section);
 
      return result;
+}
+
+void PlaylistModel::addItem(QString file)
+{
+    // Select the root item
+    QModelIndex root;
+
+    // Insert new row
+    if (!insertRow(root.row()+1, root.parent()))
+        return;
+
+    /**
+     * TAGLIB comes here
+     */
+    TagLib::FileRef f(file.toUtf8());
+    int truckNumber = f.tag()->track();
+    TagLib::String artist = f.tag()->artist();
+    TagLib::String title = f.tag()->title();
+    TagLib::String album = f.tag()->album();
+    TagLib::String genre = f.tag()->genre();
+    int year = f.tag()->year();
+    int totalTimeNum = f.audioProperties()->length();
+    QString hours,mins,secs;
+    int iHours, iMins, iSecs;
+    // Only if time is longed then 1 hour the hours will be prepended to the time
+    if (totalTimeNum>3600) {
+        iHours = totalTimeNum/3600;
+    } else {
+        iHours = 0;
+    }
+    iMins = (totalTimeNum - iHours*3600)/60;
+    iSecs = totalTimeNum - iHours*3600 - iMins*60;
+    if (iHours>0) {
+        hours = QString::number(iHours).append(":");
+        if (iHours<10) {
+            hours.prepend("0");
+        }
+    } else {
+        hours = "";
+    }
+    mins = QString::number(iMins).append(":");
+    if (iMins<10) {
+        mins.prepend("0");
+    }
+    secs = QString::number(iSecs);
+    if (iSecs<10) {
+        secs.prepend("0");
+    }
+
+    // Child item
+    QModelIndex child;
+    // Store the filename into the first column. The other columns will be filled by separated thread
+    child = index(root.row()+1, 0, root.parent());
+    setData(child, QVariant(file), Qt::EditRole);
+    // Track number
+    child = index(root.row()+1, 1, root.parent());
+    setData(child, QVariant(truckNumber), Qt::EditRole);
+    // Interpret
+    child = index(root.row()+1, 2, root.parent());
+    setData(child, QVariant(QString(artist.toCString(true))), Qt::EditRole);
+    // Track title
+    child = index(root.row()+1, 3, root.parent());
+    setData(child, QVariant(QString(title.toCString(true))), Qt::EditRole);
+    // Album
+    child = index(root.row()+1, 4, root.parent());
+    setData(child, QVariant(QString(album.toCString(true))), Qt::EditRole);
+    // Genre
+    child = index(root.row()+1, 5, root.parent());
+    setData(child, QVariant(QString(genre.toCString(true))), Qt::EditRole);
+    // Year
+    child = index(root.row()+1, 6, root.parent());
+    setData(child, QVariant(year), Qt::EditRole);
+    // Total length
+    child = index(root.row()+1, 7, root.parent());
+    setData(child, QVariant(hours.append(mins).append(secs)), Qt::EditRole);
+}
+
+void PlaylistModel::removeItem(int index)
+{
+    removeRow(index,QModelIndex());
+}
+
+void PlaylistModel::removeItems(int first, int count)
+{
+    removeRows(first,count,QModelIndex());
 }

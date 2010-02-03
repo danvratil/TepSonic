@@ -42,12 +42,6 @@ class PlaylistBrowser : public QTreeView
         void dragMoveEvent(QDragMoveEvent*);
         void keyPressEvent(QKeyEvent*);
 
-
-    public slots:
-        void addItem(QString);
-        void removeItem(int);
-        void removeItems(int, int);
-
 };
 
 #endif // PLAYLISTBROWSER_H
