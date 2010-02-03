@@ -97,7 +97,7 @@ void PlaylistBrowser::addItem(QString file) //SLOT
     /**
      * TAGLIB comes here
      */
-    TagLib::FileRef f(file.toLatin1());
+    TagLib::FileRef f(file.toUtf8());
     int truckNumber = f.tag()->track();
     TagLib::String artist = f.tag()->artist();
     TagLib::String title = f.tag()->title();
