@@ -29,9 +29,7 @@ class CollectionBrowser : public QTreeView
         ~CollectionBrowser();
 
     protected:
-        void dropEvent(QDropEvent*);
-        void dragEnterEvent(QDragEnterEvent*);
-        void dragMoveEvent(QDragMoveEvent*);
+        void startDrag(Qt::DropActions);
         void keyPressEvent(QKeyEvent*);
 
 

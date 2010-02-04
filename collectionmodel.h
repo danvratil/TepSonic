@@ -56,6 +56,9 @@
      QModelIndex addChild(QModelIndex index, QString title, QString filename = "");
      QModelIndex addRow(QModelIndex index, QString title, QString filename = "");
 
+ protected:
+     Qt::DropActions supportedDropActions() const;
+
  public slots:
      void buildCollection();
 

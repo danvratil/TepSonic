@@ -57,17 +57,18 @@ void PlaylistBrowser::dragMoveEvent(QDragMoveEvent* event)
  // Drop event (item is dropped on the widget)
 void PlaylistBrowser::dropEvent(QDropEvent* event)
 {
-    if (event->mimeData()->hasUrls()) {
-        QList<QUrl> urls = event->mimeData()->urls();
-        for (int i = 0; i < urls.size(); i++) {
-            if (QFileInfo(urls.at(i).toLocalFile()).isFile()) {
-                static_cast<PlaylistModel*>(model())->addItem(urls.at(i).toLocalFile());
-            }
-        }
-        event->setAccepted(true);
-    } else {
-        event->setAccepted(false);
+    event->acceptProposedAction();
+    QByteArray encodedData = event->mimeData()->data("data/tepsonic-tracks");
+    QDataStream stream(&encodedData, QIODevice::ReadOnly);
+    QStringList newItems;
+
+    while (!stream.atEnd()) {
+        QString text;
+        stream >> text;
+        static_cast<PlaylistModel*>(model())->addItem(text);
     }
+
+    event->setAccepted(true);
 }
 
 void PlaylistBrowser::keyPressEvent(QKeyEvent* event)

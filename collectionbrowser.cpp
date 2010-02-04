@@ -31,34 +31,62 @@
 CollectionBrowser::CollectionBrowser(QWidget* parent):
           QTreeView(parent)
 {
-    setAcceptDrops(true);
+    setAcceptDrops(false);
+    setDragDropMode(DragOnly);
+
 }
 
 CollectionBrowser::~CollectionBrowser()
 {
 }
 
-// Event: item is dragged over the widget
-void CollectionBrowser::dragEnterEvent(QDragEnterEvent *event)
+void CollectionBrowser::startDrag(Qt::DropActions)
 {
-         // Just accept the proposed action
-        event->acceptProposedAction();
+    QModelIndex index = currentIndex().sibling(currentIndex().row(),1);
+
+    QString filename;
+
+    QMimeData *mimeData = new QMimeData;
+    QByteArray encodedData;
+    QDataStream stream(&encodedData, QIODevice::WriteOnly);;
+
+
+    if (index.data().toString().isEmpty()) {
+        // Artist is being dragged (child of the dragged item is empty)
+        if (index.sibling(index.row(),0).child(0,1).data().toString().isEmpty()) {
+            int album = 0;
+            QModelIndex artistIndex = index.sibling(index.row(),0);
+            QModelIndex albumIndex = artistIndex.child(album,0);
+            while (albumIndex.sibling(album,0).isValid()) {
+                QModelIndex trackIndex = albumIndex.sibling(album,0).child(0,0);
+                int row = 0;
+                while (trackIndex.sibling(row,0).isValid()) {
+                    stream << trackIndex.sibling(row,1).data().toString();
+                    row++;
+                }
+                album++;
+            }
+        // Album is being dragged
+        } else {
+            QModelIndex albumIndex = index.sibling(index.row(),0);
+            QModelIndex trackIndex = albumIndex.child(0,0);
+            int row = 0;
+            while (trackIndex.sibling(row,0).isValid()) {
+                stream << trackIndex.sibling(row,1).data().toString();
+                row++;
+            }
+        }
+    // Single track is being dragged
+    } else {
+        stream << index.data().toString();
+    }
+
+    mimeData->setData("data/tepsonic-tracks", encodedData);
+    QDrag *drag = new QDrag(this);
+    drag->setMimeData(mimeData);
+    drag->exec(Qt::CopyAction);
 }
 
-// Event: drag has moved above the widget
-void CollectionBrowser::dragMoveEvent(QDragMoveEvent* event)
-{
-        // Again - accept the proposed action
-        event->acceptProposedAction();
-}
-
- // Drop event (item is dropped on the widget)
-void CollectionBrowser::dropEvent(QDropEvent* event)
-{
-    Q_UNUSED(event);
-
-    qDebug() << "err: CollectionBrowser::dropEvent(): stub";
-}
 
 void CollectionBrowser::keyPressEvent(QKeyEvent* event)
 {

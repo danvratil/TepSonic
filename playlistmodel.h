@@ -63,6 +63,7 @@
      bool removeRows(int position, int rows,
                      const QModelIndex &parent = QModelIndex());
 
+
  public slots:
     void addItem(QString file);
     void removeItem(int index);

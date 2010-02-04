@@ -32,6 +32,7 @@ CollectionModel::CollectionModel(const QStringList &headers, QObject *parent)
          rootData << header;
 
      rootItem = new CollectionItem(rootData);
+     setSupportedDragActions(Qt::CopyAction);
 }
 
 CollectionModel::~CollectionModel()
@@ -62,7 +63,7 @@ Qt::ItemFlags CollectionModel::flags(const QModelIndex &index) const
      if (!index.isValid())
          return 0;
 
-     return Qt::ItemIsEditable | Qt::ItemIsEnabled | Qt::ItemIsSelectable;
+     return Qt::ItemIsEditable | Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsDragEnabled;
 }
 
 CollectionItem *CollectionModel::getItem(const QModelIndex &index) const
@@ -243,3 +244,8 @@ void CollectionModel::buildCollection()
         }
     }
 }
+
+Qt::DropActions CollectionModel::supportedDropActions() const
+ {
+     return Qt::CopyAction | Qt::MoveAction;
+ }

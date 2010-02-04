@@ -100,6 +100,9 @@ MainWindow::MainWindow(QWidget *parent)
                                        << tr("Length");
     playlistModel = new PlaylistModel(headers,this);
     ui->playlistBrowser->setModel(playlistModel);
+    ui->playlistBrowser->setDragEnabled(true);
+    ui->playlistBrowser->setDropIndicatorShown(true);
+    ui->playlistBrowser->viewport()->setAcceptDrops(true);
     // hide the first column (with filename)
     ui->playlistBrowser->hideColumn(0);
     selectionModel = ui->playlistBrowser->selectionModel();
@@ -108,6 +111,9 @@ MainWindow::MainWindow(QWidget *parent)
     headers = QStringList() << "title" << "filename";
     collectionModel = new CollectionModel(headers,this);
     ui->collectionBrowser->setModel(collectionModel);
+    ui->collectionBrowser->setSelectionMode(QAbstractItemView::ExtendedSelection);
+    ui->collectionBrowser->setDragEnabled(true);
+    ui->collectionBrowser->setDropIndicatorShown(true);
     // Hide the second column that contains real filename
     ui->collectionBrowser->hideColumn(1);
     // Hide the header
@@ -122,6 +128,9 @@ MainWindow::MainWindow(QWidget *parent)
     if (settings->value("Collections/EnableCollections",true).toBool()==false) {
         ui->collectionBrowser->hide();
     } else {
+        /*if (settings->value("Collections/AutoRebuildAfterStart",false).toBool()==true) {
+            collectionsManager->updateCollections();
+        }*/
         collectionModel->buildCollection();
     }
 

@@ -203,6 +203,9 @@ bool PlaylistModel::setHeaderData(int section, Qt::Orientation orientation,
 
 void PlaylistModel::addItem(QString file)
 {
+    if (file.isEmpty())
+        return;
+
     // Select the root item
     QModelIndex root;
 
