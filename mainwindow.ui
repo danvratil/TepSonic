@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>663</width>
-    <height>324</height>
+    <width>661</width>
+    <height>322</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -323,7 +323,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>663</width>
+     <width>661</width>
      <height>20</height>
     </rect>
    </property>
@@ -339,12 +339,26 @@
     <property name="title">
      <string>P&amp;laylist</string>
     </property>
+    <widget class="QMenu" name="menuVisible_columns">
+     <property name="title">
+      <string>Visible columns</string>
+     </property>
+     <addaction name="actionTrack"/>
+     <addaction name="actionInterpret"/>
+     <addaction name="actionTrackname"/>
+     <addaction name="actionAlbum"/>
+     <addaction name="actionGenre"/>
+     <addaction name="actionYear"/>
+     <addaction name="actionLength"/>
+    </widget>
     <addaction name="actionAdd_file"/>
     <addaction name="actionAdd_folder"/>
     <addaction name="separator"/>
     <addaction name="actionClear_playlist"/>
     <addaction name="separator"/>
     <addaction name="actionSave_playlist"/>
+    <addaction name="separator"/>
+    <addaction name="menuVisible_columns"/>
    </widget>
    <widget class="QMenu" name="menuPlayer">
     <property name="title">
@@ -600,6 +614,83 @@
   <action name="actionPreferences">
    <property name="text">
     <string>&amp;Preferences</string>
+   </property>
+  </action>
+  <action name="actionTrack">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Track</string>
+   </property>
+  </action>
+  <action name="actionInterpret">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Interpret</string>
+   </property>
+  </action>
+  <action name="actionTrackname">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Track name</string>
+   </property>
+  </action>
+  <action name="actionAlbum">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Album</string>
+   </property>
+  </action>
+  <action name="actionGenre">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Genre</string>
+   </property>
+  </action>
+  <action name="actionYear">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Year</string>
+   </property>
+  </action>
+  <action name="actionLength">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Length</string>
    </property>
   </action>
  </widget>

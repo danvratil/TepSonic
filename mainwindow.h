@@ -24,6 +24,7 @@
 #include <QtGui/QActionGroup>
 #include <QtGui/QSystemTrayIcon>
 #include <QSettings>
+#include <QSignalMapper>
 #include <QItemSelectionModel>
 
 #include "playlistmodel.h"
@@ -70,6 +71,8 @@ private:
     QSystemTrayIcon *trayIcon;
     QMenu *trayIconMenu;
 
+    QSignalMapper *playlistVisibleColumnContextMenuMapper;
+
     QIcon *appIcon;
 
     QSettings *settings;
@@ -87,6 +90,9 @@ protected:
     void closeEvent(QCloseEvent*);
 
 private slots:
+
+    void showPlaylistContextMenu(QPoint pos);
+    void togglePlaylistColumnVisible(int column);
 
     /**
      * Update some player properties

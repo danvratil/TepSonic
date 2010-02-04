@@ -103,6 +103,8 @@ MainWindow::MainWindow(QWidget *parent)
     ui->playlistBrowser->setDragEnabled(true);
     ui->playlistBrowser->setDropIndicatorShown(true);
     ui->playlistBrowser->viewport()->setAcceptDrops(true);
+    ui->playlistBrowser->header()->setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(ui->playlistBrowser->header(),SIGNAL(customContextMenuRequested(QPoint)),this,SLOT(showPlaylistContextMenu(QPoint)));
     // hide the first column (with filename)
     ui->playlistBrowser->hideColumn(0);
     selectionModel = ui->playlistBrowser->selectionModel();
@@ -121,6 +123,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     settings = new QSettings(QString(QDir::homePath()).append("/.tepsonic/main.conf"),QSettings::IniFormat,this);
     restoreGeometry(settings->value("Window/Geometry", saveGeometry()).toByteArray());
+    restoreState(settings->value("Window/State", saveState()).toByteArray());
 
     collectionsManager = new CollectionsManager(settings,this);
     connect(collectionsManager,SIGNAL(collectionChanged()),collectionModel,SLOT(buildCollection()));
@@ -132,6 +135,20 @@ MainWindow::MainWindow(QWidget *parent)
             collectionsManager->updateCollections();
         }*/
         collectionModel->buildCollection();
+    }
+
+    QList<QVariant> playlistColumnsStates(settings->value("Window/PlaylistColumnsStates", QList<QVariant>()).toList());
+    QList<QVariant> playlistColumnsWidths(settings->value("Window/PlaylistColumnsWidths", QList<QVariant>()).toList());
+    // Without the first column
+    for (int i = 1; i < playlistColumnsStates.count()+1; i++) {
+        if (playlistColumnsStates.at(i-1).toBool()) {
+            ui->playlistBrowser->showColumn(i);
+            ui->playlistBrowser->setColumnWidth(i, playlistColumnsWidths.at(i-1).toInt());
+            ui->menuVisible_columns->actions().at(i-1)->setChecked(true);
+        } else {
+            ui->playlistBrowser->hideColumn(i);
+            ui->menuVisible_columns->actions().at(i-1)->setChecked(false);
+        }
     }
 
     ui->actionLabel->hide();
@@ -152,13 +169,40 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->stopButton,SIGNAL(clicked()),ui->actionStop,SLOT(trigger()));
     connect(ui->nextTrackButton,SIGNAL(clicked()),ui->actionNext_track,SLOT(trigger()));
 
-}
+    playlistVisibleColumnContextMenuMapper = new QSignalMapper(this);
+    connect(ui->actionTrack,SIGNAL(toggled(bool)),playlistVisibleColumnContextMenuMapper,SLOT(map()));
+    playlistVisibleColumnContextMenuMapper->setMapping(ui->actionTrack,1);
+    connect(ui->actionInterpret,SIGNAL(toggled(bool)),playlistVisibleColumnContextMenuMapper,SLOT(map()));
+    playlistVisibleColumnContextMenuMapper->setMapping(ui->actionInterpret,2);
+    connect(ui->actionTrackname,SIGNAL(toggled(bool)),playlistVisibleColumnContextMenuMapper,SLOT(map()));
+    playlistVisibleColumnContextMenuMapper->setMapping(ui->actionTrackname,3);
+    connect(ui->actionAlbum,SIGNAL(toggled(bool)),playlistVisibleColumnContextMenuMapper,SLOT(map()));
+    playlistVisibleColumnContextMenuMapper->setMapping(ui->actionAlbum,4);
+    connect(ui->actionGenre,SIGNAL(toggled(bool)),playlistVisibleColumnContextMenuMapper,SLOT(map()));
+    playlistVisibleColumnContextMenuMapper->setMapping(ui->actionGenre,5);
+    connect(ui->actionYear,SIGNAL(toggled(bool)),playlistVisibleColumnContextMenuMapper,SLOT(map()));
+    playlistVisibleColumnContextMenuMapper->setMapping(ui->actionYear,6);
+    connect(ui->actionLength,SIGNAL(toggled(bool)),playlistVisibleColumnContextMenuMapper,SLOT(map()));
+    playlistVisibleColumnContextMenuMapper->setMapping(ui->actionLength,7);
 
+    connect(playlistVisibleColumnContextMenuMapper,SIGNAL(mapped(int)),this,SLOT(togglePlaylistColumnVisible(int)));
+
+}
 
 
 MainWindow::~MainWindow()
 {
     settings->setValue("Window/Geometry", saveGeometry());
+    settings->setValue("Window/State", saveState());
+    QList<QVariant> playlistColumnsStates;
+    QList<QVariant> playlistColumnsWidths;
+    for (int i = 1; i < ui->playlistBrowser->model()->columnCount(QModelIndex()); i++) {
+        // Don't store "isColumnHidden" but "isColumnVisible"
+        playlistColumnsStates.append(!ui->playlistBrowser->isColumnHidden(i));
+        playlistColumnsWidths.append(ui->playlistBrowser->columnWidth(i));
+    }
+    settings->setValue("Window/PlaylistColumnsStates", playlistColumnsStates);
+    settings->setValue("Window/PlaylistColumnsWidths", playlistColumnsWidths);
 
     delete ui;
 }
@@ -477,4 +521,14 @@ void MainWindow::on_actionNext_track_triggered()
 void MainWindow::addPlaylistItem(QString filename)
 {
     playlistModel->addItem(filename);
+}
+
+void MainWindow::showPlaylistContextMenu(QPoint pos)
+{
+    ui->menuVisible_columns->popup(ui->playlistBrowser->header()->mapToGlobal(pos));
+}
+
+void MainWindow::togglePlaylistColumnVisible(int column)
+{
+    ui->playlistBrowser->setColumnHidden(column,!ui->playlistBrowser->isColumnHidden(column));
 }
