@@ -21,38 +21,37 @@
 #define COLLECTIONSMANAGER_H
 
 #include <QObject>
-#include <QSettings>
+#include <QMutex>
+#include <QThread>
 
-#include <QtSql/QSqlDatabase>
 
-class CollectionsUpdater;
+class CollectionModel;
 
-class CollectionsManager : public QObject
+class DatabaseManager;
+
+class CollectionsManager : public QThread
 {
     Q_OBJECT
-    Q_ENUMS(DBType);
+    Q_ENUMS(CollectionsManagerActions)
     public:
-        enum DBType { SQLite, MySQL };
-        CollectionsManager(QSettings *settings, QObject *parent = 0);
+        enum CollectionsManagerActions { UpdateCollections, UpdateCollectionBrowser };
+        CollectionsManager(CollectionModel *model);
         ~CollectionsManager();
-
-        QSqlDatabase sqlDb;
+        void run();
 
     public slots:
         void updateCollections();
-        void collectionsUpdated(bool updated);
-
-    signals:
-        void collectionChanged();
+        void updateCollectionBrowser();
 
     private:
-        QSettings *_settings;
+        void p_updateCollections();
+        void p_updateCollectionBrowser();
 
-        CollectionsUpdater *_updater;
+        QMutex _mutex;
 
-        void initDb(CollectionsManager::DBType dbType);
-
-
+        CollectionModel *_model;
+        CollectionsManagerActions _action;
+        DatabaseManager *_dbManager;
 };
 
 #endif // COLLECTIONSMANAGER_H

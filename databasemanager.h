@@ -17,29 +17,27 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Cambridge, MA 02110-1301, USA.
  */
 
+#ifndef DATABASEMANAGER_H
+#define DATABASEMANAGER_H
 
-#ifndef COLLECTIONSUPDATER_H
-#define COLLECTIONSUPDATER_H
-
-#include <QThread>
 #include <QObject>
-
 #include <QSettings>
+#include <QtSql/QSqlDatabase>
 
-class CollectionsUpdater : public QThread
+class DatabaseManager : public QObject
 {
     Q_OBJECT
+    Q_ENUMS(DBType)
     public:
-        CollectionsUpdater(QSettings *settings);
-        ~CollectionsUpdater();
-        void run();
+        enum DBType { SQLite, MySQL };
+        DatabaseManager();
+        ~DatabaseManager();
 
     private:
-        QSettings *_settings;
+        QSqlDatabase _sqlDb;
 
-    signals:
-        // Returns TRUE when an update was done, FALSE when the table was not altered
-        void collectionsUpdated(bool updated);
+        void initDb(DatabaseManager::DBType dbType);
+
 };
 
-#endif // COLLECTIONSUPDATER_H
+#endif // DATABASEMANAGER_H

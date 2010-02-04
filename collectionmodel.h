@@ -59,9 +59,6 @@
  protected:
      Qt::DropActions supportedDropActions() const;
 
- public slots:
-     void buildCollection();
-
  private:
      CollectionItem *getItem(const QModelIndex &index) const;
 

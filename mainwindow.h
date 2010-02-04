@@ -33,6 +33,8 @@
 #include "player.h"
 #include "tracksiterator.h"
 #include "collectionsmanager.h"
+#include "playlistmanager.h"
+#include "databasemanager.h"
 
 namespace Ui
 {
@@ -65,6 +67,8 @@ private:
     CollectionModel *collectionModel;
 
     CollectionsManager *collectionsManager;
+    PlaylistManager *playlistManager;
+    DatabaseManager *dbManager;
 
     QItemSelectionModel *selectionModel;
 
@@ -91,6 +95,7 @@ protected:
 
 private slots:
 
+    void on_actionSave_playlist_triggered();
     void showPlaylistContextMenu(QPoint pos);
     void togglePlaylistColumnVisible(int column);
 

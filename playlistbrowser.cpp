@@ -22,11 +22,13 @@
 
 #include "playlistmodel.h"
 
+#include <QDir>
 #include <QDropEvent>
 #include <QDebug>
 #include <QList>
 #include <QStringList>
 #include <QUrl>
+#include <QFile>
 #include <QFileInfo>
 
 
@@ -77,4 +79,9 @@ void PlaylistBrowser::keyPressEvent(QKeyEvent* event)
     if (event->matches(QKeySequence::Delete)) {
         model()->removeRow(selectionModel()->currentIndex().row());
     }
+}
+
+void PlaylistBrowser::savePlaylist(QString filename)
+{
+
 }

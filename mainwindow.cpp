@@ -24,7 +24,6 @@
 #include "preferencesdialog.h"
 #include "infopanel.h"
 #include "ui_mainwindow.h"
-#include "tracksiterator.h"
 
 #include "collectionitem.h"
 
@@ -51,6 +50,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     canClose = false;
 
+    // Create default UI
     ui->setupUi(this);
 
     appIcon = new QIcon(":/icons/mainIcon");
@@ -104,8 +104,9 @@ MainWindow::MainWindow(QWidget *parent)
     ui->playlistBrowser->setDropIndicatorShown(true);
     ui->playlistBrowser->viewport()->setAcceptDrops(true);
     ui->playlistBrowser->header()->setContextMenuPolicy(Qt::CustomContextMenu);
+    // Open ui->menuVisible_columns when PlaylistBrowser's header's context menu is requested
     connect(ui->playlistBrowser->header(),SIGNAL(customContextMenuRequested(QPoint)),this,SLOT(showPlaylistContextMenu(QPoint)));
-    // hide the first column (with filename)
+    // Hide the first column (with filename)
     ui->playlistBrowser->hideColumn(0);
     selectionModel = ui->playlistBrowser->selectionModel();
 
@@ -121,21 +122,28 @@ MainWindow::MainWindow(QWidget *parent)
     // Hide the header
     ui->collectionBrowser->header()->setHidden(true);
 
+    collectionsManager = new CollectionsManager(collectionModel);
+    playlistManager = new PlaylistManager(playlistModel);
+
     settings = new QSettings(QString(QDir::homePath()).append("/.tepsonic/main.conf"),QSettings::IniFormat,this);
     restoreGeometry(settings->value("Window/Geometry", saveGeometry()).toByteArray());
     restoreState(settings->value("Window/State", saveState()).toByteArray());
 
-    collectionsManager = new CollectionsManager(settings,this);
-    connect(collectionsManager,SIGNAL(collectionChanged()),collectionModel,SLOT(buildCollection()));
-
+    qDebug() << settings->value("Collections/EnableCollections",true);
     if (settings->value("Collections/EnableCollections",true).toBool()==false) {
         ui->collectionBrowser->hide();
     } else {
-        /*if (settings->value("Collections/AutoRebuildAfterStart",false).toBool()==true) {
+        qDebug() << "Moving data to collectionBrowser";
+        collectionsManager->updateCollectionBrowser();
+        if (settings->value("Collections/AutoRebuildAfterStart",false).toBool()==true) {
+            qDebug() << "Requesting collections rebuild";
             collectionsManager->updateCollections();
-        }*/
-        collectionModel->buildCollection();
+        }
     }
+    collectionsManager->updateCollectionBrowser();
+
+    // Load last playlist
+    playlistManager->loadFromFile(QDir::homePath().append("/.tepsonic/last.m3u"));
 
     QList<QVariant> playlistColumnsStates(settings->value("Window/PlaylistColumnsStates", QList<QVariant>()).toList());
     QList<QVariant> playlistColumnsWidths(settings->value("Window/PlaylistColumnsWidths", QList<QVariant>()).toList());
@@ -169,6 +177,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->stopButton,SIGNAL(clicked()),ui->actionStop,SLOT(trigger()));
     connect(ui->nextTrackButton,SIGNAL(clicked()),ui->actionNext_track,SLOT(trigger()));
 
+    // Connect individual PlaylistBrowser columns' visibility state with QActions in ui->menuVisible_columns
     playlistVisibleColumnContextMenuMapper = new QSignalMapper(this);
     connect(ui->actionTrack,SIGNAL(toggled(bool)),playlistVisibleColumnContextMenuMapper,SLOT(map()));
     playlistVisibleColumnContextMenuMapper->setMapping(ui->actionTrack,1);
@@ -184,7 +193,6 @@ MainWindow::MainWindow(QWidget *parent)
     playlistVisibleColumnContextMenuMapper->setMapping(ui->actionYear,6);
     connect(ui->actionLength,SIGNAL(toggled(bool)),playlistVisibleColumnContextMenuMapper,SLOT(map()));
     playlistVisibleColumnContextMenuMapper->setMapping(ui->actionLength,7);
-
     connect(playlistVisibleColumnContextMenuMapper,SIGNAL(mapped(int)),this,SLOT(togglePlaylistColumnVisible(int)));
 
 }
@@ -203,6 +211,12 @@ MainWindow::~MainWindow()
     }
     settings->setValue("Window/PlaylistColumnsStates", playlistColumnsStates);
     settings->setValue("Window/PlaylistColumnsWidths", playlistColumnsWidths);
+
+    // Save current playlist to file
+    playlistManager->saveToFile(QDir::homePath().append("/.tepsonic/last.m3u"));
+    qDebug() << "Waiting for playlistManager to finish...";
+    playlistManager->wait();
+    delete playlistManager;
 
     delete ui;
 }
@@ -283,10 +297,8 @@ void MainWindow::on_actionAdd_file_triggered()
     QStringList fileNames = QFileDialog::getOpenFileNames(this,
                                                           tr("Select file"),
                                                           "",
-                                                          tr("Supported audio files (*.mp3 *.wav *.ogg *.flac);;All files (*.*)"));
-    for (int file = 0; file < fileNames.count(); file++) {
-        playlistModel->addItem(fileNames.at(file));
-    }
+                                                          tr("Supported files (*.mp3 *.wav *.ogg *.flac *.m3u);;Playlists (*.m3u);;All files (*.*)"));
+    playlistManager->add(fileNames);
 }
 
 
@@ -312,10 +324,7 @@ void MainWindow::on_actionAdd_folder_triggered()
                                                         QString(),
                                                         QFileDialog::ShowDirsOnly);
 
-    // Fire file iterator thread
-    tracksIterator = new TracksIterator(dirName,playlistModel);
-    connect(tracksIterator,SIGNAL(fileFound(QString)),this,SLOT(addPlaylistItem(QString)));
-    tracksIterator->start();
+    playlistManager->add(dirName);
 }
 
 void MainWindow::updateActionBar(int progress, QString actionTitle)
@@ -531,4 +540,14 @@ void MainWindow::showPlaylistContextMenu(QPoint pos)
 void MainWindow::togglePlaylistColumnVisible(int column)
 {
     ui->playlistBrowser->setColumnHidden(column,!ui->playlistBrowser->isColumnHidden(column));
+}
+
+void MainWindow::on_actionSave_playlist_triggered()
+{
+    QString filename;
+    filename = QFileDialog::getSaveFileName(this,
+                                            tr("Save playlist to..."),
+                                            QString(),
+                                            tr("M3U Playlist (*.m3u)"));
+    playlistManager->saveToFile(filename);
 }

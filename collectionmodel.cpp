@@ -227,24 +227,6 @@ QModelIndex CollectionModel::addRow(QModelIndex root, QString title, QString fil
     return index(root.row()+1,0,root.parent());
 }
 
-void CollectionModel::buildCollection()
-{
-    QModelIndex albumsParent;
-    QModelIndex tracksParent;
-    QSqlQuery artistsQuery("SELECT `artist` FROM `Tracks` GROUP BY `artist` ORDER BY `artist` DESC");
-    while (artistsQuery.next()) {
-        albumsParent = addRow(QModelIndex(),artistsQuery.value(0).toString(),QString());
-        QSqlQuery albumsQuery("SELECT `album` FROM `Tracks` WHERE `artist`='"+artistsQuery.value(0).toString()+"' GROUP BY `album` ORDER BY `album` DESC;");
-        while (albumsQuery.next()) {
-            tracksParent = addChild(albumsParent,albumsQuery.value(0).toString(),QString());
-            QSqlQuery tracksQuery("SELECT `title`,`filename` FROM `Tracks` WHERE `album`='"+albumsQuery.value(0).toString()+"' AND `artist`='"+artistsQuery.value(0).toString()+"' ORDER BY `trackNo` DESC;");
-            while (tracksQuery.next()) {
-                addChild(tracksParent,tracksQuery.value(0).toString(),tracksQuery.value(1).toString());
-            }
-        }
-    }
-}
-
 Qt::DropActions CollectionModel::supportedDropActions() const
  {
      return Qt::CopyAction | Qt::MoveAction;

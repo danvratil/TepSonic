@@ -38,9 +38,6 @@ class CollectionBrowser : public QTreeView
         QModelIndex insertRow(QModelIndex index, QString title, QString filename = "");
         void removeRow(QModelIndex parent, int row);
 
-        void buildCollection();
-
-
 };
 
 #endif // COLLECTIONBROWSER_H
