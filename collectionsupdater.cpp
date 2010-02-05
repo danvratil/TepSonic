@@ -111,6 +111,9 @@ void CollectionsUpdater::run()
             artist.replace(rx,"\\'");
             album.replace(rx,"\\'");
             title.replace(rx,"\\'");
+            if (artist.isEmpty()) artist = tr("Unkown artist");
+            if (album.isEmpty()) album = tr("Unknown album");
+            if (title.isEmpty()) title = QFileInfo(toBeUpdated.at(i).toUtf8()).baseName();
             uint mtime = QFileInfo(toBeUpdated.at(i)).lastModified().toTime_t();
             values << "'"+filename+"',"+QString::number(trackNo)+",'"+artist+"','"+album+"','"+title+"',"+QString::number(mtime);
         }
