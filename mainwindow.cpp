@@ -476,7 +476,7 @@ void MainWindow::on_actionNext_track_triggered()
         // Is Random mode on?
         if (player->randomMode()) {
             // Choose random row (generator initialized in constructor)
-            int row = rand() % playlistModel->rowCount(QModelIndex())-1;
+            int row = rand() % playlistModel->rowCount(QModelIndex());
             QModelIndex topLeft = playlistModel->index(row,
                                                        0,
                                                        QModelIndex());
