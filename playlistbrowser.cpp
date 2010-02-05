@@ -80,8 +80,3 @@ void PlaylistBrowser::keyPressEvent(QKeyEvent* event)
         model()->removeRow(selectionModel()->currentIndex().row());
     }
 }
-
-void PlaylistBrowser::savePlaylist(QString filename)
-{
-
-}

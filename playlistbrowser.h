@@ -36,9 +36,6 @@ class PlaylistBrowser : public QTreeView
         PlaylistBrowser(QWidget* = 0);
         ~PlaylistBrowser();
 
-    public slots:
-        void savePlaylist(QString filename);
-
     protected:
         void dropEvent(QDropEvent*);
         void dragEnterEvent(QDragEnterEvent*);
