@@ -122,7 +122,10 @@ MainWindow::MainWindow(QWidget *parent)
     // Hide the header
     ui->collectionBrowser->header()->setHidden(true);
 
-    collectionsManager = new CollectionsManager(collectionModel);
+    collectionsUpdater = new CollectionsUpdater(collectionModel);
+    collectionBuilder = new CollectionBuilder(collectionModel);
+    connect(collectionsUpdater,SIGNAL(collectionsChanged()),collectionBuilder,SLOT(start()));
+
     playlistManager = new PlaylistManager(playlistModel);
 
     settings = new QSettings(QString(QDir::homePath()).append("/.tepsonic/main.conf"),QSettings::IniFormat,this);
@@ -133,10 +136,10 @@ MainWindow::MainWindow(QWidget *parent)
         ui->collectionBrowser->hide();
     } else {
         qDebug() << "Moving data to collectionBrowser";
-        collectionsManager->updateCollectionBrowser();
+        collectionBuilder->start();
         if (settings->value("Collections/AutoRebuildAfterStart",false).toBool()==true) {
             qDebug() << "Requesting collections rebuild";
-            collectionsManager->updateCollections();
+            collectionsUpdater->start();
         }
     }
 
@@ -304,7 +307,7 @@ void MainWindow::on_actionPreferences_triggered()
 {
     // Show preferences dialog
     PreferencesDialog *prefDlg = new PreferencesDialog(settings,this);
-    connect(prefDlg,SIGNAL(rebuildCollectionsRequested()),collectionsManager,SLOT(updateCollections()));
+    connect(prefDlg,SIGNAL(rebuildCollectionsRequested()),collectionsUpdater,SLOT(start()));
     prefDlg->exec();
 
 }

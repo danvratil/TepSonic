@@ -22,9 +22,10 @@ HEADERS += collectionbrowser.h \
     collectionmodel.h \
     collectionitem.h \
     infopanel.h \
-    collectionsmanager.h \
     playlistmanager.h \
-    databasemanager.h
+    databasemanager.h \
+    collectionsupdater.h \
+    collectionbuilder.h
 FORMS += mainwindow.ui \
     preferencesdialog.ui
 SOURCES += collectionbrowser.cpp \
@@ -38,7 +39,8 @@ SOURCES += collectionbrowser.cpp \
     collectionmodel.cpp \
     collectionitem.cpp \
     infopanel.cpp \
-    collectionsmanager.cpp \
     playlistmanager.cpp \
-    databasemanager.cpp
+    databasemanager.cpp \
+    collectionsupdater.cpp \
+    collectionbuilder.cpp
 RESOURCES += icons.qrc

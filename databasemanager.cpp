@@ -21,12 +21,37 @@
 
 #include <QDebug>
 #include <QDir>
-#include <QtSql/QSqlError>
-#include <QtSql/QSqlQuery>
+#include <QMutex>
 #include <QSettings>
 
-DatabaseManager::DatabaseManager()
+#include <QtSql/QSqlDatabase>
+#include <QtSql/QSqlError>
+#include <QtSql/QSqlQuery>
+
+
+DatabaseManager::DatabaseManager(QString connectionName)
 {
+    _connectionName = connectionName;
+}
+
+DatabaseManager::~DatabaseManager()
+{
+    sqlDb.close();
+    sqlDb.removeDatabase(_connectionName);
+}
+
+void DatabaseManager::connectToDB()
+{
+    QMutex mutex;
+    mutex.lock();
+
+    if (QSqlDatabase::contains(_connectionName)) {
+        qDebug() << "Connection with name " << _connectionName << " exists.";
+        mutex.unlock();
+        return;
+    }
+
+
     QSettings settings(QString(QDir::homePath()).append("/.tepsonic/main.conf"),QSettings::IniFormat,this);
 
     QString driver;
@@ -38,42 +63,42 @@ DatabaseManager::DatabaseManager()
         case 0:
            driver = "QSQLITE";
            break;
-    }
 
-    _sqlDb = QSqlDatabase::addDatabase(driver);
+    }
+    sqlDb = QSqlDatabase::addDatabase(driver,_connectionName);
     if (driver == "QMYSQL") {
         settings.beginGroup("Collections");
         settings.beginGroup("MySQL");
-        _sqlDb.setHostName(settings.value("Server","localhost").toString());
-        _sqlDb.setUserName(settings.value("Username",QString()).toString());
-        _sqlDb.setPassword(settings.value("Password",QString()).toString());
-        _sqlDb.setDatabaseName(settings.value("Database","tepsonic").toString());
+        sqlDb.setHostName(settings.value("Server","localhost").toString());
+        sqlDb.setUserName(settings.value("Username",QString()).toString());
+        sqlDb.setPassword(settings.value("Password",QString()).toString());
+        sqlDb.setDatabaseName(settings.value("Database","tepsonic").toString());
         settings.endGroup();
         settings.endGroup();
     } else {
-        _sqlDb.setDatabaseName(QString(QDir::homePath()).append("/.tepsonic/collection.db"));
+        sqlDb.setDatabaseName(QString(QDir::homePath()).append("/.tepsonic/collection.db"));
     }
 
-    if (!_sqlDb.open()) {
-        qDebug() << "Failed to connect to database!" << _sqlDb.lastError().text();
+    if (!sqlDb.open()) {
+        qDebug() << "Failed to connect to database!" << sqlDb.lastError().text();
+        return;
     }
 
     if (driver=="QMYSQL") {
-        QSqlQuery query("SHOW TABLES;");
+        QSqlQuery query("SHOW TABLES;",sqlDb);
+        if (query.size()>0) query.first();
         if (query.value(0).toString()!="Tracks") {
             initDb(DatabaseManager::MySQL);
         }
     }
-}
 
-DatabaseManager::~DatabaseManager()
-{
-    _sqlDb.close();
-    _sqlDb.removeDatabase(_sqlDb.database(_sqlDb.connectionName()).databaseName());
+    mutex.unlock();
+    return;
 }
 
 void DatabaseManager::initDb(DatabaseManager::DBType dbType)
 {
+    qDebug() << "Initializing database structure";
     switch (dbType) {
         case DatabaseManager::MySQL: {
             QSqlQuery query("CREATE TABLE IF NOT EXISTS `Tracks` (" \
@@ -86,7 +111,7 @@ void DatabaseManager::initDb(DatabaseManager::DBType dbType)
                             "   PRIMARY KEY (`filename`)," \
                             "   KEY `artist` (`artist`)," \
                             "   KEY `album` (`album`)"  \
-                            ") ENGINE=MyISAM DEFAULT CHARSET=utf8;");
+                            ") ENGINE=MyISAM DEFAULT CHARSET=utf8;",sqlDb);
         } break;
         case DatabaseManager::SQLite:
             break;

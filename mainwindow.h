@@ -32,7 +32,8 @@
 #include "infopanel.h"
 #include "player.h"
 #include "tracksiterator.h"
-#include "collectionsmanager.h"
+#include "collectionsupdater.h"
+#include "collectionbuilder.h"
 #include "playlistmanager.h"
 #include "databasemanager.h"
 
@@ -66,7 +67,9 @@ private:
     PlaylistModel *playlistModel;
     CollectionModel *collectionModel;
 
-    CollectionsManager *collectionsManager;
+    CollectionsUpdater *collectionsUpdater;
+    CollectionBuilder *collectionBuilder;
+
     PlaylistManager *playlistManager;
     DatabaseManager *dbManager;
 

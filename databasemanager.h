@@ -30,11 +30,13 @@ class DatabaseManager : public QObject
     Q_ENUMS(DBType)
     public:
         enum DBType { SQLite, MySQL };
-        DatabaseManager();
+        DatabaseManager(QString connectionName = "");
         ~DatabaseManager();
+        void connectToDB();
+        QSqlDatabase sqlDb;
 
     private:
-        QSqlDatabase _sqlDb;
+        QString _connectionName;
 
         void initDb(DatabaseManager::DBType dbType);
 

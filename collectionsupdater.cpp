@@ -1,23 +1,4 @@
-/*
- * TEPSONIC
- * Copyright 2010 Dan Vratil <vratil@progdansoft.com>
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 3
- * of the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Cambridge, MA 02110-1301, USA.
- */
-
-#include "collectionsmanager.h"
+#include "collectionsupdater.h"
 #include "collectionmodel.h"
 #include "databasemanager.h"
 
@@ -30,42 +11,30 @@
 #include <QMap>
 #include <QModelIndex>
 #include <QRegExp>
+#include <QSettings>
 #include <QStringList>
+#include <QtSql/QSqlDatabase>
 #include <QtSql/QSqlQuery>
+#include <QtSql/QSqlError>
 
 #include <taglib/taglib.h>
 #include <taglib/fileref.h>
 #include <taglib/tag.h>
 #include <taglib/tstring.h>
 
-CollectionsManager::CollectionsManager(CollectionModel *model)
+
+CollectionsUpdater::CollectionsUpdater(CollectionModel *model)
 {
     _model = model;
-    _dbManager = new DatabaseManager();
 }
 
-CollectionsManager::~CollectionsManager()
+void CollectionsUpdater::run()
 {
-    delete _dbManager;
-}
+    DatabaseManager dbManager("updateCollectionsConnection");
+    dbManager.connectToDB();
+    QSqlDatabase sqlConn = dbManager.sqlDb;
 
-void CollectionsManager::run()
-{
-    switch (_action) {
-        case CollectionsManager::UpdateCollections:
-            p_updateCollections();
-            break;
-        case CollectionsManager::UpdateCollectionBrowser:
-            p_updateCollectionBrowser();
-            break;
-    }
-
-    exit();
-}
-
-void CollectionsManager::p_updateCollections()
-{
-    qDebug() << "Starting collections update";
+    qDebug() << "Starting collections update...";
     QSettings settings(QDir::homePath().append("/.tepsonic/main.conf"),QSettings::IniFormat);
 
     // Store all paths that will be searched
@@ -79,7 +48,7 @@ void CollectionsManager::p_updateCollections()
 
     bool anythingUpdated = false;
 
-    QSqlQuery query("SELECT `filename`,`mtime` FROM `Tracks`;");
+    QSqlQuery query("SELECT `filename`,`mtime` FROM `Tracks`;",sqlConn);
     while (query.next()) {
         dbFiles[query.value(0).toString()] = query.value(1).toUInt();
     }
@@ -120,7 +89,7 @@ void CollectionsManager::p_updateCollections()
 
     // First remove files that are to be removed
     if (toBeRemoved.count() > 0) {
-        QSqlQuery query("DELETE FROM `Tracks` WHERE `filename` IN ('"+toBeRemoved.join("','")+"');");
+        QSqlQuery query("DELETE FROM `Tracks` WHERE `filename` IN ('"+toBeRemoved.join("','")+"');",sqlConn);
         if (query.numRowsAffected() > 0) {
             anythingUpdated = true;
         }
@@ -152,7 +121,7 @@ void CollectionsManager::p_updateCollections()
                         "                        `artist`=VALUES(`artist`)," \
                         "                        `album`=VALUES(`album`)," \
                         "                        `title`=VALUES(`title`)," \
-                        "                        `mtime`=VALUES(`mtime`);");
+                        "                        `mtime`=VALUES(`mtime`);",sqlConn);
         if (query.numRowsAffected() > 0) {
             anythingUpdated = true;
         }
@@ -162,55 +131,6 @@ void CollectionsManager::p_updateCollections()
     qDebug() << "Collections were updated";
 
     if (anythingUpdated) {
-        qDebug() << "Something was updated. Updating CollectionBrowser";
-        p_updateCollectionBrowser();
+        emit(collectionsChanged());
     }
-
-}
-
-void CollectionsManager::p_updateCollectionBrowser()
-{
-    qDebug() << "Updating collectionBrowser";
-    QModelIndex albumsParent;
-    QModelIndex tracksParent;
-    QSqlQuery artistsQuery("SELECT `artist` FROM `Tracks` GROUP BY `artist` ORDER BY `artist` DESC");
-    while (artistsQuery.next()) {
-        albumsParent = _model->addRow(QModelIndex(),artistsQuery.value(0).toString(),QString());
-        QSqlQuery albumsQuery("SELECT `album` FROM `Tracks` WHERE `artist`='"+artistsQuery.value(0).toString()+"' GROUP BY `album` ORDER BY `album` DESC;");
-        while (albumsQuery.next()) {
-            tracksParent = _model->addChild(albumsParent,albumsQuery.value(0).toString(),QString());
-            QSqlQuery tracksQuery("SELECT `title`,`filename` FROM `Tracks` WHERE `album`='"+albumsQuery.value(0).toString()+"' AND `artist`='"+artistsQuery.value(0).toString()+"' ORDER BY `trackNo` DESC;");
-            while (tracksQuery.next()) {
-                _model->addChild(tracksParent,tracksQuery.value(0).toString(),tracksQuery.value(1).toString());
-            }
-        }
-    }
-    qDebug() << "CollectionBrowser updated";
-}
-
-void CollectionsManager::updateCollections()
-{
-    _mutex.lock();
-    _action = CollectionsManager::UpdateCollections;
-    _mutex.unlock();
-    if (!isRunning()) {
-        start();
-    } else {
-        wait();
-        start();
-    }
-}
-
-void CollectionsManager::updateCollectionBrowser()
-{
-    _mutex.lock();
-    _action = CollectionsManager::UpdateCollectionBrowser;
-    _mutex.unlock();
-    if (!isRunning()) {
-        start();
-    } else {
-        wait();
-        start();
-    }
-
 }
