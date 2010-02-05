@@ -129,7 +129,6 @@ MainWindow::MainWindow(QWidget *parent)
     restoreGeometry(settings->value("Window/Geometry", saveGeometry()).toByteArray());
     restoreState(settings->value("Window/State", saveState()).toByteArray());
 
-    qDebug() << settings->value("Collections/EnableCollections",true);
     if (settings->value("Collections/EnableCollections",true).toBool()==false) {
         ui->collectionBrowser->hide();
     } else {
@@ -140,7 +139,6 @@ MainWindow::MainWindow(QWidget *parent)
             collectionsManager->updateCollections();
         }
     }
-    collectionsManager->updateCollectionBrowser();
 
     // Load last playlist
     playlistManager->loadFromFile(QDir::homePath().append("/.tepsonic/last.m3u"));
