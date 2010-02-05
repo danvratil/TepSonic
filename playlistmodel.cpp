@@ -181,6 +181,10 @@ void PlaylistModel::addItem(QString file)
     if (file.isEmpty())
         return;
 
+    QFileInfo finfo(file);
+    if ((!finfo.exists()) || (!finfo.isFile()))
+        return;
+
     // Select the root item
     QModelIndex root;
 
