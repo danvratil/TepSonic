@@ -102,17 +102,6 @@ QModelIndex PlaylistModel::index(int row, int column, const QModelIndex &parent)
          return QModelIndex();
  }
 
-bool PlaylistModel::insertColumns(int position, int columns, const QModelIndex &parent)
-{
-     bool success;
-
-     beginInsertColumns(parent, position, position + columns - 1);
-     success = rootItem->insertColumns(position, columns);
-     endInsertColumns();
-
-     return success;
-}
-
 bool PlaylistModel::insertRows(int position, int rows, const QModelIndex &parent)
 {
      PlaylistItem *parentItem = getItem(parent);
@@ -138,20 +127,6 @@ QModelIndex PlaylistModel::parent(const QModelIndex &index) const
 
      return createIndex(parentItem->childNumber(), 0, parentItem);
 }
-
-bool PlaylistModel::removeColumns(int position, int columns, const QModelIndex &parent)
-{
-     bool success;
-
-     beginRemoveColumns(parent, position, position + columns - 1);
-     success = rootItem->removeColumns(position, columns);
-     endRemoveColumns();
-
-     if (rootItem->columnCount() == 0)
-         removeRows(0, rowCount());
-
-     return success;
- }
 
 bool PlaylistModel::removeRows(int position, int rows, const QModelIndex &parent)
 {
