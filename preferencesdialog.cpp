@@ -19,7 +19,7 @@ PreferencesDialog::PreferencesDialog(QSettings* settings, QWidget *parent) :
     _ui->pathsList->addItems(_settings->value("SourcePaths",QStringList()).toStringList());
     _ui->collectionsStorageEngine_combo->setCurrentIndex(_settings->value("StorageEngine",0).toInt());
     _settings->beginGroup("MySQL");
-    _ui->mysqlServer_edit->setText(_settings->value("Server","localhost").toString());
+    _ui->mysqlServer_edit->setText(_settings->value("Server","127.0.0.1").toString());
     _ui->mysqlUsername_edit->setText(_settings->value("Username",QString()).toString());
     _ui->mysqlPassword_edit->setText(_settings->value("Password",QString()).toString());
     _ui->mysqlDatabase_edit->setText(_settings->value("Database",QString()).toString());
