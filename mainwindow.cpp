@@ -135,10 +135,8 @@ MainWindow::MainWindow(QWidget *parent)
     if (settings->value("Collections/EnableCollections",true).toBool()==false) {
         ui->collectionBrowser->hide();
     } else {
-        qDebug() << "Moving data to collectionBrowser";
         collectionBuilder->start();
         if (settings->value("Collections/AutoRebuildAfterStart",false).toBool()==true) {
-            qDebug() << "Requesting collections rebuild";
             collectionsUpdater->start();
         }
     }
@@ -212,6 +210,20 @@ MainWindow::~MainWindow()
     }
     settings->setValue("Window/PlaylistColumnsStates", playlistColumnsStates);
     settings->setValue("Window/PlaylistColumnsWidths", playlistColumnsWidths);
+
+    if (collectionBuilder->isRunning()) {
+        qDebug() << "Waiting for collection builder to finish";
+        collectionBuilder->wait();
+    }
+    delete collectionBuilder;
+
+    if (collectionsUpdater->isRunning()) {
+        qDebug() << "Waiting for collections updater to finish";
+        collectionsUpdater->wait();
+    }
+    delete collectionsUpdater;
+
+    delete collectionModel;
 
     // Save current playlist to file
     playlistManager->saveToFile(QDir::homePath().append("/.tepsonic/last.m3u"));

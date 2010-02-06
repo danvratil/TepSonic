@@ -30,9 +30,12 @@ CollectionsUpdater::CollectionsUpdater(CollectionModel *model)
 
 void CollectionsUpdater::run()
 {
-    DatabaseManager dbManager("updateCollectionsConnection");
+    // This does not take any effect on Linux but on Windows it will not freeze the whole system :-)
+    setPriority(QThread::LowPriority);
+
+    DatabaseManager dbManager("collectionsUpdateConnection");
     dbManager.connectToDB();
-    QSqlDatabase sqlConn = dbManager.sqlDb;
+    QSqlDatabase sqlConn = QSqlDatabase::database("collectionsUpdateConnection");
 
     qDebug() << "Starting collections update...";
     QSettings settings(QDir::homePath().append("/.tepsonic/main.conf"),QSettings::IniFormat);
@@ -48,9 +51,11 @@ void CollectionsUpdater::run()
 
     bool anythingUpdated = false;
 
-    QSqlQuery query("SELECT `filename`,`mtime` FROM `Tracks`;",sqlConn);
-    while (query.next()) {
-        dbFiles[query.value(0).toString()] = query.value(1).toUInt();
+    {
+        QSqlQuery query("SELECT filename,mtime FROM Tracks;",sqlConn);
+        while (query.next()) {
+            dbFiles[query.value(0).toString()] = query.value(1).toUInt();
+        }
     }
 
     filters << "*.mp3" << "*.mp4" << "*.wav" << "*.flac";
@@ -89,7 +94,7 @@ void CollectionsUpdater::run()
 
     // First remove files that are to be removed
     if (toBeRemoved.count() > 0) {
-        QSqlQuery query("DELETE FROM `Tracks` WHERE `filename` IN ('"+toBeRemoved.join("','")+"');",sqlConn);
+        QSqlQuery query("DELETE FROM Tracks WHERE filename IN ('"+toBeRemoved.join("','")+"');",sqlConn);
         if (query.numRowsAffected() > 0) {
             anythingUpdated = true;
         }
@@ -117,14 +122,14 @@ void CollectionsUpdater::run()
             uint mtime = QFileInfo(toBeUpdated.at(i)).lastModified().toTime_t();
             values << "'"+filename+"',"+QString::number(trackNo)+",'"+artist+"','"+album+"','"+title+"',"+QString::number(mtime);
         }
-        QSqlQuery query("INSERT INTO `Tracks`" \
-                        "   (`filename`,`trackNo`,`artist`,`album`,`title`,`mtime`)" \
+        QSqlQuery query("INSERT INTO Tracks" \
+                        "   (filename,trackNo,artist,album,title,mtime)" \
                         "   VALUES("+values.join("),(")+")" \
-                        "ON DUPLICATE KEY UPDATE `trackNo`=VALUES(`trackNo`)," \
-                        "                        `artist`=VALUES(`artist`)," \
-                        "                        `album`=VALUES(`album`)," \
-                        "                        `title`=VALUES(`title`)," \
-                        "                        `mtime`=VALUES(`mtime`);",sqlConn);
+                        "ON DUPLICATE KEY UPDATE trackNo=VALUES(trackNo)," \
+                        "                        artist=VALUES(artist)," \
+                        "                        album=VALUES(album)," \
+                        "                        title=VALUES(title)," \
+                        "                        mtime=VALUES(mtime);",sqlConn);
         if (query.numRowsAffected() > 0) {
             anythingUpdated = true;
         }

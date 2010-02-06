@@ -29,16 +29,16 @@ class DatabaseManager : public QObject
     Q_OBJECT
     Q_ENUMS(DBType)
     public:
-        enum DBType { SQLite, MySQL };
+        enum DriverTypes { SQLite, MySQL };
         DatabaseManager(QString connectionName = "");
         ~DatabaseManager();
-        void connectToDB();
+        bool connectToDB();
         QSqlDatabase sqlDb;
 
     private:
         QString _connectionName;
 
-        void initDb(DatabaseManager::DBType dbType);
+        void initDb(DatabaseManager::DriverTypes dbType);
 
 };
 

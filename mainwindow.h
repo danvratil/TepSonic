@@ -71,7 +71,6 @@ private:
     CollectionBuilder *collectionBuilder;
 
     PlaylistManager *playlistManager;
-    DatabaseManager *dbManager;
 
     QItemSelectionModel *selectionModel;
 

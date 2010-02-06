@@ -21,7 +21,6 @@
 
 #include <QDebug>
 #include <QDir>
-#include <QMutex>
 #include <QSettings>
 
 #include <QtSql/QSqlDatabase>
@@ -37,70 +36,68 @@ DatabaseManager::DatabaseManager(QString connectionName)
 DatabaseManager::~DatabaseManager()
 {
     sqlDb.close();
-    sqlDb.removeDatabase(_connectionName);
+    QSqlDatabase::removeDatabase(_connectionName);
 }
 
-void DatabaseManager::connectToDB()
+bool DatabaseManager::connectToDB()
 {
-    QMutex mutex;
-    mutex.lock();
-
     if (QSqlDatabase::contains(_connectionName)) {
         qDebug() << "Connection with name " << _connectionName << " exists.";
-        mutex.unlock();
-        return;
+        return true;
     }
-
 
     QSettings settings(QString(QDir::homePath()).append("/.tepsonic/main.conf"),QSettings::IniFormat,this);
 
-    QString driver;
+    DatabaseManager::DriverTypes driver;
     switch (settings.value("Collections/StorageEngine",0).toInt()) {
-        case 1:
-           driver = "QMYSQL";
-           break;
         default:
         case 0:
-           driver = "QSQLITE";
+           driver = SQLite;
            break;
-
+        case 1:
+           driver = MySQL;
+           break;
     }
-    sqlDb = QSqlDatabase::addDatabase(driver,_connectionName);
-    if (driver == "QMYSQL") {
-        settings.beginGroup("Collections");
-        settings.beginGroup("MySQL");
-        sqlDb.setHostName(settings.value("Server","localhost").toString());
-        sqlDb.setUserName(settings.value("Username",QString()).toString());
-        sqlDb.setPassword(settings.value("Password",QString()).toString());
-        sqlDb.setDatabaseName(settings.value("Database","tepsonic").toString());
-        settings.endGroup();
-        settings.endGroup();
-    } else {
-        sqlDb.setDatabaseName(QString(QDir::homePath()).append("/.tepsonic/collection.db"));
+
+    switch (driver) {
+        case MySQL:
+            sqlDb = QSqlDatabase::addDatabase("QMYSQL",_connectionName);
+            settings.beginGroup("Collections");
+            settings.beginGroup("MySQL");
+            sqlDb.setHostName(settings.value("Server","127.0.0.1").toString());
+            sqlDb.setUserName(settings.value("Username",QString()).toString());
+            sqlDb.setPassword(settings.value("Password",QString()).toString());
+            sqlDb.setDatabaseName(settings.value("Database","tepsonic").toString());
+            settings.endGroup();
+            settings.endGroup();
+            break;
+        case SQLite:
+            sqlDb = QSqlDatabase::addDatabase("QSQLITE",_connectionName);
+            sqlDb.setDatabaseName(QString(QDir::homePath()).append("/.tepsonic/collection.db"));
+            break;
     }
 
     if (!sqlDb.open()) {
-        qDebug() << "Failed to connect to database!" << sqlDb.lastError().text();
-        return;
+        qDebug() << "Failed to establish '" << sqlDb.connectionName() <<"' connection to database!";
+        qDebug() << "Reason: " << sqlDb.lastError().text();
+        return false;
     }
 
-    if (driver=="QMYSQL") {
-        QSqlQuery query("SHOW TABLES;",sqlDb);
-        if (query.size()>0) query.first();
-        if (query.value(0).toString()!="Tracks") {
-            initDb(DatabaseManager::MySQL);
-        }
+    // We want to use UTF8!!!
+    QSqlQuery query("SET CHARACTER SET utf8;",sqlDb);
+
+    if (!sqlDb.tables(QSql::Tables).contains("Tracks",Qt::CaseSensitive)) {
+        initDb(driver);
     }
 
-    mutex.unlock();
-    return;
+    return true;
 }
 
-void DatabaseManager::initDb(DatabaseManager::DBType dbType)
+void DatabaseManager::initDb(DatabaseManager::DriverTypes dbType)
 {
     qDebug() << "Initializing database structure";
     switch (dbType) {
-        case DatabaseManager::MySQL: {
+        case MySQL: {
             QSqlQuery query("CREATE TABLE IF NOT EXISTS `Tracks` (" \
                             "   `filename` varchar(300) NOT NULL," \
                             "   `trackNo` int(11) NOT NULL DEFAULT '0'," \
@@ -113,7 +110,13 @@ void DatabaseManager::initDb(DatabaseManager::DBType dbType)
                             "   KEY `album` (`album`)"  \
                             ") ENGINE=MyISAM DEFAULT CHARSET=utf8;",sqlDb);
         } break;
-        case DatabaseManager::SQLite:
+        case SQLite:
+            QSqlQuery query("CREATE TABLE Tracks("\
+                            "   filename," \
+                            "   trackNo INTEGER," \
+                            "   artist," \
+                            "   title," \
+                            "   mtime INTEGER);",sqlDb);
             break;
     }
 }
