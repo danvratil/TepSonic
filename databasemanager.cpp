@@ -60,7 +60,7 @@ bool DatabaseManager::connectToDB()
     }
 
     switch (driver) {
-        case MySQL:
+        case MySQL: {
             sqlDb = QSqlDatabase::addDatabase("QMYSQL",_connectionName);
             settings.beginGroup("Collections");
             settings.beginGroup("MySQL");
@@ -70,11 +70,11 @@ bool DatabaseManager::connectToDB()
             sqlDb.setDatabaseName(settings.value("Database","tepsonic").toString());
             settings.endGroup();
             settings.endGroup();
-            break;
-        case SQLite:
+        } break;
+        case SQLite: {
             sqlDb = QSqlDatabase::addDatabase("QSQLITE",_connectionName);
             sqlDb.setDatabaseName(QString(QDir::homePath()).append("/.tepsonic/collection.db"));
-            break;
+        } break;
     }
 
     if (!sqlDb.open()) {
@@ -84,7 +84,9 @@ bool DatabaseManager::connectToDB()
     }
 
     // We want to use UTF8!!!
-    QSqlQuery query("SET CHARACTER SET utf8;",sqlDb);
+    if (driver == MySQL ) {
+        QSqlQuery query("SET CHARACTER SET utf8;",sqlDb);
+    }
 
     if (!sqlDb.tables(QSql::Tables).contains("Tracks",Qt::CaseSensitive)) {
         initDb(driver);
@@ -110,13 +112,15 @@ void DatabaseManager::initDb(DatabaseManager::DriverTypes dbType)
                             "   KEY `album` (`album`)"  \
                             ") ENGINE=MyISAM DEFAULT CHARSET=utf8;",sqlDb);
         } break;
-        case SQLite:
+        case SQLite: {
             QSqlQuery query("CREATE TABLE Tracks("\
-                            "   filename," \
+                            "   filename TEXT," \
                             "   trackNo INTEGER," \
-                            "   artist," \
-                            "   title," \
-                            "   mtime INTEGER);",sqlDb);
-            break;
+                            "   artist TEXT," \
+                            "   album TEXT," \
+                            "   title TEXT," \
+                            "   mtime INTEGER,"\
+                            "   PRIMARY KEY(filename ASC));",sqlDb);
+        } break;
     }
 }

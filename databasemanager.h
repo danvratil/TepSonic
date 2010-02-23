@@ -27,7 +27,7 @@
 class DatabaseManager : public QObject
 {
     Q_OBJECT
-    Q_ENUMS(DBType)
+    Q_ENUMS(DriverTypes)
     public:
         enum DriverTypes { SQLite, MySQL };
         DatabaseManager(QString connectionName = "");

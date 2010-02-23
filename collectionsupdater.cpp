@@ -55,6 +55,7 @@ void CollectionsUpdater::run()
 
     {
         QSqlQuery query("SELECT filename,mtime FROM Tracks;",sqlConn);
+        qDebug() << sqlConn.lastError().text();
         while (query.next()) {
             dbFiles[query.value(0).toString()] = query.value(1).toUInt();
         }
@@ -97,6 +98,7 @@ void CollectionsUpdater::run()
     // First remove files that are to be removed
     if (toBeRemoved.count() > 0) {
         QSqlQuery query("DELETE FROM Tracks WHERE filename IN ('"+toBeRemoved.join("','")+"');",sqlConn);
+        qDebug() << sqlConn.lastError().text();
         if (query.numRowsAffected() > 0) {
             anythingUpdated = true;
         }
@@ -107,6 +109,7 @@ void CollectionsUpdater::run()
     // Next we will prepare set of input data for each file that should be updated
     QRegExp rx("\'");
     if (toBeUpdated.count() > 0) {
+        QVariantList filenames, trackNos, artists, albums, titles, mtimes;
         for (int i = 0; i < toBeUpdated.count(); i++) {
             TagLib::FileRef f(toBeUpdated.at(i).toUtf8());
             int trackNo = f.tag()->track();
@@ -122,21 +125,30 @@ void CollectionsUpdater::run()
             if (album.isEmpty()) album = tr("Unknown album");
             if (title.isEmpty()) title = QFileInfo(toBeUpdated.at(i).toUtf8()).baseName();
             uint mtime = QFileInfo(toBeUpdated.at(i)).lastModified().toTime_t();
-            values << "'"+filename+"',"+QString::number(trackNo)+",'"+artist+"','"+album+"','"+title+"',"+QString::number(mtime);
+            filenames << filename;
+            trackNos << trackNo;
+            artists << artist;
+            albums << album;
+            titles << title;
+            mtimes << mtime;
         }
-        QSqlQuery query("INSERT INTO Tracks" \
-                        "   (filename,trackNo,artist,album,title,mtime)" \
-                        "   VALUES("+values.join("),(")+")" \
-                        "ON DUPLICATE KEY UPDATE trackNo=VALUES(trackNo)," \
-                        "                        artist=VALUES(artist)," \
-                        "                        album=VALUES(album)," \
-                        "                        title=VALUES(title)," \
-                        "                        mtime=VALUES(mtime);",sqlConn);
+        QSqlQuery query(sqlConn);
+        query.prepare("REPLACE INTO Tracks (filename,trackNo,artist,album,title,mtime)"\
+                      "VALUES (?, ?, ?, ?, ?, ?)");
+        query.addBindValue(filenames);
+        query.addBindValue(trackNos);
+        query.addBindValue(artists);
+        query.addBindValue(albums);
+        query.addBindValue(titles);
+        query.addBindValue(mtimes);
+        query.execBatch();
         if (query.numRowsAffected() > 0) {
             anythingUpdated = true;
         }
-        values.clear();
+        qDebug() << query.lastError().text();
+
     }
+    values.clear();
 
     qDebug() << "Collections were updated";
 
