@@ -18,7 +18,9 @@ void CollectionBuilder::run()
     qDebug() << "Updating CollectionBrowser...";
 
     DatabaseManager dbManager("updateCollectionBrowserConnection");
-    dbManager.connectToDB();
+    if (!dbManager.connectToDB()) {
+        return;
+    }
     QSqlDatabase sqlConn = QSqlDatabase::database("updateCollectionBrowserConnection");
 
     _model->removeRows(0,_model->rowCount(QModelIndex()),QModelIndex());
