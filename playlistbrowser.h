@@ -30,6 +30,8 @@
 #include <QObject>
 #include <QTreeView>
 
+class PlaylistManager;
+
 class PlaylistBrowser : public QTreeView
 {
     public:
@@ -41,6 +43,8 @@ class PlaylistBrowser : public QTreeView
         void dragEnterEvent(QDragEnterEvent*);
         void dragMoveEvent(QDragMoveEvent*);
         void keyPressEvent(QKeyEvent*);
+
+        PlaylistManager *m_playlistManager;
 
 };
 

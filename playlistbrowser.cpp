@@ -21,6 +21,7 @@
 #include "playlistbrowser.h"
 
 #include "playlistmodel.h"
+#include "playlistmanager.h"
 
 #include <QDir>
 #include <QDropEvent>
@@ -59,16 +60,23 @@ void PlaylistBrowser::dragMoveEvent(QDragMoveEvent* event)
  // Drop event (item is dropped on the widget)
 void PlaylistBrowser::dropEvent(QDropEvent* event)
 {
+
     event->acceptProposedAction();
     QByteArray encodedData = event->mimeData()->data("data/tepsonic-tracks");
     QDataStream stream(&encodedData, QIODevice::ReadOnly);
     QStringList newItems;
 
+    m_playlistManager = new PlaylistManager(static_cast<PlaylistModel*>(this->model()));
+
+    QStringList files;
+
     while (!stream.atEnd()) {
         QString text;
         stream >> text;
-        static_cast<PlaylistModel*>(model())->addItem(text);
+        files << text;
     }
+
+    m_playlistManager->add(files);
 
     event->setAccepted(true);
 }
