@@ -34,7 +34,9 @@ void CollectionsUpdater::run()
     setPriority(QThread::LowPriority);
 
     DatabaseManager dbManager("collectionsUpdateConnection");
-    dbManager.connectToDB();
+    if (!dbManager.connectToDB()) {
+        return;
+    }
     QSqlDatabase sqlConn = QSqlDatabase::database("collectionsUpdateConnection");
 
     qDebug() << "Starting collections update...";
