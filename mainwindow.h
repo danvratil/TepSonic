@@ -97,6 +97,8 @@ protected:
 
 private slots:
 
+    void on_clearSearchButton_clicked();
+    void on_searchEdit_textChanged(QString );
     void on_actionSave_playlist_triggered();
     void showPlaylistContextMenu(QPoint pos);
     void togglePlaylistColumnVisible(int column);

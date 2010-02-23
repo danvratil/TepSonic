@@ -564,3 +564,27 @@ void MainWindow::on_actionSave_playlist_triggered()
                                             tr("M3U Playlist (*.m3u)"));
     playlistManager->saveToFile(filename);
 }
+
+void MainWindow::on_searchEdit_textChanged(QString newText)
+{
+    QModelIndex index;
+    for (int i = 0; i < playlistModel->rowCount(QModelIndex());i++) {
+        if ((playlistModel->index(i,2,QModelIndex()).data().toString().contains(newText, Qt::CaseInsensitive)) ||
+            (playlistModel->index(i,3,QModelIndex()).data().toString().contains(newText, Qt::CaseInsensitive)) ||
+            (playlistModel->index(i,4,QModelIndex()).data().toString().contains(newText, Qt::CaseInsensitive)) ||
+            (playlistModel->index(i,5,QModelIndex()).data().toString().contains(newText, Qt::CaseInsensitive)) ||
+            (playlistModel->index(i,6,QModelIndex()).data().toString().contains(newText, Qt::CaseInsensitive))) {
+            ui->playlistBrowser->setRowHidden(i,QModelIndex(),false);
+        } else {
+            ui->playlistBrowser->setRowHidden(i,QModelIndex(),true);
+        }
+    }
+}
+
+void MainWindow::on_clearSearchButton_clicked()
+{
+    ui->searchEdit->setText("");
+    for (int i = 0; i < playlistModel->rowCount(QModelIndex());i++) {
+        ui->playlistBrowser->setRowHidden(i,QModelIndex(),false);
+    }
+}
