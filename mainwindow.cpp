@@ -146,15 +146,15 @@ MainWindow::MainWindow(QWidget *parent)
 
     QList<QVariant> playlistColumnsStates(settings->value("Window/PlaylistColumnsStates", QList<QVariant>()).toList());
     QList<QVariant> playlistColumnsWidths(settings->value("Window/PlaylistColumnsWidths", QList<QVariant>()).toList());
-    // Without the first column
-    for (int i = 1; i < playlistColumnsStates.count()+1; i++) {
-        if (playlistColumnsStates.at(i-1).toBool()) {
+
+    for (int i = 0; i < playlistColumnsStates.count()-1; i++) {
+        if (playlistColumnsStates.at(i).toBool()) {
             ui->playlistBrowser->showColumn(i);
-            ui->playlistBrowser->setColumnWidth(i, playlistColumnsWidths.at(i-1).toInt());
-            ui->menuVisible_columns->actions().at(i-1)->setChecked(true);
+            ui->playlistBrowser->setColumnWidth(i, playlistColumnsWidths.at(i).toInt());
+            ui->menuVisible_columns->actions().at(i)->setChecked(true);
         } else {
             ui->playlistBrowser->hideColumn(i);
-            ui->menuVisible_columns->actions().at(i-1)->setChecked(false);
+            ui->menuVisible_columns->actions().at(i)->setChecked(false);
         }
     }
 
@@ -178,6 +178,8 @@ MainWindow::MainWindow(QWidget *parent)
 
     // Connect individual PlaylistBrowser columns' visibility state with QActions in ui->menuVisible_columns
     playlistVisibleColumnContextMenuMapper = new QSignalMapper(this);
+    connect(ui->actionFilename,SIGNAL(toggled(bool)),playlistVisibleColumnContextMenuMapper,SLOT(map()));
+    playlistVisibleColumnContextMenuMapper->setMapping(ui->actionFilename,0);
     connect(ui->actionTrack,SIGNAL(toggled(bool)),playlistVisibleColumnContextMenuMapper,SLOT(map()));
     playlistVisibleColumnContextMenuMapper->setMapping(ui->actionTrack,1);
     connect(ui->actionInterpret,SIGNAL(toggled(bool)),playlistVisibleColumnContextMenuMapper,SLOT(map()));
@@ -203,7 +205,7 @@ MainWindow::~MainWindow()
     settings->setValue("Window/State", saveState());
     QList<QVariant> playlistColumnsStates;
     QList<QVariant> playlistColumnsWidths;
-    for (int i = 1; i < ui->playlistBrowser->model()->columnCount(QModelIndex()); i++) {
+    for (int i = 0; i < ui->playlistBrowser->model()->columnCount(QModelIndex())-1; i++) {
         // Don't store "isColumnHidden" but "isColumnVisible"
         playlistColumnsStates.append(!ui->playlistBrowser->isColumnHidden(i));
         playlistColumnsWidths.append(ui->playlistBrowser->columnWidth(i));

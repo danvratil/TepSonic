@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>657</width>
-    <height>318</height>
+    <width>655</width>
+    <height>316</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -354,7 +354,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>657</width>
+     <width>655</width>
      <height>20</height>
     </rect>
    </property>
@@ -374,6 +374,7 @@
      <property name="title">
       <string>Visible columns</string>
      </property>
+     <addaction name="actionFilename"/>
      <addaction name="actionTrack"/>
      <addaction name="actionInterpret"/>
      <addaction name="actionTrackname"/>
@@ -722,6 +723,14 @@
    </property>
    <property name="text">
     <string>Length</string>
+   </property>
+  </action>
+  <action name="actionFilename">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Filename</string>
    </property>
   </action>
  </widget>
