@@ -19,6 +19,7 @@
  */
 
 #include <QtGui>
+#include <QTime>
 
 #include <taglib/taglib.h>
 #include <taglib/fileref.h>
@@ -203,31 +204,13 @@ void PlaylistModel::addItem(QString file)
     TagLib::String genre = f.tag()->genre();
     int year = f.tag()->year();
     int totalTimeNum = f.audioProperties()->length();
-    QString hours,mins,secs;
-    int iHours, iMins, iSecs;
-    // Only if time is longed then 1 hour the hours will be prepended to the time
-    if (totalTimeNum>3600) {
-        iHours = totalTimeNum/3600;
+    QTime trackLength(0,0,0,0);
+    trackLength = trackLength.addSecs(totalTimeNum);
+    QString trackLengthString;
+    if (trackLength.hour()>0) {
+        trackLengthString=trackLength.toString("hh:mm:ss");
     } else {
-        iHours = 0;
-    }
-    iMins = (totalTimeNum - iHours*3600)/60;
-    iSecs = totalTimeNum - iHours*3600 - iMins*60;
-    if (iHours>0) {
-        hours = QString::number(iHours).append(":");
-        if (iHours<10) {
-            hours.prepend("0");
-        }
-    } else {
-        hours = "";
-    }
-    mins = QString::number(iMins).append(":");
-    if (iMins<10) {
-        mins.prepend("0");
-    }
-    secs = QString::number(iSecs);
-    if (iSecs<10) {
-        secs.prepend("0");
+        trackLengthString=trackLength.toString("mm:ss");
     }
 
     // Child item
@@ -255,7 +238,7 @@ void PlaylistModel::addItem(QString file)
     setData(child, QVariant(year), Qt::EditRole);
     // Total length
     child = index(rowCount(root)-1, 7, root.parent());
-    setData(child, QVariant(hours.append(mins).append(secs)), Qt::EditRole);
+    setData(child, QVariant(trackLengthString), Qt::EditRole);
 }
 
 void PlaylistModel::removeItem(int index)
