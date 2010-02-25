@@ -196,35 +196,35 @@ bool CollectionModel::setHeaderData(int section, Qt::Orientation orientation, co
 
 QModelIndex CollectionModel::addChild(QModelIndex root, QString title, QString filename)
 {
-    if (!insertRow(0, root))
+    if (!insertRow(rowCount(root), root))
         return QModelIndex();
 
     QModelIndex child;
     // Some title like artist/album/track name
-    child = index(0, 0, root);
+    child = index(rowCount(root)-1, 0, root);
     setData(child, title);
     // Real file name (in hidden column)
-    child = index(0, 1, root);
+    child = index(rowCount(root)-1, 1, root);
     setData(child, filename);
 
-    return index(0,0,root);
+    return index(rowCount(root)-1,0,root);
 }
 
 
 QModelIndex CollectionModel::addRow(QModelIndex root, QString title, QString filename)
 {
-    if (!insertRow(root.row()+1, root.parent()))
+    if (!insertRow(rowCount(root), root.parent()))
         return QModelIndex();
 
     QModelIndex child;
     // Some title like artist/album/track name
-    child = index(root.row()+1, 0, root.parent());
+    child = index(rowCount(root)-1, 0, root.parent());
     setData(child, title, Qt::EditRole);
     // Readl file name (in hidden column)
-    child = index(root.row()+1, 1, root.parent());
+    child = index(rowCount(root)-1, 1, root.parent());
     setData(child, filename, Qt::EditRole);
 
-    return index(root.row()+1,0,root.parent());
+    return index(rowCount(root)-1,0,root.parent());
 }
 
 Qt::DropActions CollectionModel::supportedDropActions() const

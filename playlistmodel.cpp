@@ -189,7 +189,7 @@ void PlaylistModel::addItem(QString file)
     QModelIndex root;
 
     // Insert new row
-    if (!insertRow(root.row()+1, root.parent()))
+    if (!insertRow(rowCount(root), root.parent()))
         return;
 
     /**
@@ -233,28 +233,28 @@ void PlaylistModel::addItem(QString file)
     // Child item
     QModelIndex child;
     // Store the filename into the first column. The other columns will be filled by separated thread
-    child = index(root.row()+1, 0, root.parent());
+    child = index(rowCount(root)-1, 0, root.parent());
     setData(child, QVariant(file), Qt::EditRole);
     // Track number
-    child = index(root.row()+1, 1, root.parent());
+    child = index(rowCount(root)-1, 1, root.parent());
     setData(child, QVariant(truckNumber), Qt::EditRole);
     // Interpret
-    child = index(root.row()+1, 2, root.parent());
+    child = index(rowCount(root)-1, 2, root.parent());
     setData(child, QVariant(QString(artist.toCString(true))), Qt::EditRole);
     // Track title
-    child = index(root.row()+1, 3, root.parent());
+    child = index(rowCount(root)-1, 3, root.parent());
     setData(child, QVariant(QString(title.toCString(true))), Qt::EditRole);
     // Album
-    child = index(root.row()+1, 4, root.parent());
+    child = index(rowCount(root)-1, 4, root.parent());
     setData(child, QVariant(QString(album.toCString(true))), Qt::EditRole);
     // Genre
-    child = index(root.row()+1, 5, root.parent());
+    child = index(rowCount(root)-1, 5, root.parent());
     setData(child, QVariant(QString(genre.toCString(true))), Qt::EditRole);
     // Year
-    child = index(root.row()+1, 6, root.parent());
+    child = index(rowCount(root)-1, 6, root.parent());
     setData(child, QVariant(year), Qt::EditRole);
     // Total length
-    child = index(root.row()+1, 7, root.parent());
+    child = index(rowCount(root)-1, 7, root.parent());
     setData(child, QVariant(hours.append(mins).append(secs)), Qt::EditRole);
 }
 
