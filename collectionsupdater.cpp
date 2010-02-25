@@ -111,7 +111,7 @@ void CollectionsUpdater::run()
     if (toBeUpdated.count() > 0) {
         QVariantList filenames, trackNos, artists, albums, titles, mtimes;
         for (int i = 0; i < toBeUpdated.count(); i++) {
-            TagLib::FileRef f(toBeUpdated.at(i).toUtf8());
+            TagLib::FileRef f(toBeUpdated.at(i).toUtf8().constData());
             int trackNo = f.tag()->track();
             QString filename = toBeUpdated.at(i);
             QString artist = f.tag()->artist().toCString(true);

@@ -195,7 +195,7 @@ void PlaylistModel::addItem(QString file)
     /**
      * TAGLIB comes here
      */
-    TagLib::FileRef f(file.toUtf8());
+    TagLib::FileRef f(file.toUtf8().constData());
     int truckNumber = f.tag()->track();
     TagLib::String artist = f.tag()->artist();
     TagLib::String title = f.tag()->title();
