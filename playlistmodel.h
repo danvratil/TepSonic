@@ -58,17 +58,21 @@
                      const QModelIndex &parent = QModelIndex());
      bool removeRows(int position, int rows,
                      const QModelIndex &parent = QModelIndex());
-
+     QString totalLength();
 
  public slots:
     void addItem(QString file);
-    void removeItem(int index);
-    void removeItems(int first, int count);
 
  private:
      PlaylistItem *getItem(const QModelIndex &index) const;
 
      PlaylistItem *rootItem;
+
+     int _totalLength;
+
+ signals:
+     void playlistLengthChanged(int totalLength, int tracksCount);
+
  };
 
 

@@ -37,6 +37,8 @@ PlaylistModel::PlaylistModel(const QStringList &headers, QObject *parent)
      foreach (QString header, headers)
          rootData << header;
 
+     _totalLength = 0;
+
      rootItem = new PlaylistItem(rootData);
 }
 
@@ -134,9 +136,25 @@ bool PlaylistModel::removeRows(int position, int rows, const QModelIndex &parent
      PlaylistItem *parentItem = getItem(parent);
      bool success = true;
 
+     int totalRemoveTime = 0;
+     for (int i=position;i<position+rows;i++) {
+         QString trackLength = index(i,7,QModelIndex()).data().toString();
+         if (trackLength.length()==5) {
+             trackLength.prepend("00:");
+         }
+         QTime tl(0,0,0,0);
+         totalRemoveTime += tl.secsTo(QTime::fromString(trackLength,"hh:mm:ss"));
+     }
+
      beginRemoveRows(parent, position, position + rows - 1);
      success = parentItem->removeChildren(position, rows);
      endRemoveRows();
+
+     if (success) {
+         // Decrease total length of the playlist by total length of removed tracks
+         _totalLength -= totalRemoveTime;
+        emit playlistLengthChanged(_totalLength,rowCount(QModelIndex()));
+     }
 
      return success;
 }
@@ -204,6 +222,9 @@ void PlaylistModel::addItem(QString file)
     TagLib::String genre = f.tag()->genre();
     int year = f.tag()->year();
     int totalTimeNum = f.audioProperties()->length();
+    // And length of the track to the total length of the playlist
+    _totalLength += totalTimeNum;
+    qDebug() << "Length of playlist: " << _totalLength;
     QTime trackLength(0,0,0,0);
     trackLength = trackLength.addSecs(totalTimeNum);
     QString trackLengthString;
@@ -239,14 +260,6 @@ void PlaylistModel::addItem(QString file)
     // Total length
     child = index(rowCount(root)-1, 7, root.parent());
     setData(child, QVariant(trackLengthString), Qt::EditRole);
-}
 
-void PlaylistModel::removeItem(int index)
-{
-    removeRow(index,QModelIndex());
-}
-
-void PlaylistModel::removeItems(int first, int count)
-{
-    removeRows(first,count,QModelIndex());
+    emit playlistLengthChanged(_trackLength, rowCount(QModelIndex()));
 }
