@@ -35,6 +35,9 @@
 #include <QFileDialog>
 #include <QFileInfo>
 #include <QItemSelectionModel>
+#include <QDate>
+#include <QDateTime>
+#include <QTime>
 #include <Phonon/SeekSlider>
 #include <Phonon/VolumeSlider>
 
@@ -90,6 +93,10 @@ MainWindow::MainWindow(QWidget *parent)
     infoPanel->hide();
     ui->centralWidget->layout()->addWidget(infoPanel);
 
+    playlistLengthLabel = new QLabel(this);
+    ui->statusBar->addWidget(playlistLengthLabel,0);
+    playlistLengthLabel->setText(tr("%n track(s)", "", 0).append(" (00:00)"));
+
     QStringList headers = QStringList()<< tr("Filename")
                                        << tr("Track")
                                        << tr("Interpret")
@@ -99,6 +106,7 @@ MainWindow::MainWindow(QWidget *parent)
                                        << tr("Year")
                                        << tr("Length");
     playlistModel = new PlaylistModel(headers,this);
+    connect(playlistModel,SIGNAL(playlistLengthChanged(int,int)),this,SLOT(playlistLengthChanged(int,int)));
     ui->playlistBrowser->setModel(playlistModel);
     ui->playlistBrowser->setDragEnabled(true);
     ui->playlistBrowser->setDropIndicatorShown(true);
@@ -589,4 +597,42 @@ void MainWindow::on_clearSearchButton_clicked()
     for (int i = 0; i < playlistModel->rowCount(QModelIndex());i++) {
         ui->playlistBrowser->setRowHidden(i,QModelIndex(),false);
     }
+}
+
+void MainWindow::playlistLengthChanged(int totalLength, int tracksCount)
+{
+    int days = totalLength / 86400;
+    int hours = (totalLength - (days*86400))/ 3600;
+    int mins = (totalLength - (days*86400) - (hours*3600))/60;
+    int secs = totalLength - (days*86400) - (hours*3600) - (mins*60);
+
+    QString sDays;
+    QString sHours;
+    QString sMins;
+    QString sSecs;
+
+    if (days > 0) {
+        sDays = tr("%n day(s)","",hours).append(" ");
+    }
+
+    if (hours<10) {
+        sHours = QString("0").append(QString::number(hours)).append(":");
+    } else {
+        sHours = QString::number(hours).append(":");
+    }
+    if (hours == 0) sHours = QString();
+    if (mins<10) {
+        sMins = QString("0").append(QString::number(mins));
+    } else {
+        sMins = QString::number(mins);
+    }
+    if (secs<10) {
+        sSecs = QString("0").append(QString::number(secs));
+    } else {
+        sSecs = QString::number(secs);
+    }
+
+    playlistLengthLabel->setText(tr("%n track(s)","",tracksCount).append(" (").append(sDays).append(sHours).append(sMins).append(":").append(sSecs).append(")"));
+    //playlistLengthLabel->setText("MainWindow::playlistLengthChanged: Implement me!! ");
+    //playlistLengthLabel->setText(tr("%n track(s)","",tracksCount).append(" (").append(length).append(")"));
 }

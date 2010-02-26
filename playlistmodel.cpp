@@ -224,7 +224,6 @@ void PlaylistModel::addItem(QString file)
     int totalTimeNum = f.audioProperties()->length();
     // And length of the track to the total length of the playlist
     _totalLength += totalTimeNum;
-    qDebug() << "Length of playlist: " << _totalLength;
     QTime trackLength(0,0,0,0);
     trackLength = trackLength.addSecs(totalTimeNum);
     QString trackLengthString;
@@ -261,5 +260,5 @@ void PlaylistModel::addItem(QString file)
     child = index(rowCount(root)-1, 7, root.parent());
     setData(child, QVariant(trackLengthString), Qt::EditRole);
 
-    emit playlistLengthChanged(_trackLength, rowCount(QModelIndex()));
+    emit playlistLengthChanged(_totalLength, rowCount(QModelIndex()));
 }

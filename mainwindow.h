@@ -26,6 +26,7 @@
 #include <QSettings>
 #include <QSignalMapper>
 #include <QItemSelectionModel>
+#include <QLabel>
 
 #include "playlistmodel.h"
 #include "collectionmodel.h"
@@ -80,6 +81,8 @@ private:
     QSignalMapper *playlistVisibleColumnContextMenuMapper;
 
     QIcon *appIcon;
+
+    QLabel *playlistLengthLabel;
 
     QSettings *settings;
     Player *player;
@@ -182,6 +185,8 @@ private slots:
      * Add new track to playlist
      */
     void addPlaylistItem(QString);
+
+    void playlistLengthChanged(int totalLength, int tracksCount);
 
   public slots:
 
