@@ -107,7 +107,10 @@ MainWindow::MainWindow(QWidget *parent)
                                        << tr("Length");
     playlistModel = new PlaylistModel(headers,this);
     connect(playlistModel,SIGNAL(playlistLengthChanged(int,int)),this,SLOT(playlistLengthChanged(int,int)));
-    ui->playlistBrowser->setModel(playlistModel);
+    playlistProxyModel = new PlaylistProxyModel(this);
+    playlistProxyModel->setSourceModel(playlistModel);
+
+    ui->playlistBrowser->setModel(playlistProxyModel);
     ui->playlistBrowser->setDragEnabled(true);
     ui->playlistBrowser->setDropIndicatorShown(true);
     ui->playlistBrowser->viewport()->setAcceptDrops(true);
@@ -183,6 +186,8 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->playPauseButton,SIGNAL(clicked()),ui->actionPlay_pause,SLOT(trigger()));
     connect(ui->stopButton,SIGNAL(clicked()),ui->actionStop,SLOT(trigger()));
     connect(ui->nextTrackButton,SIGNAL(clicked()),ui->actionNext_track,SLOT(trigger()));
+
+    connect(ui->searchEdit,SIGNAL(textChanged(QString)),playlistProxyModel,SLOT(setFilterRegExp(QString)));
 
     // Connect individual PlaylistBrowser columns' visibility state with QActions in ui->menuVisible_columns
     playlistVisibleColumnContextMenuMapper = new QSignalMapper(this);
@@ -575,7 +580,7 @@ void MainWindow::on_actionSave_playlist_triggered()
     playlistManager->saveToFile(filename);
 }
 
-void MainWindow::on_searchEdit_textChanged(QString newText)
+/*void MainWindow::on_searchEdit_textChanged(QString newText)
 {
     QModelIndex index;
     for (int i = 0; i < playlistModel->rowCount(QModelIndex());i++) {
@@ -589,14 +594,11 @@ void MainWindow::on_searchEdit_textChanged(QString newText)
             ui->playlistBrowser->setRowHidden(i,QModelIndex(),true);
         }
     }
-}
+}*/
 
 void MainWindow::on_clearSearchButton_clicked()
 {
     ui->searchEdit->setText("");
-    for (int i = 0; i < playlistModel->rowCount(QModelIndex());i++) {
-        ui->playlistBrowser->setRowHidden(i,QModelIndex(),false);
-    }
 }
 
 void MainWindow::playlistLengthChanged(int totalLength, int tracksCount)
@@ -633,6 +635,4 @@ void MainWindow::playlistLengthChanged(int totalLength, int tracksCount)
     }
 
     playlistLengthLabel->setText(tr("%n track(s)","",tracksCount).append(" (").append(sDays).append(sHours).append(sMins).append(":").append(sSecs).append(")"));
-    //playlistLengthLabel->setText("MainWindow::playlistLengthChanged: Implement me!! ");
-    //playlistLengthLabel->setText(tr("%n track(s)","",tracksCount).append(" (").append(length).append(")"));
 }

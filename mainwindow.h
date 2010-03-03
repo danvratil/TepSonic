@@ -29,6 +29,7 @@
 #include <QLabel>
 
 #include "playlistmodel.h"
+#include "playlistproxymodel.h"
 #include "collectionmodel.h"
 #include "infopanel.h"
 #include "player.h"
@@ -66,6 +67,7 @@ private:
     QActionGroup *repeatPlaybackGroup;
 
     PlaylistModel *playlistModel;
+    PlaylistProxyModel *playlistProxyModel;
     CollectionModel *collectionModel;
 
     CollectionsUpdater *collectionsUpdater;
@@ -101,7 +103,7 @@ protected:
 private slots:
 
     void on_clearSearchButton_clicked();
-    void on_searchEdit_textChanged(QString );
+    /*void on_searchEdit_textChanged(QString );*/
     void on_actionSave_playlist_triggered();
     void showPlaylistContextMenu(QPoint pos);
     void togglePlaylistColumnVisible(int column);
