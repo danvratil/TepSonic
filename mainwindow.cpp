@@ -558,6 +558,9 @@ void MainWindow::on_actionNext_track_triggered()
                     // Now select the first item in playlist
                     selectionModel->select(QItemSelection(topLeft,bottomRight),
                                            QItemSelectionModel::Select);
+                    // If there is no row below and we are not in repeat mode, then stop the playback
+                } else {
+                    return;
                 } // if (player->repeatMode() == Player::RepeatAll)
             } // if (selected.at(0).row() == playlistModel->rowCount(QModelIndex()))
         } // if (player->randomMode() == false)
