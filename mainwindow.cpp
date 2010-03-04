@@ -124,7 +124,13 @@ MainWindow::MainWindow(QWidget *parent)
     // Not translatable
     headers = QStringList() << "title" << "filename";
     collectionModel = new CollectionModel(headers,this);
-    ui->collectionBrowser->setModel(collectionModel);
+    collectionProxyModel = new CollectionProxyModel(this);
+    collectionProxyModel->setSourceModel(collectionModel);
+    collectionProxyModel->setFilterCaseSensitivity(Qt::CaseInsensitive);
+    collectionProxyModel->setFilterKeyColumn(0);
+    collectionProxyModel->setDynamicSortFilter(true);
+
+    ui->collectionBrowser->setModel(collectionProxyModel);
     ui->collectionBrowser->setSelectionMode(QAbstractItemView::ExtendedSelection);
     ui->collectionBrowser->setDragEnabled(true);
     ui->collectionBrowser->setDropIndicatorShown(true);
@@ -187,7 +193,8 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->stopButton,SIGNAL(clicked()),ui->actionStop,SLOT(trigger()));
     connect(ui->nextTrackButton,SIGNAL(clicked()),ui->actionNext_track,SLOT(trigger()));
 
-    connect(ui->searchEdit,SIGNAL(textChanged(QString)),playlistProxyModel,SLOT(setFilterRegExp(QString)));
+    connect(ui->playlistSearchEdit,SIGNAL(textChanged(QString)),playlistProxyModel,SLOT(setFilterRegExp(QString)));
+    connect(ui->colectionSearchEdit,SIGNAL(textChanged(QString)),collectionProxyModel,SLOT(setFilterRegExp(QString)));
 
     // Connect individual PlaylistBrowser columns' visibility state with QActions in ui->menuVisible_columns
     playlistVisibleColumnContextMenuMapper = new QSignalMapper(this);
@@ -580,27 +587,6 @@ void MainWindow::on_actionSave_playlist_triggered()
     playlistManager->saveToFile(filename);
 }
 
-/*void MainWindow::on_searchEdit_textChanged(QString newText)
-{
-    QModelIndex index;
-    for (int i = 0; i < playlistModel->rowCount(QModelIndex());i++) {
-        if ((playlistModel->index(i,2,QModelIndex()).data().toString().contains(newText, Qt::CaseInsensitive)) ||
-            (playlistModel->index(i,3,QModelIndex()).data().toString().contains(newText, Qt::CaseInsensitive)) ||
-            (playlistModel->index(i,4,QModelIndex()).data().toString().contains(newText, Qt::CaseInsensitive)) ||
-            (playlistModel->index(i,5,QModelIndex()).data().toString().contains(newText, Qt::CaseInsensitive)) ||
-            (playlistModel->index(i,6,QModelIndex()).data().toString().contains(newText, Qt::CaseInsensitive))) {
-            ui->playlistBrowser->setRowHidden(i,QModelIndex(),false);
-        } else {
-            ui->playlistBrowser->setRowHidden(i,QModelIndex(),true);
-        }
-    }
-}*/
-
-void MainWindow::on_clearSearchButton_clicked()
-{
-    ui->searchEdit->setText("");
-}
-
 void MainWindow::playlistLengthChanged(int totalLength, int tracksCount)
 {
     int days = totalLength / 86400;
@@ -635,4 +621,14 @@ void MainWindow::playlistLengthChanged(int totalLength, int tracksCount)
     }
 
     playlistLengthLabel->setText(tr("%n track(s)","",tracksCount).append(" (").append(sDays).append(sHours).append(sMins).append(":").append(sSecs).append(")"));
+}
+
+void MainWindow::on_clearPlaylistSearch_clicked()
+{
+    ui->playlistSearchEdit->setText("");
+}
+
+void MainWindow::on_cleatCollectionSearch_clicked()
+{
+    ui->colectionSearchEdit->setText("");
 }

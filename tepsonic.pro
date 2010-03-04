@@ -26,7 +26,8 @@ HEADERS += collectionbrowser.h \
     databasemanager.h \
     collectionsupdater.h \
     collectionbuilder.h \
-    playlistproxymodel.h
+    playlistproxymodel.h \
+    collectionproxymodel.h
 FORMS += mainwindow.ui \
     preferencesdialog.ui
 SOURCES += collectionbrowser.cpp \
@@ -44,5 +45,6 @@ SOURCES += collectionbrowser.cpp \
     databasemanager.cpp \
     collectionsupdater.cpp \
     collectionbuilder.cpp \
-    playlistproxymodel.cpp
+    playlistproxymodel.cpp \
+    collectionproxymodel.cpp
 RESOURCES += icons.qrc

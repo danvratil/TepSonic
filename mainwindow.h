@@ -25,12 +25,14 @@
 #include <QtGui/QSystemTrayIcon>
 #include <QSettings>
 #include <QSignalMapper>
+#include <QSortFilterProxyModel>
 #include <QItemSelectionModel>
 #include <QLabel>
 
 #include "playlistmodel.h"
 #include "playlistproxymodel.h"
 #include "collectionmodel.h"
+#include "collectionproxymodel.h"
 #include "infopanel.h"
 #include "player.h"
 #include "tracksiterator.h"
@@ -69,6 +71,7 @@ private:
     PlaylistModel *playlistModel;
     PlaylistProxyModel *playlistProxyModel;
     CollectionModel *collectionModel;
+    CollectionProxyModel *collectionProxyModel;
 
     CollectionsUpdater *collectionsUpdater;
     CollectionBuilder *collectionBuilder;
@@ -102,8 +105,8 @@ protected:
 
 private slots:
 
-    void on_clearSearchButton_clicked();
-    /*void on_searchEdit_textChanged(QString );*/
+    void on_cleatCollectionSearch_clicked();
+    void on_clearPlaylistSearch_clicked();
     void on_actionSave_playlist_triggered();
     void showPlaylistContextMenu(QPoint pos);
     void togglePlaylistColumnVisible(int column);
