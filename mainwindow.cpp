@@ -94,7 +94,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->centralWidget->layout()->addWidget(infoPanel);
 
     playlistLengthLabel = new QLabel(this);
-    ui->statusBar->addWidget(playlistLengthLabel,0);
+    ui->statusBar->addPermanentWidget(playlistLengthLabel,0);
     playlistLengthLabel->setText(tr("%n track(s)", "", 0).append(" (00:00)"));
 
     QStringList headers = QStringList()<< tr("Filename")
@@ -252,6 +252,11 @@ MainWindow::~MainWindow()
     qDebug() << "Waiting for playlistManager to finish...";
     playlistManager->wait();
     delete playlistManager;
+
+    delete playlistProxyModel;
+    delete playlistModel;
+
+    delete collectionProxyModel;
 
     delete ui;
 }
