@@ -395,8 +395,8 @@ void MainWindow::updatePlayerTrack()
 void MainWindow::on_playlistBrowser_doubleClicked(QModelIndex index)
 {
    // Play item on row double click
-   QVariant row = playlistModel->data(index.sibling(index.row(),0), Qt::DisplayRole);
-   player->setTrack(row.toString(),true);
+   QString filename = playlistModel->index(index.row(),0,QModelIndex()).data().toString();
+   player->setTrack(filename,true);
 }
 
 void MainWindow::on_actionRandom_ON_triggered()
