@@ -124,7 +124,7 @@ private slots:
     void on_actionRandom_OFF_triggered();
     void on_actionRandom_ON_triggered();
 
-    void on_playerStatusChanged(Phonon::State, Phonon::State);
+    void playerStatusChanged(Phonon::State, Phonon::State);
 
     /**
      * Activate item in playlist

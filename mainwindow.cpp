@@ -180,7 +180,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     player = new Player();
     connect(player->phononPlayer,SIGNAL(finished()),this,SLOT(updatePlayerTrack()));
-    connect(player->phononPlayer,SIGNAL(stateChanged(Phonon::State,Phonon::State)),this,SLOT(on_playerStatusChanged(Phonon::State,Phonon::State)));
+    connect(player->phononPlayer,SIGNAL(stateChanged(Phonon::State,Phonon::State)),this,SLOT(playerStatusChanged(Phonon::State,Phonon::State)));
 
     ui->seekSlider->setMediaObject(player->phononPlayer);
     ui->volumeSlider->setAudioOutput(player->audioOutput);
@@ -424,7 +424,7 @@ void MainWindow::on_actionRepeat_playlist_triggered()
     player->setRepeatMode(Player::RepeatAll);
 }
 
-void MainWindow::on_playerStatusChanged(Phonon::State newState, Phonon::State oldState)
+void MainWindow::playerStatusChanged(Phonon::State newState, Phonon::State oldState)
 {
     Q_UNUSED(oldState);
 
