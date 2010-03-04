@@ -33,7 +33,6 @@
 #include "playlistproxymodel.h"
 #include "collectionmodel.h"
 #include "collectionproxymodel.h"
-#include "infopanel.h"
 #include "player.h"
 #include "tracksiterator.h"
 #include "collectionsupdater.h"
@@ -62,8 +61,6 @@ public:
 
 private:
     Ui::MainWindow *ui;
-
-    InfoPanel *infoPanel;
 
     QActionGroup *randomPlaybackGroup;
     QActionGroup *repeatPlaybackGroup;
@@ -192,13 +189,6 @@ private slots:
     void addPlaylistItem(QString);
 
     void playlistLengthChanged(int totalLength, int tracksCount);
-
-  public slots:
-
-    /**
-     * Update action bar
-     */
-    void updateActionBar(int progress, QString actionTitle = QString());
 
 };
 

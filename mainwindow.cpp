@@ -22,7 +22,6 @@
 
 #include "mainwindow.h"
 #include "preferencesdialog.h"
-#include "infopanel.h"
 #include "ui_mainwindow.h"
 
 #include "collectionitem.h"
@@ -88,10 +87,6 @@ MainWindow::MainWindow(QWidget *parent)
     trayIconMenu->addSeparator();
     trayIconMenu->addAction(ui->actionQuit_TepSonic);
     trayIcon->setContextMenu(trayIconMenu);
-
-    infoPanel = new InfoPanel(this);
-    infoPanel->hide();
-    ui->centralWidget->layout()->addWidget(infoPanel);
 
     playlistLengthLabel = new QLabel(this);
     ui->statusBar->addPermanentWidget(playlistLengthLabel,0);
@@ -174,9 +169,6 @@ MainWindow::MainWindow(QWidget *parent)
             ui->menuVisible_columns->actions().at(i)->setChecked(false);
         }
     }
-
-    ui->actionLabel->hide();
-    ui->actionProgress->hide();
 
     player = new Player();
     connect(player->phononPlayer,SIGNAL(finished()),this,SLOT(updatePlayerTrack()));
@@ -367,22 +359,6 @@ void MainWindow::on_actionAdd_folder_triggered()
     playlistManager->add(dirName);
 }
 
-void MainWindow::updateActionBar(int progress, QString actionTitle)
-{
-    if (ui->actionLabel->isHidden()) {
-        ui->actionLabel->show();
-    }
-    if (ui->actionProgress->isHidden()) {
-        ui->actionProgress->show();
-    }
-
-    if (not actionTitle.isEmpty()) {
-        ui->actionLabel->setText(actionTitle);
-    }
-
-    ui->actionProgress->setValue(progress);
-}
-
 void MainWindow::updatePlayerTrack()
 {
     if (player->repeatMode()==Player::RepeatTrack) {
@@ -451,9 +427,7 @@ void MainWindow::playerStatusChanged(Phonon::State newState, Phonon::State oldSt
             ui->trackTitleLabel->setText(tr("Player is stopped"));
             break;
         case Phonon::ErrorState:
-            infoPanel->setMode(InfoPanel::ErrorMode);
-            infoPanel->setMessage(player->phononPlayer->errorString());
-            infoPanel->show();
+            ui->statusBar->showMessage(player->phononPlayer->errorString(),5000);
             break;
         case Phonon::LoadingState:
             break;
