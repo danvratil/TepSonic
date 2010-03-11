@@ -42,10 +42,11 @@ Player::~Player()
 }
 
 void Player::setTrack(const QString fileName)
-{\
+{
     if (QFileInfo(fileName).isFile()) {
        phononPlayer->setCurrentSource(Phonon::MediaSource(fileName));
    }
+   emit trackChanged(fileName);
 }
 
 void Player::setTrack(const QString fileName, bool autoPlay)
@@ -54,6 +55,7 @@ void Player::setTrack(const QString fileName, bool autoPlay)
     if (autoPlay==true) {
         phononPlayer->play();
     }
+    emit trackChanged(fileName);
 }
 
 void Player::setRandomMode(bool randomMode)

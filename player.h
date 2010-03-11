@@ -53,6 +53,7 @@ class Player: public QObject
  signals:
     void repeatModeChanged(RepeatMode repeatMode);
     void randomModeChanged(bool randomMode);
+    void trackChanged(QString filename);
 
 };
 
