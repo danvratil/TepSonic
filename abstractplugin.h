@@ -43,7 +43,7 @@ class AbstractPlugin : public QObject, public PluginInterface
     public slots:
         virtual void settingsAccepted() = 0;
         virtual void trackChanged(QString filename) = 0;
-        virtual void playerStatusChanged(Phonon::State newState, Phonon::State oldState);
+        virtual void playerStatusChanged(Phonon::State newState, Phonon::State oldState) = 0;
 
     protected:
 
