@@ -1,6 +1,6 @@
 /*
  * TEPSONIC
- * Copyright 2009 Dan Vratil <vratil@progdansoft.com>
+ * Copyright 2010 Dan Vratil <vratil@progdansoft.com>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -17,23 +17,38 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Cambridge, MA 02110-1301, USA.
  */
 
-#include <QtGui/QApplication>
-#include <QList>
+
+#ifndef ABSTRACTPLUGIN_H
+#define ABSTRACTPLUGIN_H
+
+#include "plugininterface.h"
+
+#include <QObject>
 #include "player.h"
-#include "mainwindow.h"
-#include "pluginsmanager.h"
+#include <Phonon/MediaObject>
 
-int main(int argc, char *argv[])
+class QString;
+class QWidget;
+//class MainWindow;
+
+
+class AbstractPlugin : public QObject, public PluginInterface
 {
-    QApplication tepsonic(argc, argv);
-    tepsonic.setApplicationName("TepSonic");
-    tepsonic.setOrganizationName("Dan Vrátil");
-    tepsonic.setApplicationVersion("0.85");
+    Q_OBJECT
+    Q_INTERFACES(PluginInterface);
+    public:
+        virtual const QWidget* settingsWidget() = 0;
+        virtual QString getName() = 0;
 
-    Player *player = new Player();
-    MainWindow mainWindow(player);
-    PluginsManager *pluginsManager = new PluginsManager(&mainWindow,player);
+    public slots:
+        virtual void settingsAccepted() = 0;
+        virtual void trackChanged(QString filename) = 0;
+        virtual void playerStatusChanged(Phonon::State newState, Phonon::State oldState);
 
-    mainWindow.show();
-    return tepsonic.exec();
-}
+    protected:
+
+};
+
+#include "moc_abstractplugin.cpp"
+
+#endif // ABSTRACTPLUGIN_H

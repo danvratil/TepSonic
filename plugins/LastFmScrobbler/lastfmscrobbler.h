@@ -1,6 +1,6 @@
 /*
  * TEPSONIC
- * Copyright 2009 Dan Vratil <vratil@progdansoft.com>
+ * Copyright 2010 Dan Vratil <vratil@progdansoft.com>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -17,23 +17,33 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Cambridge, MA 02110-1301, USA.
  */
 
-#include <QtGui/QApplication>
-#include <QList>
-#include "player.h"
-#include "mainwindow.h"
-#include "pluginsmanager.h"
+#ifndef LASTFMSCROBBLER_H
+#define LASTFMSCROBBLER_H
 
-int main(int argc, char *argv[])
+#include "abstractplugin.h"
+
+#include "ui_lastfmscrobblerconfig.h"
+
+#include <QObject>
+#include <QWidget>
+#include <QString>
+
+class LastFmScrobbler : public AbstractPlugin
 {
-    QApplication tepsonic(argc, argv);
-    tepsonic.setApplicationName("TepSonic");
-    tepsonic.setOrganizationName("Dan Vrátil");
-    tepsonic.setApplicationVersion("0.85");
+    Q_OBJECT
+    public:
+        LastFmScrobbler();
+        ~LastFmScrobbler();
+        const QWidget* settingsWidget();
+        QString getName();
 
-    Player *player = new Player();
-    MainWindow mainWindow(player);
-    PluginsManager *pluginsManager = new PluginsManager(&mainWindow,player);
+    public slots:
+        void settingsAccepted();
+        void trackChanged(QString filename);
+        //void playerStatusChanged(Phonon::State newState, Phonon::State oldState) { }
 
-    mainWindow.show();
-    return tepsonic.exec();
-}
+    private:
+        Ui::LastFmScrobblerConfig *_configWidget;
+};
+
+#endif // LASTFMSCROBBLER_H

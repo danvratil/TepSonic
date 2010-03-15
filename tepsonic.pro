@@ -4,7 +4,7 @@
 QT += phonon \
     sql
 TEMPLATE = app
-TARGET = 
+TARGET = tepsonic
 LIBS += -ltag
 DEPENDPATH += .
 INCLUDEPATH += . \
@@ -27,7 +27,10 @@ HEADERS += collectionbrowser.h \
     collectionbuilder.h \
     playlistproxymodel.h \
     collectionproxymodel.h \
-    statusbar.h
+    statusbar.h \
+    plugininterface.h \
+    pluginsmanager.h \
+    abstractplugin.h
 FORMS += mainwindow.ui \
     preferencesdialog.ui
 SOURCES += collectionbrowser.cpp \
@@ -46,5 +49,6 @@ SOURCES += collectionbrowser.cpp \
     collectionbuilder.cpp \
     playlistproxymodel.cpp \
     collectionproxymodel.cpp \
-    statusbar.cpp
+    statusbar.cpp \
+    pluginsmanager.cpp
 RESOURCES += icons.qrc

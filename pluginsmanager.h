@@ -1,6 +1,6 @@
 /*
  * TEPSONIC
- * Copyright 2009 Dan Vratil <vratil@progdansoft.com>
+ * Copyright 2010 Dan Vratil <vratil@progdansoft.com>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -17,23 +17,33 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Cambridge, MA 02110-1301, USA.
  */
 
-#include <QtGui/QApplication>
+
+#ifndef PLUGINSMANAGER_H
+#define PLUGINSMANAGER_H
+
+#include <QObject>
 #include <QList>
-#include "player.h"
-#include "mainwindow.h"
-#include "pluginsmanager.h"
+#include <QPluginLoader>
 
-int main(int argc, char *argv[])
+class MainWindow;
+class Player;
+
+class PluginsManager : public QObject
 {
-    QApplication tepsonic(argc, argv);
-    tepsonic.setApplicationName("TepSonic");
-    tepsonic.setOrganizationName("Dan Vrátil");
-    tepsonic.setApplicationVersion("0.85");
+    Q_OBJECT
+    public:
+        explicit PluginsManager(MainWindow *mainWindow, Player *player);
+        ~PluginsManager();
 
-    Player *player = new Player();
-    MainWindow mainWindow(player);
-    PluginsManager *pluginsManager = new PluginsManager(&mainWindow,player);
 
-    mainWindow.show();
-    return tepsonic.exec();
-}
+    public slots:
+        void loadPlugins();
+
+    private:
+        QList<QPluginLoader*> _plugins;
+        MainWindow *_mainWindow;
+        Player *_player;
+
+};
+
+#endif // PLUGINSMANAGER_H

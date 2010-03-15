@@ -50,7 +50,7 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
-    MainWindow(QWidget *parent = 0);
+    MainWindow(Player *player);
     ~MainWindow();
 
     /**
@@ -87,7 +87,9 @@ private:
     QLabel *playlistLengthLabel;
 
     QSettings *settings;
-    Player *player;
+
+    Player *_player;
+
 
     TracksIterator *tracksIterator;
 

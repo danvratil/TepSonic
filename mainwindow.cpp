@@ -44,8 +44,8 @@
 
 #include <QDebug>
 
-MainWindow::MainWindow(QWidget *parent)
-    : QMainWindow(parent), ui(new Ui::MainWindow)
+MainWindow::MainWindow(Player *player)
+    : ui(new Ui::MainWindow)
 {
     // Initialize pseudo-random numbers generator
     srand(time(NULL));
@@ -170,12 +170,12 @@ MainWindow::MainWindow(QWidget *parent)
         }
     }
 
-    player = new Player();
-    connect(player->phononPlayer,SIGNAL(finished()),this,SLOT(updatePlayerTrack()));
-    connect(player->phononPlayer,SIGNAL(stateChanged(Phonon::State,Phonon::State)),this,SLOT(playerStatusChanged(Phonon::State,Phonon::State)));
+    _player = player;
+    connect(_player->phononPlayer,SIGNAL(finished()),this,SLOT(updatePlayerTrack()));
+    connect(_player->phononPlayer,SIGNAL(stateChanged(Phonon::State,Phonon::State)),this,SLOT(playerStatusChanged(Phonon::State,Phonon::State)));
 
-    ui->seekSlider->setMediaObject(player->phononPlayer);
-    ui->volumeSlider->setAudioOutput(player->audioOutput);
+    ui->seekSlider->setMediaObject(_player->phononPlayer);
+    ui->volumeSlider->setAudioOutput(_player->audioOutput);
 
     connect(ui->loadFileButton,SIGNAL(clicked()),ui->actionAdd_file,SLOT(trigger()));
     connect(ui->loadFolderButton,SIGNAL(clicked()),ui->actionAdd_folder,SLOT(trigger()));
@@ -187,6 +187,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     connect(ui->playlistSearchEdit,SIGNAL(textChanged(QString)),playlistProxyModel,SLOT(setFilterRegExp(QString)));
     connect(ui->colectionSearchEdit,SIGNAL(textChanged(QString)),collectionProxyModel,SLOT(setFilterRegExp(QString)));
+    connect(ui->colectionSearchEdit,SIGNAL(textChanged(QString)),playlistProxyModel,SLOT(invalidate()));
 
     // Connect individual PlaylistBrowser columns' visibility state with QActions in ui->menuVisible_columns
     playlistVisibleColumnContextMenuMapper = new QSignalMapper(this);
@@ -361,8 +362,8 @@ void MainWindow::on_actionAdd_folder_triggered()
 
 void MainWindow::updatePlayerTrack()
 {
-    if (player->repeatMode()==Player::RepeatTrack) {
-        player->phononPlayer->play();
+    if (_player->repeatMode()==Player::RepeatTrack) {
+        _player->phononPlayer->play();
     } else {
         on_actionNext_track_triggered();
     }
@@ -372,32 +373,32 @@ void MainWindow::on_playlistBrowser_doubleClicked(QModelIndex index)
 {
    // Play item on row double click
    QString filename = playlistModel->index(index.row(),0,QModelIndex()).data().toString();
-   player->setTrack(filename,true);
+   _player->setTrack(filename,true);
 }
 
 void MainWindow::on_actionRandom_ON_triggered()
 {
-    player->setRandomMode(true);
+    _player->setRandomMode(true);
 }
 
 void MainWindow::on_actionRandom_OFF_triggered()
 {
-    player->setRandomMode(false);
+    _player->setRandomMode(false);
 }
 
 void MainWindow::on_actionRepeat_track_triggered()
 {
-    player->setRepeatMode(Player::RepeatTrack);
+    _player->setRepeatMode(Player::RepeatTrack);
 }
 
 void MainWindow::on_actionRepeat_OFF_triggered()
 {
-    player->setRepeatMode(Player::RepeatOff);
+    _player->setRepeatMode(Player::RepeatOff);
 }
 
 void MainWindow::on_actionRepeat_playlist_triggered()
 {
-    player->setRepeatMode(Player::RepeatAll);
+    _player->setRepeatMode(Player::RepeatAll);
 }
 
 void MainWindow::playerStatusChanged(Phonon::State newState, Phonon::State oldState)
@@ -410,7 +411,7 @@ void MainWindow::playerStatusChanged(Phonon::State newState, Phonon::State oldSt
             ui->actionPlay_pause->setIcon(QIcon(":/icons/pause"));
             ui->stopButton->setEnabled(true);
             ui->actionStop->setEnabled(true);
-            ui->trackTitleLabel->setText(player->phononPlayer->currentSource().fileName());
+            ui->trackTitleLabel->setText(_player->phononPlayer->currentSource().fileName());
             break;
         case Phonon::PausedState:
             ui->playPauseButton->setIcon(QIcon(":/icons/start"));
@@ -427,7 +428,7 @@ void MainWindow::playerStatusChanged(Phonon::State newState, Phonon::State oldSt
             ui->trackTitleLabel->setText(tr("Player is stopped"));
             break;
         case Phonon::ErrorState:
-            ui->statusBar->showMessage(player->phononPlayer->errorString(),5000);
+            ui->statusBar->showMessage(_player->phononPlayer->errorString(),5000);
             break;
         case Phonon::LoadingState:
             break;
@@ -452,35 +453,35 @@ void MainWindow::on_actionPrevious_track_triggered()
         // And then select the new row
         selectionModel->select(QItemSelection(topLeft,bottomRight),
                                QItemSelectionModel::Select);
-        player->setTrack(selectionModel->selectedRows(0).at(0).data().toString(),true);
+        _player->setTrack(selectionModel->selectedRows(0).at(0).data().toString(),true);
     }
 }
 
 void MainWindow::on_actionPlay_pause_triggered()
 {
-    if (player->phononPlayer->state() == Phonon::PlayingState) {
-        player->phononPlayer->pause();
+    if (_player->phononPlayer->state() == Phonon::PlayingState) {
+        _player->phononPlayer->pause();
     } else {
         /* When the source is empty there are some files in playlist, select the
            first row and load it as current source */
-        if ((player->phononPlayer->currentSource().fileName().isEmpty()) &&
+        if ((_player->phononPlayer->currentSource().fileName().isEmpty()) &&
             (playlistModel->rowCount() > 0)) {
             QModelIndex topLeft = playlistModel->index(0,0,QModelIndex());
             QModelIndex bottomRight = playlistModel->index(0,playlistModel->columnCount(QModelIndex())-1,QModelIndex());
             selectionModel->select(QItemSelection(topLeft,bottomRight),
                                    QItemSelectionModel::Select);
-            player->setTrack(selectionModel->selectedRows(0).at(0).data().toString(),true);
+            _player->setTrack(selectionModel->selectedRows(0).at(0).data().toString(),true);
 
         }
-        player->phononPlayer->play();
+        _player->phononPlayer->play();
     }
 }
 
 void MainWindow::on_actionStop_triggered()
 {
-    player->phononPlayer->stop();
+    _player->phononPlayer->stop();
     // Empty source
-    player->phononPlayer->setCurrentSource(Phonon::MediaSource());
+    _player->phononPlayer->setCurrentSource(Phonon::MediaSource());
 }
 
 void MainWindow::on_actionNext_track_triggered()
@@ -488,7 +489,7 @@ void MainWindow::on_actionNext_track_triggered()
     QModelIndexList selected = selectionModel->selectedRows(0);
     if (selected.count() > 0) {
         // Is Random mode on?
-        if (player->randomMode()) {
+        if (_player->randomMode()) {
             // Choose random row (generator initialized in constructor)
             int row = rand() % playlistModel->rowCount(QModelIndex());
             QModelIndex topLeft = playlistModel->index(row,
@@ -520,7 +521,7 @@ void MainWindow::on_actionNext_track_triggered()
                                        QItemSelectionModel::Select);
                 // If there is now row below, but player is set to "RepeatAll" then jump to the first track
             } else {
-                if(player->repeatMode() == Player::RepeatAll) {
+                if(_player->repeatMode() == Player::RepeatAll) {
                     QModelIndex topLeft = playlistModel->index(0,0,QModelIndex());
                     QModelIndex bottomRight = playlistModel->index(0,
                                                                    playlistModel->columnCount(QModelIndex())-1,
@@ -535,11 +536,11 @@ void MainWindow::on_actionNext_track_triggered()
                     // If there is no row below and we are not in repeat mode, then stop the playback
                 } else {
                     return;
-                } // if (player->repeatMode() == Player::RepeatAll)
+                } // if (_player->repeatMode() == Player::RepeatAll)
             } // if (selected.at(0).row() == playlistModel->rowCount(QModelIndex()))
-        } // if (player->randomMode() == false)
+        } // if (_player->randomMode() == false)
         // Now set the selected item as mediasource into Phonon player
-        player->setTrack(selectionModel->selectedRows(0).at(0).data().toString(),true);
+        _player->setTrack(selectionModel->selectedRows(0).at(0).data().toString(),true);
     } // if (selected.count() == 0)
 
 }

@@ -26,6 +26,14 @@
 #include <Phonon/AudioOutput>
 #include <Phonon/MediaObject>
 
+struct MetaData {
+    QString artist;
+    QString title;
+    QString album;
+    int length;
+    int trackNumber;
+};
+
 class Player: public QObject
 {
     Q_OBJECT
@@ -41,6 +49,8 @@ class Player: public QObject
     void setTrack(const QString fileName, bool autoPlay);
     RepeatMode repeatMode() { return _repeatMode; }
     bool randomMode() { return _randomMode; }
+    MetaData currentMetaData();
+
 
   private:
     RepeatMode _repeatMode;
