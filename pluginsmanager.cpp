@@ -43,6 +43,10 @@ PluginsManager::~PluginsManager()
 {
     // Unload all plugins
     foreach (QPluginLoader *pluginLoader, _plugins) {
+        disconnect(static_cast<AbstractPlugin*>(pluginLoader->instance()),SLOT(settingsAccepted()));
+        disconnect(static_cast<AbstractPlugin*>(pluginLoader->instance()),SLOT(playerStatusChanged(Phonon::State,Phonon::State)));
+        disconnect(static_cast<AbstractPlugin*>(pluginLoader->instance()),SLOT(trackChanged(QString)));
+        disconnect(static_cast<AbstractPlugin*>(pluginLoader->instance()),SLOT(trackPositionChanged(qint64)));
         pluginLoader->unload();
     }
 }
@@ -51,15 +55,19 @@ PluginsManager::~PluginsManager()
 void PluginsManager::loadPlugins()
 {
     QDir pluginsDir = QDir(qApp->applicationDirPath());
-    pluginsDir.cdUp();
     pluginsDir.cd("plugins");
     foreach(QString filename, pluginsDir.entryList(QDir::Files)) {
-        qDebug() << "Loading plugin " << pluginsDir.absoluteFilePath(filename);
-        QPluginLoader *pluginLoader = new QPluginLoader(pluginsDir.absoluteFilePath(filename));
-        QObject *plugin = pluginLoader->instance();
-        qDebug() << pluginLoader->errorString();
-        if (plugin) {
-            _plugins.append(pluginLoader);
+        qDebug() << filename;
+        if (QLibrary::isLibrary(filename)) {
+            qDebug() << "Loading plugin " << pluginsDir.absoluteFilePath(filename);
+            QPluginLoader *pluginLoader = new QPluginLoader(pluginsDir.absoluteFilePath(filename));
+            QObject *plugin = pluginLoader->instance();
+            if (plugin) {
+                _plugins.append(pluginLoader);
+                connect(_player,SIGNAL(trackChanged(QString)),static_cast<AbstractPlugin*>(plugin),SLOT(trackChanged(QString)));
+                connect(_player,SIGNAL(stateChanged(Phonon::State,Phonon::State)),static_cast<AbstractPlugin*>(plugin),SLOT(playerStatusChanged(Phonon::State,Phonon::State)));
+                connect(_player,SIGNAL(trackPositionChanged(qint64)),static_cast<AbstractPlugin*>(plugin),SLOT(trackPositionChanged(qint64)));
+            }
         }
     }
 }
