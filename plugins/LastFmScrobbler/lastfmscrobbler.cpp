@@ -48,8 +48,7 @@ void LastFmScrobbler::settingsWidget(QWidget *parentWidget)
     _configWidget = new Ui::LastFmScrobblerConfig();
     _configWidget->setupUi(parentWidget);
 
-    qDebug() << QDir::homePath().append("/.tepsonic/lastfmscrobbler.conf");
-    QSettings settings(QDir::homePath().append("/.tepsonic/lastfmscrobbler.conf"));
+    QSettings settings(QDir::homePath().append("/.tepsonic/lastfmscrobbler.conf"),QSettings::IniFormat,this);
     _configWidget->usernameEdit->setText(settings.value("username",QString()).toString());
     _configWidget->passwordEdit->setText(settings.value("password",QString()).toString());
 }
@@ -61,8 +60,7 @@ void LastFmScrobbler::trackChanged(QString filename)
 
 void LastFmScrobbler::settingsAccepted()
 {
-    qDebug() << "Saving config";
-    QSettings settings(QDir::homePath().append("/.tepsonic/lastfmscrobbler.conf"));
+    QSettings settings(QDir::homePath().append("/.tepsonic/lastfmscrobbler.conf"),QSettings::IniFormat,this);
     settings.setValue("username",_configWidget->usernameEdit->text());
     settings.setValue("password",_configWidget->passwordEdit->text());
 }
