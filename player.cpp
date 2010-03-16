@@ -57,7 +57,6 @@ void Player::setTrack(const QString fileName, bool autoPlay)
     if (autoPlay==true) {
         _phononPlayer->play();
     }
-    emit trackChanged(fileName);
 }
 
 void Player::setRandomMode(bool randomMode)
