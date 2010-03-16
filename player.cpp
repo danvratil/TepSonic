@@ -28,10 +28,12 @@
 
 Player::Player()
 {
-    phononPlayer = new Phonon::MediaObject();
-    phononPlayer = new Phonon::MediaObject();
-    audioOutput = new Phonon::AudioOutput(Phonon::MusicCategory);
-    Phonon::createPath(phononPlayer,audioOutput);
+    _phononPlayer = new Phonon::MediaObject();
+    _audioOutput = new Phonon::AudioOutput(Phonon::MusicCategory);
+    Phonon::createPath(_phononPlayer,_audioOutput);
+
+    connect(_phononPlayer,SIGNAL(finished()),this,SIGNAL(finished()));
+    connect(_phononPlayer,SIGNAL(stateChanged(Phonon::State,Phonon::State)),this,SIGNAL(stateChanged(Phonon::State,Phonon::State)));
 
     _randomMode = false;
     _repeatMode = RepeatOff;
@@ -44,7 +46,7 @@ Player::~Player()
 void Player::setTrack(const QString fileName)
 {
     if (QFileInfo(fileName).isFile()) {
-       phononPlayer->setCurrentSource(Phonon::MediaSource(fileName));
+       _phononPlayer->setCurrentSource(Phonon::MediaSource(fileName));
    }
    emit trackChanged(fileName);
 }
@@ -53,7 +55,7 @@ void Player::setTrack(const QString fileName, bool autoPlay)
 {
     setTrack(fileName);
     if (autoPlay==true) {
-        phononPlayer->play();
+        _phononPlayer->play();
     }
     emit trackChanged(fileName);
 }
@@ -84,6 +86,13 @@ MetaData Player::currentMetaData()
     data.trackNumber = phononPlayer->metaData("TRACKNUMBER").at(0).toInt();*/
 
     return data;
+}
+
+void Player::stop()
+{
+    _phononPlayer->stop();
+    // Empty the source
+    _phononPlayer->setCurrentSource(Phonon::MediaSource());
 }
 
 

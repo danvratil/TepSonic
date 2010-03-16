@@ -43,27 +43,39 @@ class Player: public QObject
     enum RepeatMode { RepeatOff, RepeatTrack, RepeatAll };
     Player();
     ~Player();
-    Phonon::MediaObject *phononPlayer;
-    Phonon::AudioOutput *audioOutput;
-    void setTrack(const QString fileName);
-    void setTrack(const QString fileName, bool autoPlay);
-    RepeatMode repeatMode() { return _repeatMode; }
-    bool randomMode() { return _randomMode; }
+
     MetaData currentMetaData();
 
+    RepeatMode repeatMode() { return _repeatMode; }
+    bool randomMode() { return _randomMode; }
+    Phonon::MediaSource currentSource() { return _phononPlayer->currentSource(); }
+    Phonon::State playerState() { return _phononPlayer->state(); }
+    QString errorString() { return _phononPlayer->errorString(); }
+    Phonon::MediaObject* mediaObject() { return _phononPlayer; }
+    Phonon::AudioOutput* audioOutput() { return _audioOutput; }
 
   private:
     RepeatMode _repeatMode;
     bool _randomMode;
+    Phonon::MediaObject *_phononPlayer;
+    Phonon::AudioOutput *_audioOutput;
+
 
  public slots:
     void setRepeatMode(RepeatMode);
     void setRandomMode(bool);
+    void play() { _phononPlayer->play(); }
+    void pause() { _phononPlayer->pause(); }
+    void stop();
+    void setTrack(const QString fileName);
+    void setTrack(const QString fileName, bool autoPlay);
 
  signals:
     void repeatModeChanged(RepeatMode repeatMode);
     void randomModeChanged(bool randomMode);
     void trackChanged(QString filename);
+    void finished();
+    void stateChanged(Phonon::State newState, Phonon::State oldState);
 
 };
 
