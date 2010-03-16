@@ -20,6 +20,8 @@ class PreferencesDialog : public QDialog {
         PreferencesDialog(QSettings* settings, QWidget *parent = 0);
         virtual ~PreferencesDialog();
 
+        void addPlugin(QPluginLoader *plugin);
+
     signals:
         void rebuildCollectionsRequested();
 

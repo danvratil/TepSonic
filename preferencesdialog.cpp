@@ -1,6 +1,8 @@
 #include "preferencesdialog.h"
 #include "ui_preferencesdialog.h"
 
+#include "abstractplugin.h"
+
 #include <QFileDialog>
 #include <QDebug>
 
@@ -70,6 +72,7 @@ void PreferencesDialog::on_buttonBox_accepted()
     _settings->setValue("RestoreSession",_ui->rememberLastSessionCheckbox->isChecked());
     _settings->endGroup(); // Preferences group
 
+    emit(accepted());
     this->close();
 }
 
@@ -106,4 +109,12 @@ void PreferencesDialog::on_addPathButton_clicked()
 void PreferencesDialog::on_rebuildCollectionsNowBtn_clicked()
 {
     emit rebuildCollectionsRequested();
+}
+
+void PreferencesDialog::addPlugin(QPluginLoader *plugin)
+{
+    QWidget *pluginWidget = new QWidget();
+    int newItem = _ui->toolBox->addItem(pluginWidget,QIcon(),static_cast<AbstractPlugin*>(plugin->instance())->getName());
+    static_cast<AbstractPlugin*>(plugin->instance())->settingsWidget(pluginWidget);
+    connect(this,SIGNAL(accepted()),static_cast<AbstractPlugin*>(plugin->instance()),SLOT(settingsAccepted()));
 }

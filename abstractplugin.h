@@ -37,7 +37,7 @@ class AbstractPlugin : public QObject, public PluginInterface
     Q_OBJECT
     Q_INTERFACES(PluginInterface);
     public:
-        virtual QWidget* settingsWidget() = 0;
+        virtual void settingsWidget(QWidget *parentWidget) = 0;
         virtual QString getName() = 0;
         QString pluginName() { return _pluginName; }
 

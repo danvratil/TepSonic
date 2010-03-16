@@ -28,7 +28,7 @@ class PluginInterface
 {
     public:
         virtual ~PluginInterface() {}
-        virtual QWidget* settingsWidget() = 0;
+        virtual void settingsWidget(QWidget *parentWidget) = 0;
 
 };
 

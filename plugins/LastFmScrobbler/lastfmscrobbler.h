@@ -34,7 +34,7 @@ class LastFmScrobbler : public AbstractPlugin
     public:
         LastFmScrobbler();
         ~LastFmScrobbler();
-        QWidget* settingsWidget();
+        void settingsWidget(QWidget *parentWidget);
         QString getName();
 
     public slots:
@@ -45,5 +45,7 @@ class LastFmScrobbler : public AbstractPlugin
     private:
         Ui::LastFmScrobblerConfig *_configWidget;
 };
+
+#include "moc_abstractplugin.cpp"
 
 #endif // LASTFMSCROBBLER_H

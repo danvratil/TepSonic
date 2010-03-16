@@ -339,6 +339,11 @@ void MainWindow::on_actionPreferences_triggered()
 {
     // Show preferences dialog
     PreferencesDialog *prefDlg = new PreferencesDialog(settings,this);
+    qDebug() << "Adding plugins widgets to configurtion dialog";
+    qDebug() << _pluginsManager->pluginsCount() << "plugins available";
+    for (int i = 0; i<_pluginsManager->pluginsCount(); i++) {
+        prefDlg->addPlugin(_pluginsManager->pluginAt(i));
+    }
     connect(prefDlg,SIGNAL(rebuildCollectionsRequested()),collectionsUpdater,SLOT(start()));
     prefDlg->exec();
 

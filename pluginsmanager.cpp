@@ -57,8 +57,19 @@ void PluginsManager::loadPlugins()
         qDebug() << "Loading plugin " << pluginsDir.absoluteFilePath(filename);
         QPluginLoader *pluginLoader = new QPluginLoader(pluginsDir.absoluteFilePath(filename));
         QObject *plugin = pluginLoader->instance();
+        qDebug() << pluginLoader->errorString();
         if (plugin) {
             _plugins.append(pluginLoader);
         }
     }
+}
+
+int PluginsManager::pluginsCount()
+{
+    return _plugins.count();
+}
+
+QPluginLoader* PluginsManager::pluginAt(int index)
+{
+    return _plugins.at(index);
 }
