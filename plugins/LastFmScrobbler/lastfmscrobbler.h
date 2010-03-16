@@ -34,13 +34,13 @@ class LastFmScrobbler : public AbstractPlugin
     public:
         LastFmScrobbler();
         ~LastFmScrobbler();
-        const QWidget* settingsWidget();
+        QWidget* settingsWidget();
         QString getName();
 
     public slots:
         void settingsAccepted();
         void trackChanged(QString filename);
-        //void playerStatusChanged(Phonon::State newState, Phonon::State oldState) { }
+        void playerStatusChanged(Phonon::State newState, Phonon::State oldState) { }
 
     private:
         Ui::LastFmScrobblerConfig *_configWidget;

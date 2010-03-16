@@ -57,11 +57,8 @@ void PluginsManager::loadPlugins()
         qDebug() << "Loading plugin " << pluginsDir.absoluteFilePath(filename);
         QPluginLoader *pluginLoader = new QPluginLoader(pluginsDir.absoluteFilePath(filename));
         QObject *plugin = pluginLoader->instance();
-        qDebug() << plugin;
         if (plugin) {
             _plugins.append(pluginLoader);
-            qDebug() << static_cast<AbstractPlugin*>(plugin)->getName();
-            connect(_player,SIGNAL(trackChanged(QString)),static_cast<AbstractPlugin*>(plugin),SLOT(trackChanged(QString)));
         }
     }
 }

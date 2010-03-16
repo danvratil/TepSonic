@@ -33,6 +33,7 @@ int main(int argc, char *argv[])
     Player *player = new Player();
     MainWindow mainWindow(player);
     PluginsManager *pluginsManager = new PluginsManager(&mainWindow,player);
+    mainWindow.setPluginsManager(pluginsManager);
 
     mainWindow.show();
     return tepsonic.exec();

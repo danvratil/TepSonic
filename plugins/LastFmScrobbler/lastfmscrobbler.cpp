@@ -41,7 +41,7 @@ QString LastFmScrobbler::getName()
     return "lastfm!";
 }
 
-const QWidget* LastFmScrobbler::settingsWidget()
+QWidget* LastFmScrobbler::settingsWidget()
 {
     qDebug() << "LastFmScrobbler settings widget requested";
 

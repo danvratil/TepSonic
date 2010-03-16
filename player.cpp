@@ -77,11 +77,11 @@ void Player::setRepeatMode(RepeatMode repeatMode)
 MetaData Player::currentMetaData()
 {
     MetaData data;
-    data.artist = phononPlayer->metaData("ARTIST");
-    data.album = phononPlayer->metaData("ALBUM");
+    /*data.artist = phononPlayer->metaData("ARTIST").
+    data.album = phononPlayer->metaData("ALBUM").at(0);
     data.length = (int)phononPlayer->totalTime()/1000;
-    data.title = phononPlayer->metaData("TITLE");
-    data.trackNumber = QString(phononPlayer->metaData("TRACKNUMBER")).toInt();
+    data.title = phononPlayer->metaData("TITLE").at(0);
+    data.trackNumber = phononPlayer->metaData("TRACKNUMBER").at(0).toInt();*/
 
     return data;
 }

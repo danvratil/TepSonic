@@ -37,8 +37,9 @@ class AbstractPlugin : public QObject, public PluginInterface
     Q_OBJECT
     Q_INTERFACES(PluginInterface);
     public:
-        virtual const QWidget* settingsWidget() = 0;
+        virtual QWidget* settingsWidget() = 0;
         virtual QString getName() = 0;
+        QString pluginName() { return _pluginName; }
 
     public slots:
         virtual void settingsAccepted() = 0;
@@ -46,9 +47,13 @@ class AbstractPlugin : public QObject, public PluginInterface
         virtual void playerStatusChanged(Phonon::State newState, Phonon::State oldState) = 0;
 
     protected:
+        void setPluginName(QString name) { _pluginName = name; }
+
+    private:
+        QString _pluginName;
 
 };
 
-#include "moc_abstractplugin.cpp"
+//#include "moc_abstractplugin.cpp"
 
 #endif // ABSTRACTPLUGIN_H

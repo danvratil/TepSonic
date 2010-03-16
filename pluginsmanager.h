@@ -35,6 +35,9 @@ class PluginsManager : public QObject
         explicit PluginsManager(MainWindow *mainWindow, Player *player);
         ~PluginsManager();
 
+        //QList<QWidget*> settingsWidgets();
+        int pluginsCount() { return _plugins.count(); }
+        QPluginLoader *plugin(int index) { return _plugins.at(index); }
 
     public slots:
         void loadPlugins();

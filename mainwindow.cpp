@@ -615,3 +615,8 @@ void MainWindow::on_cleatCollectionSearch_clicked()
 {
     ui->colectionSearchEdit->setText("");
 }
+
+void MainWindow::setPluginsManager(PluginsManager *pluginsManager)
+{
+    _pluginsManager = pluginsManager;
+}

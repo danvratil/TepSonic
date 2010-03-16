@@ -4,6 +4,7 @@
 #include <QtGui/QDialog>
 
 #include <QDirModel>
+#include <QPluginLoader>
 #include <QTreeWidgetItem>
 #include <QSettings>
 
@@ -14,31 +15,32 @@ namespace Ui {
 class PreferencesDialog : public QDialog {
     Q_OBJECT
     Q_DISABLE_COPY(PreferencesDialog)
-public:
-    PreferencesDialog(QSettings* settings, QWidget *parent = 0);
-    virtual ~PreferencesDialog();
 
-signals:
-    void rebuildCollectionsRequested();
+    public:
+        PreferencesDialog(QSettings* settings, QWidget *parent = 0);
+        virtual ~PreferencesDialog();
 
-protected:
-    virtual void changeEvent(QEvent *e);
+    signals:
+        void rebuildCollectionsRequested();
 
-private:
-    Ui::PreferencesDialog *_ui;
+    protected:
+        virtual void changeEvent(QEvent *e);
 
-    QSettings *_settings;
+    private:
+        Ui::PreferencesDialog *_ui;
 
-private slots:
+        QSettings *_settings;
+
+    private slots:
 
 
-private slots:
-    void on_rebuildCollectionsNowBtn_clicked();
-    void on_addPathButton_clicked();
-    void on_removePathButton_clicked();
-    void on_collectionsStorageEngine_combo_currentIndexChanged(QString newIndex);
-    void on_buttonBox_rejected();
-    void on_buttonBox_accepted();
+    private slots:
+        void on_rebuildCollectionsNowBtn_clicked();
+        void on_addPathButton_clicked();
+        void on_removePathButton_clicked();
+        void on_collectionsStorageEngine_combo_currentIndexChanged(QString newIndex);
+        void on_buttonBox_rejected();
+        void on_buttonBox_accepted();
 };
 
 #endif // PREFERENCESDIALOG_H

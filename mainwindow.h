@@ -39,6 +39,7 @@
 #include "collectionbuilder.h"
 #include "playlistmanager.h"
 #include "databasemanager.h"
+#include "pluginsmanager.h"
 
 namespace Ui
 {
@@ -58,6 +59,8 @@ public:
      * to be only hidden not terminated. If TRUE, the main window will be closed and application
      * will be terminated.*/
     bool canClose;
+
+    void setPluginsManager(PluginsManager *pluginsManager);
 
 private:
     Ui::MainWindow *ui;
@@ -89,6 +92,7 @@ private:
     QSettings *settings;
 
     Player *_player;
+    PluginsManager *_pluginsManager;
 
 
     TracksIterator *tracksIterator;
