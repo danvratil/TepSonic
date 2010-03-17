@@ -29,8 +29,6 @@
 
 class QString;
 class QWidget;
-//class MainWindow;
-
 
 class AbstractPlugin : public QObject, public PluginInterface
 {
@@ -38,19 +36,18 @@ class AbstractPlugin : public QObject, public PluginInterface
     Q_INTERFACES(PluginInterface);
     public:
         virtual void settingsWidget(QWidget *parentWidget) = 0;
-        virtual QString getName() = 0;
-        QString pluginName() { return _pluginName; }
+        virtual QString pluginName() = 0;
 
     public slots:
         virtual void settingsAccepted() = 0;
-        virtual void trackChanged(QString filename) = 0;
+        virtual void trackChanged(MetaData metadata) = 0;
+        virtual void trackFinished(MetaData metadata) = 0;
         virtual void playerStatusChanged(Phonon::State newState, Phonon::State oldState) = 0;
+        virtual void trackPositionChanged(qint64 newPos) = 0;
 
-    protected:
-        void setPluginName(QString name) { _pluginName = name; }
+    signals:
+        void error(QString);
 
-    private:
-        QString _pluginName;
 
 };
 

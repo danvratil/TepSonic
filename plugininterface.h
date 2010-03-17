@@ -23,13 +23,14 @@
 #include <QtPlugin>
 
 class QWidget;
+class QString;
 
 class PluginInterface
 {
     public:
         virtual ~PluginInterface() {}
         virtual void settingsWidget(QWidget *parentWidget) = 0;
-
+        virtual QString pluginName() = 0;
 };
 
 Q_DECLARE_INTERFACE(PluginInterface,"TepSonic.PluginInterface/1.0");
