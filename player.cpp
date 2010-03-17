@@ -103,7 +103,7 @@ MetaData Player::currentMetaData()
     data.album = f.tag()->album().toCString();
     data.trackNumber = f.tag()->track();
     // Length in msecs
-    qint64 totalTimeNum = f.audioProperties()->length()*1000;
+    data.length = f.audioProperties()->length()*1000;
     data.filename = filename;
 
     return data;
