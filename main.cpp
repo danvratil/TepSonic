@@ -28,7 +28,7 @@ int main(int argc, char *argv[])
     QApplication tepsonic(argc, argv);
     tepsonic.setApplicationName("TepSonic");
     tepsonic.setOrganizationName("Dan Vrátil");
-    tepsonic.setApplicationVersion("0.85");
+    tepsonic.setApplicationVersion("0.90");
 
     Player *player = new Player();
     MainWindow mainWindow(player);
