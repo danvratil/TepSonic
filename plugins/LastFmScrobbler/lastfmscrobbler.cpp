@@ -135,9 +135,14 @@ QUrl LastFmScrobbler::prepareHandshakeURL(QString username, QString password)
     QString token = QCryptographicHash::hash(QString(passwordHash+timestamp).toUtf8(),
                                              QCryptographicHash::Md5).toHex();
 
-    QString uri = "hs=true&p=1.2.1&c=tst&v=1.0&u=" + username
-                    + "&t=" + timestamp
-                    + "&a=" + token;
+    QString uri;
+    uri.append("hs=true");
+    uri.append("&p=1.2.1");
+    uri.append("&c="+QCoreApplication::applicationName());
+    uri.append("&v="+QCoreApplication::applicationVersion());
+    uri.append("&u=" + username);
+    uri.append("&t=" + timestamp);
+    uri.append("&a=" + token);
 
     return QUrl("http://post.audioscrobbler.com/?"+uri);
 }
@@ -190,7 +195,7 @@ void LastFmScrobbler::scrobble(MetaData metadata)
 
     data.append("&a[0]="+QUrl::toPercentEncoding(metadata.artist.toUtf8()));
     data.append("&t[0]="+QUrl::toPercentEncoding(metadata.title.toUtf8()));
-    data.append("&i[0]="+QString::number(QDateTime::currentDateTime().toTime_t()-(int)(metadata.length/1000)));
+    data.append("&i[0]="+QString::number(QDateTime::currentDateTime().toUTC().toTime_t()-(int)(metadata.length/1000)));
     data.append("&o[0]=R");
     data.append("&r[0]=");
     data.append("&l[0]="+QString::number((int)(metadata.length/1000)));
