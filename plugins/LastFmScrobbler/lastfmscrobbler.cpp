@@ -62,9 +62,10 @@ void LastFmScrobbler::settingsWidget(QWidget *parentWidget)
 
 void LastFmScrobbler::trackFinished(MetaData trackdata)
 {
-    if ((_played >= 240000) && (_played >= trackdata.length/2)) {
+   /* if ((_played >= 240000) && (_played >= trackdata.length/2)) {
         scrobble(trackdata);
-    }
+    }*/
+    scrobble(trackdata);
 }
 
 void LastFmScrobbler::trackPositionChanged(qint64 newPos)
@@ -189,7 +190,7 @@ void LastFmScrobbler::scrobble(MetaData metadata)
 
     data.append("&a[0]="+QUrl::toPercentEncoding(metadata.artist.toUtf8()));
     data.append("&t[0]="+QUrl::toPercentEncoding(metadata.title.toUtf8()));
-    data.append("&i[0]="+QString::number(QDateTime::currentDateTime().toTime_t()-metadata.length));
+    data.append("&i[0]="+QString::number(QDateTime::currentDateTime().toTime_t()-(int)(metadata.length/1000)));
     data.append("&o[0]=R");
     data.append("&r[0]=");
     data.append("&l[0]="+QString::number((int)(metadata.length/1000)));
