@@ -94,7 +94,6 @@ private:
     Player *_player;
     PluginsManager *_pluginsManager;
 
-
     TracksIterator *tracksIterator;
 
 protected:
@@ -105,6 +104,9 @@ protected:
      * and ignores the event (FALSE)
      */
     void closeEvent(QCloseEvent*);
+
+public slots:
+    void showError(QString error);
 
 private slots:
 

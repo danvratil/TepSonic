@@ -171,11 +171,11 @@ MainWindow::MainWindow(Player *player)
     }
 
     _player = player;
-    connect(_player->phononPlayer,SIGNAL(finished()),this,SLOT(updatePlayerTrack()));
-    connect(_player->phononPlayer,SIGNAL(stateChanged(Phonon::State,Phonon::State)),this,SLOT(playerStatusChanged(Phonon::State,Phonon::State)));
+    connect(_player,SIGNAL(trackFinished()),this,SLOT(updatePlayerTrack()));
+    connect(_player,SIGNAL(stateChanged(Phonon::State,Phonon::State)),this,SLOT(playerStatusChanged(Phonon::State,Phonon::State)));
 
-    ui->seekSlider->setMediaObject(_player->phononPlayer);
-    ui->volumeSlider->setAudioOutput(_player->audioOutput);
+    ui->seekSlider->setMediaObject(_player->mediaObject());
+    ui->volumeSlider->setAudioOutput(_player->audioOutput());
 
     connect(ui->loadFileButton,SIGNAL(clicked()),ui->actionAdd_file,SLOT(trigger()));
     connect(ui->loadFolderButton,SIGNAL(clicked()),ui->actionAdd_folder,SLOT(trigger()));
@@ -368,7 +368,7 @@ void MainWindow::on_actionAdd_folder_triggered()
 void MainWindow::updatePlayerTrack()
 {
     if (_player->repeatMode()==Player::RepeatTrack) {
-        _player->phononPlayer->play();
+        _player->play();
     } else {
         on_actionNext_track_triggered();
     }
@@ -416,7 +416,7 @@ void MainWindow::playerStatusChanged(Phonon::State newState, Phonon::State oldSt
             ui->actionPlay_pause->setIcon(QIcon(":/icons/pause"));
             ui->stopButton->setEnabled(true);
             ui->actionStop->setEnabled(true);
-            ui->trackTitleLabel->setText(_player->phononPlayer->currentSource().fileName());
+            ui->trackTitleLabel->setText(_player->currentSource().fileName());
             break;
         case Phonon::PausedState:
             ui->playPauseButton->setIcon(QIcon(":/icons/start"));
@@ -433,7 +433,7 @@ void MainWindow::playerStatusChanged(Phonon::State newState, Phonon::State oldSt
             ui->trackTitleLabel->setText(tr("Player is stopped"));
             break;
         case Phonon::ErrorState:
-            ui->statusBar->showMessage(_player->phononPlayer->errorString(),5000);
+            ui->statusBar->showMessage(_player->errorString(),5000);
             break;
         case Phonon::LoadingState:
             break;
@@ -464,12 +464,12 @@ void MainWindow::on_actionPrevious_track_triggered()
 
 void MainWindow::on_actionPlay_pause_triggered()
 {
-    if (_player->phononPlayer->state() == Phonon::PlayingState) {
-        _player->phononPlayer->pause();
+    if (_player->playerState() == Phonon::PlayingState) {
+        _player->pause();
     } else {
         /* When the source is empty there are some files in playlist, select the
            first row and load it as current source */
-        if ((_player->phononPlayer->currentSource().fileName().isEmpty()) &&
+        if ((_player->currentSource().fileName().isEmpty()) &&
             (playlistModel->rowCount() > 0)) {
             QModelIndex topLeft = playlistModel->index(0,0,QModelIndex());
             QModelIndex bottomRight = playlistModel->index(0,playlistModel->columnCount(QModelIndex())-1,QModelIndex());
@@ -478,15 +478,13 @@ void MainWindow::on_actionPlay_pause_triggered()
             _player->setTrack(selectionModel->selectedRows(0).at(0).data().toString(),true);
 
         }
-        _player->phononPlayer->play();
+        _player->play();
     }
 }
 
 void MainWindow::on_actionStop_triggered()
 {
-    _player->phononPlayer->stop();
-    // Empty source
-    _player->phononPlayer->setCurrentSource(Phonon::MediaSource());
+    _player->stop();
 }
 
 void MainWindow::on_actionNext_track_triggered()
@@ -624,4 +622,9 @@ void MainWindow::on_cleatCollectionSearch_clicked()
 void MainWindow::setPluginsManager(PluginsManager *pluginsManager)
 {
     _pluginsManager = pluginsManager;
+}
+
+void MainWindow::showError(QString error)
+{
+    ui->statusBar->showMessage(error,5000);
 }
