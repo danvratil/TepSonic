@@ -16,5 +16,5 @@ DEFINES += LASTFMSCROBBLER_LIBRARY
 SOURCES += lastfmscrobbler.cpp
 HEADERS += lastfmscrobbler.h
 FORMS += lastfmscrobblerconfig.ui
-DESTDIR = ../../plugins
+DESTDIR = ../../build/plugins
 VERSION = 0.1.0

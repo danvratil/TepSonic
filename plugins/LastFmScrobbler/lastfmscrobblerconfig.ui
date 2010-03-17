@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>396</width>
-    <height>161</height>
+    <width>394</width>
+    <height>159</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -37,7 +37,7 @@
    <item row="1" column="1">
     <widget class="QLineEdit" name="passwordEdit">
      <property name="inputMethodHints">
-      <set>Qt::ImhNone</set>
+      <set>Qt::ImhHiddenText</set>
      </property>
      <property name="inputMask">
       <string notr="true"/>
@@ -47,6 +47,26 @@
      </property>
      <property name="echoMode">
       <enum>QLineEdit::Password</enum>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="0" colspan="2">
+    <widget class="QPushButton" name="testLoginButton">
+     <property name="text">
+      <string>Test</string>
+     </property>
+    </widget>
+   </item>
+   <item row="3" column="0" colspan="2">
+    <widget class="QLabel" name="errorLabel">
+     <property name="font">
+      <font>
+       <weight>75</weight>
+       <bold>true</bold>
+      </font>
+     </property>
+     <property name="text">
+      <string/>
      </property>
     </widget>
    </item>

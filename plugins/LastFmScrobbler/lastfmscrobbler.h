@@ -27,6 +27,11 @@
 #include <QObject>
 #include <QWidget>
 #include <QString>
+#include <QNetworkAccessManager>
+#include <QNetworkReply>
+#include <QUrl>
+
+#include <QDebug>
 
 class LastFmScrobbler : public AbstractPlugin
 {
@@ -35,15 +40,32 @@ class LastFmScrobbler : public AbstractPlugin
         LastFmScrobbler();
         ~LastFmScrobbler();
         void settingsWidget(QWidget *parentWidget);
-        QString getName();
+        QString pluginName();
 
     public slots:
         void settingsAccepted();
-        void trackChanged(QString filename);
+        void trackChanged(MetaData trackData);
+        void trackFinished(MetaData trackData);
         void playerStatusChanged(Phonon::State newState, Phonon::State oldState) { }
+        void trackPositionChanged(qint64 newPos);
 
     private:
+        QUrl prepareHandshakeURL(QString username, QString password);
+        void login();
+        void scrobble(MetaData metadata);
+
         Ui::LastFmScrobblerConfig *_configWidget;
+
+        QString _token;
+        QString _nowPlayingURL;
+        QString _submissionURL;
+        qint64 _played;
+
+    private slots:
+        void on_testLoginButton_clicked();
+        void testLoginFinished(QNetworkReply *reply);
+        void loginFinished(QNetworkReply *reply);
+        void scrobblingFinished(QNetworkReply *reply);
 };
 
 #include "moc_abstractplugin.cpp"
