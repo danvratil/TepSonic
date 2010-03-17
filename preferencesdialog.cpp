@@ -133,7 +133,7 @@ void PreferencesDialog::on_rebuildCollectionsNowBtn_clicked()
 void PreferencesDialog::addPlugin(QPluginLoader *plugin)
 {
     QWidget *pluginWidget = new QWidget();
-    int newItem = _ui->toolBox->addItem(pluginWidget,QIcon(),static_cast<AbstractPlugin*>(plugin->instance())->getName());
+    int newItem = _ui->toolBox->addItem(pluginWidget,QIcon(),static_cast<AbstractPlugin*>(plugin->instance())->pluginName());
     static_cast<AbstractPlugin*>(plugin->instance())->settingsWidget(pluginWidget);
     connect(this,SIGNAL(accepted()),static_cast<AbstractPlugin*>(plugin->instance()),SLOT(settingsAccepted()));
 }

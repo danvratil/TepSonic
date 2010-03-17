@@ -45,7 +45,8 @@ PluginsManager::~PluginsManager()
     foreach (QPluginLoader *pluginLoader, _plugins) {
         disconnect(static_cast<AbstractPlugin*>(pluginLoader->instance()),SLOT(settingsAccepted()));
         disconnect(static_cast<AbstractPlugin*>(pluginLoader->instance()),SLOT(playerStatusChanged(Phonon::State,Phonon::State)));
-        disconnect(static_cast<AbstractPlugin*>(pluginLoader->instance()),SLOT(trackChanged(QString)));
+        disconnect(static_cast<AbstractPlugin*>(pluginLoader->instance()),SLOT(trackChanged(MetaData)));
+        disconnect(static_cast<AbstractPlugin*>(pluginLoader->instance()),SLOT(trackFinished(MetaData)));
         disconnect(static_cast<AbstractPlugin*>(pluginLoader->instance()),SLOT(trackPositionChanged(qint64)));
         pluginLoader->unload();
     }
@@ -64,9 +65,11 @@ void PluginsManager::loadPlugins()
             QObject *plugin = pluginLoader->instance();
             if (plugin) {
                 _plugins.append(pluginLoader);
-                connect(_player,SIGNAL(trackChanged(QString)),static_cast<AbstractPlugin*>(plugin),SLOT(trackChanged(QString)));
+                connect(_player,SIGNAL(trackChanged(MetaData)),static_cast<AbstractPlugin*>(plugin),SLOT(trackChanged(MetaData)));
+                connect(_player,SIGNAL(trackFinished(MetaData)),static_cast<AbstractPlugin*>(plugin),SLOT(trackFinished(MetaData)));
                 connect(_player,SIGNAL(stateChanged(Phonon::State,Phonon::State)),static_cast<AbstractPlugin*>(plugin),SLOT(playerStatusChanged(Phonon::State,Phonon::State)));
                 connect(_player,SIGNAL(trackPositionChanged(qint64)),static_cast<AbstractPlugin*>(plugin),SLOT(trackPositionChanged(qint64)));
+                connect(static_cast<AbstractPlugin*>(plugin),SIGNAL(error(QString)),_mainWindow,SLOT(showError(QString)));
             }
         }
     }
