@@ -27,10 +27,11 @@
 #include <Phonon/MediaObject>
 
 struct MetaData {
+    QString filename;
     QString artist;
     QString title;
     QString album;
-    int length;
+    qint64 length;
     int trackNumber;
 };
 
@@ -45,7 +46,6 @@ class Player: public QObject
     ~Player();
 
     MetaData currentMetaData();
-
     RepeatMode repeatMode() { return _repeatMode; }
     bool randomMode() { return _randomMode; }
     Phonon::MediaSource currentSource() { return _phononPlayer->currentSource(); }
@@ -60,6 +60,9 @@ class Player: public QObject
     Phonon::MediaObject *_phononPlayer;
     Phonon::AudioOutput *_audioOutput;
 
+ private slots:
+    void emitFinished();
+    void emitTrackChanged();
 
  public slots:
     void setRepeatMode(RepeatMode);
@@ -73,9 +76,11 @@ class Player: public QObject
  signals:
     void repeatModeChanged(RepeatMode repeatMode);
     void randomModeChanged(bool randomMode);
-    void trackChanged(QString filename);
-    void finished();
+    void trackChanged(MetaData metadata);
+    void trackFinished(MetaData metadata);
+    void trackFinished();
     void stateChanged(Phonon::State newState, Phonon::State oldState);
+    void trackPositionChanged(qint64 newPos);
 
 };
 
