@@ -27,6 +27,11 @@
 #include <Phonon/AudioOutput>
 #include <Phonon/MediaSource>
 
+#include <taglib/taglib.h>
+#include <taglib/fileref.h>
+#include <taglib/tag.h>
+#include <taglib/tstring.h>
+
 Player::Player()
 {
     _phononPlayer = new Phonon::MediaObject();
@@ -39,7 +44,7 @@ Player::Player()
     connect(_phononPlayer,SIGNAL(finished()),this,SLOT(emitFinished()));
     connect(_phononPlayer,SIGNAL(stateChanged(Phonon::State,Phonon::State)),this,SIGNAL(stateChanged(Phonon::State,Phonon::State)));
     connect(_phononPlayer,SIGNAL(tick(qint64)),this,SIGNAL(trackPositionChanged(qint64)));
-    connect(_phononPlayer,SIGNAL(metaDataChanged()),this,SLOT(emitTrackChanged()));
+    connect(_phononPlayer,SIGNAL(currentSourceChanged(Phonon::MediaSource)),this,SLOT(emitTrackChanged()));
 
     _randomMode = false;
     _repeatMode = RepeatOff;
@@ -54,7 +59,7 @@ void Player::setTrack(const QString fileName)
     if (QFileInfo(fileName).isFile()) {
        _phononPlayer->setCurrentSource(Phonon::MediaSource(fileName));
    }
-   //emit trackChanged(currentMetaData());
+   emit trackChanged(currentMetaData());
 }
 
 void Player::setTrack(const QString fileName, bool autoPlay)
@@ -85,14 +90,21 @@ MetaData Player::currentMetaData()
 {
     MetaData data;
 
-    if (_phononPlayer->currentSource().type()==Phonon::MediaSource::Invalid) return data;
+    QString filename = _phononPlayer->currentSource().fileName();
 
-    data.filename = _phononPlayer->currentSource().fileName();
-    data.artist = _phononPlayer->metaData(Phonon::ArtistMetaData).join(QString());
-    data.album = _phononPlayer->metaData(Phonon::AlbumMetaData).join(QString());
-    data.length = (qint64)_phononPlayer->totalTime(); //msecs
-    data.title = _phononPlayer->metaData(Phonon::TitleMetaData).join(QString());
-    data.trackNumber = _phononPlayer->metaData(Phonon::TracknumberMetaData).join(QString()).toInt();
+    if ((!QFileInfo(filename).exists()) ||
+        (_phononPlayer->currentSource().type()==Phonon::MediaSource::Invalid)) {
+        return data;
+    }
+
+    TagLib::FileRef f(filename.toUtf8().constData());
+    data.artist = f.tag()->artist().toCString();
+    data.title = f.tag()->title().toCString();
+    data.album = f.tag()->album().toCString();
+    data.trackNumber = f.tag()->track();
+    // Length in msecs
+    qint64 totalTimeNum = f.audioProperties()->length()*1000;
+    data.filename = filename;
 
     return data;
 }
@@ -102,12 +114,13 @@ void Player::stop()
     _phononPlayer->stop();
     // Empty the source
     _phononPlayer->setCurrentSource(Phonon::MediaSource());
+    emit trackChanged(MetaData());
 }
 
 void Player::emitFinished()
 {
-    emit trackFinished();
     emit trackFinished(currentMetaData());
+    emit trackFinished();
 }
 
 void Player::emitTrackChanged()
