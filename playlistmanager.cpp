@@ -40,7 +40,6 @@ PlaylistManager::~PlaylistManager()
 
 void PlaylistManager::run()
 {
-    _mutex.lock();
     switch (_action) {
         case PlaylistManager::LoadPlaylist:
             for (int i = 0; i < _files.count(); i++) {
@@ -61,7 +60,6 @@ void PlaylistManager::run()
             p_savePlaylist(_files.at(0));
             break;
     }
-    _mutex.unlock();
 }
 
 void PlaylistManager::p_addFile(QString filename)
@@ -137,31 +135,25 @@ void PlaylistManager::p_savePlaylist(QString filename)
 
 void PlaylistManager::add(QString filename)
 {
-    _mutex.lock();
     _action = PlaylistManager::LoadPlaylist;
     _files.clear();
     _files << filename;
-    _mutex.unlock();
     start();
 }
 
 void PlaylistManager::add(QStringList filenames)
 {
-    _mutex.lock();
     _action = PlaylistManager::LoadPlaylist;
     _files.clear();
     _files << filenames;
-    _mutex.unlock();
     start();
 }
 
 void PlaylistManager::saveToFile(QString filename)
 {
-    _mutex.lock();
     _action = PlaylistManager::SavePlaylist;
     _files.clear();
     _files << filename;
-    _mutex.unlock();
     start();
 }
 

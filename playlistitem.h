@@ -18,7 +18,6 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Cambridge, MA 02110-1301, USA.
  */
 
-
 #ifndef PLAYLISTITEM_H
 #define PLAYLISTITEM_H
 
@@ -28,7 +27,7 @@
 
 //TODO: sorting
 
- class PlaylistItem
+class PlaylistItem
  {
  public:
      PlaylistItem(const QVector<QVariant> &data, PlaylistItem *parent = 0);
@@ -38,6 +37,7 @@
      int childCount() const;
      int columnCount() const;
      QVariant data(int column) const;
+     void appendChild(PlaylistItem *item);
      bool insertChildren(int position, int count, int columns);
      bool insertColumns(int position, int columns);
      PlaylistItem *parent();

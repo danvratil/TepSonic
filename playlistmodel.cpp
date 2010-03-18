@@ -208,14 +208,14 @@ void PlaylistModel::addItem(QString file)
     QModelIndex root;
 
     // Insert new row
-    if (!insertRow(rowCount(root), root.parent()))
+    if (!insertRow(rowCount(root), root))
         return;
 
     /**
      * TAGLIB comes here
      */
     TagLib::FileRef f(file.toUtf8().constData());
-    int truckNumber = f.tag()->track();
+    int trackNumber = f.tag()->track();
     TagLib::String artist = f.tag()->artist();
     TagLib::String title = f.tag()->title();
     TagLib::String album = f.tag()->album();
@@ -233,32 +233,14 @@ void PlaylistModel::addItem(QString file)
         trackLengthString=trackLength.toString("mm:ss");
     }
 
-    // Child item
-    QModelIndex child;
-    // Store the filename into the first column. The other columns will be filled by separated thread
-    child = index(rowCount(root)-1, 0, root.parent());
-    setData(child, QVariant(file), Qt::EditRole);
-    // Track number
-    child = index(rowCount(root)-1, 1, root.parent());
-    setData(child, QVariant(truckNumber), Qt::EditRole);
-    // Interpret
-    child = index(rowCount(root)-1, 2, root.parent());
-    setData(child, QVariant(QString(artist.toCString(true))), Qt::EditRole);
-    // Track title
-    child = index(rowCount(root)-1, 3, root.parent());
-    setData(child, QVariant(QString(title.toCString(true))), Qt::EditRole);
-    // Album
-    child = index(rowCount(root)-1, 4, root.parent());
-    setData(child, QVariant(QString(album.toCString(true))), Qt::EditRole);
-    // Genre
-    child = index(rowCount(root)-1, 5, root.parent());
-    setData(child, QVariant(QString(genre.toCString(true))), Qt::EditRole);
-    // Year
-    child = index(rowCount(root)-1, 6, root.parent());
-    setData(child, QVariant(year), Qt::EditRole);
-    // Total length
-    child = index(rowCount(root)-1, 7, root.parent());
-    setData(child, QVariant(trackLengthString), Qt::EditRole);
+    rootItem->child(rootItem->childCount()-1)->setData(0,QVariant(file));
+    rootItem->child(rootItem->childCount()-1)->setData(1,QVariant(trackNumber));
+    rootItem->child(rootItem->childCount()-1)->setData(2,QVariant(artist.toCString(true)));
+    rootItem->child(rootItem->childCount()-1)->setData(3,QVariant(title.toCString(true)));
+    rootItem->child(rootItem->childCount()-1)->setData(4,QVariant(album.toCString(true)));
+    rootItem->child(rootItem->childCount()-1)->setData(5,QVariant(genre.toCString(true)));
+    rootItem->child(rootItem->childCount()-1)->setData(6,QVariant(year));
+    rootItem->child(rootItem->childCount()-1)->setData(7,QVariant(trackLengthString));
 
     emit playlistLengthChanged(_totalLength, rowCount(QModelIndex()));
 }

@@ -22,6 +22,7 @@
 
 #include "playlistmodel.h"
 #include "playlistmanager.h"
+#include "playlistproxymodel.h"
 
 #include <QDir>
 #include <QDropEvent>
@@ -66,7 +67,8 @@ void PlaylistBrowser::dropEvent(QDropEvent* event)
     QDataStream stream(&encodedData, QIODevice::ReadOnly);
     QStringList newItems;
 
-    m_playlistManager = new PlaylistManager(static_cast<PlaylistModel*>(this->model()));
+    PlaylistProxyModel *proxyModel = static_cast<PlaylistProxyModel*>(this->model());
+    m_playlistManager = new PlaylistManager(static_cast<PlaylistModel*>(proxyModel->sourceModel()));
 
     QStringList files;
 

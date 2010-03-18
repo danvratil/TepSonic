@@ -25,11 +25,9 @@
 #include <QModelIndex>
 #include <QVariant>
 
-#include "playlistitem.h"
+class PlaylistItem;
 
- class PlaylistItem;
-
- class PlaylistModel : public QAbstractItemModel
+class PlaylistModel : public QAbstractItemModel
  {
      Q_OBJECT
 

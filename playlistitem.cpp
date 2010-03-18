@@ -18,13 +18,16 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Cambridge, MA 02110-1301, USA.
  */
 
-#include <QStringList>
 #include "playlistitem.h"
 
 PlaylistItem::PlaylistItem(const QVector<QVariant> &data, PlaylistItem *parent)
 {
+     if (data.isEmpty()) {
+        itemData.fill(QString(),8);
+     } else {
+        itemData = data;
+     }
      parentItem = parent;
-     itemData = data;
 }
 
 PlaylistItem::~PlaylistItem()
@@ -74,6 +77,11 @@ bool PlaylistItem::insertChildren(int position, int count, int columns)
      return true;
 }
 
+void PlaylistItem::appendChild(PlaylistItem *item)
+{
+    childItems.append(item);
+}
+
 bool PlaylistItem::insertColumns(int position, int columns)
 {
      if (position < 0 || position > itemData.size())
@@ -110,7 +118,7 @@ bool PlaylistItem::removeColumns(int position, int columns)
          return false;
 
      for (int column = 0; column < columns; ++column)
-         itemData.remove(position);
+         itemData.remove(position,columns);
 
      foreach (PlaylistItem *child, childItems)
          child->removeColumns(position, columns);
