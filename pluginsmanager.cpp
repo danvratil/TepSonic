@@ -55,21 +55,42 @@ PluginsManager::~PluginsManager()
 
 void PluginsManager::loadPlugins()
 {
-    QDir pluginsDir = QDir(qApp->applicationDirPath());
-    pluginsDir.cd("plugins");
-    foreach(QString filename, pluginsDir.entryList(QDir::Files)) {
-        qDebug() << filename;
-        if (QLibrary::isLibrary(filename)) {
-            qDebug() << "Loading plugin " << pluginsDir.absoluteFilePath(filename);
-            QPluginLoader *pluginLoader = new QPluginLoader(pluginsDir.absoluteFilePath(filename));
-            QObject *plugin = pluginLoader->instance();
-            if (plugin) {
-                _plugins.append(pluginLoader);
-                connect(_player,SIGNAL(trackChanged(MetaData)),static_cast<AbstractPlugin*>(plugin),SLOT(trackChanged(MetaData)));
-                connect(_player,SIGNAL(trackFinished(MetaData)),static_cast<AbstractPlugin*>(plugin),SLOT(trackFinished(MetaData)));
-                connect(_player,SIGNAL(stateChanged(Phonon::State,Phonon::State)),static_cast<AbstractPlugin*>(plugin),SLOT(playerStatusChanged(Phonon::State,Phonon::State)));
-                connect(_player,SIGNAL(trackPositionChanged(qint64)),static_cast<AbstractPlugin*>(plugin),SLOT(trackPositionChanged(qint64)));
-                connect(static_cast<AbstractPlugin*>(plugin),SIGNAL(error(QString)),_mainWindow,SLOT(showError(QString)));
+    QStringList pluginsDirs;
+    /* By default we will search in applicationDirPath/plugins
+       This is common situation on Windows where the plugins will probably be stored in
+       C:\Program Files\TepSonic\plugins
+       On Linux it can be usefull for developers who havie their TepSonic source
+       for example in /home/me/tepsonic/ and plugins in /home/me/tepsonic/plugins.
+       Putting this folder first will also result in preferring these plugins before
+       same-called plugins installed somewhere in system */
+    pluginsDirs << qApp->applicationDirPath().append("/plugins");
+    // Default extension on windows
+    QString ext = "dll";
+#ifndef _WIN32
+    // On Linux we want to search in default library paths
+    pluginsDirs << "/usr/lib/tepsonic/plugins/";
+    pluginsDirs << "/usr/local/lib/tepsonic/plugins/";
+    // If we are on Linux, override the extension
+    ext = "so";
+#endif
+    QDir pluginsDir;
+    pluginsDir.setNameFilters(QStringList() << "libtepsonic_*."+ext);
+    foreach(QString folder, pluginsDirs) {
+        pluginsDir.setPath(folder);
+        foreach(QString filename, pluginsDir.entryList(QDir::Files)) {
+            if (QLibrary::isLibrary(filename)) {
+                qDebug() << "Loading plugin " << pluginsDir.absoluteFilePath(filename);
+
+                QPluginLoader *pluginLoader = new QPluginLoader(pluginsDir.absoluteFilePath(filename));
+                QObject *plugin = pluginLoader->instance();
+                if (plugin) {
+                    _plugins.append(pluginLoader);
+                    connect(_player,SIGNAL(trackChanged(Player::MetaData)),static_cast<AbstractPlugin*>(plugin),SLOT(trackChanged(Player::MetaData)));
+                    connect(_player,SIGNAL(trackFinished(Player::MetaData)),static_cast<AbstractPlugin*>(plugin),SLOT(trackFinished(Player::MetaData)));
+                    connect(_player,SIGNAL(stateChanged(Phonon::State,Phonon::State)),static_cast<AbstractPlugin*>(plugin),SLOT(playerStatusChanged(Phonon::State,Phonon::State)));
+                    connect(_player,SIGNAL(trackPositionChanged(qint64)),static_cast<AbstractPlugin*>(plugin),SLOT(trackPositionChanged(qint64)));
+                    connect(static_cast<AbstractPlugin*>(plugin),SIGNAL(error(QString)),_mainWindow,SLOT(showError(QString)));
+                }
             }
         }
     }
