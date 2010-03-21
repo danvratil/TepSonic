@@ -25,30 +25,29 @@
 #include <QFileDialog>
 #include <QDebug>
 
-PreferencesDialog::PreferencesDialog(QSettings* settings, QWidget *parent) :
+PreferencesDialog::PreferencesDialog(QWidget *parent) :
     QDialog(parent),
     _ui(new Ui::PreferencesDialog)
 {
     _ui->setupUi(this);
     _ui->toolBox->setCurrentIndex(0);
 
-    _settings = settings;
-
-    _settings->beginGroup("Collections");
-    _ui->enableCollectionsCheckbox->setChecked(_settings->value("EnableCollections",true).toBool());
-    _ui->autoRebuildCheckbox->setChecked(_settings->value("AutoRebuildAfterStart",true).toBool());
-    _ui->pathsList->addItems(_settings->value("SourcePaths",QStringList()).toStringList());
-    _ui->collectionsStorageEngine_combo->setCurrentIndex(_settings->value("StorageEngine",0).toInt());
-    _settings->beginGroup("MySQL");
-    _ui->mysqlServer_edit->setText(_settings->value("Server","127.0.0.1").toString());
-    _ui->mysqlUsername_edit->setText(_settings->value("Username",QString()).toString());
-    _ui->mysqlPassword_edit->setText(_settings->value("Password",QString()).toString());
-    _ui->mysqlDatabase_edit->setText(_settings->value("Database",QString()).toString());
-    _settings->endGroup();
-    _settings->endGroup();
-    _settings->beginGroup("Preferences");
-    _ui->rememberLastSessionCheckbox->setChecked(_settings->value("RestoreSession",true).toBool());
-    _settings->endGroup();
+    QSettings settings(QString(QDir::homePath()).append("/.tepsonic/main.conf"),QSettings::IniFormat,this);
+    settings.beginGroup("Collections");
+    _ui->enableCollectionsCheckbox->setChecked(settings.value("EnableCollections",true).toBool());
+    _ui->autoRebuildCheckbox->setChecked(settings.value("AutoRebuildAfterStart",true).toBool());
+    _ui->pathsList->addItems(settings.value("SourcePaths",QStringList()).toStringList());
+    _ui->collectionsStorageEngine_combo->setCurrentIndex(settings.value("StorageEngine",0).toInt());
+    settings.beginGroup("MySQL");
+    _ui->mysqlServer_edit->setText(settings.value("Server","127.0.0.1").toString());
+    _ui->mysqlUsername_edit->setText(settings.value("Username",QString()).toString());
+    _ui->mysqlPassword_edit->setText(settings.value("Password",QString()).toString());
+    _ui->mysqlDatabase_edit->setText(settings.value("Database",QString()).toString());
+    settings.endGroup();
+    settings.endGroup();
+    settings.beginGroup("Preferences");
+    _ui->rememberLastSessionCheckbox->setChecked(settings.value("RestoreSession",true).toBool());
+    settings.endGroup();
 
 }
 
@@ -70,26 +69,27 @@ void PreferencesDialog::changeEvent(QEvent *e)
 
 void PreferencesDialog::on_buttonBox_accepted()
 {
-    _settings->beginGroup("Collections");
-    _settings->setValue("EnableCollections",_ui->enableCollectionsCheckbox->isChecked());
-    _settings->setValue("AutoRebuildAfterStart",_ui->autoRebuildCheckbox->isChecked());
+    QSettings settings(QString(QDir::homePath()).append("/.tepsonic/main.conf"),QSettings::IniFormat,this);
+    settings.beginGroup("Collections");
+    settings.setValue("EnableCollections",_ui->enableCollectionsCheckbox->isChecked());
+    settings.setValue("AutoRebuildAfterStart",_ui->autoRebuildCheckbox->isChecked());
     QStringList items;
     for (int i = 0; i < _ui->pathsList->count(); i++) {
         items.append(_ui->pathsList->item(i)->text());
     }
-    _settings->setValue("SourcePaths",items);
-    _settings->setValue("StorageEngine",_ui->collectionsStorageEngine_combo->currentIndex());
-    _settings->beginGroup("MySQL");
-    _settings->setValue("Server",_ui->mysqlServer_edit->text());
-    _settings->setValue("Username",_ui->mysqlUsername_edit->text());
+    settings.setValue("SourcePaths",items);
+    settings.setValue("StorageEngine",_ui->collectionsStorageEngine_combo->currentIndex());
+    settings.beginGroup("MySQL");
+    settings.setValue("Server",_ui->mysqlServer_edit->text());
+    settings.setValue("Username",_ui->mysqlUsername_edit->text());
     // I'd like to have the password encrypted (but not hashed!) - I don't like password in plaintext...
-    _settings->setValue("Password",_ui->mysqlPassword_edit->text());
-    _settings->setValue("Database",_ui->mysqlDatabase_edit->text());
-    _settings->endGroup(); // MySQL group
-    _settings->endGroup(); // Collections group
-    _settings->beginGroup("Preferences");
-    _settings->setValue("RestoreSession",_ui->rememberLastSessionCheckbox->isChecked());
-    _settings->endGroup(); // Preferences group
+    settings.setValue("Password",_ui->mysqlPassword_edit->text());
+    settings.setValue("Database",_ui->mysqlDatabase_edit->text());
+    settings.endGroup(); // MySQL group
+    settings.endGroup(); // Collections group
+    settings.beginGroup("Preferences");
+    settings.setValue("RestoreSession",_ui->rememberLastSessionCheckbox->isChecked());
+    settings.endGroup(); // Preferences group
 
     emit(accepted());
     this->close();
@@ -133,7 +133,7 @@ void PreferencesDialog::on_rebuildCollectionsNowBtn_clicked()
 void PreferencesDialog::addPlugin(QPluginLoader *plugin)
 {
     QWidget *pluginWidget = new QWidget();
-    int newItem = _ui->toolBox->addItem(pluginWidget,QIcon(),static_cast<AbstractPlugin*>(plugin->instance())->pluginName());
+    _ui->toolBox->addItem(pluginWidget,QIcon(),static_cast<AbstractPlugin*>(plugin->instance())->pluginName());
     static_cast<AbstractPlugin*>(plugin->instance())->settingsWidget(pluginWidget);
     connect(this,SIGNAL(accepted()),static_cast<AbstractPlugin*>(plugin->instance()),SLOT(settingsAccepted()));
 }

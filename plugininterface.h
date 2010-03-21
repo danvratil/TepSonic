@@ -25,11 +25,23 @@
 class QWidget;
 class QString;
 
+//! Interface for plugins. Plugins should not be subclassed from this interface, use AbstractPlugin class instead
+/*!
+  PluginInterface is an interface that must be common for all plugins. All it's methods are pure virtual.
+  It allows Qt to check if plugins were build against the same interface as the current application provides. In
+  other case, the plugin will not be loaded.
+  See AbstractPlugin for full description of plugins API.
+ */
 class PluginInterface
 {
     public:
+        //! Destructor
         virtual ~PluginInterface() {}
+
+        //! Installs plugin's UI on given parentWidget.
         virtual void settingsWidget(QWidget *parentWidget) = 0;
+
+        //! Returns name of plugin
         virtual QString pluginName() = 0;
 };
 

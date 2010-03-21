@@ -31,18 +31,18 @@ CollectionModel::CollectionModel(const QStringList &headers, QObject *parent)
      foreach (QString header, headers)
          rootData << header;
 
-     rootItem = new CollectionItem(rootData);
+     _rootItem = new CollectionItem(rootData);
      setSupportedDragActions(Qt::CopyAction);
 }
 
 CollectionModel::~CollectionModel()
 {
-     delete rootItem;
+     delete _rootItem;
 }
 
 int CollectionModel::columnCount(const QModelIndex & /* parent */) const
 {
-     return rootItem->columnCount();
+     return _rootItem->columnCount();
 }
 
 QVariant CollectionModel::data(const QModelIndex &index, int role) const
@@ -54,7 +54,6 @@ QVariant CollectionModel::data(const QModelIndex &index, int role) const
          return QVariant();
 
      CollectionItem *item = getItem(index);
-
      return item->data(index.column());
 }
 
@@ -72,13 +71,14 @@ CollectionItem *CollectionModel::getItem(const QModelIndex &index) const
          CollectionItem *item = static_cast<CollectionItem*>(index.internalPointer());
          if (item) return item;
      }
-     return rootItem;
+     return _rootItem;
 }
 
-QVariant CollectionModel::headerData(int section, Qt::Orientation orientation, int role) const
+QVariant CollectionModel::headerData(int section, Qt::Orientation orientation,
+                                     int role) const
 {
      if (orientation == Qt::Horizontal && role == Qt::DisplayRole)
-         return rootItem->data(section);
+         return _rootItem->data(section);
 
      return QVariant();
 }
@@ -97,24 +97,13 @@ QModelIndex CollectionModel::index(int row, int column, const QModelIndex &paren
          return QModelIndex();
 }
 
-bool CollectionModel::insertColumns(int position, int columns, const QModelIndex &parent)
-{
-     bool success;
-
-     beginInsertColumns(parent, position, position + columns - 1);
-     success = rootItem->insertColumns(position, columns);
-     endInsertColumns();
-
-     return success;
-}
-
 bool CollectionModel::insertRows(int position, int rows, const QModelIndex &parent)
 {
      CollectionItem *parentItem = getItem(parent);
      bool success;
 
      beginInsertRows(parent, position, position + rows - 1);
-     success = parentItem->insertChildren(position, rows, rootItem->columnCount());
+     success = parentItem->insertChildren(position, rows, _rootItem->columnCount());
      endInsertRows();
 
      return success;
@@ -128,24 +117,10 @@ QModelIndex CollectionModel::parent(const QModelIndex &index) const
      CollectionItem *childItem = getItem(index);
      CollectionItem *parentItem = childItem->parent();
 
-     if (parentItem == rootItem)
+     if (parentItem == _rootItem)
          return QModelIndex();
 
      return createIndex(parentItem->childNumber(), 0, parentItem);
-}
-
-bool CollectionModel::removeColumns(int position, int columns, const QModelIndex &parent)
-{
-     bool success;
-
-     beginRemoveColumns(parent, position, position + columns - 1);
-     success = rootItem->removeColumns(position, columns);
-     endRemoveColumns();
-
-     if (rootItem->columnCount() == 0)
-         removeRows(0, rowCount());
-
-     return success;
 }
 
 bool CollectionModel::removeRows(int position, int rows, const QModelIndex &parent)
@@ -167,7 +142,8 @@ int CollectionModel::rowCount(const QModelIndex &parent) const
      return parentItem->childCount();
 }
 
-bool CollectionModel::setData(const QModelIndex &index, const QVariant &value, int role)
+bool CollectionModel::setData(const QModelIndex &index, const QVariant &value,
+                              int role)
 {
      if (role != Qt::EditRole)
          return false;
@@ -186,7 +162,7 @@ bool CollectionModel::setHeaderData(int section, Qt::Orientation orientation, co
      if (role != Qt::EditRole || orientation != Qt::Horizontal)
          return false;
 
-     bool result = rootItem->setData(section, value);
+     bool result = _rootItem->setData(section, value);
 
      if (result)
          emit headerDataChanged(orientation, section, section);
@@ -194,37 +170,15 @@ bool CollectionModel::setHeaderData(int section, Qt::Orientation orientation, co
      return result;
 }
 
-QModelIndex CollectionModel::addChild(QModelIndex root, QString title, QString filename)
+QModelIndex CollectionModel::addChild(const QModelIndex &parent, QString title, QString filename)
 {
-    if (!insertRow(rowCount(root), root))
+    if (!insertRow(rowCount(parent), parent))
         return QModelIndex();
 
-    QModelIndex child;
-    // Some title like artist/album/track name
-    child = index(rowCount(root)-1, 0, root);
-    setData(child, title);
-    // Real file name (in hidden column)
-    child = index(rowCount(root)-1, 1, root);
-    setData(child, filename);
+    getItem(parent)->child(getItem(parent)->childCount()-1)->setData(0,title);
+    getItem(parent)->child(getItem(parent)->childCount()-1)->setData(1,filename);
 
-    return index(rowCount(root)-1,0,root);
-}
-
-
-QModelIndex CollectionModel::addRow(QModelIndex root, QString title, QString filename)
-{
-    if (!insertRow(rowCount(root), root.parent()))
-        return QModelIndex();
-
-    QModelIndex child;
-    // Some title like artist/album/track name
-    child = index(rowCount(root)-1, 0, root.parent());
-    setData(child, title, Qt::EditRole);
-    // Readl file name (in hidden column)
-    child = index(rowCount(root)-1, 1, root.parent());
-    setData(child, filename, Qt::EditRole);
-
-    return index(rowCount(root)-1,0,root.parent());
+    return index(rowCount(parent)-1,0,parent);
 }
 
 Qt::DropActions CollectionModel::supportedDropActions() const

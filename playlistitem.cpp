@@ -37,12 +37,15 @@ PlaylistItem::~PlaylistItem()
 
 PlaylistItem *PlaylistItem::child(int number)
 {
-     return childItems.value(number);
+    if (number > childItems.size())
+        return 0;
+
+    return childItems.value(number);
 }
 
 int PlaylistItem::childCount() const
 {
-     return childItems.count();
+    return childItems.size();
 }
 
 int PlaylistItem::childNumber() const
@@ -82,20 +85,6 @@ void PlaylistItem::appendChild(PlaylistItem *item)
     childItems.append(item);
 }
 
-bool PlaylistItem::insertColumns(int position, int columns)
-{
-     if (position < 0 || position > itemData.size())
-         return false;
-
-     for (int column = 0; column < columns; ++column)
-         itemData.insert(position, QVariant());
-
-     foreach (PlaylistItem *child, childItems)
-         child->insertColumns(position, columns);
-
-     return true;
-}
-
 PlaylistItem *PlaylistItem::parent()
 {
      return parentItem;
@@ -108,20 +97,6 @@ bool PlaylistItem::removeChildren(int position, int count)
 
      for (int row = 0; row < count; ++row)
          delete childItems.takeAt(position);
-
-     return true;
-}
-
-bool PlaylistItem::removeColumns(int position, int columns)
-{
-     if (position < 0 || position + columns > itemData.size())
-         return false;
-
-     for (int column = 0; column < columns; ++column)
-         itemData.remove(position,columns);
-
-     foreach (PlaylistItem *child, childItems)
-         child->removeColumns(position, columns);
 
      return true;
 }

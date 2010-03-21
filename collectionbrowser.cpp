@@ -18,8 +18,7 @@
  */
 
 #include "collectionbrowser.h"
-
-#include <QtSql/QSqlQuery>
+#include "collectionproxymodel.h"
 
 #include <QDropEvent>
 #include <QDebug>
@@ -96,7 +95,7 @@ void CollectionBrowser::keyPressEvent(QKeyEvent* event)
     // When 'delete' pressed, remove selected row from collections
     if (event->matches(QKeySequence::Delete)) {
         QModelIndex index = selectionModel()->currentIndex();
-        model()->removeRow(selectionModel()->currentIndex().row(),selectionModel()->currentIndex().parent());
+        static_cast<CollectionProxyModel*>(model())->sourceModel()->removeRow(selectionModel()->currentIndex().row(),selectionModel()->currentIndex().parent());
     }
 
 }

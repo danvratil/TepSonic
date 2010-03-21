@@ -60,7 +60,7 @@ void LastFmScrobbler::settingsWidget(QWidget *parentWidget)
     connect(_configWidget->testLoginButton,SIGNAL(clicked(bool)),_configWidget->testLoginButton,SLOT(setDisabled(bool)));
 }
 
-void LastFmScrobbler::trackFinished(MetaData trackdata)
+void LastFmScrobbler::trackFinished(Player::MetaData trackdata)
 {
    /* if ((_played >= 240000) && (_played >= trackdata.length/2)) {
         scrobble(trackdata);
@@ -73,7 +73,7 @@ void LastFmScrobbler::trackPositionChanged(qint64 newPos)
     _played = newPos;
 }
 
-void LastFmScrobbler::trackChanged(MetaData trackData)
+void LastFmScrobbler::trackChanged(Player::MetaData trackData)
 {
     Q_UNUSED(trackData);
     _played = 0;
@@ -138,8 +138,10 @@ QUrl LastFmScrobbler::prepareHandshakeURL(QString username, QString password)
     QString uri;
     uri.append("hs=true");
     uri.append("&p=1.2.1");
-    uri.append("&c="+QCoreApplication::applicationName());
-    uri.append("&v="+QCoreApplication::applicationVersion());
+    //uri.append("&c="+QCoreApplication::applicationName());
+    //uri.append("&v="+QCoreApplication::applicationVersion());
+    uri.append("&c=tst");
+    uri.append("&v=1.0");
     uri.append("&u=" + username);
     uri.append("&t=" + timestamp);
     uri.append("&a=" + token);
@@ -167,6 +169,7 @@ void LastFmScrobbler::login()
 void LastFmScrobbler::loginFinished(QNetworkReply *reply)
 {
     int statusCode = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+    qDebug() << "Last.fm plugin login: server replied " << statusCode;
     if (statusCode!=200) {
         emit error(tr("Last.fm plugin: Invalid server response. Failed to login"));
     } else {
@@ -189,7 +192,7 @@ void LastFmScrobbler::loginFinished(QNetworkReply *reply)
     }
 }
 
-void LastFmScrobbler::scrobble(MetaData metadata)
+void LastFmScrobbler::scrobble(Player::MetaData metadata)
 {
     QString data("s="+_token);
 

@@ -22,21 +22,32 @@
 
 #include <QTreeView>
 
+//! A View for displaying tree structure of collections
+/*!
+  Class CollectionBrowser subclasses QTreeView and extends it for capability
+  of providing data when drag&drop operation (CollectionBrowser->PlaylistBrowser) is
+  started
+*/
 class CollectionBrowser : public QTreeView
 {
     public:
+
+        //! Constructor
         CollectionBrowser(QWidget* = 0);
+
+        //! Destructor
         ~CollectionBrowser();
 
     protected:
+        //! Event that is fired when drag operation is started
         void startDrag(Qt::DropActions);
+
+        //! Event handler that is fired when a key is pressed
+        /*!
+          It is called only when CollectionBrowser has focus when the key
+          is pressed
+        */
         void keyPressEvent(QKeyEvent*);
-
-
-    public slots:
-        QModelIndex insertChild(QModelIndex index, QString title, QString filename = "");
-        QModelIndex insertRow(QModelIndex index, QString title, QString filename = "");
-        void removeRow(QModelIndex parent, int row);
 
 };
 

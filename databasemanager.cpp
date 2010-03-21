@@ -31,6 +31,18 @@
 DatabaseManager::DatabaseManager(QString connectionName)
 {
     _connectionName = connectionName;
+
+    QSettings settings(QString(QDir::homePath()).append("/.tepsonic/main.conf"),QSettings::IniFormat,this);
+    _driverType = (DriverTypes)settings.value("Collections/StorageEngine",0).toInt();
+    settings.beginGroup("Collections");
+    settings.beginGroup("MySQL");
+    _server = settings.value("Server","127.0.0.1").toString();
+    _username = settings.value("Username",QString()).toString();
+    _password = settings.value("Password",QString()).toString();
+    _db = settings.value("Database","tepsonic").toString();
+    settings.endGroup();
+    settings.endGroup();;
+
 }
 
 DatabaseManager::~DatabaseManager()
@@ -46,30 +58,13 @@ bool DatabaseManager::connectToDB()
         return true;
     }
 
-    QSettings settings(QString(QDir::homePath()).append("/.tepsonic/main.conf"),QSettings::IniFormat,this);
-
-    DatabaseManager::DriverTypes driver;
-    switch (settings.value("Collections/StorageEngine",0).toInt()) {
-        default:
-        case 0:
-           driver = SQLite;
-           break;
-        case 1:
-           driver = MySQL;
-           break;
-    }
-
-    switch (driver) {
+    switch (_driverType) {
         case MySQL: {
             sqlDb = QSqlDatabase::addDatabase("QMYSQL",_connectionName);
-            settings.beginGroup("Collections");
-            settings.beginGroup("MySQL");
-            sqlDb.setHostName(settings.value("Server","127.0.0.1").toString());
-            sqlDb.setUserName(settings.value("Username",QString()).toString());
-            sqlDb.setPassword(settings.value("Password",QString()).toString());
-            sqlDb.setDatabaseName(settings.value("Database","tepsonic").toString());
-            settings.endGroup();
-            settings.endGroup();
+            sqlDb.setHostName(_server);
+            sqlDb.setUserName(_username);
+            sqlDb.setPassword(_password);
+            sqlDb.setDatabaseName(_db);
         } break;
         case SQLite: {
             sqlDb = QSqlDatabase::addDatabase("QSQLITE",_connectionName);
@@ -84,21 +79,21 @@ bool DatabaseManager::connectToDB()
     }
 
     // We want to use UTF8!!!
-    if (driver == MySQL ) {
+    if (_driverType == MySQL ) {
         QSqlQuery query("SET CHARACTER SET utf8;",sqlDb);
     }
 
     if (!sqlDb.tables(QSql::Tables).contains("Tracks",Qt::CaseSensitive)) {
-        initDb(driver);
+        initDb();
     }
 
     return true;
 }
 
-void DatabaseManager::initDb(DatabaseManager::DriverTypes dbType)
+void DatabaseManager::initDb()
 {
     qDebug() << "Initializing database structure";
-    switch (dbType) {
+    switch (_driverType) {
         case MySQL: {
             QSqlQuery query("CREATE TABLE IF NOT EXISTS `Tracks` (" \
                             "   `filename` varchar(300) NOT NULL," \

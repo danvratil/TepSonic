@@ -22,35 +22,92 @@
 #define ABSTRACTPLUGIN_H
 
 #include "plugininterface.h"
+#include "player.h"
 
 #include <QObject>
-#include "player.h"
 #include <Phonon/MediaObject>
 
 class QString;
 class QWidget;
 
+//! The AbstractPlugin class provides interface to be implemented by plugins
+/*!
+  When creating plugins for TepSonic, plugins must implement a few default functions
+  including settingsWidget() and pluginName().
+  Implementation of slots is optional. But at least settingsAccepted() should be implemented
+  if the plugin has a settings interface.
+*/
 class AbstractPlugin : public QObject, public PluginInterface
 {
     Q_OBJECT
     Q_INTERFACES(PluginInterface);
     public:
+
+        //! Initilizes plugin's settings UI on given parentWidget. This is a pure virtual method.
+        /*!
+          When the Settings dialog is opened it requests PluginManager to give it a list of plugins. Then it
+          appends a new QWidget to the list of pages and ask the plugin to initialize it's settings UI on it
+          by calling settingsWidget() and passing pointer to the new QWidget.
+          \param parentWidget pointer to QWidget that plugin UI will be initialized on
+        */
         virtual void settingsWidget(QWidget *parentWidget) = 0;
+
+        //! Provides name of the plugin. This is a pure virtual method.
+        /*!
+          Returned value is set as a title to plugin's settings panel in Settings dialog and is used in
+          plugins list.
+          */
         virtual QString pluginName() = 0;
 
     public slots:
-        virtual void settingsAccepted() = 0;
-        virtual void trackChanged(MetaData metadata) = 0;
-        virtual void trackFinished(MetaData metadata) = 0;
-        virtual void playerStatusChanged(Phonon::State newState, Phonon::State oldState) = 0;
-        virtual void trackPositionChanged(qint64 newPos) = 0;
+        //! Called when Settings dialog is accepted
+        /*!
+          When user accepts the Settings dialog (by clicking on "OK" button) this slot is called. It is good to implement
+          saving of configuration to a file.
+        */
+        virtual void settingsAccepted() {}
+
+        //! Notifies about changing current track
+        /*!
+          Provides information about new track that was recently set to Player. It recieves MetaData with informations
+          about the new track.
+          \param metadata Meta data from the current track
+        */
+        virtual void trackChanged(Player::MetaData metadata) { Q_UNUSED(metadata) }
+
+        //! Notifies that current track was played.
+        /*!
+          This slot notifies plugin that current track was finished. The slot is called when playback reaches
+          the end of the current track, not when the playback was stopped by user or changed for another.
+          \param metadata Meta data from the current track
+          \sa trackChanged()
+        */
+        virtual void trackFinished(Player::MetaData metadata) { Q_UNUSED(metadata) }
+
+        //! Notifies about change of player's status
+        /*!
+          Provides information about change of state of the player. New state and previous (old) state are passed.
+          \param newState new state of the player
+          \param oldState previous state of the player
+        */
+        virtual void playerStatusChanged(Phonon::State newState, Phonon::State oldState) { Q_UNUSED(newState) Q_UNUSED(oldState) }
+
+        //! Informs about position of the playback
+        /*!
+          This slot is fired every second and provides information about current position in the track.
+          \param newPos gives current position from beginning of the track in milliseconds
+        */
+        virtual void trackPositionChanged(qint64 newPos) { Q_UNUSED(newPos) }
 
     signals:
-        void error(QString);
-
-
+        //! Signalize failure of the plugin to main window
+        /*!
+          Plugin can emit this signal when an failure that user should be informed about occurs. Additionally it can
+          pass a string with short description of the error (eg. Failed to connect to...). The string should be prefixed
+          with name of the plugin as it's not done automatically
+          \param msg short description of the error
+        */
+        void error(QString msg);
 };
-
-//#include "moc_abstractplugin.cpp"
 
 #endif // ABSTRACTPLUGIN_H

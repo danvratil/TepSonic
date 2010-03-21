@@ -18,10 +18,10 @@
  */
 
 #include <QtGui/QApplication>
-#include <QList>
 #include "player.h"
 #include "mainwindow.h"
 #include "pluginsmanager.h"
+
 
 int main(int argc, char *argv[])
 {

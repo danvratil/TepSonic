@@ -18,111 +18,91 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Cambridge, MA 02110-1301, USA.
  */
 
-#include <QStringList>
 #include "collectionitem.h"
+
+#include <QDebug>
 
 CollectionItem::CollectionItem(const QVector<QVariant> &data, CollectionItem *parent)
 {
-     parentItem = parent;
-     itemData = data;
+     _parentItem = parent;
+     _itemData = data;
 }
 
 CollectionItem::~CollectionItem()
 {
-     qDeleteAll(childItems);
+     qDeleteAll(_childItems);
 }
 
-CollectionItem *CollectionItem::child(int number)
+CollectionItem *CollectionItem::child(int index)
 {
-     return childItems.value(number);
+     if (index > _childItems.count())
+         return NULL;
+
+     return _childItems.value(index);
 }
 
 int CollectionItem::childCount() const
 {
-     return childItems.count();
+     return _childItems.count();
 }
 
 int CollectionItem::childNumber() const
 {
-     if (parentItem)
-         return parentItem->childItems.indexOf(const_cast<CollectionItem*>(this));
+     if (_parentItem)
+         return _parentItem->_childItems.indexOf(const_cast<CollectionItem*>(this));
 
      return 0;
 }
 
 int CollectionItem::columnCount() const
 {
-     return itemData.count();
+     return _itemData.count();
 }
 
 QVariant CollectionItem::data(int column) const
 {
-     return itemData.value(column);
+    if ((column < 0) || (column > _itemData.size()))
+        return QVariant();
+
+    return _itemData.value(column);
 }
 
 bool CollectionItem::insertChildren(int position, int count, int columns)
 {
-     if (position < 0 || position > childItems.size())
+     if (position < 0 || position > _childItems.size())
          return false;
 
      for (int row = 0; row < count; ++row) {
          QVector<QVariant> data(columns);
          CollectionItem *item = new CollectionItem(data, this);
-         childItems.insert(position, item);
+         _childItems.insert(position, item);
      }
-
-     return true;
-}
-
-bool CollectionItem::insertColumns(int position, int columns)
-{
-     if (position < 0 || position > itemData.size())
-         return false;
-
-     for (int column = 0; column < columns; ++column)
-         itemData.insert(position, QVariant());
-
-     foreach (CollectionItem *child, childItems)
-         child->insertColumns(position, columns);
 
      return true;
 }
 
 CollectionItem *CollectionItem::parent()
 {
-     return parentItem;
+     return _parentItem;
 }
 
 bool CollectionItem::removeChildren(int position, int count)
 {
-     if (position < 0 || position + count > childItems.size())
+     if (position < 0 || position + count > _childItems.size())
          return false;
 
      for (int row = 0; row < count; ++row)
-         delete childItems.takeAt(position);
-
-     return true;
-}
-
-bool CollectionItem::removeColumns(int position, int columns)
-{
-     if (position < 0 || position + columns > itemData.size())
-         return false;
-
-     for (int column = 0; column < columns; ++column)
-         itemData.remove(position);
-
-     foreach (CollectionItem *child, childItems)
-         child->removeColumns(position, columns);
+         delete _childItems.takeAt(position);
 
      return true;
 }
 
 bool CollectionItem::setData(int column, const QVariant &value)
 {
-     if (column < 0 || column >= itemData.size())
+
+     if (column < 0 || column >= _itemData.size())
          return false;
 
-     itemData[column] = value;
+     _itemData[column] = value;
      return true;
 }

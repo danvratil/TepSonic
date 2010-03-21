@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>645</width>
-    <height>401</height>
+    <width>643</width>
+    <height>399</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -296,7 +296,7 @@
          </widget>
         </item>
         <item row="1" column="2">
-         <widget class="QPushButton" name="cleatCollectionSearch">
+         <widget class="QPushButton" name="clearCollectionSearch">
           <property name="text">
            <string/>
           </property>
@@ -361,7 +361,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>645</width>
+     <width>643</width>
      <height>20</height>
     </rect>
    </property>

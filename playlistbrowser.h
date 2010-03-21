@@ -17,13 +17,6 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Cambridge, MA 02110-1301, USA.
  */
 
-/** Playlist Browser
- *    QTreeView with implemented DROP action
- *
- * Thanks to David Watzke
- *
- */
-
 #ifndef PLAYLISTBROWSER_H
 #define PLAYLISTBROWSER_H
 
@@ -32,19 +25,56 @@
 
 class PlaylistManager;
 
+//! PlaylistBrowser class is a QTreeView subclass with support for drop events
+/*!
+  PlaylistBrowser class i subclasses from QTreeView and provides support for ending
+  drag&drop operations. Dropped items are passed to PlaylistManager which loads them into
+  the PlaylistModel from separate thread without freezing the UI
+*/
 class PlaylistBrowser : public QTreeView
 {
     public:
-        PlaylistBrowser(QWidget* = 0);
+        //! Constructor
+        /*!
+          \param parent pointer to parent QWidget
+        */
+        PlaylistBrowser(QWidget *parent= 0);
+
+        //! Destructor
         ~PlaylistBrowser();
 
     protected:
-        void dropEvent(QDropEvent*);
-        void dragEnterEvent(QDragEnterEvent*);
-        void dragMoveEvent(QDragMoveEvent*);
-        void keyPressEvent(QKeyEvent*);
+        //! Called when items are dropped on the browser
+        /*!
+          When drag&drop action is finished by dropping items into PlaylistBrowser the items are read
+          from \p dropEvent and passed to PlaylistManager which loads the files into the PlaylistModel
+          \param dropEvent provides more informations about the event
+        */
+        void dropEvent(QDropEvent *dropEvent);
 
-        PlaylistManager *m_playlistManager;
+        //! Called when items are dragged into the PlaylistBrowser
+        /*!
+          \param dragEnterEvent provides more informations about the event
+        */
+        void dragEnterEvent(QDragEnterEvent *dragEnterEvent);
+
+        //! Called when items are moved within the PlaylistBrowser
+        /*!
+          Currently the action is just accepted without any response
+          \todo move items within PlaylistBrowser by dragging them from place to place
+          \param dragMoveEvent provides more informations about the event
+        */
+        void dragMoveEvent(QDragMoveEvent *dragMoveEvent);
+
+        //! Called when a key is pressed when the PlaylistBrowser has focus
+        /*!
+          Removes selected items from PlaylistModel
+          \param keyEvent provides more informations about the event
+        */
+        void keyPressEvent(QKeyEvent *keyEvent);
+
+        //! PlaylistManager
+        PlaylistManager *_playlistManager;
 
 };
 

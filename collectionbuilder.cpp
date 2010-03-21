@@ -30,7 +30,7 @@ void CollectionBuilder::run()
     {
         QSqlQuery artistsQuery("SELECT artist FROM Tracks GROUP BY artist ORDER BY artist ASC",sqlConn);
         while (artistsQuery.next()) {
-            albumsParent = _model->addRow(QModelIndex(),artistsQuery.value(0).toString(),QString());
+            albumsParent = _model->addChild(QModelIndex(),artistsQuery.value(0).toString(),QString());
             QSqlQuery albumsQuery("SELECT album FROM Tracks WHERE artist='"+artistsQuery.value(0).toString()+"' GROUP BY album ORDER BY album ASC;",sqlConn);
             while (albumsQuery.next()) {
                 tracksParent = _model->addChild(albumsParent,albumsQuery.value(0).toString(),QString());

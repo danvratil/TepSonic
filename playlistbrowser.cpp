@@ -68,7 +68,7 @@ void PlaylistBrowser::dropEvent(QDropEvent* event)
     QStringList newItems;
 
     PlaylistProxyModel *proxyModel = static_cast<PlaylistProxyModel*>(this->model());
-    m_playlistManager = new PlaylistManager(static_cast<PlaylistModel*>(proxyModel->sourceModel()));
+    _playlistManager = new PlaylistManager(static_cast<PlaylistModel*>(proxyModel->sourceModel()));
 
     QStringList files;
 
@@ -78,7 +78,7 @@ void PlaylistBrowser::dropEvent(QDropEvent* event)
         files << text;
     }
 
-    m_playlistManager->add(files);
+    _playlistManager->add(files);
 
     event->setAccepted(true);
 }

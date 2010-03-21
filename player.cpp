@@ -54,17 +54,13 @@ Player::~Player()
 {
 }
 
-void Player::setTrack(const QString fileName)
+void Player::setTrack(const QString fileName, bool autoPlay)
 {
     if (QFileInfo(fileName).isFile()) {
        _phononPlayer->setCurrentSource(Phonon::MediaSource(fileName));
    }
-   emit trackChanged(currentMetaData());
-}
 
-void Player::setTrack(const QString fileName, bool autoPlay)
-{
-    setTrack(fileName);
+   emit trackChanged(currentMetaData());
     if (autoPlay==true) {
         _phononPlayer->play();
     }
@@ -86,9 +82,9 @@ void Player::setRepeatMode(RepeatMode repeatMode)
     }
 }
 
-MetaData Player::currentMetaData()
+Player::MetaData Player::currentMetaData()
 {
-    MetaData data;
+    Player::MetaData data;
 
     QString filename = _phononPlayer->currentSource().fileName();
 
