@@ -90,6 +90,7 @@ void PluginsManager::loadPlugins()
                     connect(_player,SIGNAL(stateChanged(Phonon::State,Phonon::State)),static_cast<AbstractPlugin*>(plugin),SLOT(playerStatusChanged(Phonon::State,Phonon::State)));
                     connect(_player,SIGNAL(trackPositionChanged(qint64)),static_cast<AbstractPlugin*>(plugin),SLOT(trackPositionChanged(qint64)));
                     connect(static_cast<AbstractPlugin*>(plugin),SIGNAL(error(QString)),_mainWindow,SLOT(showError(QString)));
+
                 }
             }
         }

@@ -25,6 +25,7 @@
 #include "ui_mainwindow.h"
 #include "preferencesdialog.h"
 
+#include "abstractplugin.h"
 #include "collectionitem.h"
 
 #include <QMessageBox>
@@ -316,7 +317,8 @@ void MainWindow::on_actionPreferences_triggered()
     // Show preferences dialog
     PreferencesDialog *prefDlg = new PreferencesDialog(this);
     for (int i = 0; i < _pluginsManager->pluginsCount(); i++) {
-        prefDlg->addPlugin(_pluginsManager->pluginAt(i));
+        if (static_cast<AbstractPlugin*>(_pluginsManager->pluginAt(i)->instance())->hasConfigUI())
+            prefDlg->addPlugin(_pluginsManager->pluginAt(i));
     }
     connect(prefDlg,SIGNAL(rebuildCollectionsRequested()),_collectionsUpdater,SLOT(start()));
     prefDlg->exec();

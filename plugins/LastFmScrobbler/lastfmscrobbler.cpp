@@ -35,17 +35,15 @@ LastFmScrobbler::LastFmScrobbler()
 {
     qDebug() << "Last.fm plugin loaded!";
 
+    setPluginName("Last.fm plugin");
+    setHasConfigUI(true);
+
     login();
 }
 
 LastFmScrobbler::~LastFmScrobbler()
 {
     qDebug() << "LastFmScrobbler destroyed";
-}
-
-QString LastFmScrobbler::pluginName()
-{
-    return "Last.fm plugin";
 }
 
 void LastFmScrobbler::settingsWidget(QWidget *parentWidget)

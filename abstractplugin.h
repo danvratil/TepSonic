@@ -41,6 +41,12 @@ class AbstractPlugin : public QObject, public PluginInterface
 {
     Q_OBJECT
     Q_INTERFACES(PluginInterface);
+    Q_PROPERTY(bool hasConfigUI
+               READ hasConfigUI
+               WRITE setHasConfigUI);
+    Q_PROPERTY(QString pluginName
+               READ pluginName
+               WRITE setPluginName);
     public:
 
         //! Initilizes plugin's settings UI on given parentWidget. This is a pure virtual method.
@@ -52,12 +58,26 @@ class AbstractPlugin : public QObject, public PluginInterface
         */
         virtual void settingsWidget(QWidget *parentWidget) = 0;
 
-        //! Provides name of the plugin. This is a pure virtual method.
+        //! Returns state of hasConfigUI property
         /*!
-          Returned value is set as a title to plugin's settings panel in Settings dialog and is used in
-          plugins list.
-          */
-        virtual QString pluginName() = 0;
+          \return Returns state of hasConfigUI property.
+        */
+        bool hasConfigUI() const { return _hasConfigUI; }
+
+        //! Changes state of hasConfigUI property
+        /*!
+          \param state new state of the property
+        */
+        void setHasConfigUI(const bool &state) { _hasConfigUI = state; }
+
+        //! Returns state of pluginName property
+        QString pluginName() const { return _pluginName; }
+
+        //! Changes sate of pluginName property
+        /*!
+          \param name new name of the plugin
+        */
+        void setPluginName(const QString &name) { _pluginName = name; }
 
     public slots:
         //! Called when Settings dialog is accepted
@@ -108,6 +128,14 @@ class AbstractPlugin : public QObject, public PluginInterface
           \param msg short description of the error
         */
         void error(QString msg);
+
+    private:
+        //! Has config UI?
+        bool _hasConfigUI;
+
+        //! The plugin name
+        QString _pluginName;
+
 };
 
 #endif // ABSTRACTPLUGIN_H
