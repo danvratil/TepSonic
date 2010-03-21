@@ -196,13 +196,13 @@ class Player: public QObject
       \param metadata meta data of the new track
       \sa setTrack()
     */
-    void trackChanged(MetaData metadata);
+    void trackChanged(Player::MetaData metadata);
 
     //! Informs that end of the current track was reached and provides it's metadata
     /*!
       \param metadata meta data of the just finished track
     */
-    void trackFinished(MetaData metadata);
+    void trackFinished(Player::MetaData metadata);
 
     //! Informs that end of the current track was reached
     void trackFinished();
