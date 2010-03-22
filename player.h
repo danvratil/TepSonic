@@ -36,6 +36,16 @@ class Player: public QObject
 {
     Q_OBJECT
     Q_ENUMS(RepeatMode)
+    Q_PROPERTY(Player::RepeatMode repeatMode
+               READ repeatMode
+               WRITE setRepeatMode)
+    Q_PROPERTY(bool randomMode
+               READ randomMode
+               WRITE setRandomMode)
+    Q_PROPERTY(Player::MetaData metadata
+               READ currentMetaData)
+    Q_PROPERTY(Phonon::State playerState
+               READ playerState)
   public:
     //! Structure to pass track's metadata
     struct MetaData {
@@ -64,7 +74,7 @@ class Player: public QObject
       \return Returns meta data of current track
       \sa trackChanged(), trackFinished()
     */
-    MetaData currentMetaData();
+    Player::MetaData currentMetaData();
 
     //! Returns current repeat mode
     /*!
