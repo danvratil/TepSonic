@@ -55,6 +55,9 @@ namespace Ui
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
+    Q_PROPERTY(PluginsManager* pluginsManager
+               READ pluginsManager
+               WRITE setPluginsManager)
 
 public:
     //! Constructor
@@ -74,8 +77,16 @@ public:
       Gives the main window access to the PluginsManager. At normal circumstances it would be passed in constructor
       but the PluginsManager is created after the main window so it's not possible (without risking invalid reference)
       \param pluginsManager pointer to PluginsManager object
+      \sa pluginsManager()
     */
     inline void setPluginsManager(PluginsManager *pluginsManager) { _pluginsManager = pluginsManager; }
+
+    //! Returns pointer to PluginsManager
+    /*!
+      \return Returns pointer to plugins manager
+      \sa setPluginsManager()
+    */
+    PluginsManager* pluginsManager() { return _pluginsManager; }
 
 private:
     //! Pointer to main window's UI (generated from mainwindow.ui)
