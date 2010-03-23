@@ -313,10 +313,6 @@ void MainWindow::on_actionPreferences_triggered()
 {
     // Show preferences dialog
     PreferencesDialog *prefDlg = new PreferencesDialog(this);
-    for (int i = 0; i < _pluginsManager->pluginsCount(); i++) {
-        if (static_cast<AbstractPlugin*>(_pluginsManager->pluginAt(i)->instance())->hasConfigUI())
-            prefDlg->addPlugin(_pluginsManager->pluginAt(i));
-    }
     connect(prefDlg,SIGNAL(rebuildCollectionsRequested()),_taskManager,SLOT(rebuildCollections()));
     prefDlg->exec();
 

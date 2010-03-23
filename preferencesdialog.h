@@ -26,10 +26,20 @@
 #include <QPluginLoader>
 #include <QTreeWidgetItem>
 #include <QSettings>
+#include <QListWidgetItem>
 
 namespace Ui {
     class PreferencesDialog;
 }
+
+namespace PreferencesPages {
+    class Player;
+    class Plugins;
+    class Collections;
+}
+
+class MainWindow;
+
 
 //! PreferencesDialog is a dialog window with application settings
 /*!
@@ -46,20 +56,12 @@ class PreferencesDialog : public QDialog {
         //! Constructor
         /*!
           In constructor UI is prepared and current preferences are loaded from settings file.
-          \param parent dialog's parent widget
+          \param parent pointer to main window
         */
-        PreferencesDialog(QWidget *parent = 0);
+        PreferencesDialog(MainWindow *parent = 0);
 
         //! Destructor
         ~PreferencesDialog();
-
-        //! Create new tab with settings for given plugin
-        /*!
-          When called a new item is added to the toolbox and plugin's configuration interface is
-          created on it's widget using plugin's settingsWidget() method
-          \param plugin pointer to QPluginLoader
-        */
-        void addPlugin(QPluginLoader *plugin);
 
     signals:
         //! Informs main window that rebuilding collections was requested
@@ -73,30 +75,23 @@ class PreferencesDialog : public QDialog {
         //! Dialog interface
         Ui::PreferencesDialog *_ui;
 
+        //! Player page
+        PreferencesPages::Player *_player;
+
+        //! Collections page
+        PreferencesPages::Collections *_collections;
+
+        //! Plugins page
+        PreferencesPages::Plugins *_plugins;
+
+        //! Main window
+        MainWindow *_parent;
 
     private slots:
-        //! Called when rebuildCollectionsNowBtn is clicked and emmits rebuildCollectionsRequested() signal
-        void on_rebuildCollectionsNowBtn_clicked();
 
-        //! Called when addPathButton is clicked
-        /*!
-          A file dialog to add folder is showed and user can select a folder that will be added to list of
-          collections source folders
-        */
-        void on_addPathButton_clicked();
 
-        //! Called when removePathButton is clicked
-        /*!
-          Removes selected path from list of collection source folders
-        */
-        void on_removePathButton_clicked();
-
-        //! Called when collectionsStorageEngine_combo selection is changed
-        /*!
-          This enables or disables configuration of connection to MySQL server
-          when MySQL is selected in to combo
-        */
-        void on_collectionsStorageEngine_combo_currentIndexChanged(QString newIndex);
+        //! Called when button in the left list is clicked
+        void on_pagesButtons_currentItemChanged(QListWidgetItem* current, QListWidgetItem* previous);
 
         //! Called when the dialog is closed via "Cancel" button
         void on_buttonBox_rejected();

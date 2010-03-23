@@ -32,9 +32,13 @@ HEADERS += collectionbrowser.h \
     playlistpopulator.h \
     playlistwriter.h \
     pluginsmanager.h \
-    collectionpopulator.h
+    collectionpopulator.h \
+    preferencespages.h
 FORMS += mainwindow.ui \
-    preferencesdialog.ui
+    preferencesdialog.ui \
+    player.ui \
+    collections.ui \
+    plugins.ui
 SOURCES += collectionbrowser.cpp \
     main.cpp \
     mainwindow.cpp \
@@ -54,5 +58,6 @@ SOURCES += collectionbrowser.cpp \
     playlistpopulator.cpp \
     playlistwriter.cpp \
     pluginsmanager.cpp \
-    collectionpopulator.cpp
+    collectionpopulator.cpp \
+    preferencespages.cpp
 RESOURCES += icons.qrc
