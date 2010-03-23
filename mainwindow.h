@@ -31,15 +31,17 @@
 #include <QItemSelectionModel>
 #include <QLabel>
 
+// These two classes are used in inline methods
 #include "playlistmodel.h"
-#include "playlistproxymodel.h"
-#include "collectionmodel.h"
-#include "collectionproxymodel.h"
 #include "player.h"
-#include "tracksiterator.h"
-#include "databasemanager.h"
-#include "pluginsmanager.h"
-#include "taskmanager.h"
+//#include "tracksiterator.h"
+
+class PlaylistProxyModel;
+class CollectionModel;
+class CollectionProxyModel;
+class DatabaseManager;
+class PluginsManager;
+class TaskManager;
 
 namespace Ui
 {

@@ -24,9 +24,14 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "preferencesdialog.h"
-
+#include "playlistproxymodel.h"
+#include "playlistmodel.h"
+#include "collectionproxymodel.h"
+#include "collectionmodel.h"
 #include "abstractplugin.h"
 #include "collectionitem.h"
+#include "taskmanager.h"
+#include "pluginsmanager.h"
 
 #include <QMessageBox>
 #include <QDir>
