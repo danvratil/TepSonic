@@ -1,4 +1,4 @@
-//*
+/*
  * TEPSONIC
  * Copyright 2010 Dan Vratil <vratil@progdansoft.com>
  *
@@ -72,7 +72,7 @@ void PlaylistPopulator::run()
 
         /* When the _files is empty thread is suspended until awoken again
            by adding new file */
-        if ((empty) || (!_canClose)) {
+        if ((empty) && (!_canClose)) {
             emit filesAdded();
             _lock.wait(&_mutex);
         }
