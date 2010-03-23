@@ -70,7 +70,8 @@ void PlaylistWriter::run()
         }
 
         // Wait until awaken again
-        _lock.wait(&_mutex);
+        if (!_canClose)
+            _lock.wait(&_mutex);
 
     } while (!_canClose);
 }
