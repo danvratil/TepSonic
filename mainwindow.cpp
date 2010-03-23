@@ -110,12 +110,14 @@ MainWindow::MainWindow(Player *player)
             this,SLOT(playlistLengthChanged(int,int)));
     _playlistProxyModel = new PlaylistProxyModel(this);
     _playlistProxyModel->setSourceModel(_playlistModel);
+    _playlistProxyModel->setDynamicSortFilter(true);
 
     _ui->playlistBrowser->setModel(_playlistProxyModel);
     _ui->playlistBrowser->setDragEnabled(true);
     _ui->playlistBrowser->setDropIndicatorShown(true);
     _ui->playlistBrowser->viewport()->setAcceptDrops(true);
     _ui->playlistBrowser->header()->setContextMenuPolicy(Qt::CustomContextMenu);
+    _ui->playlistBrowser->setAlternatingRowColors(true);
     // Open ui->menuVisible_columns when PlaylistBrowser's header's context menu is requested
     connect(_ui->playlistBrowser->header(),SIGNAL(customContextMenuRequested(QPoint)),
             this,SLOT(showPlaylistContextMenu(QPoint)));
@@ -136,15 +138,16 @@ MainWindow::MainWindow(Player *player)
     _ui->collectionBrowser->setSelectionMode(QAbstractItemView::ExtendedSelection);
     _ui->collectionBrowser->setDragEnabled(true);
     _ui->collectionBrowser->setDropIndicatorShown(true);
+    _ui->collectionBrowser->setAlternatingRowColors(true);
+    _ui->collectionBrowser->setRootIsDecorated(true);
     // Hide the second column that contains real filename
     _ui->collectionBrowser->hideColumn(1);
     // Hide the header
     _ui->collectionBrowser->header()->setHidden(true);
 
-
     _taskManager = new TaskManager(_playlistModel,_collectionModel);
-
     connect(_ui->playlistBrowser,SIGNAL(addedFiles(QStringList)),_taskManager,SLOT(addFilesToPlaylist(QStringList)));
+    connect(_taskManager,SIGNAL(collectionsPopulated()),this,SLOT(fixCollectionProxyModel()));
 
     _settings = new QSettings(QString(QDir::homePath()).append("/.tepsonic/main.conf"),QSettings::IniFormat,this);
     restoreGeometry(_settings->value("Window/Geometry", saveGeometry()).toByteArray());
@@ -192,9 +195,13 @@ MainWindow::MainWindow(Player *player)
     connect(_ui->stopButton,SIGNAL(clicked()),_ui->actionStop,SLOT(trigger()));
     connect(_ui->nextTrackButton,SIGNAL(clicked()),_ui->actionNext_track,SLOT(trigger()));
 
+
     connect(_ui->playlistSearchEdit,SIGNAL(textChanged(QString)),_playlistProxyModel,SLOT(setFilterRegExp(QString)));
-    connect(_ui->colectionSearchEdit,SIGNAL(textChanged(QString)),_collectionProxyModel,SLOT(setFilterRegExp(QString)));
+    // Workaround for QTBUG 7585 (http://bugreports.qt.nokia.com/browse/QTBUG-7585)
+    // Calling invalidate() before changing filter solves problem with expand icons being displayed incorrectly
     connect(_ui->colectionSearchEdit,SIGNAL(textChanged(QString)),_playlistProxyModel,SLOT(invalidate()));
+    connect(_ui->colectionSearchEdit,SIGNAL(textChanged(QString)),_collectionProxyModel,SLOT(setFilterRegExp(QString)));
+
 
     // Connect individual PlaylistBrowser columns' visibility state with QActions in ui->menuVisible_columns
     _playlistVisibleColumnContextMenuMapper = new QSignalMapper(this);
@@ -215,7 +222,6 @@ MainWindow::MainWindow(Player *player)
     connect(_ui->actionLength,SIGNAL(toggled(bool)),_playlistVisibleColumnContextMenuMapper,SLOT(map()));
     _playlistVisibleColumnContextMenuMapper->setMapping(_ui->actionLength,7);
     connect(_playlistVisibleColumnContextMenuMapper,SIGNAL(mapped(int)),this,SLOT(togglePlaylistColumnVisible(int)));
-
 
 }
 
@@ -556,4 +562,13 @@ void MainWindow::showError(QString error)
     _ui->statusBar->showMessage(error,5000);
 }
 
+void MainWindow::fixCollectionProxyModel()
+{
+    // Workaround for QTBUG 7585
+    // http://bugreports.qt.nokia.com/browse/QTBUG-7585
+    _collectionProxyModel->invalidate();
+    _collectionProxyModel->setFilterRegExp("");
+}
+
 #include "moc_mainwindow.cpp"
+

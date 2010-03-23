@@ -18,7 +18,6 @@
  */
 
 #include "playlistproxymodel.h"
-#include <QDebug>
 
 PlaylistProxyModel::PlaylistProxyModel(QObject *parent):
         QSortFilterProxyModel(parent)

@@ -179,6 +179,15 @@ public slots:
 
 private slots:
 
+
+    //! Workaround for QTBUG  7585
+    /*!
+      When filter applied, the expand-icons are not displayed correctly.
+      \link http://bugreports.qt.nokia.com/browse/QTBUG-7585
+      Calling invalidate() before changing the filter solves the problem.
+    */
+    void fixCollectionProxyModel();
+
     //! Clears collectionSearchEdit field and resets collections filter
     void on_clearCollectionSearch_clicked();
 

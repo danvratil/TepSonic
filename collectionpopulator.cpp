@@ -80,6 +80,7 @@ void CollectionPopulator::run()
         _mutex.unlock();
         qDebug() << "CollectionBrowser populated";
 
+        emit collectionsPopulated();
 
         // We don't want to lock the thread when the thread is allowed to quit
         if (!_canClose)

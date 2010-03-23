@@ -41,6 +41,8 @@ TaskManager::TaskManager(PlaylistModel *playlistModel, CollectionModel *collecti
 
     connect(_collectionBuilder,SIGNAL(collectionChanged()),
             _collectionPopulator,SLOT(populate()));
+    connect(_collectionPopulator,SIGNAL(collectionsPopulated()),
+            this,SIGNAL(collectionsPopulated()));
 }
 
 TaskManager::~TaskManager()

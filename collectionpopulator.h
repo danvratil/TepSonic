@@ -56,6 +56,10 @@ class CollectionPopulator : public QThread
         //! Wakes up the thread
         void populate();
 
+    signals:
+        //! Emitted when whole collections are populated
+        void collectionsPopulated();
+
     private:
         //! Pointer to CollectionModel
         CollectionModel *_collectionModel;
