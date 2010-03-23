@@ -195,21 +195,21 @@ bool PlaylistModel::setHeaderData(int section, Qt::Orientation orientation,
      return result;
 }
 
-void PlaylistModel::addItem(QString file)
+bool PlaylistModel::addItem(QString file)
 {
     if (file.isEmpty())
-        return;
+        return false;
 
     QFileInfo finfo(file);
     if ((!finfo.exists()) || (!finfo.isFile()))
-        return;
+        return false;
 
     // Select the root item
     QModelIndex root;
 
     // Insert new row
     if (!insertRow(rowCount(root), root))
-        return;
+        return false;
 
     /**
      * TAGLIB comes here
@@ -243,4 +243,6 @@ void PlaylistModel::addItem(QString file)
     rootItem->child(rootItem->childCount()-1)->setData(7,QVariant(trackLengthString));
 
     emit playlistLengthChanged(_totalLength, rowCount(QModelIndex()));
+
+    return true;
 }

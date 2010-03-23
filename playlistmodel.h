@@ -176,7 +176,7 @@ class PlaylistModel : public QAbstractItemModel
       \param file track file to load
       \sa PlaylistManager
     */
-    void addItem(QString file);
+    bool addItem(QString file);
 
  private:
      //! Returns pointer to PlaylistModel located on given index
