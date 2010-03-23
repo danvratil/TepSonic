@@ -162,8 +162,24 @@ MainWindow::MainWindow(Player *player)
         }
     }
 
+    _player = player;
+    connect(_player,SIGNAL(trackFinished()),this,SLOT(updatePlayerTrack()));
+    connect(_player,SIGNAL(stateChanged(Phonon::State,Phonon::State)),
+            this,SLOT(playerStatusChanged(Phonon::State,Phonon::State)));
+    connect(_player,SIGNAL(repeatModeChanged(Player::RepeatMode)),
+            this,SLOT(repeatModeChanged(Player::RepeatMode)));
+    connect(_player,SIGNAL(randomModeChanged(bool)),
+            this,SLOT(randomModeChanged(bool)));
+
+    _ui->seekSlider->setMediaObject(_player->mediaObject());
+    _ui->volumeSlider->setAudioOutput(_player->audioOutput());
+
     // Load last playlist
-    _taskManager->addFileToPlaylist(QDir::homePath().append("/.tepsonic/last.m3u"));
+    if (_settings->value("Preferences/RestoreSession").toBool()) {
+        _taskManager->addFileToPlaylist(QDir::homePath().append("/.tepsonic/last.m3u"));
+        _player->setRandomMode(_settings->value("LastSession/RandomMode",false).toBool());
+        _player->setRepeatMode(Player::RepeatMode(_settings->value("LastSession/RepeatMode",0).toInt()));
+    }
 
     QList<QVariant> playlistColumnsStates(_settings->value("Window/PlaylistColumnsStates", QList<QVariant>()).toList());
     QList<QVariant> playlistColumnsWidths(_settings->value("Window/PlaylistColumnsWidths", QList<QVariant>()).toList());
@@ -179,13 +195,7 @@ MainWindow::MainWindow(Player *player)
         }
     }
 
-    _player = player;
-    connect(_player,SIGNAL(trackFinished()),this,SLOT(updatePlayerTrack()));
-    connect(_player,SIGNAL(stateChanged(Phonon::State,Phonon::State)),
-            this,SLOT(playerStatusChanged(Phonon::State,Phonon::State)));
 
-    _ui->seekSlider->setMediaObject(_player->mediaObject());
-    _ui->volumeSlider->setAudioOutput(_player->audioOutput());
 
     connect(_ui->loadFileButton,SIGNAL(clicked()),_ui->actionAdd_file,SLOT(trigger()));
     connect(_ui->loadFolderButton,SIGNAL(clicked()),_ui->actionAdd_folder,SLOT(trigger()));
@@ -239,6 +249,9 @@ MainWindow::~MainWindow()
     }
     _settings->setValue("Window/PlaylistColumnsStates", playlistColumnsStates);
     _settings->setValue("Window/PlaylistColumnsWidths", playlistColumnsWidths);
+
+    _settings->setValue("LastSession/RepeatMode", int(_player->repeatMode()));
+    _settings->setValue("LastSession/RandomMode", _player->randomMode());
 
     // Save current playlist to file
     _taskManager->savePlaylistToFile(QDir::homePath().append("/.tepsonic/last.m3u"));
@@ -565,6 +578,32 @@ void MainWindow::fixCollectionProxyModel()
     _collectionProxyModel->invalidate();
     _collectionProxyModel->setFilterRegExp("");
 }
+
+void MainWindow::repeatModeChanged(Player::RepeatMode newMode)
+{
+    switch (newMode) {
+        case Player::RepeatOff:
+            _ui->actionRepeat_OFF->setChecked(true);
+            break;
+        case Player::RepeatTrack:
+            _ui->actionRepeat_track->setChecked(true);
+            break;
+        case Player::RepeatAll:
+            _ui->actionRepeat_playlist->setChecked(true);
+            break;
+    }
+}
+
+void MainWindow::randomModeChanged(bool newMode)
+{
+    if (newMode == true) {
+        _ui->actionRandom_ON->setChecked(true);
+    } else {
+        _ui->actionRandom_OFF->setChecked(true);
+    }
+}
+
+
 
 #include "moc_mainwindow.cpp"
 

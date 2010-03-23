@@ -304,6 +304,12 @@ private slots:
     */
     void playlistLengthChanged(int totalLength, int tracksCount);
 
+    //! Called when Player's RepeatMode is changed
+    void repeatModeChanged(Player::RepeatMode newMode);
+
+    //! Called when Player's RandomMode is changed
+    void randomModeChanged(bool newMode);
+
 };
 
 #endif // MAINWINDOW_H

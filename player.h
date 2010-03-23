@@ -58,9 +58,9 @@ class Player: public QObject
     };
 
     //! Enumeration of repeat modes.
-    enum RepeatMode { RepeatOff,    /*! < Disable repeat */
-                      RepeatTrack,  /*! < Repeat current track */
-                      RepeatAll     /*! < Repeat whole playlist */
+    enum RepeatMode { RepeatOff = 0,    /*! < Disable repeat */
+                      RepeatTrack = 1,  /*! < Repeat current track */
+                      RepeatAll = 2     /*! < Repeat whole playlist */
     };
 
     //! Constructor
@@ -192,7 +192,7 @@ class Player: public QObject
       \param repeatMode new repeat mode
       \sa repeatMode()
     */
-    void repeatModeChanged(RepeatMode repeatMode);
+    void repeatModeChanged(Player::RepeatMode repeatMode);
 
     //! Informs about new random mode
     /*!
