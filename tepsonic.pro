@@ -21,16 +21,18 @@ HEADERS += collectionbrowser.h \
     player.h \
     collectionmodel.h \
     collectionitem.h \
-    playlistmanager.h \
     databasemanager.h \
-    collectionsupdater.h \
     collectionbuilder.h \
     playlistproxymodel.h \
     collectionproxymodel.h \
     statusbar.h \
     plugininterface.h \
+    abstractplugin.h \
+    taskmanager.h \
+    playlistpopulator.h \
+    playlistwriter.h \
     pluginsmanager.h \
-    abstractplugin.h
+    collectionpopulator.h
 FORMS += mainwindow.ui \
     preferencesdialog.ui
 SOURCES += collectionbrowser.cpp \
@@ -43,12 +45,14 @@ SOURCES += collectionbrowser.cpp \
     player.cpp \
     collectionmodel.cpp \
     collectionitem.cpp \
-    playlistmanager.cpp \
     databasemanager.cpp \
-    collectionsupdater.cpp \
     collectionbuilder.cpp \
     playlistproxymodel.cpp \
     collectionproxymodel.cpp \
     statusbar.cpp \
-    pluginsmanager.cpp
+    taskmanager.cpp \
+    playlistpopulator.cpp \
+    playlistwriter.cpp \
+    pluginsmanager.cpp \
+    collectionpopulator.cpp
 RESOURCES += icons.qrc

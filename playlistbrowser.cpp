@@ -67,8 +67,8 @@ void PlaylistBrowser::dropEvent(QDropEvent* event)
     QDataStream stream(&encodedData, QIODevice::ReadOnly);
     QStringList newItems;
 
-    PlaylistProxyModel *proxyModel = static_cast<PlaylistProxyModel*>(this->model());
-    _playlistManager = new PlaylistManager(static_cast<PlaylistModel*>(proxyModel->sourceModel()));
+    /*PlaylistProxyModel *proxyModel = static_cast<PlaylistProxyModel*>(this->model());
+    _playlistManager = new PlaylistManager(static_cast<PlaylistModel*>(proxyModel->sourceModel()));*/
 
     QStringList files;
 
@@ -78,7 +78,9 @@ void PlaylistBrowser::dropEvent(QDropEvent* event)
         files << text;
     }
 
-    _playlistManager->add(files);
+    emit addedFiles(files);
+
+    //_playlistManager->add(files);
 
     event->setAccepted(true);
 }
@@ -90,3 +92,5 @@ void PlaylistBrowser::keyPressEvent(QKeyEvent* event)
         model()->removeRow(selectionModel()->currentIndex().row());
     }
 }
+
+#include "moc_playlistbrowser.cpp"

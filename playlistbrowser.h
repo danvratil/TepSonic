@@ -22,6 +22,7 @@
 
 #include <QObject>
 #include <QTreeView>
+#include <QStringList>
 
 class PlaylistManager;
 
@@ -33,6 +34,8 @@ class PlaylistManager;
 */
 class PlaylistBrowser : public QTreeView
 {
+    Q_OBJECT
+
     public:
         //! Constructor
         /*!
@@ -75,6 +78,11 @@ class PlaylistBrowser : public QTreeView
 
         //! PlaylistManager
         PlaylistManager *_playlistManager;
+
+    signals:
+        void addedFiles(QStringList);
+
+
 
 };
 

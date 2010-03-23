@@ -136,12 +136,10 @@ MainWindow::MainWindow(Player *player)
     // Hide the header
     _ui->collectionBrowser->header()->setHidden(true);
 
-    _collectionsUpdater = new CollectionsUpdater(_collectionModel);
-    _collectionBuilder = new CollectionBuilder(_collectionModel);
-    connect(_collectionsUpdater,SIGNAL(collectionsChanged()),
-            _collectionBuilder,SLOT(start()));
 
-    _playlistManager = new PlaylistManager(_playlistModel);
+    _taskManager = new TaskManager(_playlistModel,_collectionModel);
+
+    connect(_ui->playlistBrowser,SIGNAL(addedFiles(QStringList)),_taskManager,SLOT(addFilesToPlaylist(QStringList)));
 
     _settings = new QSettings(QString(QDir::homePath()).append("/.tepsonic/main.conf"),QSettings::IniFormat,this);
     restoreGeometry(_settings->value("Window/Geometry", saveGeometry()).toByteArray());
@@ -150,14 +148,14 @@ MainWindow::MainWindow(Player *player)
     if (_settings->value("Collections/EnableCollections",true).toBool()==false) {
         _ui->collectionBrowser->hide();
     } else {
-        _collectionBuilder->start();
+        _taskManager->populateCollections();
         if (_settings->value("Collections/AutoRebuildAfterStart",false).toBool()==true) {
-            _collectionsUpdater->start();
+            _taskManager->rebuildCollections();
         }
     }
 
     // Load last playlist
-    _playlistManager->loadFromFile(QDir::homePath().append("/.tepsonic/last.m3u"));
+    _taskManager->addFileToPlaylist(QDir::homePath().append("/.tepsonic/last.m3u"));
 
     QList<QVariant> playlistColumnsStates(_settings->value("Window/PlaylistColumnsStates", QList<QVariant>()).toList());
     QList<QVariant> playlistColumnsWidths(_settings->value("Window/PlaylistColumnsWidths", QList<QVariant>()).toList());
@@ -213,6 +211,7 @@ MainWindow::MainWindow(Player *player)
     _playlistVisibleColumnContextMenuMapper->setMapping(_ui->actionLength,7);
     connect(_playlistVisibleColumnContextMenuMapper,SIGNAL(mapped(int)),this,SLOT(togglePlaylistColumnVisible(int)));
 
+
 }
 
 
@@ -230,30 +229,17 @@ MainWindow::~MainWindow()
     _settings->setValue("Window/PlaylistColumnsStates", playlistColumnsStates);
     _settings->setValue("Window/PlaylistColumnsWidths", playlistColumnsWidths);
 
-    if (_collectionBuilder->isRunning()) {
-        qDebug() << "Waiting for collection builder to finish";
-        _collectionBuilder->wait();
-    }
-    delete _collectionBuilder;
-
-    if (_collectionsUpdater->isRunning()) {
-        qDebug() << "Waiting for collections updater to finish";
-        _collectionsUpdater->wait();
-    }
-    delete _collectionsUpdater;
-
-    delete _collectionModel;
-
     // Save current playlist to file
-    _playlistManager->saveToFile(QDir::homePath().append("/.tepsonic/last.m3u"));
-    qDebug() << "Waiting for playlistManager to finish...";
-    _playlistManager->wait();
-    delete _playlistManager;
+    _taskManager->savePlaylistToFile(QDir::homePath().append("/.tepsonic/last.m3u"));
+
+    qDebug() << "Waiting for taskManager to finish...";
+    delete _taskManager;
 
     delete _playlistProxyModel;
     delete _playlistModel;
 
     delete _collectionProxyModel;
+    delete _collectionModel;
 
     delete _ui;
 }
@@ -308,7 +294,7 @@ void MainWindow::on_actionAdd_file_triggered()
                                                           tr("Select file"),
                                                           "",
                                                           tr("Supported files (*.mp3 *.wav *.ogg *.flac *.m3u);;Playlists (*.m3u);;All files (*.*)"));
-    _playlistManager->add(fileNames);
+    _taskManager->addFilesToPlaylist(fileNames);
 }
 
 
@@ -320,7 +306,7 @@ void MainWindow::on_actionPreferences_triggered()
         if (static_cast<AbstractPlugin*>(_pluginsManager->pluginAt(i)->instance())->hasConfigUI())
             prefDlg->addPlugin(_pluginsManager->pluginAt(i));
     }
-    connect(prefDlg,SIGNAL(rebuildCollectionsRequested()),_collectionsUpdater,SLOT(start()));
+    connect(prefDlg,SIGNAL(rebuildCollectionsRequested()),_taskManager,SLOT(rebuildCollections()));
     prefDlg->exec();
 
 }
@@ -332,8 +318,7 @@ void MainWindow::on_actionAdd_folder_triggered()
                                                         tr("Add directory"),
                                                         QString(),
                                                         QFileDialog::ShowDirsOnly);
-
-    _playlistManager->add(dirName);
+    _taskManager->addFileToPlaylist(dirName);
 }
 
 void MainWindow::updatePlayerTrack()
@@ -512,7 +497,7 @@ void MainWindow::on_actionSave_playlist_triggered()
                                             tr("Save playlist to..."),
                                             QString(),
                                             tr("M3U Playlist (*.m3u)"));
-    _playlistManager->saveToFile(filename);
+    _taskManager->savePlaylistToFile(filename);
 }
 
 void MainWindow::playlistLengthChanged(int totalLength, int tracksCount)

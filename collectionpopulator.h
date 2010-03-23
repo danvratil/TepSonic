@@ -1,7 +1,7 @@
 /*
  * TEPSONIC
  * Copyright 2010 Dan Vratil <vratil@progdansoft.com>
-  *
+ *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 3
@@ -18,67 +18,57 @@
  */
 
 
-#ifndef COLLECTIONBUILDER_H
-#define COLLECTIONBUILDER_H
+#ifndef COLLECTIONPOPULATOR_H
+#define COLLECTIONPOPULATOR_H
 
 #include <QThread>
 #include <QMutex>
 #include <QWaitCondition>
-#include <QStringList>
 
 class CollectionModel;
 
-//! CollectionBuilder is a thread that builds collections
+//! CollectionPopulator populates the CollectionModel with data loaded from SQL storage backend
 /*!
-  CollectionBuilder loads data from SQL storage backend and comapres them
-  with content of given folders. Then the SQL storage is updated and synced with
-  the given folders.
-  The threads is waiting sleeping and is awoken only when new folder is added to the list.
-  When the work is done the thread falls asleep again.
+  CollectionPopulator is subclassed from QThread. The thread is sleeping until awoken by calling
+  populate() method. When the model is populated by data from the SQL the thread falls asleep again
 */
-class CollectionBuilder : public QThread
+class CollectionPopulator : public QThread
 {
     Q_OBJECT
     public:
-
         //! Constructor
         /*!
-          \param model pointer to a CollectionModel that should be populated
+          Constructor that sets up collectionModel and launches the thread
+          \param collectionModel pointer to CollectionModel
         */
-        CollectionBuilder(CollectionModel *model);
+        explicit CollectionPopulator(CollectionModel *collectionModel);
 
         //! Destructor
-        ~CollectionBuilder();
-
-        //! Start the thread
         /*!
-          Main thread method. Loads data from database and populates the model
+          Allows thread to quit and wakes the thread and wait until it quits
         */
+        ~CollectionPopulator();
+
+        //! Main thread method
         void run();
 
     public slots:
-        //! Wake the thread and load given folder.
-        void rebuildFolder(QString folder);
-
-    signals:
-        //! Emitted when a change in collections is made
-        void collectionChanged();
+        //! Wakes up the thread
+        void populate();
 
     private:
-        //! Pointer to CollectionModel that is populated
+        //! Pointer to CollectionModel
         CollectionModel *_collectionModel;
 
         //! Mutex for syncing access to model
         QMutex _mutex;
 
-        //! Lock holds the thread sleeping when there's nothing to do
+        //! Locks the thread until awaken
         QWaitCondition _lock;
 
-        //! Allows thread to quit
+        //! Can I quit the thread daddy?
         bool _canClose;
 
-        //! List of folder to go through
-        QStringList _folders;
 };
 
-#endif // COLLECTIONBUILDER_H
+#endif // COLLECTIONPOPULATOR_H

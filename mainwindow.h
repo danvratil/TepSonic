@@ -37,11 +37,9 @@
 #include "collectionproxymodel.h"
 #include "player.h"
 #include "tracksiterator.h"
-#include "collectionsupdater.h"
-#include "collectionbuilder.h"
-#include "playlistmanager.h"
 #include "databasemanager.h"
 #include "pluginsmanager.h"
+#include "taskmanager.h"
 
 namespace Ui
 {
@@ -104,20 +102,14 @@ private:
     //! Pointer to CollectionProxyModel
     CollectionProxyModel *_collectionProxyModel;
 
-    //! Pointer to CollectionsUpdated
-    CollectionsUpdater *_collectionsUpdater;
-
-    //! Pointer to CollectionsBuilder
-    CollectionBuilder *_collectionBuilder;
-
-    //! Pointer to PlaylistManager
-    PlaylistManager *_playlistManager;
-
     //! Pointer to Player
     Player *_player;
 
     //! Pointer to PluginsManager
     PluginsManager *_pluginsManager;
+
+    //! Pointer to TaskManager
+    TaskManager *_taskManager;
 
     //! Group of QActions that contains Random ON and Random OFF actions
     QActionGroup *_randomPlaybackGroup;
