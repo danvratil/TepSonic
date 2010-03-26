@@ -23,8 +23,8 @@
 
 #include "databasemanager.h"
 
-#include <QDebug>
 #include <QSqlQuery>
+#include <QSqlDriver>
 
 CollectionPopulator::CollectionPopulator(CollectionModel *collectionModel)
 {
@@ -67,10 +67,14 @@ void CollectionPopulator::run()
             QSqlQuery artistsQuery("SELECT artist FROM Tracks GROUP BY artist ORDER BY artist ASC",sqlConn);
             while (artistsQuery.next()) {
                 albumsParent = _collectionModel->addChild(QModelIndex(),artistsQuery.value(0).toString(),QString());
-                QSqlQuery albumsQuery("SELECT album FROM Tracks WHERE artist='"+artistsQuery.value(0).toString()+"' GROUP BY album ORDER BY album ASC;",sqlConn);
+                QString artist = sqlConn.driver()->escapeIdentifier(artistsQuery.value(0).toString(),QSqlDriver::FieldName);
+                QSqlQuery albumsQuery("SELECT album FROM Tracks WHERE artist="+artist+" GROUP BY album ORDER BY album ASC;",
+                                      sqlConn);
                 while (albumsQuery.next()) {
                     tracksParent = _collectionModel->addChild(albumsParent,albumsQuery.value(0).toString(),QString());
-                    QSqlQuery tracksQuery("SELECT title,filename FROM Tracks WHERE album='"+albumsQuery.value(0).toString()+"' AND artist='"+artistsQuery.value(0).toString()+"' ORDER BY trackNo ASC;",sqlConn);
+                    QString album = sqlConn.driver()->escapeIdentifier(albumsQuery.value(0).toString(),QSqlDriver::FieldName);
+                    QSqlQuery tracksQuery("SELECT title,filename FROM Tracks WHERE album="+album+" AND artist="+artist+" ORDER BY trackNo ASC;",
+                                          sqlConn);
                     while (tracksQuery.next()) {
                         _collectionModel->addChild(tracksParent,tracksQuery.value(0).toString(),tracksQuery.value(1).toString());
                     }
@@ -78,7 +82,6 @@ void CollectionPopulator::run()
             }
         }
         _mutex.unlock();
-        qDebug() << "CollectionBrowser populated";
 
         emit collectionsPopulated();
 
