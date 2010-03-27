@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>495</width>
-    <height>364</height>
+    <width>491</width>
+    <height>360</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -29,13 +29,13 @@
        </property>
        <property name="minimumSize">
         <size>
-         <width>100</width>
+         <width>90</width>
          <height>0</height>
         </size>
        </property>
        <property name="maximumSize">
         <size>
-         <width>100</width>
+         <width>90</width>
          <height>16777215</height>
         </size>
        </property>
@@ -67,15 +67,28 @@
         <property name="text">
          <string>Player</string>
         </property>
+        <property name="icon">
+         <iconset resource="icons.qrc">
+          <normaloff>:/icons/player</normaloff>:/icons/player</iconset>
+        </property>
        </item>
        <item>
         <property name="text">
          <string>Collections</string>
         </property>
+        <property name="icon">
+         <iconset>
+          <normalon>:/icons/collections</normalon>
+         </iconset>
+        </property>
        </item>
        <item>
         <property name="text">
          <string>Plugins</string>
+        </property>
+        <property name="icon">
+         <iconset resource="icons.qrc">
+          <normaloff>:/icons/plugins</normaloff>:/icons/plugins</iconset>
         </property>
        </item>
       </widget>
@@ -104,6 +117,8 @@
  <tabstops>
   <tabstop>buttonBox</tabstop>
  </tabstops>
- <resources/>
+ <resources>
+  <include location="icons.qrc"/>
+ </resources>
  <connections/>
 </ui>
