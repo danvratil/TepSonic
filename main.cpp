@@ -18,6 +18,7 @@
  */
 
 #include <QtGui/QApplication>
+#include <QTextCodec>
 #include "player.h"
 #include "mainwindow.h"
 #include "pluginsmanager.h"
@@ -29,6 +30,9 @@ int main(int argc, char *argv[])
     tepsonic.setApplicationName("TepSonic");
     tepsonic.setOrganizationName("Dan Vrátil");
     tepsonic.setApplicationVersion("0.90");
+
+    QTextCodec::setCodecForTr(QTextCodec::codecForName("utf8"));
+    QTextCodec::setCodecForCStrings(QTextCodec::codecForName("UTF-8"));
 
     Player *player = new Player();
     MainWindow mainWindow(player);
