@@ -274,10 +274,14 @@ void MainWindow::on_actionAbout_TepSonic_triggered()
     QMessageBox aboutDlg;
 
     QString str = QString(tr("<h1>TepSonic</h1><i>Version %1</i><br>" \
-                             "<b>Author:</b> Dan \"ProgDan\" Vrátil<br>" \
-                             "<b>Contact:</b> vratil@progdansoft.com<br/>" \
-                             "<b>Homepage:</b> www.progdan.homelinux.net<br/><br/>" \
-                             "This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2 of the License, or (at your option) any later version.")).arg(QString(QApplication::applicationVersion()));
+                             "<b>Author:</b> %2<br>" \
+                             "<b>Artwork:</b> %3<br><br>" \
+                             "This program is free software; you can redistribute it and/or modify it under the terms of " \
+                             "the GNU General Public License as published by the Free Software Foundation; either version " \
+                             "2 of the License, or (at your option) any later version.")).arg(
+                                     QString(QApplication::applicationVersion()),
+                                     QString("Dan Vratil &lt;vratil@progdansoft.com&gt;").toLatin1(),
+                                     QString("Matej Zverina, Michael Ruml").toLatin1());
     aboutDlg.about(this,tr("About TepSonic"),str.toAscii());
 }
 
