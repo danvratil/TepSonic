@@ -58,7 +58,7 @@ class CollectionBuilder : public QThread
 
     public slots:
         //! Wake the thread and load given folder.
-        void rebuildFolder(QString folder);
+        void rebuildFolder(QStringList folder);
 
     signals:
         //! Emitted when a change in collections is made
