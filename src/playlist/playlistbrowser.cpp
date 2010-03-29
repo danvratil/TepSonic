@@ -19,7 +19,6 @@
 
 
 #include "playlistbrowser.h"
-
 #include "playlistmodel.h"
 #include "playlistproxymodel.h"
 

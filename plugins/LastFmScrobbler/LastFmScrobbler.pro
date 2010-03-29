@@ -8,13 +8,14 @@ TARGET = tepsonic_lastfmscrobbler
 TEMPLATE = lib
 CONFIG += plugin
 INCLUDEPATH += . \
-    ../../ \
-    ../../build \
+    ../../src \
     /usr/include/Phonon \
     /usr/include/KDE
+
 DEFINES += LASTFMSCROBBLER_LIBRARY
-SOURCES += lastfmscrobbler.cpp
-HEADERS += lastfmscrobbler.h
-FORMS += lastfmscrobblerconfig.ui
-DESTDIR = ../../build/plugins
+
+SOURCES += src/lastfmscrobbler.cpp
+HEADERS += src/lastfmscrobbler.h
+FORMS += ui/lastfmscrobblerconfig.ui
+DESTDIR = ../../bin/plugins
 VERSION = 0.1.0

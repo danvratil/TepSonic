@@ -32,7 +32,7 @@
 #include <QLabel>
 
 // These two classes are used in inline methods
-#include "playlistmodel.h"
+#include "playlist/playlistmodel.h"
 #include "player.h"
 //#include "tracksiterator.h"
 

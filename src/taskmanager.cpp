@@ -18,13 +18,13 @@
  */
 
 #include "taskmanager.h"
+#include "collections/collectionmodel.h"
+#include "collections/collectionpopulator.h"
+#include "collections/collectionbuilder.h"
+#include "playlist/playlistmodel.h"
+#include "playlist/playlistpopulator.h"
+#include "playlist/playlistwriter.h"
 
-#include "playlistmodel.h"
-#include "collectionmodel.h"
-#include "playlistpopulator.h"
-#include "playlistwriter.h"
-#include "collectionpopulator.h"
-#include "collectionbuilder.h"
 
 #include <QDir>
 #include <QSettings>
