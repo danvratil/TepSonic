@@ -44,6 +44,11 @@ TaskManager::TaskManager(PlaylistModel *playlistModel, CollectionModel *collecti
             this,SLOT(populateCollections()));
     connect(_collectionPopulator,SIGNAL(collectionsPopulated()),
             this,SIGNAL(collectionsPopulated()));
+    connect(_collectionBuilder,SIGNAL(buildingStarted()),
+            this,SLOT(collectionsRebuildingStarted()));
+    connect(_collectionBuilder,SIGNAL(buildingFinished()),
+            this,SIGNAL(taskDone()));
+
 }
 
 TaskManager::~TaskManager()
@@ -85,4 +90,9 @@ void TaskManager::rebuildCollections(const QString &folder)
     if (!dirs.isEmpty()) {
         _collectionBuilder->rebuildFolder(dirs);
     }
+}
+
+void TaskManager::collectionsRebuildingStarted()
+{
+    emit taskStarted(tr("Rebuilding collections"));
 }

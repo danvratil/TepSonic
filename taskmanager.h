@@ -58,14 +58,6 @@ class TaskManager : public QObject
         ~TaskManager();
 
     signals:
-        // Emitted when progress of any thread is changed.
-        /*!
-          Returns overall progress of all running tasks together
-          \param action action(s) that are being taken
-          \param progress progress of all running tasks together
-        */
-        void progressChanged(QString action, int progress);
-
         //! Emitted when all items from playlist are populated
         void playlistPopulated();
 
@@ -80,6 +72,15 @@ class TaskManager : public QObject
 
         //! Emitted when collections are rebuild and a change is made (some track is added, updated or removed)
         void collectionsChanged();
+
+        //! Emited when a task is finished
+        void taskDone();
+
+        //! Emited when a task is started describing the started task
+        /*!
+          \param action description of the task
+        */
+        void taskStarted(QString action);
 
     public slots:
         //! Appends given file to playlist
@@ -123,6 +124,11 @@ class TaskManager : public QObject
           are rebuild
         */
         void rebuildCollections(const QString &folder = QString());
+
+    private slots:
+
+        //! Emits signals with information about collections rebuilding has started
+        void collectionsRebuildingStarted();
 
     private:
         //! Pointer to PlaylistPopulator

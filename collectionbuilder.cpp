@@ -66,6 +66,7 @@ void CollectionBuilder::run()
     do {
 
         if (!_folders.isEmpty()) {
+            emit buildingStarted();
 
             // This does not take any effect on Linux but on Windows it will not freeze the whole system :-)
             setPriority(QThread::LowPriority);
@@ -176,6 +177,7 @@ void CollectionBuilder::run()
 
         // We don't want to lock the thread when the thread is allowed to close
         if (!_canClose)
+            emit buildingFinished();
             _lock.wait(&_mutex);
 
     } while (!_canClose);

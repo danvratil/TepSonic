@@ -64,6 +64,13 @@ class CollectionBuilder : public QThread
         //! Emitted when a change in collections is made
         void collectionChanged();
 
+        //! Informs that building has begun
+        void buildingStarted();
+
+        //! Informs that building has finished
+        void buildingFinished();
+
+
     private:
         //! Pointer to CollectionModel that is populated
         CollectionModel *_collectionModel;

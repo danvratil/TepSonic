@@ -148,6 +148,8 @@ MainWindow::MainWindow(Player *player)
     _taskManager = new TaskManager(_playlistModel,_collectionModel);
     connect(_ui->playlistBrowser,SIGNAL(addedFiles(QStringList)),_taskManager,SLOT(addFilesToPlaylist(QStringList)));
     connect(_taskManager,SIGNAL(collectionsPopulated()),this,SLOT(fixCollectionProxyModel()));
+    connect(_taskManager,SIGNAL(taskStarted(QString)),_ui->statusBar,SLOT(showWorkingBar(QString)));
+    connect(_taskManager,SIGNAL(taskDone()),_ui->statusBar,SLOT(cancelAction()));
 
     _settings = new QSettings(QString(QDir::homePath()).append("/.tepsonic/main.conf"),QSettings::IniFormat,this);
     restoreGeometry(_settings->value("Window/Geometry", saveGeometry()).toByteArray());

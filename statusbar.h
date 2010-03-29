@@ -55,6 +55,9 @@ class StatusBar : public QStatusBar
         //! Hides action label and progressbar
         void cancelAction();
 
+        //! Shows progress bar that is just informing about work, not showing exact progress
+        void showWorkingBar(QString action);
+
 };
 
 #endif // STATUSBAR_H
