@@ -42,7 +42,7 @@ LastFmScrobbler::LastFmScrobbler()
     // Load cache first
     QSettings settings(QDir::homePath().append("/.tepsonic/lastfmscrobbler.conf"),QSettings::IniFormat,this);
     int size = settings.beginReadArray("Cache");
-    for (int i = 0; i < size; ++i) {
+    for (int i = 0; i < size; i++) {
         settings.setArrayIndex(i);
         LastFmScrobbler::MetaData metadata;
         metadata.trackInfo.album = settings.value("album").toString();
@@ -268,6 +268,8 @@ void LastFmScrobbler::scrobblingFinished(QNetworkReply *reply)
     int statusCode = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
     if (statusCode!=200) {
         emit error(tr("Last.fm plugin: Invalid server response. Failed to scrobble"));
+        _failedAttempts++;
+        setupTimer();
     } else {
         QString status = reply->readLine(1024);
         if (status.startsWith("OK")) {
