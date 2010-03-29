@@ -34,6 +34,7 @@ void StatusBar::setProgressBar(QString action, int position, int maxPosition)
         _actionLabel->setSizePolicy(QSizePolicy::Minimum,QSizePolicy::Fixed);
         insertWidget(0,_actionLabel,1);
     }
+    _actionLabel->setText(action);
 
     if (_progressBar==0) {
         _progressBar = new QProgressBar(this);
@@ -44,7 +45,7 @@ void StatusBar::setProgressBar(QString action, int position, int maxPosition)
         _progressBar->setMinimum(0);
         _progressBar->setMaximum(maxPosition);
     }
-
+    _progressBar->setMaximum(maxPosition);
     _progressBar->setValue(position);
 
     if (position == maxPosition) {
