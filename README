@@ -30,6 +30,7 @@ CONTENT
  * Qt >= 4.5
  * Phonon
  * TagLib
+ * SQLite or MySQL database for collections
  * some music
 
 
