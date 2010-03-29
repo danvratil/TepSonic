@@ -21,6 +21,7 @@
 #define LASTFMSCROBBLER_H
 
 #include "abstractplugin.h"
+#include "player.h"
 
 #include "ui_lastfmscrobblerconfig.h"
 
@@ -31,6 +32,7 @@
 #include <QNetworkReply>
 #include <QUrl>
 
+
 //! LastFmScrobbler is a plugin for scrobbling recently played tracks to Last.fm
 /*!
   LastFmScrobbler is a plugin for scrobbling recently played tracks to Last.fm
@@ -40,6 +42,11 @@ class LastFmScrobbler : public AbstractPlugin
 {
     Q_OBJECT
     public:
+        struct MetaData {
+            Player::MetaData trackInfo;
+            uint playbackStart;
+        };
+
         //! Constructor
         /*!
           Loads settings and try to login and obtain token and url
@@ -109,9 +116,9 @@ class LastFmScrobbler : public AbstractPlugin
 
         //! Makes a submission to Last.fm server
         /*!
-          Sents a HTTP request to Last.fm with some data contained in \p metadata. When
-          request is successfull and servers replies, scrobblingFinished() slot is invoked
+          Appends new track to the queue (cache) and calls submitTrack() to try to submit the track.
           \param metadata meta data of the track to be submitted
+          \sa submitTrack()
         */
         void scrobble(Player::MetaData metadata);
 
@@ -129,6 +136,10 @@ class LastFmScrobbler : public AbstractPlugin
 
         //! Amount of time played
         qint64 _played;
+
+        int _failedAttempts;
+
+        QList<LastFmScrobbler::MetaData> _cache;
 
     private slots:
         //! Called when testLoginButton is clicked
@@ -166,6 +177,30 @@ class LastFmScrobbler : public AbstractPlugin
           \sa reply(), error()
         */
         void scrobblingFinished(QNetworkReply *reply);
+
+        //! Submit first track in cache
+        /*!
+          Attempts to submit first track in cache (if there's any) and when successfull, keeps posting until all tracks
+          are submitted.
+        */
+        void submitTrack();
+
+        //! Creates a timer which starts new attempt to submit a track
+        /*!
+          This method is called when the scrobblers fails to submit a track. First, number of failed attempts is incremented
+          and then the timer is set up. The tick interval is growing exponentialy with one half of square of failed attempts
+          which makes the interval to be longer and longer.
+          The intervals are 7 seconds, 2 minutes, 10 minutes, 30 minutes, 1 hour, 2.7 hours etc...
+        */
+        void setupTimer();
+
+        //! Saves current cache
+        /*!
+          Saves current cache to config file. This is performed after every change in cache in order to prevent
+          lost of some tracks
+        */
+        void saveCache();
+
 };
 
 #include "moc_abstractplugin.cpp"

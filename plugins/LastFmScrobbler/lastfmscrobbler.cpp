@@ -30,6 +30,7 @@
 #include <QPushButton>
 #include <QFormLayout>
 #include <QHttpRequestHeader>
+#include <QTimer>
 
 LastFmScrobbler::LastFmScrobbler()
 {
@@ -38,12 +39,29 @@ LastFmScrobbler::LastFmScrobbler()
     setPluginName("Last.fm plugin");
     setHasConfigUI(true);
 
+    // Load cache first
+    QSettings settings(QDir::homePath().append("/.tepsonic/lastfmscrobbler.conf"),QSettings::IniFormat,this);
+    int size = settings.beginReadArray("Cache");
+    for (int i = 0; i < size; ++i) {
+        settings.setArrayIndex(i);
+        LastFmScrobbler::MetaData metadata;
+        metadata.trackInfo.album = settings.value("album").toString();
+        metadata.trackInfo.artist = settings.value("artist").toString();
+        metadata.trackInfo.filename = settings.value("filename").toString();
+        metadata.trackInfo.length = settings.value("length").toUInt();
+        metadata.trackInfo.title = settings.value("title").toString();
+        metadata.trackInfo.trackNumber = settings.value("trackNumber").toInt();
+        metadata.playbackStart = settings.value("playbackStart").toUInt();
+        _cache.append(metadata);
+     }
+     settings.endArray();
+
     login();
 }
 
 LastFmScrobbler::~LastFmScrobbler()
 {
-    qDebug() << "LastFmScrobbler destroyed";
+
 }
 
 void LastFmScrobbler::settingsWidget(QWidget *parentWidget)
@@ -56,6 +74,7 @@ void LastFmScrobbler::settingsWidget(QWidget *parentWidget)
     _configWidget->passwordEdit->setText(settings.value("password",QString()).toString());
     connect(_configWidget->testLoginButton,SIGNAL(clicked()),this,SLOT(on_testLoginButton_clicked()));
     connect(_configWidget->testLoginButton,SIGNAL(clicked(bool)),_configWidget->testLoginButton,SLOT(setDisabled(bool)));
+
 }
 
 void LastFmScrobbler::trackFinished(Player::MetaData trackdata)
@@ -176,6 +195,9 @@ void LastFmScrobbler::loginFinished(QNetworkReply *reply)
             _token = QString(reply->readLine(256)).remove("\n");
             _nowPlayingURL = QString(reply->readLine(256)).remove("\n");
             _submissionURL = QString(reply->readLine(256)).remove("\n");
+            _failedAttempts = 0;
+            // Try to submit all tracks in cache
+            submitTrack();
         } else if (status.startsWith("BADAUTH")) {
             emit error("Last.fm plugin: "+tr("Bad username or login"));
         } else  if (status.startsWith("BANNED")) {
@@ -188,20 +210,49 @@ void LastFmScrobbler::loginFinished(QNetworkReply *reply)
             emit error("Last.fm plugin: "+tr("Unknown error"));
         }
     }
+
 }
 
 void LastFmScrobbler::scrobble(Player::MetaData metadata)
 {
+    LastFmScrobbler::MetaData data;
+    data.trackInfo = metadata;
+    data.playbackStart = QDateTime::currentDateTime().toUTC().toTime_t()-(int)(metadata.length/1000);
+
+    // Appends last track to cache. The track is removed when sucessfully scrobbled
+    _cache.append(data);
+    saveCache();
+
+    // Don't even try when not logged in
+    if (_submissionURL.isEmpty())
+        return;
+
+    /* If this is the only track in front we can expect that everything works and the track
+       will be submitted. If there are more tracks then we will suppose that something is wrong
+       and we'll wait for timer */
+    if (_cache.size() == 1)
+        submitTrack();
+
+}
+
+void LastFmScrobbler::submitTrack()
+{
+    if (_cache.isEmpty()) return;
+
+    LastFmScrobbler::MetaData metadata = _cache.first();
+
     QString data("s="+_token);
 
-    data.append("&a[0]="+QUrl::toPercentEncoding(metadata.artist.toUtf8()));
-    data.append("&t[0]="+QUrl::toPercentEncoding(metadata.title.toUtf8()));
-    data.append("&i[0]="+QString::number(QDateTime::currentDateTime().toUTC().toTime_t()-(int)(metadata.length/1000)));
+    QString playbackStart = QString::number(metadata.playbackStart);
+
+    data.append("&a[0]="+QUrl::toPercentEncoding(metadata.trackInfo.artist.toUtf8()));
+    data.append("&t[0]="+QUrl::toPercentEncoding(metadata.trackInfo.title.toUtf8()));
+    data.append("&i[0]="+playbackStart);
     data.append("&o[0]=R");
     data.append("&r[0]=");
-    data.append("&l[0]="+QString::number((int)(metadata.length/1000)));
-    data.append("&b[0]="+QUrl::toPercentEncoding(metadata.album.toUtf8()));
-    data.append("&n[0]="+QString::number(metadata.trackNumber));
+    data.append("&l[0]="+QString::number((int)(metadata.trackInfo.length/1000)));
+    data.append("&b[0]="+QUrl::toPercentEncoding(metadata.trackInfo.album.toUtf8()));
+    data.append("&n[0]="+QString::number(metadata.trackInfo.trackNumber));
     data.append("&m[0]=");
 
     QNetworkAccessManager *NAM = new QNetworkAccessManager();
@@ -221,15 +272,49 @@ void LastFmScrobbler::scrobblingFinished(QNetworkReply *reply)
         QString status = reply->readLine(1024);
         if (status.startsWith("OK")) {
             qDebug() << "Track was sucessfully scrobbled";
+            _failedAttempts = 0;
+            _cache.takeFirst();
+            saveCache();
+            // if there are some more tracks to submit then do it
+            if (!_cache.isEmpty()) submitTrack();
         } else if (status.startsWith("BADSESSION")) {
             emit error("Last.fm plugin: "+tr("Failed to scrobble due invalid token. Trying to obtain a new one..."));
             login();
+            _failedAttempts++;
+            setupTimer();
         } else if (status.startsWith("FAILED")) {
             emit error("Last.fm plugin: "+status.remove("FAILED ",Qt::CaseSensitive));
+            _failedAttempts++;
+            setupTimer();
         } else {
             emit error("Last.fm plugin: "+tr("Unknown error"));
+            _failedAttempts++;
+            setupTimer();
         }
     }
+}
+
+void LastFmScrobbler::setupTimer()
+{
+    qDebug() << "Settings up timer...next shot in " << (int)(2^((_failedAttempts/2)*_failedAttempts)*5) << " seconds";
+    QTimer::singleShot((int)(2^((_failedAttempts/2)*_failedAttempts)*5000),this,SLOT(submitTrack()));
+}
+
+void LastFmScrobbler::saveCache()
+{
+    QSettings settings(QDir::homePath().append("/.tepsonic/lastfmscrobbler.conf"),QSettings::IniFormat,this);
+    settings.beginWriteArray("Cache");
+    for (int i = 0; i < _cache.size(); ++i) {
+        settings.setArrayIndex(i);
+        settings.setValue("album", _cache.at(i).trackInfo.album);
+        settings.setValue("artist", _cache.at(i).trackInfo.artist);
+        settings.setValue("filename", _cache.at(i).trackInfo.filename);
+        settings.setValue("length", _cache.at(i).trackInfo.length);
+        settings.setValue("title", _cache.at(i).trackInfo.title);
+        settings.setValue("trackNumber", _cache.at(i).trackInfo.trackNumber);
+        settings.setValue("playbackStart",_cache.at(i).playbackStart);
+    }
+    settings.endArray();
 }
 
 #include "moc_lastfmscrobbler.cpp"
