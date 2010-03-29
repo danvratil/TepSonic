@@ -42,8 +42,14 @@ namespace PreferencesPages {
         public:
             Collections(QWidget *parent = 0);
             Ui::Collections *ui;
+            bool collectionsSourceChanged() { return _collectionsSourceChanged; }
+
+        private:
+            bool _collectionsSourceChanged;
 
         private slots:
+            void on_pushButton_clicked();
+            void on_removeAllPathsButton_clicked();
             void on_removePathButton_clicked();
             void on_addPathButton_clicked();
             void on_dbEngineCombo_currentIndexChanged(QString );

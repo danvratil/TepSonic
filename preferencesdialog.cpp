@@ -143,7 +143,11 @@ void PreferencesDialog::on_buttonBox_accepted()
     }
     settings.setValue("pluginsEnabled",QVariant(plugins));
 
-    emit(accepted());
+    if (_collections->collectionsSourceChanged()) {
+        emit rebuildCollections();
+    }
+
+    emit accepted();
     this->close();
 }
 

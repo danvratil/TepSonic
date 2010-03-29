@@ -65,7 +65,7 @@ class PreferencesDialog : public QDialog {
 
     signals:
         //! Informs main window that rebuilding collections was requested
-        void rebuildCollectionsRequested();
+        void rebuildCollections();
 
     protected:
         //! When language is changed the window is retranslated
@@ -88,7 +88,6 @@ class PreferencesDialog : public QDialog {
         MainWindow *_parent;
 
     private slots:
-
 
         //! Called when button in the left list is clicked
         void on_pagesButtons_currentItemChanged(QListWidgetItem* current, QListWidgetItem* previous);

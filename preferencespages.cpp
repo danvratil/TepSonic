@@ -37,6 +37,7 @@ PreferencesPages::Collections::Collections(QWidget *parent):
     ui->tabWidget->setCurrentIndex(0);
     connect(ui->dbEngineCombo,SIGNAL(currentIndexChanged(QString)),
             this,SLOT(on_dbEngineCombo_currentIndexChanged(QString)));
+    _collectionsSourceChanged = false;
 }
 
 PreferencesPages::Plugins::Plugins(QWidget *parent):
@@ -65,6 +66,7 @@ void PreferencesPages::Collections::on_addPathButton_clicked()
      if(!dirName.isEmpty()) {
          ui->collectionsPathsList->addItem(dirName);
      }
+     _collectionsSourceChanged = true;
 }
 
 void PreferencesPages::Collections::on_removePathButton_clicked()
@@ -72,8 +74,18 @@ void PreferencesPages::Collections::on_removePathButton_clicked()
     foreach (QListWidgetItem *item, ui->collectionsPathsList->selectedItems()) {
         delete ui->collectionsPathsList->takeItem(ui->collectionsPathsList->row(item));
     }
+    _collectionsSourceChanged = true;
+}
+
+void PreferencesPages::Collections::on_removeAllPathsButton_clicked()
+{
+    ui->collectionsPathsList->clear();
+    _collectionsSourceChanged = true;
 }
 
 #include "moc_preferencespages.cpp"
 
-
+void PreferencesPages::Collections::on_pushButton_clicked()
+{
+    emit collectionsSourceChanged();
+}
