@@ -37,6 +37,7 @@
 #include <QtSql/QSqlDatabase>
 #include <QtSql/QSqlQuery>
 #include <QtSql/QSqlDriver>
+#include <QtSql/QSqlError>
 #include <QHash>
 #include <QHashIterator>
 
@@ -116,7 +117,7 @@ void CollectionBuilder::run()
                         dirIterator.next();
                         filesProcessed++;
                     }
-                } while (_folders.size()>1);
+                } while (_folders.size()>0);
                 // Find all pairs with value > 0 and put the list of filenames to toBeRemoved stringlist
                 QHashIterator<QString, uint> i(dbFiles);
                 while (i.hasNext()) {
@@ -162,6 +163,8 @@ void CollectionBuilder::run()
                 updateQuery.bindValue(3,albums);
                 updateQuery.bindValue(4,titles);
                 updateQuery.bindValue(5,mtimes);
+
+                updateQuery.execBatch();
 
                 if ((!toBeRemoved.empty()) || (!toBeUpdated.empty())) {
                     emit(collectionChanged());

@@ -96,6 +96,7 @@ void CollectionPopulator::run()
 
 void CollectionPopulator::populate()
 {
+
     // Unlock thread for one iteration
     _lock.wakeAll();
 }

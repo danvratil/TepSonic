@@ -28,6 +28,7 @@
 
 #include <QDir>
 #include <QSettings>
+#include <QStringList>
 
 TaskManager::TaskManager(PlaylistModel *playlistModel, CollectionModel *collectionModel)
 {
@@ -40,7 +41,7 @@ TaskManager::TaskManager(PlaylistModel *playlistModel, CollectionModel *collecti
     _collectionBuilder = new CollectionBuilder(_collectionModel);
 
     connect(_collectionBuilder,SIGNAL(collectionChanged()),
-            _collectionPopulator,SLOT(populate()));
+            this,SLOT(populateCollections()));
     connect(_collectionPopulator,SIGNAL(collectionsPopulated()),
             this,SIGNAL(collectionsPopulated()));
 }
@@ -75,10 +76,10 @@ void TaskManager::populateCollections()
 
 void TaskManager::rebuildCollections(const QString &folder)
 {
-    QString dirs = folder;
+    QStringList dirs;
     if (folder.isEmpty()) {
-        QSettings settings(QDir::homePath().append("/.tepsonic/main.conf"));
-        dirs = settings.value("SourcePath",QString()).toString();
+        QSettings settings(QDir::homePath().append("/.tepsonic/main.conf"),QSettings::IniFormat,this);
+        dirs << settings.value("Collections/SourcePaths",QStringList()).toStringList();
     }
 
     if (!dirs.isEmpty()) {
