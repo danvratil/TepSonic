@@ -310,6 +310,9 @@ private slots:
     //! Called when Player's RandomMode is changed
     void randomModeChanged(bool newMode);
 
+    //! Called when position in track is changed
+    void playerPosChanged(qint64 newPos);
+
 };
 
 #endif // MAINWINDOW_H

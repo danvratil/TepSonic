@@ -18,7 +18,9 @@
  */
 
 #include <QtGui/QApplication>
+#include <QObject>
 #include <QTextCodec>
+#include <QString>
 #include "player.h"
 #include "mainwindow.h"
 #include "pluginsmanager.h"

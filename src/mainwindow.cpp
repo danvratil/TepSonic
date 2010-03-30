@@ -32,6 +32,7 @@
 #include "abstractplugin.h"
 #include "taskmanager.h"
 #include "pluginsmanager.h"
+#include "tools.h"
 
 #include <QMessageBox>
 #include <QDir>
@@ -175,6 +176,8 @@ MainWindow::MainWindow(Player *player)
             this,SLOT(randomModeChanged(bool)));
     connect(_player,SIGNAL(trackChanged(Player::MetaData)),
             this,SLOT(trackChanged(Player::MetaData)));
+    connect(_player,SIGNAL(trackPositionChanged(qint64)),
+            this,SLOT(playerPosChanged(qint64)));
 
     _ui->seekSlider->setMediaObject(_player->mediaObject());
     _ui->volumeSlider->setAudioOutput(_player->audioOutput());
@@ -386,6 +389,7 @@ void MainWindow::playerStatusChanged(Phonon::State newState, Phonon::State oldSt
             _ui->stopButton->setEnabled(true);
             _ui->actionStop->setEnabled(true);
             _ui->trackTitleLabel->setText(metadata.artist+" - "+metadata.title);
+            _ui->playbackTimeLabel->setText("00:00:00");
             _trayIcon->setToolTip(tr("Playing: %1 - %2").arg(metadata.artist,metadata.title));
             break;
         case Phonon::PausedState:
@@ -402,6 +406,7 @@ void MainWindow::playerStatusChanged(Phonon::State newState, Phonon::State oldSt
             _ui->stopButton->setEnabled(false);
             _ui->actionStop->setEnabled(false);
             _ui->trackTitleLabel->setText(tr("Player is stopped"));
+            _ui->playbackTimeLabel->setText(tr("Stopped"));
             _trayIcon->setToolTip(tr("Player is stopped"));
             break;
         case Phonon::ErrorState:
@@ -543,38 +548,8 @@ void MainWindow::on_actionSave_playlist_triggered()
 
 void MainWindow::playlistLengthChanged(int totalLength, int tracksCount)
 {
-    int days = totalLength / 86400;
-    int hours = (totalLength - (days*86400))/ 3600;
-    int mins = (totalLength - (days*86400) - (hours*3600))/60;
-    int secs = totalLength - (days*86400) - (hours*3600) - (mins*60);
-
-    QString sDays;
-    QString sHours;
-    QString sMins;
-    QString sSecs;
-
-    if (days > 0) {
-        sDays = tr("%n day(s)","",hours).append(" ");
-    }
-
-    if (hours<10) {
-        sHours = QString("0").append(QString::number(hours)).append(":");
-    } else {
-        sHours = QString::number(hours).append(":");
-    }
-    if (hours == 0) sHours = QString();
-    if (mins<10) {
-        sMins = QString("0").append(QString::number(mins));
-    } else {
-        sMins = QString::number(mins);
-    }
-    if (secs<10) {
-        sSecs = QString("0").append(QString::number(secs));
-    } else {
-        sSecs = QString::number(secs);
-    }
-
-    _playlistLengthLabel->setText(tr("%n track(s)","",tracksCount).append(" (").append(sDays).append(sHours).append(sMins).append(":").append(sSecs).append(")"));
+    QString time = formatMilliseconds(totalLength);
+    _playlistLengthLabel->setText(tr("%n track(s)","",tracksCount).append(" ("+time+")"));
 }
 
 void MainWindow::on_clearPlaylistSearch_clicked()
@@ -622,6 +597,11 @@ void MainWindow::randomModeChanged(bool newMode)
     } else {
         _ui->actionRandom_OFF->setChecked(true);
     }
+}
+
+void MainWindow::playerPosChanged(qint64 newPos)
+{
+    _ui->playbackTimeLabel->setText(formatMilliseconds(newPos));
 }
 
 #include "moc_mainwindow.cpp"
