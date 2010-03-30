@@ -18,14 +18,18 @@
  */
 
 #include <QtGui/QApplication>
+#include <QDir>
 #include <QObject>
 #include <QLocale>
+#include <QLibraryInfo>
 #include <QTextCodec>
 #include <QTranslator>
 #include <QString>
 #include "player.h"
 #include "mainwindow.h"
 #include "pluginsmanager.h"
+
+#include <QDebug>
 
 
 int main(int argc, char *argv[])
@@ -35,12 +39,28 @@ int main(int argc, char *argv[])
     tepsonic.setOrganizationName("Dan Vrátil");
     tepsonic.setApplicationVersion("0.90");
 
+    QString locale = QLocale::system().name();
+
+    // Qt translations
+    QTranslator qtTranslator;
+    qtTranslator.load("qt_" + locale,
+                      QLibraryInfo::location(QLibraryInfo::TranslationsPath));
+    tepsonic.installTranslator(&qtTranslator);
+
+    // App translations
+    QTranslator translator;
+    QString dataDir = QLatin1String(PKGDATADIR);
+    QString localeDir = dataDir + QDir::separator() + "locale";
+    // If app was not "installed" use the app directory
+    if (!QFile::exists(localeDir)) {
+        localeDir = qApp->applicationDirPath() + QDir::separator() + "locale";
+        qDebug() << "Using locale dir" << localeDir << locale;
+    }
+    translator.load(locale,localeDir);
+    tepsonic.installTranslator(&translator);
+
     QTextCodec::setCodecForTr(QTextCodec::codecForName("utf8"));
     QTextCodec::setCodecForCStrings(QTextCodec::codecForName("UTF-8"));
-
-    QTranslator translator;
-    translator.load(QLocale::system().name());
-    tepsonic.installTranslator(&translator);
 
     Player *player = new Player();
     MainWindow mainWindow(player);

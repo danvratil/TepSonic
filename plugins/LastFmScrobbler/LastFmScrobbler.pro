@@ -6,9 +6,12 @@ QT += phonon \
     gui
 TARGET = tepsonic_lastfmscrobbler
 TEMPLATE = lib
-CONFIG += plugin
+CONFIG += plugin \
+    release
+
 INCLUDEPATH += . \
     ../../src \
+    ../../build/moc \
     /usr/include/Phonon \
     /usr/include/KDE
 
@@ -17,5 +20,5 @@ DEFINES += LASTFMSCROBBLER_LIBRARY
 SOURCES += src/lastfmscrobbler.cpp
 HEADERS += src/lastfmscrobbler.h
 FORMS += ui/lastfmscrobblerconfig.ui
-DESTDIR = ../../bin/plugins
+DESTDIR = ../../build/target/plugins
 VERSION = 0.1.0

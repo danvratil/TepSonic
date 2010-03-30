@@ -1,6 +1,7 @@
 QT += phonon \
     sql
 TEMPLATE = app
+CONFIG += release
 TARGET = tepsonic
 LIBS += -ltag
 DEPENDPATH += .
@@ -9,7 +10,10 @@ INCLUDEPATH += . \
     playlist \
     /usr/include/KDE \
     /usr/include/Phonon
-DESTDIR = ../bin
+DESTDIR = ../build/target/
+OBJECTS_DIR = ../build/obj/
+MOC_DIR = ../build/moc/
+
 
 # Input
 HEADERS += mainwindow.h \
@@ -63,3 +67,24 @@ SOURCES += main.cpp \
     playlist/playlistpopulator.cpp \
     playlist/playlistwriter.cpp
 RESOURCES += ../icons.qrc
+
+# Translations
+CODECFORTR = UTF-8
+CODECFORSRC = UTF-8
+include(../ts/ts.pri)
+
+unix {
+    isEmpty(PREFIX):PREFIX = /usr
+    BINDIR = $$PREFIX/bin
+    INSTALLS += target
+    target.path = $$BINDIR
+    DATADIR = $$PREFIX/share
+    PKGDATADIR = $$DATADIR/tepsonic
+    DEFINES += DATADIR=\\\"$$DATADIR\\\" \
+        PKGDATADIR=\\\"$$PKGDATADIR\\\"
+    INSTALLS += translations
+    translations.path = $$PKGDATADIR
+    translations.files += $$DESTDIR/ts
+}
+
+
