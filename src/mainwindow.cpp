@@ -92,6 +92,7 @@ MainWindow::MainWindow(Player *player)
     _trayIconMenu->addSeparator();
     _trayIconMenu->addAction(_ui->actionQuit_TepSonic);
     _trayIcon->setContextMenu(_trayIconMenu);
+    _trayIcon->setToolTip(tr("Player is stopped"));
 
     _playlistLengthLabel = new QLabel(this);
     _ui->statusBar->addPermanentWidget(_playlistLengthLabel,0);
@@ -172,6 +173,8 @@ MainWindow::MainWindow(Player *player)
             this,SLOT(repeatModeChanged(Player::RepeatMode)));
     connect(_player,SIGNAL(randomModeChanged(bool)),
             this,SLOT(randomModeChanged(bool)));
+    connect(_player,SIGNAL(trackChanged(Player::MetaData)),
+            this,SLOT(trackChanged(Player::MetaData)));
 
     _ui->seekSlider->setMediaObject(_player->mediaObject());
     _ui->volumeSlider->setAudioOutput(_player->audioOutput());
@@ -374,20 +377,24 @@ void MainWindow::playerStatusChanged(Phonon::State newState, Phonon::State oldSt
 {
     Q_UNUSED(oldState);
 
+    Player::MetaData metadata = _player->currentMetaData();
+
     switch (newState) {
         case Phonon::PlayingState:
             _ui->playPauseButton->setIcon(QIcon(":/icons/pause"));
             _ui->actionPlay_pause->setIcon(QIcon(":/icons/pause"));
             _ui->stopButton->setEnabled(true);
             _ui->actionStop->setEnabled(true);
-            _ui->trackTitleLabel->setText(_player->currentSource().fileName());
+            _ui->trackTitleLabel->setText(metadata.artist+" - "+metadata.title);
+            _trayIcon->setToolTip(tr("Playing: %1 - %2").arg(metadata.artist,metadata.title));
             break;
         case Phonon::PausedState:
             _ui->playPauseButton->setIcon(QIcon(":/icons/start"));
             _ui->actionPlay_pause->setIcon(QIcon(":/icons/start"));
             _ui->stopButton->setEnabled(true);
             _ui->actionStop->setEnabled(true);
-            _ui->trackTitleLabel->setText(QString(tr("%1 [paused]")).arg(_ui->trackTitleLabel->text()));
+            _ui->trackTitleLabel->setText(tr("%1 [paused]").arg(_ui->trackTitleLabel->text()));
+            _trayIcon->setToolTip(tr("%1 [paused]").arg(_trayIcon->toolTip()));
             break;
         case Phonon::StoppedState:
             _ui->playPauseButton->setIcon(QIcon(":/icons/start"));
@@ -395,6 +402,7 @@ void MainWindow::playerStatusChanged(Phonon::State newState, Phonon::State oldSt
             _ui->stopButton->setEnabled(false);
             _ui->actionStop->setEnabled(false);
             _ui->trackTitleLabel->setText(tr("Player is stopped"));
+            _trayIcon->setToolTip(tr("Player is stopped"));
             break;
         case Phonon::ErrorState:
             _ui->statusBar->showMessage(_player->errorString(),5000);
@@ -616,7 +624,4 @@ void MainWindow::randomModeChanged(bool newMode)
     }
 }
 
-
-
 #include "moc_mainwindow.cpp"
-
