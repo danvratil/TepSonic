@@ -34,10 +34,13 @@
 
 LastFmScrobbler::LastFmScrobbler()
 {
-    qDebug() << "Last.fm plugin loaded!";
-
     setPluginName("Last.fm plugin");
     setHasConfigUI(true);
+}
+
+void LastFmScrobbler::init()
+{
+    _cache.clear();
 
     // Load cache first
     QSettings settings(QDir::homePath().append("/.tepsonic/lastfmscrobbler.conf"),QSettings::IniFormat,this);
@@ -56,12 +59,17 @@ LastFmScrobbler::LastFmScrobbler()
      }
      settings.endArray();
 
-    login();
+     login();
 }
 
-LastFmScrobbler::~LastFmScrobbler()
+void LastFmScrobbler::quit()
 {
+    saveCache();
 
+    _token.clear();
+    _submissionURL.clear();
+    _nowPlayingURL.clear();
+    _cache.clear();
 }
 
 void LastFmScrobbler::settingsWidget(QWidget *parentWidget)

@@ -49,13 +49,22 @@ class LastFmScrobbler : public AbstractPlugin
 
         //! Constructor
         /*!
-          Loads settings and try to login and obtain token and url
-          \sa login()
+          Creates the plugin.
         */
         LastFmScrobbler();
 
         //! Destructor
-        ~LastFmScrobbler();
+        ~LastFmScrobbler() {}
+
+        //! Initialize the plugins
+        /*!
+          Loads settings, calls login() for the first time
+          \sa login()
+        */
+        void init();
+
+        //! Prepares the plugin to be disabled
+        void quit();
 
         //! Initializes UI on given widget
         /*!
