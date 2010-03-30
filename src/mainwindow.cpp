@@ -548,7 +548,7 @@ void MainWindow::on_actionSave_playlist_triggered()
 
 void MainWindow::playlistLengthChanged(int totalLength, int tracksCount)
 {
-    QString time = formatMilliseconds(totalLength);
+    QString time = formatTimestamp(totalLength);
     _playlistLengthLabel->setText(tr("%n track(s)","",tracksCount).append(" ("+time+")"));
 }
 
