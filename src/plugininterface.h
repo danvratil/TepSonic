@@ -38,6 +38,21 @@ class PluginInterface
         //! Destructor
         virtual ~PluginInterface() {}
 
+        //! Initializes the plugin
+        /*!
+          The plugin should not be initiated in the constructor. The constructor is only for setting plugin's name
+          and hasConfigUI. The initialization itself (like loading settings, connection to network etc) should be done
+          here. This allows user to disable the plugin (init() is not called) but TepSonic still knows about the plugin
+          without initializing it.
+        */
+        virtual void init() = 0;
+
+        //! Uninitializes the plugin
+        /*!
+          The plugin should stop doing it's work but it won't be destroyed. The plugin will be formally disabled.
+        */
+        virtual void quit() = 0;
+
         //! Installs plugin's UI on given parentWidget.
         virtual void settingsWidget(QWidget *parentWidget) = 0;
 

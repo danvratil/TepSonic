@@ -29,6 +29,7 @@
 
 class QString;
 class QWidget;
+class PluginsManager;
 
 //! The AbstractPlugin class provides interface to be implemented by plugins
 /*!
@@ -39,6 +40,9 @@ class QWidget;
 */
 class AbstractPlugin : public QObject, public PluginInterface
 {
+    // Plugins manager is our friend!
+    friend class PluginsManager;
+
     Q_OBJECT
     Q_INTERFACES(PluginInterface);
     Q_PROPERTY(bool hasConfigUI
@@ -48,6 +52,21 @@ class AbstractPlugin : public QObject, public PluginInterface
                READ pluginName
                WRITE setPluginName);
     public:
+
+        //! Initializes the plugin
+        /*!
+          The plugin should not be initiated in the constructor. The constructor is only for setting plugin's name
+          and hasConfigUI. The initialization itself (like loading settings, connection to network etc) should be done
+          here. This allows user to disable the plugin (init() is not called) but TepSonic still knows about the plugin
+          without initializing it.
+        */
+        virtual void init() = 0;
+
+        //! Uninitializes the plugin
+        /*!
+          The plugin should stop doing it's work but it won't be destroyed. The plugin will be formally disabled.
+        */
+        virtual void quit() { }
 
         //! Initilizes plugin's settings UI on given parentWidget. This is a pure virtual method.
         /*!
@@ -135,6 +154,9 @@ class AbstractPlugin : public QObject, public PluginInterface
 
         //! The plugin name
         QString _pluginName;
+
+        //! Is the plugin initialized?
+        bool _initialized;
 
 };
 
