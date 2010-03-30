@@ -19,7 +19,9 @@
 
 #include <QtGui/QApplication>
 #include <QObject>
+#include <QLocale>
 #include <QTextCodec>
+#include <QTranslator>
 #include <QString>
 #include "player.h"
 #include "mainwindow.h"
@@ -35,6 +37,10 @@ int main(int argc, char *argv[])
 
     QTextCodec::setCodecForTr(QTextCodec::codecForName("utf8"));
     QTextCodec::setCodecForCStrings(QTextCodec::codecForName("UTF-8"));
+
+    QTranslator translator;
+    translator.load(QLocale::system().name());
+    tepsonic.installTranslator(&translator);
 
     Player *player = new Player();
     MainWindow mainWindow(player);

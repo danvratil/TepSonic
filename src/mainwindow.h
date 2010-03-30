@@ -164,6 +164,9 @@ protected:
     */
     void closeEvent(QCloseEvent *event);
 
+    //! When language is changed the window is retranslated
+    void changeEvent(QEvent *e);
+
 public slots:
     //! Displays \p error message in status bar
     /*!

@@ -605,4 +605,15 @@ void MainWindow::playerPosChanged(qint64 newPos)
     _ui->playbackTimeLabel->setText(formatMilliseconds(newPos));
 }
 
+void MainWindow::changeEvent(QEvent *e)
+{
+    switch (e->type()) {
+        case QEvent::LanguageChange:
+            _ui->retranslateUi(this);
+            break;
+        default:
+            break;
+    }
+}
+
 #include "moc_mainwindow.cpp"
