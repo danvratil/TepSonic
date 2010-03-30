@@ -1,6 +1,6 @@
 TEMPLATE = subdirs
 
-CONFIG += release
+CONFIG += debug
 
 SUBDIRS = src \
   plugins

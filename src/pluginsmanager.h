@@ -27,6 +27,7 @@
 
 class MainWindow;
 class Player;
+class AbstractPlugin;
 
 //! PluginsManager is a class for loading and providing access to plugins
 /*!
@@ -37,6 +38,7 @@ class PluginsManager : public QObject
 {
     Q_OBJECT
     public:
+
         //! Constructor
         /*!
           At the end of constructor the method loadPlugins() is called to load
@@ -67,6 +69,13 @@ class PluginsManager : public QObject
           \return Returns pointer to QPluginLoader on given index
         */
         QPluginLoader *pluginAt(int index);
+
+    public slots:
+        //! Initializes enabled plugins
+        /*!
+          Initializes enabled plugins
+        */
+        void initPlugins();
 
     private slots:
         //! Loads all available plugins

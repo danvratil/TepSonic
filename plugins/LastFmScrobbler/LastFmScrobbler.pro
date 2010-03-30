@@ -7,7 +7,7 @@ QT += phonon \
 TARGET = tepsonic_lastfmscrobbler
 TEMPLATE = lib
 CONFIG += plugin \
-    release
+    debug
 
 INCLUDEPATH += . \
     ../../src \

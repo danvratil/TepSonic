@@ -1,7 +1,7 @@
 QT += phonon \
     sql
 TEMPLATE = app
-CONFIG += release
+CONFIG += debug
 TARGET = tepsonic
 LIBS += -ltag
 DEPENDPATH += .

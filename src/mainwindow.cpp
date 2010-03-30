@@ -347,6 +347,7 @@ void MainWindow::on_actionPreferences_triggered()
     // Show preferences dialog
     PreferencesDialog *prefDlg = new PreferencesDialog(this);
     connect(prefDlg,SIGNAL(rebuildCollections()),_taskManager,SLOT(rebuildCollections()));
+    connect(prefDlg,SIGNAL(accepted()),_pluginsManager,SLOT(initPlugins()));
     prefDlg->exec();
 
 }

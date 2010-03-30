@@ -28,8 +28,10 @@
 #include <QDir>
 #include <QFileInfo>
 #include <QLibrary>
+#include <QMap>
 #include <QPluginLoader>
 #include <QDebug>
+#include <QSettings>
 #include <Phonon/MediaObject>
 
 PluginsManager::PluginsManager(MainWindow *mainWindow, Player *player)
@@ -48,6 +50,7 @@ PluginsManager::~PluginsManager()
         disconnect(static_cast<AbstractPlugin*>(pluginLoader->instance()),SLOT(trackChanged(MetaData)));
         disconnect(static_cast<AbstractPlugin*>(pluginLoader->instance()),SLOT(trackFinished(MetaData)));
         disconnect(static_cast<AbstractPlugin*>(pluginLoader->instance()),SLOT(trackPositionChanged(qint64)));
+        static_cast<AbstractPlugin*>(pluginLoader->instance())->quit();
         pluginLoader->unload();
     }
 }
@@ -73,6 +76,7 @@ void PluginsManager::loadPlugins()
     // If we are on Linux, override the extension
     ext = "so";
 #endif
+
     QDir pluginsDir;
     pluginsDir.setNameFilters(QStringList() << "libtepsonic_*."+ext);
     foreach(QString folder, pluginsDirs) {
@@ -85,16 +89,48 @@ void PluginsManager::loadPlugins()
                 QObject *plugin = pluginLoader->instance();
                 if (plugin) {
                     _plugins.append(pluginLoader);
-                    connect(_player,SIGNAL(trackChanged(Player::MetaData)),static_cast<AbstractPlugin*>(plugin),SLOT(trackChanged(Player::MetaData)));
-                    connect(_player,SIGNAL(trackFinished(Player::MetaData)),static_cast<AbstractPlugin*>(plugin),SLOT(trackFinished(Player::MetaData)));
-                    connect(_player,SIGNAL(stateChanged(Phonon::State,Phonon::State)),static_cast<AbstractPlugin*>(plugin),SLOT(playerStatusChanged(Phonon::State,Phonon::State)));
-                    connect(_player,SIGNAL(trackPositionChanged(qint64)),static_cast<AbstractPlugin*>(plugin),SLOT(trackPositionChanged(qint64)));
-                    connect(static_cast<AbstractPlugin*>(plugin),SIGNAL(error(QString)),_mainWindow,SLOT(showError(QString)));
-
+                    static_cast<AbstractPlugin*>(plugin)->_initialized = false;
                 }
             }
         }
     }
+    initPlugins();
+}
+
+void PluginsManager::initPlugins()
+{
+    QSettings settings(QDir::homePath().append("/.tepsonic/main.conf"),QSettings::IniFormat,this);
+    settings.beginGroup("Plugins");
+    QMap<QString,QVariant> plugins = settings.value("pluginsEnabled").toMap();
+    settings.endGroup();
+
+    foreach (QPluginLoader *pluginLoader, _plugins) {
+        QObject *plugin = pluginLoader->instance();
+        QString pluginName = static_cast<AbstractPlugin*>(plugin)->pluginName();
+        if (((!plugins.contains(pluginName)) || (plugins[pluginName].toBool()==true)) && (static_cast<AbstractPlugin*>(plugin)->_initialized==false)) {
+            connect(_player,SIGNAL(trackChanged(Player::MetaData)),static_cast<AbstractPlugin*>(plugin),SLOT(trackChanged(Player::MetaData)));
+            connect(_player,SIGNAL(trackFinished(Player::MetaData)),static_cast<AbstractPlugin*>(plugin),SLOT(trackFinished(Player::MetaData)));
+            connect(_player,SIGNAL(stateChanged(Phonon::State,Phonon::State)),static_cast<AbstractPlugin*>(plugin),SLOT(playerStatusChanged(Phonon::State,Phonon::State)));
+            connect(_player,SIGNAL(trackPositionChanged(qint64)),static_cast<AbstractPlugin*>(plugin),SLOT(trackPositionChanged(qint64)));
+            connect(static_cast<AbstractPlugin*>(plugin),SIGNAL(error(QString)),_mainWindow,SLOT(showError(QString)));
+            static_cast<AbstractPlugin*>(plugin)->init();
+            static_cast<AbstractPlugin*>(plugin)->_initialized = true;
+        }
+
+        /* If the plugins is formally disabled, but still initialized then remove all connections and call it's metod
+           quit()
+        */
+        if ((plugins[pluginName].toBool()==false) && (static_cast<AbstractPlugin*>(plugin)->_initialized==true)) {
+            disconnect(static_cast<AbstractPlugin*>(plugin),SLOT(settingsAccepted()));
+            disconnect(static_cast<AbstractPlugin*>(plugin),SLOT(playerStatusChanged(Phonon::State,Phonon::State)));
+            disconnect(static_cast<AbstractPlugin*>(plugin),SLOT(trackChanged(MetaData)));
+            disconnect(static_cast<AbstractPlugin*>(plugin),SLOT(trackFinished(MetaData)));
+            disconnect(static_cast<AbstractPlugin*>(plugin),SLOT(trackPositionChanged(qint64)));
+            static_cast<AbstractPlugin*>(plugin)->_initialized = false;
+            static_cast<AbstractPlugin*>(plugin)->quit();
+        }
+
+    } // end of loop
 }
 
 int PluginsManager::pluginsCount()

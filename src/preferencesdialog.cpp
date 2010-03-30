@@ -62,6 +62,7 @@ PreferencesDialog::PreferencesDialog(MainWindow *parent):
 
     settings.beginGroup("Plugins");
     QMap<QString,QVariant> plugins = settings.value("pluginsEnabled").toMap();
+    settings.endGroup();
 
     // Iterate through all plugins
     for (int i=0; i < _parent->pluginsManager()->pluginsCount(); i++) {
@@ -142,6 +143,7 @@ void PreferencesDialog::on_buttonBox_accepted()
         plugins.insert(item->text(),QVariant(item->checkState()));
     }
     settings.setValue("pluginsEnabled",QVariant(plugins));
+    settings.endGroup();
 
     if (_collections->collectionsSourceChanged()) {
         emit rebuildCollections();

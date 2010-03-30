@@ -54,7 +54,6 @@ int main(int argc, char *argv[])
     // If app was not "installed" use the app directory
     if (!QFile::exists(localeDir)) {
         localeDir = qApp->applicationDirPath() + QDir::separator() + "locale";
-        qDebug() << "Using locale dir" << localeDir << locale;
     }
     translator.load(locale,localeDir);
     tepsonic.installTranslator(&translator);
