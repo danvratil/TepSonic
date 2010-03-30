@@ -117,6 +117,7 @@ MainWindow::MainWindow(Player *player)
     _ui->playlistBrowser->setModel(_playlistProxyModel);
     _ui->playlistBrowser->setDragEnabled(true);
     _ui->playlistBrowser->setDropIndicatorShown(true);
+    _ui->playlistBrowser->setSortingEnabled(true);
     _ui->playlistBrowser->viewport()->setAcceptDrops(true);
     _ui->playlistBrowser->header()->setContextMenuPolicy(Qt::CustomContextMenu);
     _ui->playlistBrowser->setAlternatingRowColors(true);
