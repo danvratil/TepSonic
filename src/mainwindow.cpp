@@ -373,7 +373,7 @@ void MainWindow::updatePlayerTrack()
 void MainWindow::on_playlistBrowser_doubleClicked(QModelIndex index)
 {
    // Play item on row double click
-   QString filename = _playlistModel->index(index.row(),0,QModelIndex()).data().toString();
+   QString filename = index.sibling(index.row(),0).data().toString();
    _player->setTrack(filename,true);
 }
 
