@@ -66,10 +66,10 @@ void PluginsManager::loadPlugins()
        for example in /home/me/tepsonic/ and plugins in /home/me/tepsonic/plugins.
        Putting this folder first will also result in preferring these plugins before
        same-called plugins installed somewhere in system */
-    pluginsDirs << qApp->applicationDirPath().append("/plugins");
+    pluginsDirs << qApp->applicationDirPath()+QDir::separator()+"plugins";
     // Default extension on windows
     QString ext = "dll";
-#ifndef _WIN32
+#ifndef Q_OS_WIN32
     // On Linux we want to search in default library paths
     pluginsDirs << "/usr/lib/tepsonic/plugins/";
     pluginsDirs << "/usr/local/lib/tepsonic/plugins/";
