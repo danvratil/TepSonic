@@ -47,7 +47,7 @@ DatabaseManager::DatabaseManager(QString connectionName)
 
 DatabaseManager::~DatabaseManager()
 {
-    sqlDb.close();
+    _sqlDb.close();
     QSqlDatabase::removeDatabase(_connectionName);
 }
 
@@ -60,30 +60,30 @@ bool DatabaseManager::connectToDB()
 
     switch (_driverType) {
         case MySQL: {
-            sqlDb = QSqlDatabase::addDatabase("QMYSQL",_connectionName);
-            sqlDb.setHostName(_server);
-            sqlDb.setUserName(_username);
-            sqlDb.setPassword(_password);
-            sqlDb.setDatabaseName(_db);
+            _sqlDb = QSqlDatabase::addDatabase("QMYSQL",_connectionName);
+            _sqlDb.setHostName(_server);
+            _sqlDb.setUserName(_username);
+            _sqlDb.setPassword(_password);
+            _sqlDb.setDatabaseName(_db);
         } break;
         case SQLite: {
-            sqlDb = QSqlDatabase::addDatabase("QSQLITE",_connectionName);
-            sqlDb.setDatabaseName(QString(QDir::homePath()).append("/.tepsonic/collection.db"));
+            _sqlDb = QSqlDatabase::addDatabase("QSQLITE",_connectionName);
+            _sqlDb.setDatabaseName(QString(QDir::homePath()).append("/.tepsonic/collection.db"));
         } break;
     }
 
-    if (!sqlDb.open()) {
-        qDebug() << "Failed to establish '" << sqlDb.connectionName() <<"' connection to database!";
-        qDebug() << "Reason: " << sqlDb.lastError().text();
+    if (!_sqlDb.open()) {
+        qDebug() << "Failed to establish '" << _sqlDb.connectionName() <<"' connection to database!";
+        qDebug() << "Reason: " << _sqlDb.lastError().text();
         return false;
     }
 
     // We want to use UTF8!!!
     if (_driverType == MySQL ) {
-        QSqlQuery query("SET CHARACTER SET utf8;",sqlDb);
+        QSqlQuery query("SET CHARACTER SET utf8;",_sqlDb);
     }
 
-    if (!sqlDb.tables(QSql::Tables).contains("Tracks",Qt::CaseSensitive)) {
+    if (!_sqlDb.tables(QSql::Tables).contains("Tracks",Qt::CaseSensitive)) {
         initDb();
     }
 
@@ -105,7 +105,7 @@ void DatabaseManager::initDb()
                             "   PRIMARY KEY (`filename`)," \
                             "   KEY `artist` (`artist`)," \
                             "   KEY `album` (`album`)"  \
-                            ") ENGINE=MyISAM DEFAULT CHARSET=utf8;",sqlDb);
+                            ") ENGINE=MyISAM DEFAULT CHARSET=utf8;",_sqlDb);
         } break;
         case SQLite: {
             QSqlQuery query("CREATE TABLE Tracks("\
@@ -115,7 +115,7 @@ void DatabaseManager::initDb()
                             "   album TEXT," \
                             "   title TEXT," \
                             "   mtime INTEGER,"\
-                            "   PRIMARY KEY(filename ASC));",sqlDb);
+                            "   PRIMARY KEY(filename ASC));",_sqlDb);
         } break;
     }
 }
