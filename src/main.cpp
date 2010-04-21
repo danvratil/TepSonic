@@ -29,6 +29,8 @@
 #include "mainwindow.h"
 #include "pluginsmanager.h"
 
+#include "constants.h"
+
 #include <QDebug>
 
 

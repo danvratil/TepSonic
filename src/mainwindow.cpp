@@ -21,6 +21,8 @@
 #include <cstdlib>
 #include <ctime>
 
+#include "constants.h"
+
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "preferencesdialog.h"
@@ -154,7 +156,7 @@ MainWindow::MainWindow(Player *player)
     connect(_taskManager,SIGNAL(taskStarted(QString)),_ui->statusBar,SLOT(showWorkingBar(QString)));
     connect(_taskManager,SIGNAL(taskDone()),_ui->statusBar,SLOT(cancelAction()));
 
-    _settings = new QSettings(QString(QDir::homePath()).append("/.tepsonic/main.conf"),QSettings::IniFormat,this);
+    _settings = new QSettings(QString(QString(_CONFIGDIR)).append("/main.conf"),QSettings::IniFormat,this);
     restoreGeometry(_settings->value("Window/Geometry", saveGeometry()).toByteArray());
     restoreState(_settings->value("Window/State", saveState()).toByteArray());
 
@@ -185,7 +187,7 @@ MainWindow::MainWindow(Player *player)
 
     // Load last playlist
     if (_settings->value("Preferences/RestoreSession").toBool()) {
-        _taskManager->addFileToPlaylist(QDir::homePath().append("/.tepsonic/last.m3u"));
+        _taskManager->addFileToPlaylist(QString(_CONFIGDIR).append("/last.m3u"));
         _player->setRandomMode(_settings->value("LastSession/RandomMode",false).toBool());
         _player->setRepeatMode(Player::RepeatMode(_settings->value("LastSession/RepeatMode",0).toInt()));
     }
@@ -263,7 +265,7 @@ MainWindow::~MainWindow()
     _settings->setValue("LastSession/RandomMode", _player->randomMode());
 
     // Save current playlist to file
-    _taskManager->savePlaylistToFile(QDir::homePath().append("/.tepsonic/last.m3u"));
+    _taskManager->savePlaylistToFile(QString(_CONFIGDIR).append("/last.m3u"));
 
     qDebug() << "Waiting for taskManager to finish...";
     delete _taskManager;

@@ -18,6 +18,7 @@
  */
 
 #include "lastfmscrobbler.h"
+#include "constants.h"
 
 #include <QObject>
 #include <QCryptographicHash>
@@ -43,7 +44,7 @@ void LastFmScrobbler::init()
     _cache.clear();
 
     // Load cache first
-    QSettings settings(QDir::homePath().append("/.tepsonic/lastfmscrobbler.conf"),QSettings::IniFormat,this);
+    QSettings settings(QString(_CONFIGDIR).append("/lastfmscrobbler.conf"),QSettings::IniFormat,this);
     int size = settings.beginReadArray("Cache");
     for (int i = 0; i < size; i++) {
         settings.setArrayIndex(i);
@@ -77,7 +78,7 @@ void LastFmScrobbler::settingsWidget(QWidget *parentWidget)
     _configWidget = new Ui::LastFmScrobblerConfig();
     _configWidget->setupUi(parentWidget);
 
-    QSettings settings(QDir::homePath().append("/.tepsonic/lastfmscrobbler.conf"),QSettings::IniFormat,this);
+    QSettings settings(QString(_CONFIGDIR).append("/lastfmscrobbler.conf"),QSettings::IniFormat,this);
     _configWidget->usernameEdit->setText(settings.value("username",QString()).toString());
     _configWidget->passwordEdit->setText(settings.value("password",QString()).toString());
     connect(_configWidget->testLoginButton,SIGNAL(clicked()),this,SLOT(on_testLoginButton_clicked()));
@@ -106,7 +107,7 @@ void LastFmScrobbler::trackChanged(Player::MetaData trackData)
 
 void LastFmScrobbler::settingsAccepted()
 {
-    QSettings settings(QDir::homePath().append("/.tepsonic/lastfmscrobbler.conf"),QSettings::IniFormat,this);
+    QSettings settings(QString(_CONFIGDIR).append("/lastfmscrobbler.conf"),QSettings::IniFormat,this);
     settings.setValue("username",_configWidget->usernameEdit->text());
     settings.setValue("password",_configWidget->passwordEdit->text());
 }
@@ -176,7 +177,7 @@ QUrl LastFmScrobbler::prepareHandshakeURL(QString username, QString password)
 
 void LastFmScrobbler::login()
 {
-    QSettings settings(QDir::homePath().append("/.tepsonic/lastfmscrobbler.conf"),QSettings::IniFormat,this);
+    QSettings settings(QString(_CONFIGDIR).append("/lastfmscrobbler.conf"),QSettings::IniFormat,this);
     QString username = settings.value("username",QString()).toString();
     QString password = settings.value("password",QString()).toString();
     // We won't try to log in if user didn't fill the credentials
@@ -312,7 +313,7 @@ void LastFmScrobbler::setupTimer()
 
 void LastFmScrobbler::saveCache()
 {
-    QSettings settings(QDir::homePath().append("/.tepsonic/lastfmscrobbler.conf"),QSettings::IniFormat,this);
+    QSettings settings(QString(_CONFIGDIR).append("/lastfmscrobbler.conf"),QSettings::IniFormat,this);
     settings.beginWriteArray("Cache");
     for (int i = 0; i < _cache.size(); ++i) {
         settings.setArrayIndex(i);

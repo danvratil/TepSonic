@@ -18,6 +18,7 @@
  */
 
 #include "databasemanager.h"
+#include "constants.h"
 
 #include <QDebug>
 #include <QDir>
@@ -32,7 +33,7 @@ DatabaseManager::DatabaseManager(QString connectionName)
 {
     _connectionName = connectionName;
 
-    QSettings settings(QString(QDir::homePath()).append("/.tepsonic/main.conf"),QSettings::IniFormat,this);
+    QSettings settings(QString(_CONFIGDIR).append("/main.conf"),QSettings::IniFormat,this);
     _driverType = (DriverTypes)settings.value("Collections/StorageEngine",0).toInt();
     settings.beginGroup("Collections");
     settings.beginGroup("MySQL");
@@ -68,7 +69,7 @@ bool DatabaseManager::connectToDB()
         } break;
         case SQLite: {
             _sqlDb = QSqlDatabase::addDatabase("QSQLITE",_connectionName);
-            _sqlDb.setDatabaseName(QString(QDir::homePath()).append("/.tepsonic/collection.db"));
+            _sqlDb.setDatabaseName(QString(_CONFIGDIR).append("/collection.db"));
         } break;
     }
 

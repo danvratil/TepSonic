@@ -22,6 +22,7 @@
 #include "preferencespages.h"
 #include "pluginsmanager.h"
 #include "mainwindow.h"
+#include "constants.h"
 
 #include "abstractplugin.h"
 
@@ -43,7 +44,7 @@ PreferencesDialog::PreferencesDialog(MainWindow *parent):
     _ui->pages->addWidget(_collections);
     _ui->pages->addWidget(_plugins);
 
-    QSettings settings(QString(QDir::homePath()).append("/.tepsonic/main.conf"),QSettings::IniFormat,this);
+    QSettings settings(QString(_CONFIGDIR).append("/main.conf"),QSettings::IniFormat,this);
     settings.beginGroup("Collections");
     _collections->ui->enableCollectionsCheckbox->setChecked(settings.value("EnableCollections",true).toBool());
     _collections->ui->autoupdateCollectionsCheckbox->setChecked(settings.value("AutoRebuildAfterStart",true).toBool());
@@ -115,7 +116,7 @@ void PreferencesDialog::changeEvent(QEvent *e)
 
 void PreferencesDialog::on_buttonBox_accepted()
 {
-    QSettings settings(QString(QDir::homePath()).append("/.tepsonic/main.conf"),QSettings::IniFormat,this);
+    QSettings settings(QString(_CONFIGDIR).append("/main.conf"),QSettings::IniFormat,this);
     settings.beginGroup("Collections");
     settings.setValue("EnableCollections",_collections->ui->enableCollectionsCheckbox->isChecked());
     settings.setValue("AutoRebuildAfterStart",_collections->ui->autoupdateCollectionsCheckbox->isChecked());
@@ -157,19 +158,6 @@ void PreferencesDialog::on_buttonBox_rejected()
 {
     this->close();
 }
-
-/*void PreferencesDialog::addPlugin(QPluginLoader *plugin)
-{
-    QString pluginName = static_cast<AbstractPlugin*>(plugin->instance())->pluginName();
-    if (static_cast<AbstractPlugin*>(plugin->instance())->hasConfigUI()) {
-        QWidget *pluginWidget = new QWidget();
-        _plugins->ui->tabs->addTab(pluginWidget,pluginName);
-        static_cast<AbstractPlugin*>(plugin->instance())->settingsWidget(pluginWidget);
-        connect(this,SIGNAL(accepted()),static_cast<AbstractPlugin*>(plugin->instance()),SLOT(settingsAccepted()));
-    }
-    item->setCheckState(pluginEnabled[pluginName].toBool());
-    _plugins->ui->pluginsList->addItem(item);
-}*/
 
 void PreferencesDialog::on_pagesButtons_currentItemChanged(QListWidgetItem* current, QListWidgetItem* previous)
 {

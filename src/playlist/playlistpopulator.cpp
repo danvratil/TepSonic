@@ -31,6 +31,7 @@ PlaylistPopulator::PlaylistPopulator(PlaylistModel *playlistModel)
 
     _playlistModel = playlistModel;
     _canClose = false;
+    _files.clear();
 
     // Start the thread and pause it immediatelly
     start();
@@ -52,12 +53,14 @@ void PlaylistPopulator::run()
     do
     {
         _mutex.lock();
-        if (!_files.isEmpty()) {
+        if (_files.size() > 0) {
             if (QFileInfo(_files.first()).isDir()) {
                 expandDir(_files.takeFirst());
             }
-            if (QFileInfo(_files.first()).suffix().toLower()=="m3u") {
-                expandPlaylist(_files.takeFirst());
+            if (_files.size()>0) {
+                if (QFileInfo(_files.first()).suffix().toLower()=="m3u") {
+                    expandPlaylist(_files.takeFirst());
+                }
             }
             if (_files.size() > 0) {
                 if (_playlistModel->addItem(_files.takeFirst()))
@@ -123,7 +126,8 @@ void PlaylistPopulator::expandPlaylist(QString filename)
         lineLength = file.readLine(buf, sizeof(buf));
         if (lineLength != -1) {
             QString filepath = playlistDir.absoluteFilePath(buf).remove("\n",Qt::CaseInsensitive);
-            files << filepath;
+            if (filepath.length()>0)
+                files << filepath;
         }
     } while (lineLength > -1);
 

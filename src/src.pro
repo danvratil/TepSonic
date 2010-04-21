@@ -16,7 +16,8 @@ MOC_DIR = ../build/moc/
 
 
 # Input
-HEADERS += mainwindow.h \
+HEADERS += constants.h \
+    mainwindow.h \
     player.h \
     statusbar.h \
     abstractplugin.h \
@@ -45,6 +46,7 @@ FORMS += ui/mainwindow.ui \
     ui/collections.ui \
     ui/plugins.ui
 SOURCES += main.cpp \
+    constants.cpp \
     mainwindow.cpp \
     player.cpp \
     statusbar.cpp \

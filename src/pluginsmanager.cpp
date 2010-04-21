@@ -18,11 +18,13 @@
  */
 
 
+#include "constants.h"
 #include "pluginsmanager.h"
 #include "plugininterface.h"
 #include "abstractplugin.h"
 #include "mainwindow.h"
 #include "player.h"
+
 
 #include <QApplication>
 #include <QDir>
@@ -99,7 +101,7 @@ void PluginsManager::loadPlugins()
 
 void PluginsManager::initPlugins()
 {
-    QSettings settings(QDir::homePath().append("/.tepsonic/main.conf"),QSettings::IniFormat,this);
+    QSettings settings(QString(_CONFIGDIR).append("/main.conf"),QSettings::IniFormat,this);
     settings.beginGroup("Plugins");
     QMap<QString,QVariant> plugins = settings.value("pluginsEnabled").toMap();
     settings.endGroup();

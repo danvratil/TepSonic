@@ -18,6 +18,7 @@
  */
 
 #include "taskmanager.h"
+#include "constants.h"
 #include "collections/collectionmodel.h"
 #include "collections/collectionpopulator.h"
 #include "collections/collectionbuilder.h"
@@ -83,7 +84,7 @@ void TaskManager::rebuildCollections(const QString &folder)
 {
     QStringList dirs;
     if (folder.isEmpty()) {
-        QSettings settings(QDir::homePath().append("/.tepsonic/main.conf"),QSettings::IniFormat,this);
+        QSettings settings(QString(_CONFIGDIR).append("/main.conf"),QSettings::IniFormat,this);
         dirs << settings.value("Collections/SourcePaths",QStringList()).toStringList();
     }
 
