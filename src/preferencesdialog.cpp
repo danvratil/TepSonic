@@ -65,6 +65,7 @@ PreferencesDialog::PreferencesDialog(MainWindow *parent):
     QMap<QString,QVariant> plugins = settings.value("pluginsEnabled").toMap();
     settings.endGroup();
 
+    qDebug() << _parent->pluginsManager()->pluginsCount();
     // Iterate through all plugins
     for (int i=0; i < _parent->pluginsManager()->pluginsCount(); i++) {
 

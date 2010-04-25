@@ -14,8 +14,10 @@ INCLUDEPATH += . \
     /usr/include/Phonon \
     /usr/include/KDE
 DEFINES += LASTFMSCROBBLER_LIBRARY
-SOURCES += src/lastfmscrobbler.cpp
-HEADERS += src/lastfmscrobbler.h
+SOURCES += src/lastfmscrobbler.cpp \
+           ../../src/constants.cpp
+HEADERS += src/lastfmscrobbler.h \
+           ../../src/constants.h
 FORMS += ui/lastfmscrobblerconfig.ui
 DESTDIR = ../../build/target/plugins
 VERSION = 0.1.0

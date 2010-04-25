@@ -177,8 +177,6 @@ MainWindow::MainWindow(Player *player)
             this,SLOT(repeatModeChanged(Player::RepeatMode)));
     connect(_player,SIGNAL(randomModeChanged(bool)),
             this,SLOT(randomModeChanged(bool)));
-    connect(_player,SIGNAL(trackChanged(Player::MetaData)),
-            this,SLOT(trackChanged(Player::MetaData)));
     connect(_player,SIGNAL(trackPositionChanged(qint64)),
             this,SLOT(playerPosChanged(qint64)));
 
