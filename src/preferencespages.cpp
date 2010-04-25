@@ -37,6 +37,8 @@ PreferencesPages::Collections::Collections(QWidget *parent):
     ui->tabWidget->setCurrentIndex(0);
     connect(ui->dbEngineCombo,SIGNAL(currentIndexChanged(QString)),
             this,SLOT(on_dbEngineCombo_currentIndexChanged(QString)));
+    connect(ui->rebuildCollectionsButton,SIGNAL(clicked()),
+            this,SIGNAL(rebuildCollections()));
     _collectionsSourceChanged = false;
 }
 

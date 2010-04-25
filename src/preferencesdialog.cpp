@@ -39,6 +39,8 @@ PreferencesDialog::PreferencesDialog(MainWindow *parent):
     _player = new PreferencesPages::Player;
     _collections = new PreferencesPages::Collections;
     _plugins = new PreferencesPages::Plugins;
+    connect(_collections,SIGNAL(rebuildCollections()),
+            this,SIGNAL(rebuildCollections()));
 
     _ui->pages->addWidget(_player);
     _ui->pages->addWidget(_collections);
@@ -65,7 +67,6 @@ PreferencesDialog::PreferencesDialog(MainWindow *parent):
     QMap<QString,QVariant> plugins = settings.value("pluginsEnabled").toMap();
     settings.endGroup();
 
-    qDebug() << _parent->pluginsManager()->pluginsCount();
     // Iterate through all plugins
     for (int i=0; i < _parent->pluginsManager()->pluginsCount(); i++) {
 

@@ -89,7 +89,6 @@ void PluginsManager::loadPlugins()
 
                 QPluginLoader *pluginLoader = new QPluginLoader(pluginsDir.absoluteFilePath(filename));
                 QObject *plugin = pluginLoader->instance();
-                qDebug() << pluginLoader->errorString();
                 if (plugin) {
                     _plugins.append(pluginLoader);
                     static_cast<AbstractPlugin*>(plugin)->_initialized = false;

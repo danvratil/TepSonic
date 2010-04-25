@@ -53,6 +53,9 @@ namespace PreferencesPages {
             void on_removePathButton_clicked();
             void on_addPathButton_clicked();
             void on_dbEngineCombo_currentIndexChanged(QString );
+
+        signals:
+            void rebuildCollections();
     };
 
     class Plugins: public QWidget
