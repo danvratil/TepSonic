@@ -155,14 +155,13 @@ MainWindow::MainWindow(Player *player)
     connect(_taskManager,SIGNAL(collectionsPopulated()),this,SLOT(fixCollectionProxyModel()));
     connect(_taskManager,SIGNAL(taskStarted(QString)),_ui->statusBar,SLOT(showWorkingBar(QString)));
     connect(_taskManager,SIGNAL(taskDone()),_ui->statusBar,SLOT(cancelAction()));
+    // This refreshes the filter when an item is added to the playlist so the item appears immediately
+    connect(_taskManager,SIGNAL(playlistPopulated()),_playlistProxyModel,SLOT(invalidate()));
 
     _settings = new QSettings(QString(QString(_CONFIGDIR)).append("/main.conf"),QSettings::IniFormat,this);
     restoreGeometry(_settings->value("Window/Geometry", saveGeometry()).toByteArray());
     restoreState(_settings->value("Window/State", saveState()).toByteArray());
-    QList<int> defaultSizes;
-    defaultSizes << 170 << (_ui->viewsWidget->width()-170);
     _ui->viewsSplitter->restoreState(_settings->value("Window/ViewsSplit").toByteArray());
-    //_ui->viewsSplitter->setSizes(defaultSizes);
 
     if (_settings->value("Collections/EnableCollections",true).toBool()==false) {
         _ui->collectionBrowser->hide();
@@ -619,6 +618,16 @@ void MainWindow::changeEvent(QEvent *e)
             break;
         default:
             break;
+    }
+}
+
+void MainWindow::on_collectionBrowser_doubleClicked(QModelIndex index)
+{
+    QString file;
+    file = index.sibling(index.row(),1).data().toString();
+
+    if (not file.isEmpty()) {
+        _taskManager->addFileToPlaylist(file);
     }
 }
 

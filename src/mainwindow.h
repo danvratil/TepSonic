@@ -182,6 +182,8 @@ public slots:
 
 private slots:
 
+    //! When doubleclicked item is a track, move it to the playlist
+    void on_collectionBrowser_doubleClicked(QModelIndex index);
 
     //! Workaround for QTBUG  7585
     /*!
