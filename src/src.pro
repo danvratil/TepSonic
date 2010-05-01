@@ -34,6 +34,7 @@ HEADERS += constants.h \
     preferencesdialog.h \
     preferencespages.h \
     tools.h \
+    trayicon.h \
     collections/collectionbrowser.h \
     collections/collectionmodel.h \
     collections/collectionitem.h \
@@ -62,6 +63,7 @@ SOURCES += main.cpp \
     preferencesdialog.cpp \
     preferencespages.cpp \
     tools.cpp \
+    trayicon.cpp \
     collections/collectionpopulator.cpp \
     collections/collectionbrowser.cpp \
     collections/collectionmodel.cpp \

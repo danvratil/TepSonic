@@ -77,9 +77,11 @@ MainWindow::MainWindow(Player *player)
     _repeatPlaybackGroup->addAction(_ui->actionRepeat_track);
     _ui->actionRepeat_OFF->setChecked(true);
 
-    _trayIcon = new QSystemTrayIcon(*_appIcon, this);
+    _trayIcon = new TrayIcon(*_appIcon, this);
     connect(_trayIcon, SIGNAL(activated(QSystemTrayIcon::ActivationReason)),
             this, SLOT(trayClicked(QSystemTrayIcon::ActivationReason)));
+    connect(_trayIcon, SIGNAL(mouseWheelScrolled(int)),
+            this, SLOT(trayIconMouseWheelScrolled(int)));
     _trayIcon->setVisible(true);
 
     _trayIconMenu = new QMenu(this);
@@ -628,6 +630,25 @@ void MainWindow::on_collectionBrowser_doubleClicked(QModelIndex index)
 
     if (not file.isEmpty()) {
         _taskManager->addFileToPlaylist(file);
+    }
+}
+
+void MainWindow::trayIconMouseWheelScrolled(int delta)
+{
+    if (delta>0) {
+        _player->audioOutput()->setMuted(false);
+        if (_player->audioOutput()->volume() < 1) {
+            _player->audioOutput()->setVolume(_player->audioOutput()->volume()+0.1);
+        } else {
+            _player->audioOutput()->setVolume(1);
+        }
+    } else {
+                                              // not a typo
+        if (_player->audioOutput()->volume() > 0.01) {
+            _player->audioOutput()->setVolume(_player->audioOutput()->volume()-0.1);
+        } else {
+            _player->audioOutput()->setMuted(true);
+        }
     }
 }
 

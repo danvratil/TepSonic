@@ -24,17 +24,18 @@
 #include <QMessageBox>
 #include <QtGui/QMainWindow>
 #include <QtGui/QActionGroup>
-#include <QtGui/QSystemTrayIcon>
 #include <QSettings>
 #include <QSignalMapper>
 #include <QSortFilterProxyModel>
 #include <QItemSelectionModel>
 #include <QLabel>
+#include <QSystemTrayIcon>
 
-// These two classes are used in inline methods
+
+// These classes are used in inline methods
 #include "playlist/playlistmodel.h"
 #include "player.h"
-//#include "tracksiterator.h"
+#include "trayicon.h"
 
 class PlaylistProxyModel;
 class CollectionModel;
@@ -123,7 +124,7 @@ private:
     QItemSelectionModel *_selectionModel;
 
     //! Application system tray icon
-    QSystemTrayIcon *_trayIcon;
+    TrayIcon *_trayIcon;
 
     //! Tray icon menu
     QMenu *_trayIconMenu;
@@ -317,6 +318,10 @@ private slots:
 
     //! Called when position in track is changed
     void playerPosChanged(qint64 newPos);
+
+    void trayIconMouseWheelScrolled(int delta);
+
+
 
 };
 
