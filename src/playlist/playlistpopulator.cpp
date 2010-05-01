@@ -94,12 +94,13 @@ void PlaylistPopulator::expandDir(QString dir)
     QStringList files;
 
     QDirIterator dirIterator(dirlist,QDirIterator::Subdirectories);
+    
     while (dirIterator.hasNext()) {
+        dirIterator.next();
         fileInfo = dirIterator.fileInfo();
         if (fileInfo.isFile()) {
             files << fileInfo.filePath();
         }
-        dirIterator.next();
     }
 
     files.append(_files);

@@ -101,6 +101,7 @@ void CollectionBuilder::run()
 
                     QDirIterator dirIterator(dirlist,QDirIterator::Subdirectories);
                     while (dirIterator.hasNext()) {
+                        dirIterator.next();
                         fileInfo = dirIterator.fileInfo();
                         if (fileInfo.isFile()) {
                             // If the file is not in database OR mtime are different then the file will be updated
@@ -113,7 +114,6 @@ void CollectionBuilder::run()
                             }
                             dbFiles.remove(fileInfo.filePath().toUtf8());
                         }
-                        dirIterator.next();
                         filesProcessed++;
                     }
                 } while (_folders.size()>0);
