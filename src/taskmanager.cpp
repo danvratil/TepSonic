@@ -49,7 +49,12 @@ TaskManager::TaskManager(PlaylistModel *playlistModel, CollectionModel *collecti
             this,SLOT(collectionsRebuildingStarted()));
     connect(_collectionBuilder,SIGNAL(buildingFinished()),
             this,SIGNAL(taskDone()));
-
+    connect(_playlistPopulator,SIGNAL(filesAdded()),
+            this,SIGNAL(playlistPopulated()));
+    connect(_playlistPopulator,SIGNAL(fileAdded()),
+            this,SIGNAL(playlistPopulated()));
+    connect(_playlistWriter,SIGNAL(playlistSaved()),
+            this,SIGNAL(playlistSaved()));
 }
 
 TaskManager::~TaskManager()

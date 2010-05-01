@@ -75,6 +75,14 @@ class PlaylistWriter : public QThread
         //! Can the thread be quit?
         bool _canClose;
 
+    signals:
+        //! Emitted when playlist is succesfully written to a file
+        /*!
+          The signal is emitted after each playlist in queue is saved.
+        */
+        void playlistSaved();
+
+
 };
 
 #endif // PLAYLISTWRITER_H

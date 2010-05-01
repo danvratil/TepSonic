@@ -50,6 +50,7 @@ void PlaylistWriter::run()
 {
     do {
 
+        _mutex.lock();
         if (!_outputFile.isEmpty())
         {
             QDir playlistDir(QFileInfo(_outputFile).path());
@@ -58,16 +59,15 @@ void PlaylistWriter::run()
             if (file.open(QFile::WriteOnly)) {
 
                 file.flush();
-                _mutex.lock();
                 for (int i = 0; i < _playlistModel->rowCount(QModelIndex()); i++) {
                     QString trackfname = playlistDir.relativeFilePath(_playlistModel->index(i,0,QModelIndex()).data().toString());
                     file.write(QByteArray().append(trackfname).append("\n"));
                 }
-                _mutex.unlock();
-
             }
             file.close();
         }
+        _mutex.unlock();
+        emit playlistSaved();
 
         // Wait until awaken again
         if (!_canClose)
