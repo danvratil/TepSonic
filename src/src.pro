@@ -77,12 +77,14 @@ SOURCES += main.cpp \
 RESOURCES += ../icons.qrc
 
 unix {
-    isEmpty(PREFIX):PREFIX = /usr
+    isEmpty(PREFIX): PREFIX = /usr
+    PKGDATADIR = $$PREFIX/share/tepsonic
+    DEFINES += PKGDATADIR=\\\"$$PKGDATADIR\\\"
     BINDIR = $$PREFIX/bin
     INSTALLS += target
     target.path = $$BINDIR
     INSTALLS += translations
-    translations.path = $$PREFIX/share/tepsonic/locale/
+    translations.path = $$PKGDATADIR/locale/
     translations.files += ../build/target/locale/*.qm
 }
 
