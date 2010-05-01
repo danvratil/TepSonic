@@ -85,8 +85,6 @@ void CollectionBuilder::run()
                 QStringList toBeRemoved;
                 QStringList filters;
 
-                bool anythingUpdated = false;
-
                 {   // Populeate dbFiles map by _ALL_ tracks from db
                     QSqlQuery query("SELECT filename,mtime FROM Tracks;",sqlConn);
                     while (query.next()) {
