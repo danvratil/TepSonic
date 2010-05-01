@@ -21,3 +21,10 @@ HEADERS += src/lastfmscrobbler.h \
 FORMS += ui/lastfmscrobblerconfig.ui
 DESTDIR = ../../build/target/plugins
 VERSION = 0.1.0
+
+unix {
+    isEmpty(PREFIX):PREFIX = /usr
+    LIBDIR = $$PREFIX/lib
+    INSTALLS += target
+    target.path = $$LIBDIR
+}

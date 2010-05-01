@@ -14,6 +14,12 @@ DESTDIR = ../build/target/
 OBJECTS_DIR = ../build/obj/
 MOC_DIR = ../build/moc/
 
+# Translations
+CODECFORTR = UTF-8
+CODECFORSRC = UTF-8
+include(../ts/ts.pri)
+
+
 
 # Input
 HEADERS += constants.h \
@@ -70,23 +76,15 @@ SOURCES += main.cpp \
     playlist/playlistwriter.cpp
 RESOURCES += ../icons.qrc
 
-# Translations
-CODECFORTR = UTF-8
-CODECFORSRC = UTF-8
-include(../ts/ts.pri)
-
 unix {
     isEmpty(PREFIX):PREFIX = /usr
     BINDIR = $$PREFIX/bin
     INSTALLS += target
     target.path = $$BINDIR
-    DATADIR = $$PREFIX/share
-    PKGDATADIR = $$DATADIR/tepsonic
-    DEFINES += DATADIR=\\\"$$DATADIR\\\" \
-        PKGDATADIR=\\\"$$PKGDATADIR\\\"
     INSTALLS += translations
-    translations.path = $$PKGDATADIR
-    translations.files += $$DESTDIR/ts
+    translations.path = $$PREFIX/share/tepsonic/locale/
+    translations.files += ../build/target/locale/*.qm
 }
+
 
 
