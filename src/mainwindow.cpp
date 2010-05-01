@@ -159,6 +159,10 @@ MainWindow::MainWindow(Player *player)
     _settings = new QSettings(QString(QString(_CONFIGDIR)).append("/main.conf"),QSettings::IniFormat,this);
     restoreGeometry(_settings->value("Window/Geometry", saveGeometry()).toByteArray());
     restoreState(_settings->value("Window/State", saveState()).toByteArray());
+    QList<int> defaultSizes;
+    defaultSizes << 170 << (_ui->viewsWidget->width()-170);
+    _ui->viewsSplitter->restoreState(_settings->value("Window/ViewsSplit").toByteArray());
+    //_ui->viewsSplitter->setSizes(defaultSizes);
 
     if (_settings->value("Collections/EnableCollections",true).toBool()==false) {
         _ui->collectionBrowser->hide();
@@ -249,6 +253,7 @@ MainWindow::~MainWindow()
 {
     _settings->setValue("Window/Geometry", saveGeometry());
     _settings->setValue("Window/State", saveState());
+    _settings->setValue("Window/ViewsSplit",_ui->viewsSplitter->saveState());
     QList<QVariant> playlistColumnsStates;
     QList<QVariant> playlistColumnsWidths;
     for (int i = 0; i < _ui->playlistBrowser->model()->columnCount(QModelIndex())-1; i++) {
