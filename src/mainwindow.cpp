@@ -305,7 +305,7 @@ void MainWindow::on_actionAbout_TepSonic_triggered()
 
 void MainWindow::on_actionReport_a_bug_triggered()
 {
-    QDesktopServices::openUrl(QUrl("http://bugzilla.progdan.homelinux.net/index.php?project=5&do=index&switch=1", QUrl::TolerantMode));
+    QDesktopServices::openUrl(QUrl("http://bugs.tepsonic.org", QUrl::TolerantMode));
 }
 
 
