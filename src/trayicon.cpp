@@ -21,7 +21,6 @@
 
 #include <QEvent>
 #include <QWheelEvent>
-#include <QDebug>
 
 TrayIcon::TrayIcon(QObject *parent)
 {

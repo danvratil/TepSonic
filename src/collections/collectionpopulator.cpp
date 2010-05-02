@@ -23,8 +23,10 @@
 
 #include "databasemanager.h"
 
+#include <QSqlField>
 #include <QSqlQuery>
 #include <QSqlDriver>
+#include <QVariant>
 
 CollectionPopulator::CollectionPopulator(CollectionModel *collectionModel)
 {
@@ -64,15 +66,19 @@ void CollectionPopulator::run()
         QModelIndex albumsParent;
         QModelIndex tracksParent;
         {
+            QSqlField data("album",QVariant::String);
             QSqlQuery artistsQuery("SELECT artist FROM Tracks GROUP BY artist ORDER BY artist ASC",sqlConn);
             while (artistsQuery.next()) {
                 albumsParent = _collectionModel->addChild(QModelIndex(),artistsQuery.value(0).toString(),QString());
-                QString artist = sqlConn.driver()->escapeIdentifier(artistsQuery.value(0).toString(),QSqlDriver::FieldName);
+                data.setValue(artistsQuery.value(0).toString());
+                QString artist = sqlConn.driver()->formatValue(data,false);
                 QSqlQuery albumsQuery("SELECT album FROM Tracks WHERE artist="+artist+" GROUP BY album ORDER BY album ASC;",
                                       sqlConn);
                 while (albumsQuery.next()) {
                     tracksParent = _collectionModel->addChild(albumsParent,albumsQuery.value(0).toString(),QString());
-                    QString album = sqlConn.driver()->escapeIdentifier(albumsQuery.value(0).toString(),QSqlDriver::FieldName);
+
+                    data.setValue(albumsQuery.value(0).toString());
+                    QString album = sqlConn.driver()->formatValue(data,false);
                     QSqlQuery tracksQuery("SELECT title,filename FROM Tracks WHERE album="+album+" AND artist="+artist+" ORDER BY trackNo ASC;",
                                           sqlConn);
                     while (tracksQuery.next()) {
