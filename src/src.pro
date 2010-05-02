@@ -13,6 +13,7 @@ INCLUDEPATH += . \
 DESTDIR = build/target
 OBJECTS_DIR = build/obj/
 MOC_DIR = build/moc/
+TRANSLOUT = $$TARGET
 
 include(ts/ts.pri)
 include(../dirs.pri)
@@ -79,6 +80,6 @@ unix {
     INSTALLS += target
     target.path = $$BINDIR
     INSTALLS += translations
-    translations.path = $$PKGDATADIR/locale/$$TARGET
-    translations.files += ts/*.qm
+    translations.path = $$PKGDATADIR/locale
+    translations.files += build/target/locale/$$TARGET
 }

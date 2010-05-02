@@ -1,8 +1,8 @@
 unix {
     isEmpty(PREFIX): PREFIX = /usr
-    PKGDATADIR = $$PREFIX/share/tepsonic
-    BINDIR = $$PREFIX/bin
-    LIBDIR = $$PREFIX/lib
+    isEmpty(LIBDIR): LIBDIR = $$PREFIX/lib
+    isEmpty(BINDIR): BINDIR = $$PREFIX/bin
+    isEmpty(PKGDATADIR): PKGDATADIR = $$PREFIX/share/tepsonic
     DEFINES += PKGDATADIR=\\\"$$PKGDATADIR\\\"
 }
 

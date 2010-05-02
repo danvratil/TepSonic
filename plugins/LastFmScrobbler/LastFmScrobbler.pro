@@ -5,11 +5,10 @@ QT += phonon \
     network \
     gui
 TARGET = tepsonic_lastfmscrobbler
+DEPENDS = tepsonic
 PLUGINNAME = lastfmscrobbler
 VERSION = 0.1.0
 TEMPLATE = lib
-CONFIG += plugin \
-    debug
 INCLUDEPATH += . \
     ../../src \
     ../../src/build/moc \
@@ -24,6 +23,7 @@ FORMS += ui/lastfmscrobblerconfig.ui
 DESTDIR = build/target
 MOC_DIR = build/moc
 OBJECTS_DIR = build/obj
+TRANSLOUT = $$PLUGINNAME
 
 include(ts/ts.pri)
 include(../../dirs.pri)
@@ -32,6 +32,6 @@ unix {
     INSTALLS += target
     target.path = $$LIBDIR
     INSTALLS += translations
-    translations.path = $$PKGDATADIR/locale/$$PLUGINNAME
-    translations.files += ts/*.qm
+    translations.path = $$PKGDATADIR/locale
+    translations.files += build/target/locale/$$PLUGINNAME
 }
