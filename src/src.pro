@@ -10,15 +10,12 @@ INCLUDEPATH += . \
     playlist \
     /usr/include/KDE \
     /usr/include/Phonon
-DESTDIR = ../build/target/
-OBJECTS_DIR = ../build/obj/
-MOC_DIR = ../build/moc/
+DESTDIR = build/target
+OBJECTS_DIR = build/obj/
+MOC_DIR = build/moc/
 
-# Translations
-CODECFORTR = UTF-8
-CODECFORSRC = UTF-8
-include(../ts/ts.pri)
-
+include(ts/ts.pri)
+include(../dirs.pri)
 
 
 # Input
@@ -79,16 +76,9 @@ SOURCES += main.cpp \
 RESOURCES += ../icons.qrc
 
 unix {
-    isEmpty(PREFIX): PREFIX = /usr
-    PKGDATADIR = $$PREFIX/share/tepsonic
-    DEFINES += PKGDATADIR=\\\"$$PKGDATADIR\\\"
-    BINDIR = $$PREFIX/bin
     INSTALLS += target
     target.path = $$BINDIR
     INSTALLS += translations
-    translations.path = $$PKGDATADIR/locale/
-    translations.files += ../build/target/locale/*.qm
+    translations.path = $$PKGDATADIR/locale/$$TARGET
+    translations.files += ts/*.qm
 }
-
-
-

@@ -5,12 +5,14 @@ QT += phonon \
     network \
     gui
 TARGET = tepsonic_lastfmscrobbler
+PLUGINNAME = lastfmscrobbler
+VERSION = 0.1.0
 TEMPLATE = lib
 CONFIG += plugin \
     debug
 INCLUDEPATH += . \
     ../../src \
-    ../../build/moc \
+    ../../src/build/moc \
     /usr/include/Phonon \
     /usr/include/KDE
 DEFINES += LASTFMSCROBBLER_LIBRARY
@@ -19,12 +21,17 @@ SOURCES += src/lastfmscrobbler.cpp \
 HEADERS += src/lastfmscrobbler.h \
            ../../src/constants.h
 FORMS += ui/lastfmscrobblerconfig.ui
-DESTDIR = ../../build/target/plugins
-VERSION = 0.1.0
+DESTDIR = build/target
+MOC_DIR = build/moc
+OBJECTS_DIR = build/obj
+
+include(ts/ts.pri)
+include(../../dirs.pri)
 
 unix {
-    isEmpty(PREFIX):PREFIX = /usr
-    LIBDIR = $$PREFIX/lib
     INSTALLS += target
     target.path = $$LIBDIR
+    INSTALLS += translations
+    translations.path = $$PKGDATADIR/locale/$$PLUGINNAME
+    translations.files += ts/*.qm
 }

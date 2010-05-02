@@ -6,3 +6,4 @@ SUBDIRS = src \
   plugins
 
 DISTFILES += LICENSE
+

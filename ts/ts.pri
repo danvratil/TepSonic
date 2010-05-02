@@ -1,2 +1,0 @@
-TRANSLATIONS += cs_CZ.ts
-

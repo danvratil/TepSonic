@@ -208,7 +208,7 @@ void LastFmScrobbler::loginFinished(QNetworkReply *reply)
             // Try to submit all tracks in cache
             submitTrack();
         } else if (status.startsWith("BADAUTH")) {
-            emit error("Last.fm plugin: "+tr("Bad username or login"));
+            emit error("Last.fm plugin: "+tr("Bad username or password"));
         } else  if (status.startsWith("BANNED")) {
             emit error("Last.fm plugin: "+tr("Account is banned"));
         } else if (status.startsWith("BADTIME")) {
