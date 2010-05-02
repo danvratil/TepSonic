@@ -393,6 +393,8 @@ void MainWindow::playerStatusChanged(Phonon::State newState, Phonon::State oldSt
     QString playing;
     if (metadata.title.isEmpty()) {
         playing = QFileInfo(metadata.filename).fileName();
+    } else {
+        playing = metadata.title;
     }
     if (!metadata.artist.isEmpty()) {
         playing = metadata.artist+" - "+playing;
