@@ -30,7 +30,9 @@
 #include <QString>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
+#include <QTranslator>
 #include <QUrl>
+
 
 
 //! LastFmScrobbler is a plugin for scrobbling recently played tracks to Last.fm
@@ -149,6 +151,8 @@ class LastFmScrobbler : public AbstractPlugin
         int _failedAttempts;
 
         QList<LastFmScrobbler::MetaData> _cache;
+
+        QTranslator *_translator;
 
     private slots:
         //! Called when testLoginButton is clicked

@@ -72,9 +72,9 @@ void PluginsManager::loadPlugins()
     // Default extension on windows
     QString ext = "dll";
 #ifndef Q_OS_WIN32
-    // On Linux we want to search in default library paths
-    pluginsDirs << "/usr/lib/tepsonic/plugins/";
-    pluginsDirs << "/usr/local/lib/tepsonic/plugins/";
+    // LIBDIR is defined in dirs.pri and it is a location where all project's libs are installed
+    pluginsDirs << LIBDIR;
+    qDebug() << "Searching in " << pluginsDirs;
     // If we are on Linux, override the extension
     ext = "so";
 #endif

@@ -25,6 +25,7 @@
 #include <QDateTime>
 #include <QDebug>
 #include <QDir>
+#include <QLocale>
 #include <QSettings>
 #include <QString>
 #include <QWidget>
@@ -32,11 +33,19 @@
 #include <QFormLayout>
 #include <QHttpRequestHeader>
 #include <QTimer>
+#include <QTranslator>
 
 LastFmScrobbler::LastFmScrobbler()
 {
     setPluginName("Last.fm plugin");
     setHasConfigUI(true);
+
+    QString locale = QLocale::system().name();
+    _translator = new QTranslator(this);
+    QString dataDir = QLatin1String(PKGDATADIR);
+    QString localeDir = dataDir + QDir::separator() + "locale"+QDir::separator()+"lastfmscrobbler";
+    _translator->load(locale,localeDir);
+    qApp->installTranslator(_translator);
 }
 
 void LastFmScrobbler::init()
