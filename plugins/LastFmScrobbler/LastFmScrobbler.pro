@@ -5,7 +5,6 @@ QT += phonon \
     network \
     gui
 TARGET = tepsonic_lastfmscrobbler
-DEPENDS = tepsonic
 PLUGINNAME = lastfmscrobbler
 VERSION = 0.1.0
 TEMPLATE = lib
