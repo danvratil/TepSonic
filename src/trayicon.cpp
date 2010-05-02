@@ -21,6 +21,7 @@
 
 #include <QEvent>
 #include <QWheelEvent>
+#include <QDebug>
 
 TrayIcon::TrayIcon(QObject *parent)
 {
@@ -39,7 +40,11 @@ bool TrayIcon::event(QEvent *event)
         QWheelEvent* wheelEvent = static_cast<QWheelEvent*>(event);
         emit mouseWheelScrolled(wheelEvent->delta());
         return true;
-    } else {
-        return false;
     }
+    if (event->type() == QEvent::ToolTip) {
+        event->accept();
+        return true;
+    }
+
+    return false;
 }

@@ -233,10 +233,14 @@ bool PlaylistModel::addItem(QString file)
         trackLengthString=trackLength.toString("mm:ss");
     }
 
+    QString sTitle = title.toCString(true);
+    if (sTitle.isEmpty())
+        sTitle = finfo.fileName();
+
     rootItem->child(rootItem->childCount()-1)->setData(0,QVariant(file));
     rootItem->child(rootItem->childCount()-1)->setData(1,QVariant(trackNumber));
     rootItem->child(rootItem->childCount()-1)->setData(2,QVariant(artist.toCString(true)));
-    rootItem->child(rootItem->childCount()-1)->setData(3,QVariant(title.toCString(true)));
+    rootItem->child(rootItem->childCount()-1)->setData(3,QVariant(sTitle));
     rootItem->child(rootItem->childCount()-1)->setData(4,QVariant(album.toCString(true)));
     rootItem->child(rootItem->childCount()-1)->setData(5,QVariant(genre.toCString(true)));
     rootItem->child(rootItem->childCount()-1)->setData(6,QVariant(year));

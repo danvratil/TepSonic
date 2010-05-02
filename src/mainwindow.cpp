@@ -390,15 +390,23 @@ void MainWindow::playerStatusChanged(Phonon::State newState, Phonon::State oldSt
 
     Player::MetaData metadata = _player->currentMetaData();
 
+    QString playing;
+    if (metadata.title.isEmpty()) {
+        playing = QFileInfo(metadata.filename).fileName();
+    }
+    if (!metadata.artist.isEmpty()) {
+        playing = metadata.artist+" - "+playing;
+    }
+
     switch (newState) {
         case Phonon::PlayingState:
             _ui->playPauseButton->setIcon(QIcon(":/icons/pause"));
             _ui->actionPlay_pause->setIcon(QIcon(":/icons/pause"));
             _ui->stopButton->setEnabled(true);
             _ui->actionStop->setEnabled(true);
-            _ui->trackTitleLabel->setText(metadata.artist+" - "+metadata.title);
+            _ui->trackTitleLabel->setText(playing);
             _ui->playbackTimeLabel->setText("00:00:00");
-            _trayIcon->setToolTip(tr("Playing: %1 - %2").arg(metadata.artist,metadata.title));
+            _trayIcon->setToolTip(tr("Playing: ")+playing);
             break;
         case Phonon::PausedState:
             _ui->playPauseButton->setIcon(QIcon(":/icons/start"));
