@@ -61,7 +61,7 @@ void CollectionPopulator::run()
         QSqlDatabase sqlConn = QSqlDatabase::database("populateCollectionBrowserConnection");
 
         _mutex.lock();
-        _collectionModel->removeRows(0,_collectionModel->rowCount(QModelIndex()),QModelIndex());
+        _collectionModel->clear();
 
         QModelIndex albumsParent;
         QModelIndex tracksParent;

@@ -319,7 +319,11 @@ private slots:
     //! Called when position in track is changed
     void playerPosChanged(qint64 newPos);
 
+    //! Event that updates volume when scrolling on trayicon
     void trayIconMouseWheelScrolled(int delta);
+
+    //! Called when preferences dialog is accepted, applies possible changes
+    void preferencesAccepted();
 
 
 

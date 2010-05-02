@@ -172,6 +172,12 @@
      */
      QModelIndex addChild(const QModelIndex &index, QString title, QString filename = "");
 
+     //! Remove all items and their children from model
+     /*!
+       This is the best method how to remove all items from collections
+     */
+     void clear();
+
  protected:
      //! Returns list of accepted drop acctions.
      /*!

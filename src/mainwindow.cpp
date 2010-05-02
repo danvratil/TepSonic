@@ -166,7 +166,7 @@ MainWindow::MainWindow(Player *player)
     _ui->viewsSplitter->restoreState(_settings->value("Window/ViewsSplit").toByteArray());
 
     if (_settings->value("Collections/EnableCollections",true).toBool()==false) {
-        _ui->collectionBrowser->hide();
+        _ui->collectionWidget->hide();
     } else {
         _taskManager->populateCollections();
         if (_settings->value("Collections/AutoRebuildAfterStart",false).toBool()==true) {
@@ -354,6 +354,7 @@ void MainWindow::on_actionPreferences_triggered()
     PreferencesDialog *prefDlg = new PreferencesDialog(this);
     connect(prefDlg,SIGNAL(rebuildCollections()),_taskManager,SLOT(rebuildCollections()));
     connect(prefDlg,SIGNAL(accepted()),_pluginsManager,SLOT(initPlugins()));
+    connect(prefDlg,SIGNAL(accepted()),this,SLOT(preferencesAccepted()));
     prefDlg->exec();
 
 }
@@ -659,6 +660,18 @@ void MainWindow::trayIconMouseWheelScrolled(int delta)
         } else {
             _player->audioOutput()->setMuted(true);
         }
+    }
+}
+
+void MainWindow::preferencesAccepted()
+{
+    if (_settings->value("Collections/EnableCollections").toBool()) {
+        _ui->collectionWidget->setVisible(true);
+        _taskManager->populateCollections();
+    } else {
+        _ui->collectionWidget->setHidden(true);
+        // Clear the collections to save memory
+        _collectionModel->clear();
     }
 }
 

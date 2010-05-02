@@ -185,3 +185,8 @@ Qt::DropActions CollectionModel::supportedDropActions() const
  {
      return Qt::CopyAction | Qt::MoveAction;
  }
+
+void CollectionModel::clear()
+{
+    removeRows(0,rowCount(QModelIndex()),QModelIndex());
+}
