@@ -19,6 +19,7 @@
 
 #include <QtGui/QApplication>
 #include <QDir>
+#include <QFileInfo>
 #include <QObject>
 #include <QLocale>
 #include <QLibraryInfo>
@@ -69,5 +70,15 @@ int main(int argc, char *argv[])
     mainWindow.setPluginsManager(pluginsManager);
 
     mainWindow.show();
+
+    for (int i=1; i<tepsonic.arguments().count(); i++) {
+        qDebug() << tepsonic.arguments().at(i);
+        QFileInfo param(tepsonic.arguments().at(i));
+        if ((param.isFile()) && (param.exists())) {
+            mainWindow.addPlaylistItem(param.absoluteFilePath());
+        }
+    }
+
+
     return tepsonic.exec();
 }
