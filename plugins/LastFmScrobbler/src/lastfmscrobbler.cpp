@@ -337,8 +337,6 @@ void LastFmScrobbler::saveCache()
     settings.endArray();
 }
 
-#include "moc_lastfmscrobbler.cpp"
-
 Q_EXPORT_PLUGIN2(tepsonic_lastfmscrobbler, LastFmScrobbler)
 
 
