@@ -34,13 +34,12 @@
 
 #include <QDebug>
 
-
 int main(int argc, char *argv[])
 {
     QApplication tepsonic(argc, argv);
     tepsonic.setApplicationName("TepSonic");
     tepsonic.setOrganizationName("Dan Vrátil");
-    tepsonic.setApplicationVersion("0.95-alpha");
+    tepsonic.setApplicationVersion(TEPSONIC_VERSION);
 
     QString locale = QLocale::system().name();
 

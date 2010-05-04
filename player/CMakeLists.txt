@@ -1,9 +1,22 @@
+project(tepsonic)
+
+cmake_minimum_required(VERSION 2.6)
+
+set(TEPSONIC_VERSION_MAJOR 0)
+set(TEPSONIC_VERSION_MINOR 95)
+set(TEPSONIC_VERSION_PATCH 0)
+set(TEPSONIC_VERSION ${TEPSONIC_VERSION_MAJOR}.${TEPSONIC_VERSION_MINOR}.${TEPSONIC_VERSION_PATCH})
+
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}
 		    ${CMAKE_CURRENT_BINARY_DIR}
 		    "collections"
 		    "playlist"
 )
+
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/constants.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/constants.h)
+
+set(CMAKE_BUILD_TYPE "Release")
 
 set(player_HDRS
     mainwindow.h
@@ -90,9 +103,11 @@ target_link_libraries(tepsonic
 		      ${Taglib_LIBRARIES}
 )
 
-install(FILES ${EXECUTABLE_OUTPUT_PATH}/tepsonic
-	DESTINATION ${INSTALL_BINARY_DIR}
+install(TARGETS tepsonic
+	RUNTIME DESTINATION ${INSTALL_BINARY_DIR}
+	PERMISSIONS OWNER_READ OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
 )
+
 install(FILES ${player_TRANS_QM}
 	DESTINATION ${INSTALL_DATA_DIR}/locale/tepsonic
 )

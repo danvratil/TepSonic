@@ -216,4 +216,6 @@ class LastFmScrobbler : public AbstractPlugin
 
 };
 
+#include "moc_abstractplugin.cpp"
+
 #endif // LASTFMSCROBBLER_H

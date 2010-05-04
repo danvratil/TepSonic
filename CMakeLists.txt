@@ -1,5 +1,3 @@
-project(tepsonic)
-
 cmake_minimum_required(VERSION 2.6)
 
 # Add custom cmake modules
@@ -19,6 +17,7 @@ set(QT_USE_PHONON 1)
 include(${QT_USE_FILE})
 
 include_directories(
+	${CMAKE_CURRENT_BINARY_DIR}
 	${QT_INCLUDE_DIR}
 	${QT_PHONON_INCLUDE_DIR}
         ${TAGLIB_INCLUDES}
@@ -49,7 +48,8 @@ endif (NOT DEFINED CMAKE_INSTALL_DATA_DIR)
 add_definitions(${QT_DEFINITIONS}
 		-DQT_NO_DEBUG
 		-DPKGDATADIR="${INSTALL_DATA_DIR}" 
-		-DLIBDIR="${INSTALL_LIBRARY_DIR}")
+		-DLIBDIR="${INSTALL_LIBRARY_DIR}"
+		-Wall)
 
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)
 set(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/lib)
@@ -57,3 +57,4 @@ set(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/lib)
 # First player, then plugins, this is strict order!
 add_subdirectory(player)
 add_subdirectory(plugins)
+

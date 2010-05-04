@@ -5,6 +5,8 @@ cmake_minimum_required(VERSION 2.6)
 # Add custom cmake modules
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/../../cmake/modules ${CMAKE_MODULE_PATH})
 
+set(CMAKE_BUILD_TYPE "Release")
+
 find_package(PkgConfig REQUIRED)
 find_package(Qt4 4.6 REQUIRED)
 
@@ -53,12 +55,18 @@ add_library(tepsonic_lastfmscrobbler SHARED
 	       ${lastfmsrobbler_SRCS}
 )
 
+set_target_properties(tepsonic_lastfmscrobbler
+                      PROPERTIES
+                      VERSION 0.1.0
+                      SOVERSION 1
+)
+
 target_link_libraries(tepsonic_lastfmscrobbler
 	       ${QT_LIBRARIES}
 	       ${QT_NETWORK_LIBRARIES}
 )
 
-install(FILES ${LIBRARY_OUTPUT_PATH}/libtepsonic_lastfmscrobbler.so
+install(TARGETS tepsonic_lastfmscrobbler
 	DESTINATION ${INSTALL_LIBRARY_DIR}/
 )
 install(FILES ${lastfmscrobbler_TRNS_QM}
