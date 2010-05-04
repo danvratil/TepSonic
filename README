@@ -1,5 +1,6 @@
  TEPSONIC
 ==========
+ Homepage: www.tepsonic.org
  Author: Dan Vratil <vratil@progdansoft.com>
  Contributors: Petr Los
 
@@ -10,9 +11,6 @@
 
  This is just a development release - not everything is implementend and what is
  implemented should be consider as unstable.
- On http://git.progdan.homelinux.net/cgi-bin/cgit/cgit.cgi/tepsonic.git/about/ you can 
- find a short list of intended features for first stable release and for following
- releases.
 
  Have fun with TepSonic!
 
@@ -47,11 +45,11 @@ CONTENT
 
  Currently, TepSonic is under heavy development and many things were not yet even implemented and most of the implemented stuff is still
  considered unstable. 
- Altough, if you find something you think that is a bug, please use bugizlla on http://bugzilla.progdan.homelinux.net
+ Altough, if you find something you think that is a bug, please use bugizlla on http://bugs.tepsonic.org
 
 
 4) CONTRIBUTING
 ----------------
- Please, feel free to contribute to TepSonic in any way. You can checkout current sources from git://progdan.homelinux.net/tepsonic.git and
+ Please, feel free to contribute to TepSonic in any way. You can get latest sources from git://git.gitorious.org/tepsonic/tepsonic.git and
  start working on it. If you have any question, I'll be happy to answer it :-)
 
