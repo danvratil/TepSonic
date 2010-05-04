@@ -17,6 +17,11 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Cambridge, MA 02110-1301, USA.
  */
 
+
+# Workaround for CMake not passing QT_NO_DEBUG correctly
+#define QT_NO_DEBUG
+
+
 #include "lastfmscrobbler.h"
 #include "constants.h"
 
@@ -336,8 +341,6 @@ void LastFmScrobbler::saveCache()
     }
     settings.endArray();
 }
-
-#include "moc_lastfmscrobbler.cpp"
 
 Q_EXPORT_PLUGIN2(tepsonic_lastfmscrobbler, LastFmScrobbler)
 
