@@ -22,7 +22,6 @@
 #include "collectionmodel.h"
 #include "databasemanager.h"
 
-#include <taglib/taglib.h>
 #include <taglib/fileref.h>
 #include <taglib/tag.h>
 #include <taglib/tstring.h>

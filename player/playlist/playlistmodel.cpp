@@ -21,7 +21,6 @@
 #include <QtGui>
 #include <QTime>
 
-#include <taglib/taglib.h>
 #include <taglib/fileref.h>
 #include <taglib/tag.h>
 #include <taglib/tstring.h>

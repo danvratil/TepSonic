@@ -1,12 +1,33 @@
 project(tepsonic)
 
+set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/../cmake/modules ${CMAKE_MODULE_PATH})
+
 cmake_minimum_required(VERSION 2.6)
 
+set(CMAKE_BUILD_TYPE "Release")
 set(TEPSONIC_VERSION_MAJOR 0)
 set(TEPSONIC_VERSION_MINOR 95)
 set(TEPSONIC_VERSION_PATCH 0)
 set(TEPSONIC_VERSION ${TEPSONIC_VERSION_MAJOR}.${TEPSONIC_VERSION_MINOR}.${TEPSONIC_VERSION_PATCH})
 
+find_package(PkgConfig REQUIRED)
+find_package(Qt4 REQUIRED)
+find_package(Taglib REQUIRED)
+
+add_definitions(${TAGLIB_CFLAGS})
+
+# Make sure all Qt parts will be available
+set(QT_USE_QTMAIN 1)
+set(QT_USE_QTSQL 1)
+set(QT_USE_PHONON 1)
+
+include(${QT_USE_FILE})
+
+include_directories(
+        ${CMAKE_CURRENT_BINARY_DIR}
+        ${QT_INCLUDE_DIR}
+        ${QT_PHONON_INCLUDE_DIR}
+)
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}
 		    ${CMAKE_CURRENT_BINARY_DIR}
@@ -15,8 +36,6 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}
 )
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/constants.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/constants.h)
-
-set(CMAKE_BUILD_TYPE "Release")
 
 set(player_HDRS
     mainwindow.h
@@ -99,8 +118,8 @@ add_executable(tepsonic
 target_link_libraries(tepsonic
 		      ${QT_LIBRARIES}
 		      ${QT_PHONON_LIBRARIES}
-		      ${QT_SQL_LIBRARIES}
-		      ${Taglib_LIBRARIES}
+		      ${QT_QTSQL_LIBRARIES}
+                      ${TAGLIB_LIBRARIES}
 )
 
 install(TARGETS tepsonic

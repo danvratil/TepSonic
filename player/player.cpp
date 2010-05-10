@@ -27,7 +27,6 @@
 #include <phonon/AudioOutput>
 #include <phonon/MediaSource>
 
-#include <taglib/taglib.h>
 #include <taglib/fileref.h>
 #include <taglib/tag.h>
 #include <taglib/tstring.h>

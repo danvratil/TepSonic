@@ -5,24 +5,6 @@ set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules ${CMAKE_MODULE_P
 
 set(CMAKE_BUILD_TYPE "Release")
 
-find_package(PkgConfig REQUIRED)
-find_package(Qt4 REQUIRED)
-find_package(Taglib REQUIRED)
-
-# Make sure all Qt parts will be available
-set(QT_USE_QTMAIN 1)
-set(QT_USE_QTSQL 1)
-set(QT_USE_PHONON 1)
-
-include(${QT_USE_FILE})
-
-include_directories(
-	${CMAKE_CURRENT_BINARY_DIR}
-	${QT_INCLUDE_DIR}
-	${QT_PHONON_INCLUDE_DIR}
-        ${TAGLIB_INCLUDES}
-)
-
 if (NOT DEFINED CMAKE_INSTALL_PREFIX) 
    set(CMAKE_INSTALL_PREFIX /usr/local)
 endif (NOT DEFINED CMAKE_INSTALL_PREFIX)
