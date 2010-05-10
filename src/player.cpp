@@ -94,9 +94,9 @@ Player::MetaData Player::currentMetaData()
     }
 
     TagLib::FileRef f(filename.toUtf8().constData());
-    data.artist = f.tag()->artist().toCString();
-    data.title = f.tag()->title().toCString();
-    data.album = f.tag()->album().toCString();
+    data.artist = f.tag()->artist().toCString(true);
+    data.title = f.tag()->title().toCString(true);
+    data.album = f.tag()->album().toCString(true);
     data.trackNumber = f.tag()->track();
     // Length in msecs
     data.length = f.audioProperties()->length()*1000;
