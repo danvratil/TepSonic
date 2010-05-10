@@ -110,9 +110,13 @@ bool PlaylistModel::insertRows(int position, int rows, const QModelIndex &parent
      PlaylistItem *parentItem = getItem(parent);
      bool success;
 
+     _mutex.lock();
+
      beginInsertRows(parent, position, position + rows - 1);
      success = parentItem->insertChildren(position, rows, rootItem->columnCount());
      endInsertRows();
+
+     _mutex.unlock();
 
      return success;
 }
@@ -146,9 +150,13 @@ bool PlaylistModel::removeRows(int position, int rows, const QModelIndex &parent
          totalRemoveTime += tl.secsTo(QTime::fromString(trackLength,"hh:mm:ss"));
      }
 
+     _mutex.lock();
+
      beginRemoveRows(parent, position, position + rows - 1);
      success = parentItem->removeChildren(position, rows);
      endRemoveRows();
+
+     _mutex.unlock();
 
      if (success) {
          // Decrease total length of the playlist by total length of removed tracks
@@ -173,7 +181,12 @@ bool PlaylistModel::setData(const QModelIndex &index, const QVariant &value,
          return false;
 
      PlaylistItem *item = getItem(index);
+
+     _mutex.lock();
+
      bool result = item->setData(index.column(), value);
+
+     _mutex.unlock();
 
      if (result)
          emit dataChanged(index, index);
@@ -187,7 +200,11 @@ bool PlaylistModel::setHeaderData(int section, Qt::Orientation orientation,
      if (role != Qt::EditRole || orientation != Qt::Horizontal)
          return false;
 
+     _mutex.lock();
+
      bool result = rootItem->setData(section, value);
+
+     _mutex.unlock();
 
      if (result)
          emit headerDataChanged(orientation, section, section);
@@ -206,10 +223,6 @@ bool PlaylistModel::addItem(QString file)
 
     // Select the root item
     QModelIndex root;
-
-    // Insert new row
-    if (!insertRow(rowCount(root), root))
-        return false;
 
     /**
      * TAGLIB comes here
@@ -236,6 +249,11 @@ bool PlaylistModel::addItem(QString file)
     QString sTitle = title.toCString(true);
     if (sTitle.isEmpty())
         sTitle = finfo.fileName();
+
+
+    // Insert new row
+    if (!insertRow(rowCount(root), root))
+        return false;
 
     rootItem->child(rootItem->childCount()-1)->setData(0,QVariant(file));
     rootItem->child(rootItem->childCount()-1)->setData(1,QVariant(trackNumber));

@@ -24,6 +24,7 @@
 #include <QAbstractItemModel>
 #include <QModelIndex>
 #include <QVariant>
+#include <QMutex>
 
 class PlaylistItem;
 
@@ -191,6 +192,8 @@ class PlaylistModel : public QAbstractItemModel
 
      //! Total length of playlist in seconds
      int _totalLength;
+
+     QMutex _mutex;
 
  signals:
      //! This signal is emmited when length of playlist is changed
