@@ -27,12 +27,9 @@ include_directories(
         ${CMAKE_CURRENT_BINARY_DIR}
         ${QT_INCLUDE_DIR}
         ${QT_PHONON_INCLUDE_DIR}
-)
-
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}
-		    ${CMAKE_CURRENT_BINARY_DIR}
-		    "collections"
-		    "playlist"
+	${CMAKE_CURRENT_SOURCE_DIR}
+	"collections"
+	"playlist"
 )
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/constants.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/constants.h)

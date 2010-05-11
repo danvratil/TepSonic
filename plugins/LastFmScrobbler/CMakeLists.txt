@@ -8,7 +8,7 @@ set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/../../cmake/modules ${CMAKE_MO
 set(CMAKE_BUILD_TYPE "Release")
 
 find_package(PkgConfig REQUIRED)
-find_package(Qt4 4.6 REQUIRED)
+find_package(Qt4 REQUIRED)
 
 # Make sure all Qt parts will be available
 set(QT_USE_QTMAIN 1)
@@ -16,17 +16,19 @@ set(QT_USE_QTNETWORK 1)
 
 include(${QT_USE_FILE})
 
-#add_definitions(${QT_DEFINITIONS}
-#		-DQT_PLUGIN
-#		-DQT_NO_DEBUG
-#		-DQT_SHARED
-#)
-
-include_directories(${QT_INCLUDE_DIR}
-		    ${QT_QTNETWORK_INCLUDE_DIR}
-		    ${CMAKE_CURRENT_SOURCE_DIR}
-		    ${CMAKE_CURRENT_BINARY_DIR}
+add_definitions(${QT_DEFINITIONS}
+		-DQT_PLUGIN
+		-DQT_SHARED
 )
+
+include_directories(
+	${QT_INCLUDE_DIR}
+	${QT_QTNETWORK_INCLUDE_DIR}
+	${CMAKE_CURRENT_SOURCE_DIR}
+	${CMAKE_CURRENT_BINARY_DIR}
+)
+
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/../../player/constants.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/constants.h)
 
 set(lastfmscrobbler_HDRS
     src/lastfmscrobbler.h
@@ -35,6 +37,7 @@ set(lastfmscrobbler_HDRS
 
 set(lastfmscrobbler_SRCS
     src/lastfmscrobbler.cpp
+    ../../player/constants.cpp
 )
 
 set(lastfmscrobbler_QUIS
@@ -50,10 +53,10 @@ qt4_wrap_cpp(lastfmscrobbler_QMOC_SRCS ${lastfmscrobbler_HDRS})
 qt4_add_translation(lastfmscrobbler_TRNS_QM ${lastfmscrobbler_TRNS})
 
 add_library(tepsonic_lastfmscrobbler SHARED
+	       ${lastfmscrobbler_SRCS}
 	       ${lastfmscrobbler_QUIS_HDRS}
 	       ${lastfmscrobbler_QMOC_SRCS}
 	       ${lastfmscrobbler_TRNS_QM}
-	       ${lastfmsrobbler_SRCS}
 )
 
 set_target_properties(tepsonic_lastfmscrobbler
@@ -62,7 +65,7 @@ set_target_properties(tepsonic_lastfmscrobbler
                       SOVERSION 1
 )
 
-target_link_libraries(tepsonic_lastfmscrobbler LINK_INTERFACE_LIBRARIES
+target_link_libraries(tepsonic_lastfmscrobbler
 	       ${QT_LIBRARIES}
 	       ${QT_QTNETWORK_LIBRARIES}
 )
