@@ -127,6 +127,30 @@ install(TARGETS tepsonic
 	PERMISSIONS OWNER_READ OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
 )
 
-install(FILES ${player_TRANS_QM}
-	DESTINATION ${INSTALL_DATA_DIR}/locale/tepsonic
-)
+if (UNIX)
+	install(FILES ${player_TRANS_QM}
+		DESTINATION ${INSTALL_DATA_DIR}/tepsonic/locale/tepsonic
+	)
+
+	install(FILES ../tepsonic.desktop
+		DESTINATION ${INSTALL_DATA_DIR}/applications
+	)
+	install(FILES ../icons/app_icons/16x16/tepsonic.png
+		DESTINATION ${INSTALL_DATA_DIR}/icons/hicolor/16x16/apps
+	)
+	install(FILES ../icons/app_icons/32x32/tepsonic.png
+        	DESTINATION ${INSTALL_DATA_DIR}/icons/hicolor/32x32/apps
+	)
+	install(FILES ../icons/app_icons/48x48/tepsonic.png
+        	DESTINATION ${INSTALL_DATA_DIR}/icons/hicolor/48x48/apps
+	)
+	install(FILES ../icons/app_icons/64x64/tepsonic.png
+        	DESTINATION ${INSTALL_DATA_DIR}/icons/hicolor/64x64/apps
+	)
+	install(FILES ../icons/app_icons/128x128/tepsonic.png
+        	DESTINATION ${INSTALL_DATA_DIR}/icons/hicolor/128x128/apps
+	)
+	install(FILES ../icons/app_icons/256x256/tepsonic.png
+        	DESTINATION ${INSTALL_DATA_DIR}/icons/hicolor/256x256/apps
+	)
+endif(UNIX)

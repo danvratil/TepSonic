@@ -71,5 +71,5 @@ install(TARGETS tepsonic_lastfmscrobbler
 	DESTINATION ${INSTALL_LIBRARY_DIR}/
 )
 install(FILES ${lastfmscrobbler_TRNS_QM}
-	DESTINATION ${INSTALL_DATA_DIR}/locale/lastfmscrobbler
+	DESTINATION ${INSTALL_DATA_DIR}/tepsonic/locale/lastfmscrobbler
 )
