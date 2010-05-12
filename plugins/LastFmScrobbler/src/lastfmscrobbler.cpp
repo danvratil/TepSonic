@@ -175,7 +175,7 @@ QUrl LastFmScrobbler::prepareHandshakeURL(QString username, QString password)
     uri.append("&p=1.2.1");
     //uri.append("&c="+QCoreApplication::applicationName());
     //uri.append("&v="+QCoreApplication::applicationVersion());
-    uri.append("&c=tst");
+    uri.append("&c=tps");
     uri.append("&v=1.0");
     uri.append("&u=" + username);
     uri.append("&t=" + timestamp);
