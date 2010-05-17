@@ -105,7 +105,12 @@ qt4_wrap_cpp(player_QMOC_SRCS ${player_HDRS})
 qt4_add_resources(player_RCCS_SRCS ${player_RCCS})
 qt4_add_translation(player_TRANS_QM ${player_TRANS})
 
+if (WIN32)
+  set(GUI_TYPE WIN32)
+endif (WIN32)
+
 add_executable(tepsonic
+  	       ${GUI_TYPE}
 	       ${player_RCCS_SRCS}
 	       ${player_QUIS_HDRS}
 	       ${player_QMOC_SRCS}
