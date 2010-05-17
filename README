@@ -34,11 +34,13 @@ CONTENT
 
 2) COMPILING
 -------------
-
- qmake
+ 
+ mkdir build && cd build
+ cmake ../
  make
  make install
 
+ You may want to append -DCMAKE_INSTALL_PREFIX=/usr to the cmake command
 
 3) BUGS
 --------
