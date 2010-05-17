@@ -124,7 +124,7 @@ class TaskManager : public QObject
           are rebuild
         */
         void rebuildCollections(const QString &folder = QString());
-
+        
     private slots:
 
         //! Emits signals with information about collections rebuilding has started

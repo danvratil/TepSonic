@@ -91,6 +91,8 @@ void TaskManager::rebuildCollections(const QString &folder)
     if (folder.isEmpty()) {
         QSettings settings(QString(_CONFIGDIR).append("/main.conf"),QSettings::IniFormat,this);
         dirs << settings.value("Collections/SourcePaths",QStringList()).toStringList();
+    } else {
+        dirs << folder;
     }
 
     if (!dirs.isEmpty()) {
