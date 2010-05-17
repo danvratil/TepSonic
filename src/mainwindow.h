@@ -129,6 +129,9 @@ private:
     //! Tray icon menu
     QMenu *_trayIconMenu;
 
+    //! Collections popup menu
+    QMenu *_collectionsPopupMenu;
+
     //! Signal mapper that maps items in _ui->playlistVisibleColumn menu to togglePlaylistColumnVisible()
     /*!
       \sa togglePlaylistColumnVisible()
@@ -152,6 +155,12 @@ private:
       \sa closeEvent()
     */
     bool _canClose;
+
+    //! Creates additional popupmenus
+    /*!
+      This method is called from constructor just after _ui->setupUi() is called.
+    */
+    void createMenus();
 
 
 protected:
@@ -324,6 +333,12 @@ private slots:
 
     //! Called when preferences dialog is accepted, applies possible changes
     void preferencesAccepted();
+
+    //! Open the popup
+    void showCollectionsContextMenu(QPoint pos);
+
+    //! Deletes file locally on hardisk and calls for collections rebuild
+    void removeFileFromDisk();
 
 
 

@@ -178,6 +178,15 @@
      */
      void clear();
 
+     //! Returns list of filenames of all tracks that are children of given item
+     /*!
+       Goes recursively through all parent's children and all tracks (eg. items that
+       contain filename ins second column) adds tu returned list
+       \param parent parent item
+       \return Returns list of filenames of found tracks
+     */
+     QStringList getItemChildrenTracks(const QModelIndex &parent);
+
  protected:
      //! Returns list of accepted drop acctions.
      /*!

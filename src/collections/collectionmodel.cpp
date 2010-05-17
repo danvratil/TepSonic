@@ -172,6 +172,8 @@ bool CollectionModel::setHeaderData(int section, Qt::Orientation orientation, co
 
 QModelIndex CollectionModel::addChild(const QModelIndex &parent, QString title, QString filename)
 {
+    moveToThread(QThread::currentThread());
+
     if (!insertRow(rowCount(parent), parent))
         return QModelIndex();
 
@@ -189,4 +191,23 @@ Qt::DropActions CollectionModel::supportedDropActions() const
 void CollectionModel::clear()
 {
     removeRows(0,rowCount(QModelIndex()),QModelIndex());
+}
+
+QStringList CollectionModel::getItemChildrenTracks(const QModelIndex &parent)
+{
+    QStringList result;
+
+    CollectionItem *item = getItem(parent);
+
+    for (int i = 0; i < item->childCount(); i++) {
+
+        if (item->child(i)->data(1).toString().isEmpty()) {
+            result.append(getItemChildrenTracks(index(i,0,parent)));
+        } else {
+            result.append(item->child(i)->data(1).toString());
+        }
+    }
+
+    return result;
+
 }

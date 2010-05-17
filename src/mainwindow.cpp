@@ -63,19 +63,10 @@ MainWindow::MainWindow(Player *player)
     _ui = new Ui::MainWindow();
     _ui->setupUi(this);
 
+    createMenus();
+
     _appIcon = new QIcon(":/icons/mainIcon");
     QApplication::setWindowIcon(*_appIcon);
-
-    _randomPlaybackGroup = new QActionGroup(this);
-    _randomPlaybackGroup->addAction(_ui->actionRandom_ON);
-    _randomPlaybackGroup->addAction(_ui->actionRandom_OFF);
-    _ui->actionRandom_OFF->setChecked(true);
-
-    _repeatPlaybackGroup = new QActionGroup(this);
-    _repeatPlaybackGroup->addAction(_ui->actionRepeat_OFF);
-    _repeatPlaybackGroup->addAction(_ui->actionRepeat_playlist);
-    _repeatPlaybackGroup->addAction(_ui->actionRepeat_track);
-    _ui->actionRepeat_OFF->setChecked(true);
 
     _trayIcon = new TrayIcon(*_appIcon, this);
     connect(_trayIcon, SIGNAL(activated(QSystemTrayIcon::ActivationReason)),
@@ -83,21 +74,9 @@ MainWindow::MainWindow(Player *player)
     connect(_trayIcon, SIGNAL(mouseWheelScrolled(int)),
             this, SLOT(trayIconMouseWheelScrolled(int)));
     _trayIcon->setVisible(true);
-
-    _trayIconMenu = new QMenu(this);
-    _trayIconMenu->addAction(_ui->actionShow_Hide);
-    _trayIconMenu->addSeparator();
-    _trayIconMenu->addAction(_ui->actionPrevious_track);
-    _trayIconMenu->addAction(_ui->actionPlay_pause);
-    _trayIconMenu->addAction(_ui->actionStop);
-    _trayIconMenu->addAction(_ui->actionNext_track);
-    _trayIconMenu->addSeparator();
-    _trayIconMenu->addMenu(_ui->menuRepeat);
-    _trayIconMenu->addMenu(_ui->menuRandom);
-    _trayIconMenu->addSeparator();
-    _trayIconMenu->addAction(_ui->actionQuit_TepSonic);
     _trayIcon->setContextMenu(_trayIconMenu);
     _trayIcon->setToolTip(tr("Player is stopped"));
+
 
     _playlistLengthLabel = new QLabel(this);
     _ui->statusBar->addPermanentWidget(_playlistLengthLabel,0);
@@ -136,12 +115,12 @@ MainWindow::MainWindow(Player *player)
     headers = QStringList() << "title" << "filename";
     _collectionModel = new CollectionModel(headers,this);
     _collectionProxyModel = new CollectionProxyModel(this);
-    _collectionProxyModel->setSourceModel(_collectionModel);
+    //_collectionProxyModel->setSourceModel(_collectionModel);
     _collectionProxyModel->setFilterCaseSensitivity(Qt::CaseInsensitive);
     _collectionProxyModel->setFilterKeyColumn(0);
     _collectionProxyModel->setDynamicSortFilter(true);
 
-    _ui->collectionBrowser->setModel(_collectionProxyModel);
+    _ui->collectionBrowser->setModel(_collectionModel);
     _ui->collectionBrowser->setSelectionMode(QAbstractItemView::ExtendedSelection);
     _ui->collectionBrowser->setDragEnabled(true);
     _ui->collectionBrowser->setDropIndicatorShown(true);
@@ -281,6 +260,39 @@ MainWindow::~MainWindow()
     delete _collectionModel;
 
     delete _ui;
+}
+
+void MainWindow::createMenus()
+{
+    _randomPlaybackGroup = new QActionGroup(this);
+    _randomPlaybackGroup->addAction(_ui->actionRandom_ON);
+    _randomPlaybackGroup->addAction(_ui->actionRandom_OFF);
+    _ui->actionRandom_OFF->setChecked(true);
+
+    _repeatPlaybackGroup = new QActionGroup(this);
+    _repeatPlaybackGroup->addAction(_ui->actionRepeat_OFF);
+    _repeatPlaybackGroup->addAction(_ui->actionRepeat_playlist);
+    _repeatPlaybackGroup->addAction(_ui->actionRepeat_track);
+    _ui->actionRepeat_OFF->setChecked(true);
+
+
+    _trayIconMenu = new QMenu(this);
+    _trayIconMenu->addAction(_ui->actionShow_Hide);
+    _trayIconMenu->addSeparator();
+    _trayIconMenu->addAction(_ui->actionPrevious_track);
+    _trayIconMenu->addAction(_ui->actionPlay_pause);
+    _trayIconMenu->addAction(_ui->actionStop);
+    _trayIconMenu->addAction(_ui->actionNext_track);
+    _trayIconMenu->addSeparator();
+    _trayIconMenu->addMenu(_ui->menuRepeat);
+    _trayIconMenu->addMenu(_ui->menuRandom);
+    _trayIconMenu->addSeparator();
+    _trayIconMenu->addAction(_ui->actionQuit_TepSonic);
+
+    _collectionsPopupMenu = new QMenu(this);
+    _collectionsPopupMenu->addAction(tr("Delete file from disk"),this,SLOT(removeFileFromDisk()));
+    _ui->collectionBrowser->setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(_ui->collectionBrowser,SIGNAL(customContextMenuRequested(QPoint)),this,SLOT(showCollectionsContextMenu(QPoint)));
 }
 
  /* Show "About Tepsonic" dialog */
@@ -672,6 +684,55 @@ void MainWindow::preferencesAccepted()
         _ui->collectionWidget->setHidden(true);
         // Clear the collections to save memory
         _collectionModel->clear();
+    }
+}
+
+void MainWindow::showCollectionsContextMenu(QPoint pos)
+{
+    _collectionsPopupMenu->popup(_ui->collectionBrowser->mapToGlobal(pos));
+}
+
+void MainWindow::removeFileFromDisk()
+{
+    qDebug() << _ui->collectionBrowser->mapFromGlobal(_collectionsPopupMenu->pos());
+    QModelIndex item = _ui->collectionBrowser->indexAt( _ui->collectionBrowser->mapFromGlobal(_collectionsPopupMenu->pos()));
+    QString itemName = item.data().toString();
+    QString file = item.sibling(item.row(),1).data().toString();
+
+    QString question;
+    if (file.isEmpty()) {
+        question = QString(tr("Are you sure you want to remove all content of %1 from hard disk?").arg(itemName));
+    } else {
+        question = QString(tr("Are you sure you want to remove track %1 (%2) from hard disk?").arg(itemName, file));
+    }
+
+    if (QMessageBox::question(this,
+                              tr("Confirm removal"),
+                              question,
+                              QMessageBox::Yes,
+                              QMessageBox::No) == QMessageBox::Yes) {
+
+
+        if (file.isEmpty()) {
+            QStringList files = _collectionModel->getItemChildrenTracks(item);
+            for (int i = 0; i < files.count(); i++) {
+                // Remove file
+                QFile::remove(files.at(i));
+                // And save only path instead of filepath
+                files[i] = QFileInfo(files.at(i)).absolutePath();
+            }
+            // Remove duplicate paths from list
+            files = files.toSet().toList();
+            // Rebuild collections in all paths that were affected
+            for (int i = 0; i < files.count(); i++) {
+                _taskManager->rebuildCollections(files.at(i));
+            }
+        } else {
+            // Remove the file
+            QFile::remove(file);
+            // Rebuild collections in the file's path
+            _taskManager->rebuildCollections(QFileInfo(file).absolutePath());
+        }
     }
 }
 
