@@ -94,7 +94,7 @@ void PlaylistPopulator::expandDir(QString dir)
     QStringList files;
 
     QDirIterator dirIterator(dirlist,QDirIterator::Subdirectories);
-    
+
     while (dirIterator.hasNext()) {
         dirIterator.next();
         fileInfo = dirIterator.fileInfo();
@@ -142,7 +142,7 @@ void PlaylistPopulator::addFile(const QString &file)
 {
     // Add new file to the list and wake the worker thread (if sleeping)
     _mutex.lock();
-        _files.append(file);
+    _files.append(file);
     _mutex.unlock();
     _lock.wakeAll();
 }
@@ -151,7 +151,7 @@ void PlaylistPopulator::addFiles(const QStringList &files)
 {
     // Add new file to the list and wake the workert thread (if sleeping)
     _mutex.lock();
-        _files.append(files);
+    _files.append(files);
     _mutex.unlock();
     _lock.wakeAll();
 }

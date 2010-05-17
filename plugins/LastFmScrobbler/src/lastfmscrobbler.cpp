@@ -43,7 +43,7 @@ LastFmScrobbler::LastFmScrobbler()
     QString locale = QLocale::system().name();
     _translator = new QTranslator(this);
     QString dataDir = QLatin1String(PKGDATADIR);
-    QString localeDir = dataDir + QDir::separator() + "locale"+QDir::separator()+"lastfmscrobbler";
+    QString localeDir = dataDir + QDir::separator() + "tepsonic" + QDir::separator() +  "locale" + QDir::separator() + "lastfmscrobbler";
     _translator->load(locale,localeDir);
     qApp->installTranslator(_translator);
 }
@@ -336,8 +336,6 @@ void LastFmScrobbler::saveCache()
     }
     settings.endArray();
 }
-
-#include "moc_lastfmscrobbler.cpp"
 
 Q_EXPORT_PLUGIN2(tepsonic_lastfmscrobbler, LastFmScrobbler)
 

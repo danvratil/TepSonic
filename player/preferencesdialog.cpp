@@ -30,7 +30,7 @@
 #include <QDebug>
 
 PreferencesDialog::PreferencesDialog(MainWindow *parent):
-    _ui(new Ui::PreferencesDialog)
+        _ui(new Ui::PreferencesDialog)
 {
     _ui->setupUi(this);
 

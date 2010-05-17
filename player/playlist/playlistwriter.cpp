@@ -79,7 +79,7 @@ void PlaylistWriter::run()
 void PlaylistWriter::saveToFile(QString filename)
 {
     _mutex.lock();
-        _outputFile = filename;
+    _outputFile = filename;
     _mutex.unlock();
     _lock.wakeAll();
 }

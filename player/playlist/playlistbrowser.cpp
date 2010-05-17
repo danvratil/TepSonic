@@ -33,7 +33,7 @@
 
 
 PlaylistBrowser::PlaylistBrowser(QWidget* parent):
-          QTreeView(parent)
+        QTreeView(parent)
 {
     setAcceptDrops(true);
 }
@@ -45,18 +45,18 @@ PlaylistBrowser::~PlaylistBrowser()
 // Event: item is dragged over the widget
 void PlaylistBrowser::dragEnterEvent(QDragEnterEvent *event)
 {
-         // Just accept the proposed action
-        event->acceptProposedAction();
+    // Just accept the proposed action
+    event->acceptProposedAction();
 }
 
 // Event: drag has moved above the widget
 void PlaylistBrowser::dragMoveEvent(QDragMoveEvent* event)
 {
-        // Again - accept the proposed action
-        event->acceptProposedAction();
+    // Again - accept the proposed action
+    event->acceptProposedAction();
 }
 
- // Drop event (item is dropped on the widget)
+// Drop event (item is dropped on the widget)
 void PlaylistBrowser::dropEvent(QDropEvent* event)
 {
 
@@ -86,4 +86,3 @@ void PlaylistBrowser::keyPressEvent(QKeyEvent* event)
     }
 }
 
-#include "moc_playlistbrowser.cpp"

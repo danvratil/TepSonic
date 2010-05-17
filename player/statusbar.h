@@ -34,29 +34,29 @@
 class StatusBar : public QStatusBar
 {
     Q_OBJECT
-    public:
-        //! Constructor
-        /*!
-          \param parent pointer to parent object
-        */
-        StatusBar(QWidget *parent = 0);
+public:
+    //! Constructor
+    /*!
+      \param parent pointer to parent object
+    */
+    StatusBar(QWidget *parent = 0);
 
-    private:
-        //! Label that describes the action
-        QLabel *_actionLabel;
+private:
+    //! Label that describes the action
+    QLabel *_actionLabel;
 
-        //! Progress bar that shows progress of the action
-        QProgressBar *_progressBar;
+    //! Progress bar that shows progress of the action
+    QProgressBar *_progressBar;
 
-    public slots:
-        //! Updates action description and position of progressbar
-        void setProgressBar(QString action, int progress, int maxPosition = 100);
+public slots:
+    //! Updates action description and position of progressbar
+    void setProgressBar(QString action, int progress, int maxPosition = 100);
 
-        //! Hides action label and progressbar
-        void cancelAction();
+    //! Hides action label and progressbar
+    void cancelAction();
 
-        //! Shows progress bar that is just informing about work, not showing exact progress
-        void showWorkingBar(QString action);
+    //! Shows progress bar that is just informing about work, not showing exact progress
+    void showWorkingBar(QString action);
 
 };
 

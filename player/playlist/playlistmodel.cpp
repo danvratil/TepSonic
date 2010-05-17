@@ -21,7 +21,6 @@
 #include <QtGui>
 #include <QTime>
 
-#include <taglib/taglib.h>
 #include <taglib/fileref.h>
 #include <taglib/tag.h>
 #include <taglib/tstring.h>
@@ -31,185 +30,185 @@
 
 
 PlaylistModel::PlaylistModel(const QStringList &headers, QObject *parent)
-     : QAbstractItemModel(parent)
+        : QAbstractItemModel(parent)
 {
-     QVector<QVariant> rootData;
-     foreach (QString header, headers)
-         rootData << header;
+    QVector<QVariant> rootData;
+    foreach (QString header, headers)
+    rootData << header;
 
-     _totalLength = 0;
+    _totalLength = 0;
 
-     rootItem = new PlaylistItem(rootData);
+    rootItem = new PlaylistItem(rootData);
 }
 
 PlaylistModel::~PlaylistModel()
 {
-     delete rootItem;
+    delete rootItem;
 }
 
 int PlaylistModel::columnCount(const QModelIndex & /* parent */) const
 {
-     return rootItem->columnCount();
+    return rootItem->columnCount();
 }
 
 QVariant PlaylistModel::data(const QModelIndex &index, int role) const
 {
-     if (!index.isValid())
-         return QVariant();
+    if (!index.isValid())
+        return QVariant();
 
-     if (role != Qt::DisplayRole && role != Qt::EditRole)
-         return QVariant();
+    if (role != Qt::DisplayRole && role != Qt::EditRole)
+        return QVariant();
 
-     PlaylistItem *item = getItem(index);
+    PlaylistItem *item = getItem(index);
 
-     return item->data(index.column());
+    return item->data(index.column());
 }
 
 Qt::ItemFlags PlaylistModel::flags(const QModelIndex &index) const
 {
-     if (!index.isValid())
-         return 0;
+    if (!index.isValid())
+        return 0;
 
-     return Qt::ItemIsEditable | Qt::ItemIsEnabled | Qt::ItemIsSelectable;
+    return Qt::ItemIsEditable | Qt::ItemIsEnabled | Qt::ItemIsSelectable;
 }
 
 PlaylistItem *PlaylistModel::getItem(const QModelIndex &index) const
 {
-     if (index.isValid()) {
-         PlaylistItem *item = static_cast<PlaylistItem*>(index.internalPointer());
-         if (item) return item;
-     }
-     return rootItem;
+    if (index.isValid()) {
+        PlaylistItem *item = static_cast<PlaylistItem*>(index.internalPointer());
+        if (item) return item;
+    }
+    return rootItem;
 }
 
 QVariant PlaylistModel::headerData(int section, Qt::Orientation orientation,
-                                int role) const
+                                   int role) const
 {
-     if (orientation == Qt::Horizontal && role == Qt::DisplayRole)
-         return rootItem->data(section);
+    if (orientation == Qt::Horizontal && role == Qt::DisplayRole)
+        return rootItem->data(section);
 
-     return QVariant();
+    return QVariant();
 }
 
 QModelIndex PlaylistModel::index(int row, int column, const QModelIndex &parent) const
 {
     if (parent.isValid() && parent.column() != 0)
-         return QModelIndex();
+        return QModelIndex();
 
-     PlaylistItem *parentItem = getItem(parent);
+    PlaylistItem *parentItem = getItem(parent);
 
-     PlaylistItem *childItem = parentItem->child(row);
-     if (childItem)
-         return createIndex(row, column, childItem);
-     else
-         return QModelIndex();
- }
+    PlaylistItem *childItem = parentItem->child(row);
+    if (childItem)
+        return createIndex(row, column, childItem);
+    else
+        return QModelIndex();
+}
 
 bool PlaylistModel::insertRows(int position, int rows, const QModelIndex &parent)
 {
-     PlaylistItem *parentItem = getItem(parent);
-     bool success;
+    PlaylistItem *parentItem = getItem(parent);
+    bool success;
 
      _mutex.lock();
 
-     beginInsertRows(parent, position, position + rows - 1);
-     success = parentItem->insertChildren(position, rows, rootItem->columnCount());
-     endInsertRows();
+    beginInsertRows(parent, position, position + rows - 1);
+    success = parentItem->insertChildren(position, rows, rootItem->columnCount());
+    endInsertRows();
 
      _mutex.unlock();
 
-     return success;
+    return success;
 }
 
 QModelIndex PlaylistModel::parent(const QModelIndex &index) const
 {
-     if (!index.isValid())
-         return QModelIndex();
+    if (!index.isValid())
+        return QModelIndex();
 
-     PlaylistItem *childItem = getItem(index);
-     PlaylistItem *parentItem = childItem->parent();
+    PlaylistItem *childItem = getItem(index);
+    PlaylistItem *parentItem = childItem->parent();
 
-     if (parentItem == rootItem)
-         return QModelIndex();
+    if (parentItem == rootItem)
+        return QModelIndex();
 
-     return createIndex(parentItem->childNumber(), 0, parentItem);
+    return createIndex(parentItem->childNumber(), 0, parentItem);
 }
 
 bool PlaylistModel::removeRows(int position, int rows, const QModelIndex &parent)
 {
-     PlaylistItem *parentItem = getItem(parent);
-     bool success = true;
+    PlaylistItem *parentItem = getItem(parent);
+    bool success = true;
 
-     int totalRemoveTime = 0;
-     for (int i=position;i<position+rows;i++) {
-         QString trackLength = index(i,7,QModelIndex()).data().toString();
-         if (trackLength.length()==5) {
-             trackLength.prepend("00:");
-         }
-         QTime tl(0,0,0,0);
-         totalRemoveTime += tl.secsTo(QTime::fromString(trackLength,"hh:mm:ss"));
-     }
+    int totalRemoveTime = 0;
+    for (int i=position;i<position+rows;i++) {
+        QString trackLength = index(i,7,QModelIndex()).data().toString();
+        if (trackLength.length()==5) {
+            trackLength.prepend("00:");
+        }
+        QTime tl(0,0,0,0);
+        totalRemoveTime += tl.secsTo(QTime::fromString(trackLength,"hh:mm:ss"));
+    }
 
      _mutex.lock();
 
-     beginRemoveRows(parent, position, position + rows - 1);
-     success = parentItem->removeChildren(position, rows);
-     endRemoveRows();
+    beginRemoveRows(parent, position, position + rows - 1);
+    success = parentItem->removeChildren(position, rows);
+    endRemoveRows();
 
      _mutex.unlock();
 
-     if (success) {
-         // Decrease total length of the playlist by total length of removed tracks
-         _totalLength -= totalRemoveTime;
+    if (success) {
+        // Decrease total length of the playlist by total length of removed tracks
+        _totalLength -= totalRemoveTime;
         emit playlistLengthChanged(_totalLength,rowCount(QModelIndex()));
-     }
+    }
 
-     return success;
+    return success;
 }
 
 int PlaylistModel::rowCount(const QModelIndex &parent) const
 {
-     PlaylistItem *parentItem = getItem(parent);
+    PlaylistItem *parentItem = getItem(parent);
 
-     return parentItem->childCount();
+    return parentItem->childCount();
 }
 
 bool PlaylistModel::setData(const QModelIndex &index, const QVariant &value,
-                         int role)
+                            int role)
 {
-     if (role != Qt::EditRole)
-         return false;
+    if (role != Qt::EditRole)
+        return false;
 
-     PlaylistItem *item = getItem(index);
+    PlaylistItem *item = getItem(index);
 
      _mutex.lock();
 
-     bool result = item->setData(index.column(), value);
+    bool result = item->setData(index.column(), value);
 
      _mutex.unlock();
 
-     if (result)
-         emit dataChanged(index, index);
+    if (result)
+        emit dataChanged(index, index);
 
-     return result;
+    return result;
 }
 
 bool PlaylistModel::setHeaderData(int section, Qt::Orientation orientation,
-                               const QVariant &value, int role)
+                                  const QVariant &value, int role)
 {
-     if (role != Qt::EditRole || orientation != Qt::Horizontal)
-         return false;
+    if (role != Qt::EditRole || orientation != Qt::Horizontal)
+        return false;
 
      _mutex.lock();
 
-     bool result = rootItem->setData(section, value);
+    bool result = rootItem->setData(section, value);
 
      _mutex.unlock();
 
-     if (result)
-         emit headerDataChanged(orientation, section, section);
+    if (result)
+        emit headerDataChanged(orientation, section, section);
 
-     return result;
+    return result;
 }
 
 bool PlaylistModel::addItem(QString file)

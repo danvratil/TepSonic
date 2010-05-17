@@ -28,7 +28,7 @@
 #include <QFileInfo>
 
 CollectionBrowser::CollectionBrowser(QWidget* parent):
-          QTreeView(parent)
+        QTreeView(parent)
 {
     setAcceptDrops(false);
     setDragDropMode(DragOnly);
@@ -67,7 +67,7 @@ void CollectionBrowser::startDrag(Qt::DropActions)
                     }
                     album++;
                 }
-            // Album(s) is being dragged
+                // Album(s) is being dragged
             } else {
                 QModelIndex albumIndex = index.sibling(index.row(),0);
                 QModelIndex trackIndex = albumIndex.child(0,0);
@@ -77,7 +77,7 @@ void CollectionBrowser::startDrag(Qt::DropActions)
                     row++;
                 }
             }
-        // Single track/s is being dragged
+            // Single track/s is being dragged
         } else {
             stream << index.data().toString();
         }

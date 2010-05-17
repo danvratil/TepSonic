@@ -35,43 +35,43 @@ class CollectionModel;
 class CollectionPopulator : public QThread
 {
     Q_OBJECT
-    public:
-        //! Constructor
-        /*!
-          Constructor that sets up collectionModel and launches the thread
-          \param collectionModel pointer to CollectionModel
-        */
-        explicit CollectionPopulator(CollectionModel *collectionModel);
+public:
+    //! Constructor
+    /*!
+      Constructor that sets up collectionModel and launches the thread
+      \param collectionModel pointer to CollectionModel
+    */
+    explicit CollectionPopulator(CollectionModel *collectionModel);
 
-        //! Destructor
-        /*!
-          Allows thread to quit and wakes the thread and wait until it quits
-        */
-        ~CollectionPopulator();
+    //! Destructor
+    /*!
+      Allows thread to quit and wakes the thread and wait until it quits
+    */
+    ~CollectionPopulator();
 
-        //! Main thread method
-        void run();
+    //! Main thread method
+    void run();
 
-    public slots:
-        //! Wakes up the thread
-        void populate();
+public slots:
+    //! Wakes up the thread
+    void populate();
 
-    signals:
-        //! Emitted when whole collections are populated
-        void collectionsPopulated();
+signals:
+    //! Emitted when whole collections are populated
+    void collectionsPopulated();
 
-    private:
-        //! Pointer to CollectionModel
-        CollectionModel *_collectionModel;
+private:
+    //! Pointer to CollectionModel
+    CollectionModel *_collectionModel;
 
-        //! Mutex for syncing access to model
-        QMutex _mutex;
+    //! Mutex for syncing access to model
+    QMutex _mutex;
 
-        //! Locks the thread until awaken
-        QWaitCondition _lock;
+    //! Locks the thread until awaken
+    QWaitCondition _lock;
 
-        //! Can I quit the thread daddy?
-        bool _canClose;
+    //! Can I quit the thread daddy?
+    bool _canClose;
 
 };
 

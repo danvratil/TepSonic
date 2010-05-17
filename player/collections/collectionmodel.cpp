@@ -25,149 +25,149 @@
 #include <QtSql/QSqlQuery>
 
 CollectionModel::CollectionModel(const QStringList &headers, QObject *parent)
-     : QAbstractItemModel(parent)
+        : QAbstractItemModel(parent)
 {
-     QVector<QVariant> rootData;
-     foreach (QString header, headers)
-         rootData << header;
+    QVector<QVariant> rootData;
+    foreach (QString header, headers)
+    rootData << header;
 
-     _rootItem = new CollectionItem(rootData);
-     setSupportedDragActions(Qt::CopyAction);
+    _rootItem = new CollectionItem(rootData);
+    setSupportedDragActions(Qt::CopyAction);
 }
 
 CollectionModel::~CollectionModel()
 {
-     delete _rootItem;
+    delete _rootItem;
 }
 
 int CollectionModel::columnCount(const QModelIndex & /* parent */) const
 {
-     return _rootItem->columnCount();
+    return _rootItem->columnCount();
 }
 
 QVariant CollectionModel::data(const QModelIndex &index, int role) const
 {
-     if (!index.isValid())
-         return QVariant();
+    if (!index.isValid())
+        return QVariant();
 
-     if (role != Qt::DisplayRole && role != Qt::EditRole)
-         return QVariant();
+    if (role != Qt::DisplayRole && role != Qt::EditRole)
+        return QVariant();
 
-     CollectionItem *item = getItem(index);
-     return item->data(index.column());
+    CollectionItem *item = getItem(index);
+    return item->data(index.column());
 }
 
 Qt::ItemFlags CollectionModel::flags(const QModelIndex &index) const
 {
-     if (!index.isValid())
-         return 0;
+    if (!index.isValid())
+        return 0;
 
-     return Qt::ItemIsEditable | Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsDragEnabled;
+    return Qt::ItemIsEditable | Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsDragEnabled;
 }
 
 CollectionItem *CollectionModel::getItem(const QModelIndex &index) const
 {
-     if (index.isValid()) {
-         CollectionItem *item = static_cast<CollectionItem*>(index.internalPointer());
-         if (item) return item;
-     }
-     return _rootItem;
+    if (index.isValid()) {
+        CollectionItem *item = static_cast<CollectionItem*>(index.internalPointer());
+        if (item) return item;
+    }
+    return _rootItem;
 }
 
 QVariant CollectionModel::headerData(int section, Qt::Orientation orientation,
                                      int role) const
 {
-     if (orientation == Qt::Horizontal && role == Qt::DisplayRole)
-         return _rootItem->data(section);
+    if (orientation == Qt::Horizontal && role == Qt::DisplayRole)
+        return _rootItem->data(section);
 
-     return QVariant();
+    return QVariant();
 }
 
 QModelIndex CollectionModel::index(int row, int column, const QModelIndex &parent) const
 {
-     if (parent.isValid() && parent.column() != 0)
-         return QModelIndex();
+    if (parent.isValid() && parent.column() != 0)
+        return QModelIndex();
 
-     CollectionItem *parentItem = getItem(parent);
+    CollectionItem *parentItem = getItem(parent);
 
-     CollectionItem *childItem = parentItem->child(row);
-     if (childItem)
-         return createIndex(row, column, childItem);
-     else
-         return QModelIndex();
+    CollectionItem *childItem = parentItem->child(row);
+    if (childItem)
+        return createIndex(row, column, childItem);
+    else
+        return QModelIndex();
 }
 
 bool CollectionModel::insertRows(int position, int rows, const QModelIndex &parent)
 {
-     CollectionItem *parentItem = getItem(parent);
-     bool success;
+    CollectionItem *parentItem = getItem(parent);
+    bool success;
 
-     beginInsertRows(parent, position, position + rows - 1);
-     success = parentItem->insertChildren(position, rows, _rootItem->columnCount());
-     endInsertRows();
+    beginInsertRows(parent, position, position + rows - 1);
+    success = parentItem->insertChildren(position, rows, _rootItem->columnCount());
+    endInsertRows();
 
-     return success;
+    return success;
 }
 
 QModelIndex CollectionModel::parent(const QModelIndex &index) const
 {
-     if (!index.isValid())
-         return QModelIndex();
+    if (!index.isValid())
+        return QModelIndex();
 
-     CollectionItem *childItem = getItem(index);
-     CollectionItem *parentItem = childItem->parent();
+    CollectionItem *childItem = getItem(index);
+    CollectionItem *parentItem = childItem->parent();
 
-     if (parentItem == _rootItem)
-         return QModelIndex();
+    if (parentItem == _rootItem)
+        return QModelIndex();
 
-     return createIndex(parentItem->childNumber(), 0, parentItem);
+    return createIndex(parentItem->childNumber(), 0, parentItem);
 }
 
 bool CollectionModel::removeRows(int position, int rows, const QModelIndex &parent)
 {
-     CollectionItem *parentItem = getItem(parent);
-     bool success = true;
+    CollectionItem *parentItem = getItem(parent);
+    bool success = true;
 
-     beginRemoveRows(parent, position, position + rows - 1);
-     success = parentItem->removeChildren(position, rows);
-     endRemoveRows();
+    beginRemoveRows(parent, position, position + rows - 1);
+    success = parentItem->removeChildren(position, rows);
+    endRemoveRows();
 
-     return success;
+    return success;
 }
 
 int CollectionModel::rowCount(const QModelIndex &parent) const
 {
-     CollectionItem *parentItem = getItem(parent);
+    CollectionItem *parentItem = getItem(parent);
 
-     return parentItem->childCount();
+    return parentItem->childCount();
 }
 
 bool CollectionModel::setData(const QModelIndex &index, const QVariant &value,
                               int role)
 {
-     if (role != Qt::EditRole)
-         return false;
+    if (role != Qt::EditRole)
+        return false;
 
-     CollectionItem *item = getItem(index);
-     bool result = item->setData(index.column(), value);
+    CollectionItem *item = getItem(index);
+    bool result = item->setData(index.column(), value);
 
-     if (result)
-         emit dataChanged(index, index);
+    if (result)
+        emit dataChanged(index, index);
 
-     return result;
+    return result;
 }
 
 bool CollectionModel::setHeaderData(int section, Qt::Orientation orientation, const QVariant &value, int role)
 {
-     if (role != Qt::EditRole || orientation != Qt::Horizontal)
-         return false;
+    if (role != Qt::EditRole || orientation != Qt::Horizontal)
+        return false;
 
-     bool result = _rootItem->setData(section, value);
+    bool result = _rootItem->setData(section, value);
 
-     if (result)
-         emit headerDataChanged(orientation, section, section);
+    if (result)
+        emit headerDataChanged(orientation, section, section);
 
-     return result;
+    return result;
 }
 
 QModelIndex CollectionModel::addChild(const QModelIndex &parent, QString title, QString filename)
@@ -184,9 +184,9 @@ QModelIndex CollectionModel::addChild(const QModelIndex &parent, QString title, 
 }
 
 Qt::DropActions CollectionModel::supportedDropActions() const
- {
-     return Qt::CopyAction | Qt::MoveAction;
- }
+{
+    return Qt::CopyAction | Qt::MoveAction;
+}
 
 void CollectionModel::clear()
 {

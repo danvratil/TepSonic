@@ -20,7 +20,7 @@
 #include "statusbar.h"
 
 StatusBar::StatusBar(QWidget *parent) :
-    QStatusBar(parent)
+        QStatusBar(parent)
 {
     _actionLabel = 0;
     _progressBar = 0;

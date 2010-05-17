@@ -47,8 +47,8 @@
 #include <QDate>
 #include <QDateTime>
 #include <QTime>
-#include <Phonon/SeekSlider>
-#include <Phonon/VolumeSlider>
+#include <phonon/SeekSlider>
+#include <phonon/VolumeSlider>
 
 #include <QDebug>
 
@@ -83,13 +83,13 @@ MainWindow::MainWindow(Player *player)
     _playlistLengthLabel->setText(tr("%n track(s)", "", 0).append(" (00:00)"));
 
     QStringList headers = QStringList()<< tr("Filename")
-                                       << tr("Track")
-                                       << tr("Interpret")
-                                       << tr("Track name")
-                                       << tr("Album")
-                                       << tr("Genre")
-                                       << tr("Year")
-                                       << tr("Length");
+                          << tr("Track")
+                          << tr("Interpret")
+                          << tr("Track name")
+                          << tr("Album")
+                          << tr("Genre")
+                          << tr("Year")
+                          << tr("Length");
     _playlistModel = new PlaylistModel(headers,this);
     connect(_playlistModel,SIGNAL(playlistLengthChanged(int,int)),
             this,SLOT(playlistLengthChanged(int,int)));
@@ -295,7 +295,7 @@ void MainWindow::createMenus()
     connect(_ui->collectionBrowser,SIGNAL(customContextMenuRequested(QPoint)),this,SLOT(showCollectionsContextMenu(QPoint)));
 }
 
- /* Show "About Tepsonic" dialog */
+/* Show "About Tepsonic" dialog */
 void MainWindow::on_actionAbout_TepSonic_triggered()
 {
     QMessageBox aboutDlg;
@@ -304,7 +304,7 @@ void MainWindow::on_actionAbout_TepSonic_triggered()
     developers << "Dan Vrátil";
     QStringList artwork;
     artwork << "Matěj Zvěřina"
-            << "Michael Ruml";
+    << "Michael Ruml";
 
     QString str = "<h1>"+QApplication::applicationName()+"</h1>"
                   +tr("Version %1").arg(QApplication::applicationVersion())+
@@ -330,7 +330,7 @@ void MainWindow::on_actionReport_a_bug_triggered()
 
 void MainWindow::trayClicked(QSystemTrayIcon::ActivationReason reason)
 {
-    if(reason == QSystemTrayIcon::Trigger) {
+    if (reason == QSystemTrayIcon::Trigger) {
         if (this->isHidden()) {
             this->show();
         } else {
@@ -343,7 +343,7 @@ void MainWindow::trayClicked(QSystemTrayIcon::ActivationReason reason)
 
 void MainWindow::closeEvent(QCloseEvent* event)
 {
-        // if tray is visible hide the windows and ignore the event
+    // if tray is visible hide the windows and ignore the event
     if (_trayIcon->isVisible() && (_canClose == false)) {
         this->hide();
         event->ignore();
@@ -353,9 +353,9 @@ void MainWindow::closeEvent(QCloseEvent* event)
 void MainWindow::on_actionAdd_file_triggered()
 {
     QStringList fileNames = QFileDialog::getOpenFileNames(this,
-                                                          tr("Select file"),
-                                                          "",
-                                                          tr("Supported files (*.mp3 *.wav *.ogg *.flac *.m3u);;Playlists (*.m3u);;All files (*.*)"));
+                            tr("Select file"),
+                            "",
+                            tr("Supported files (*.mp3 *.wav *.ogg *.flac *.m3u);;Playlists (*.m3u);;All files (*.*)"));
     _taskManager->addFilesToPlaylist(fileNames);
 }
 
@@ -375,9 +375,9 @@ void MainWindow::on_actionAdd_folder_triggered()
 {
     //open folder dialog
     QString dirName = QFileDialog::getExistingDirectory(this,
-                                                        tr("Add directory"),
-                                                        QString(),
-                                                        QFileDialog::ShowDirsOnly);
+                      tr("Add directory"),
+                      QString(),
+                      QFileDialog::ShowDirsOnly);
     _taskManager->addFileToPlaylist(dirName);
 }
 
@@ -392,9 +392,9 @@ void MainWindow::updatePlayerTrack()
 
 void MainWindow::on_playlistBrowser_doubleClicked(QModelIndex index)
 {
-   // Play item on row double click
-   QString filename = index.sibling(index.row(),0).data().toString();
-   _player->setTrack(filename,true);
+    // Play item on row double click
+    QString filename = index.sibling(index.row(),0).data().toString();
+    _player->setTrack(filename,true);
 }
 
 void MainWindow::playerStatusChanged(Phonon::State newState, Phonon::State oldState)
@@ -414,39 +414,39 @@ void MainWindow::playerStatusChanged(Phonon::State newState, Phonon::State oldSt
     }
 
     switch (newState) {
-        case Phonon::PlayingState:
-            _ui->playPauseButton->setIcon(QIcon(":/icons/pause"));
-            _ui->actionPlay_pause->setIcon(QIcon(":/icons/pause"));
-            _ui->stopButton->setEnabled(true);
-            _ui->actionStop->setEnabled(true);
-            _ui->trackTitleLabel->setText(playing);
-            _ui->playbackTimeLabel->setText("00:00:00");
-            _trayIcon->setToolTip(tr("Playing: ")+playing);
-            break;
-        case Phonon::PausedState:
-            _ui->playPauseButton->setIcon(QIcon(":/icons/start"));
-            _ui->actionPlay_pause->setIcon(QIcon(":/icons/start"));
-            _ui->stopButton->setEnabled(true);
-            _ui->actionStop->setEnabled(true);
-            _ui->trackTitleLabel->setText(tr("%1 [paused]").arg(_ui->trackTitleLabel->text()));
-            _trayIcon->setToolTip(tr("%1 [paused]").arg(_trayIcon->toolTip()));
-            break;
-        case Phonon::StoppedState:
-            _ui->playPauseButton->setIcon(QIcon(":/icons/start"));
-            _ui->actionPlay_pause->setIcon(QIcon(":/icons/start"));
-            _ui->stopButton->setEnabled(false);
-            _ui->actionStop->setEnabled(false);
-            _ui->trackTitleLabel->setText(tr("Player is stopped"));
-            _ui->playbackTimeLabel->setText(tr("Stopped"));
-            _trayIcon->setToolTip(tr("Player is stopped"));
-            break;
-        case Phonon::ErrorState:
-            _ui->statusBar->showMessage(_player->errorString(),5000);
-            break;
-        case Phonon::LoadingState:
-            break;
-        case Phonon::BufferingState:
-            break;
+    case Phonon::PlayingState:
+        _ui->playPauseButton->setIcon(QIcon(":/icons/pause"));
+        _ui->actionPlay_pause->setIcon(QIcon(":/icons/pause"));
+        _ui->stopButton->setEnabled(true);
+        _ui->actionStop->setEnabled(true);
+        _ui->trackTitleLabel->setText(playing);
+        _ui->playbackTimeLabel->setText("00:00:00");
+        _trayIcon->setToolTip(tr("Playing: ")+playing);
+        break;
+    case Phonon::PausedState:
+        _ui->playPauseButton->setIcon(QIcon(":/icons/start"));
+        _ui->actionPlay_pause->setIcon(QIcon(":/icons/start"));
+        _ui->stopButton->setEnabled(true);
+        _ui->actionStop->setEnabled(true);
+        _ui->trackTitleLabel->setText(tr("%1 [paused]").arg(_ui->trackTitleLabel->text()));
+        _trayIcon->setToolTip(tr("%1 [paused]").arg(_trayIcon->toolTip()));
+        break;
+    case Phonon::StoppedState:
+        _ui->playPauseButton->setIcon(QIcon(":/icons/start"));
+        _ui->actionPlay_pause->setIcon(QIcon(":/icons/start"));
+        _ui->stopButton->setEnabled(false);
+        _ui->actionStop->setEnabled(false);
+        _ui->trackTitleLabel->setText(tr("Player is stopped"));
+        _ui->playbackTimeLabel->setText(tr("Stopped"));
+        _trayIcon->setToolTip(tr("Player is stopped"));
+        break;
+    case Phonon::ErrorState:
+        _ui->statusBar->showMessage(_player->errorString(),5000);
+        break;
+    case Phonon::LoadingState:
+        break;
+    case Phonon::BufferingState:
+        break;
     }
 }
 
@@ -457,10 +457,10 @@ void MainWindow::on_actionPrevious_track_triggered()
     if ((selected.count() > 0) && (selected.at(0).row()>0)) {
         QModelIndex topLeft = _playlistModel->index(selected.at(0).row()-1,0,QModelIndex());
         QModelIndex bottomRight = _playlistModel->index(selected.at(0).row()-1,
-                                                        _playlistModel->columnCount(QModelIndex())-1,
-                                                        QModelIndex());
+                                  _playlistModel->columnCount(QModelIndex())-1,
+                                  QModelIndex());
         // First cancel all selections
-        for(int i=0;i<selected.count();i++) {
+        for (int i=0;i<selected.count();i++) {
             _selectionModel->select(selected.at(i),QItemSelectionModel::Clear);
         }
         // And then select the new row
@@ -478,7 +478,7 @@ void MainWindow::on_actionPlay_pause_triggered()
         /* When the source is empty there are some files in playlist, select the
            first row and load it as current source */
         if ((_player->currentSource().fileName().isEmpty()) &&
-            (_playlistModel->rowCount() > 0)) {
+                (_playlistModel->rowCount() > 0)) {
             QModelIndex topLeft = _playlistModel->index(0,0,QModelIndex());
             QModelIndex bottomRight = _playlistModel->index(0,_playlistModel->columnCount(QModelIndex())-1,QModelIndex());
             _selectionModel->select(QItemSelection(topLeft,bottomRight),
@@ -500,11 +500,11 @@ void MainWindow::on_actionNext_track_triggered()
             // Choose random row (generator initialized in constructor)
             int row = rand() % _playlistModel->rowCount(QModelIndex());
             QModelIndex topLeft = _playlistModel->index(row,
-                                                       0,
-                                                       QModelIndex());
+                                  0,
+                                  QModelIndex());
             QModelIndex bottomRight = _playlistModel->index(row,
-                                                            _playlistModel->columnCount(QModelIndex())-1,
-                                                            QModelIndex());
+                                      _playlistModel->columnCount(QModelIndex())-1,
+                                      QModelIndex());
             // Clear current selection(s)
             for (int i=0;i<selected.count();i++) {
                 _selectionModel->select(selected.at(i),QItemSelectionModel::Clear);
@@ -517,8 +517,8 @@ void MainWindow::on_actionNext_track_triggered()
             if (selected.at(0).row() < _playlistModel->rowCount(QModelIndex())-1) {
                 QModelIndex topLeft = _playlistModel->index(selected.at(0).row()+1,0,QModelIndex());
                 QModelIndex bottomRight = _playlistModel->index(selected.at(0).row()+1,
-                                                                 _playlistModel->columnCount(QModelIndex())-1,
-                                                               QModelIndex());
+                                          _playlistModel->columnCount(QModelIndex())-1,
+                                          QModelIndex());
                 // First clear current selection
                 for (int i = 0; i < selected.count(); i++) {
                     _selectionModel->select(selected.at(i),QItemSelectionModel::Clear);
@@ -528,11 +528,11 @@ void MainWindow::on_actionNext_track_triggered()
                                         QItemSelectionModel::Select);
                 // If there is now row below, but player is set to "RepeatAll" then jump to the first track
             } else {
-                if(_player->repeatMode() == Player::RepeatAll) {
+                if (_player->repeatMode() == Player::RepeatAll) {
                     QModelIndex topLeft = _playlistModel->index(0,0,QModelIndex());
                     QModelIndex bottomRight = _playlistModel->index(0,
-                                                                    _playlistModel->columnCount(QModelIndex())-1,
-                                                                    QModelIndex());
+                                              _playlistModel->columnCount(QModelIndex())-1,
+                                              QModelIndex());
                     // First clear current selection
                     for (int i = 0; i < selected.count(); i++) {
                         _selectionModel->select(selected.at(i),QItemSelectionModel::Clear);
@@ -609,15 +609,15 @@ void MainWindow::fixCollectionProxyModel()
 void MainWindow::repeatModeChanged(Player::RepeatMode newMode)
 {
     switch (newMode) {
-        case Player::RepeatOff:
-            _ui->actionRepeat_OFF->setChecked(true);
-            break;
-        case Player::RepeatTrack:
-            _ui->actionRepeat_track->setChecked(true);
-            break;
-        case Player::RepeatAll:
-            _ui->actionRepeat_playlist->setChecked(true);
-            break;
+    case Player::RepeatOff:
+        _ui->actionRepeat_OFF->setChecked(true);
+        break;
+    case Player::RepeatTrack:
+        _ui->actionRepeat_track->setChecked(true);
+        break;
+    case Player::RepeatAll:
+        _ui->actionRepeat_playlist->setChecked(true);
+        break;
     }
 }
 
@@ -638,11 +638,11 @@ void MainWindow::playerPosChanged(qint64 newPos)
 void MainWindow::changeEvent(QEvent *e)
 {
     switch (e->type()) {
-        case QEvent::LanguageChange:
-            _ui->retranslateUi(this);
-            break;
-        default:
-            break;
+    case QEvent::LanguageChange:
+        _ui->retranslateUi(this);
+        break;
+    default:
+        break;
     }
 }
 
@@ -666,7 +666,7 @@ void MainWindow::trayIconMouseWheelScrolled(int delta)
             _player->audioOutput()->setVolume(1);
         }
     } else {
-                                              // not a typo
+        // not a typo
         if (_player->audioOutput()->volume() > 0.01) {
             _player->audioOutput()->setVolume(_player->audioOutput()->volume()-0.1);
         } else {
@@ -735,5 +735,3 @@ void MainWindow::removeFileFromDisk()
         }
     }
 }
-
-#include "moc_mainwindow.cpp"

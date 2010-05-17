@@ -22,12 +22,11 @@
 
 #include <QFileInfo>
 #include <QStringList>
-#include <Phonon/MediaObject>
-#include <Phonon/Path>
-#include <Phonon/AudioOutput>
-#include <Phonon/MediaSource>
+#include <phonon/MediaObject>
+#include <phonon/Path>
+#include <phonon/AudioOutput>
+#include <phonon/MediaSource>
 
-#include <taglib/taglib.h>
 #include <taglib/fileref.h>
 #include <taglib/tag.h>
 #include <taglib/tstring.h>
@@ -57,10 +56,10 @@ Player::~Player()
 void Player::setTrack(const QString fileName, bool autoPlay)
 {
     if (QFileInfo(fileName).isFile()) {
-       _phononPlayer->setCurrentSource(Phonon::MediaSource(fileName));
-   }
+        _phononPlayer->setCurrentSource(Phonon::MediaSource(fileName));
+    }
 
-   emit trackChanged(currentMetaData());
+    emit trackChanged(currentMetaData());
     if (autoPlay==true) {
         _phononPlayer->play();
     }
@@ -89,7 +88,7 @@ Player::MetaData Player::currentMetaData()
     QString filename = _phononPlayer->currentSource().fileName();
 
     if ((!QFileInfo(filename).exists()) ||
-        (_phononPlayer->currentSource().type()==Phonon::MediaSource::Invalid)) {
+            (_phononPlayer->currentSource().type()==Phonon::MediaSource::Invalid)) {
         return data;
     }
 

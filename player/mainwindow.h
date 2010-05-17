@@ -46,7 +46,7 @@ class TaskManager;
 
 namespace Ui
 {
-    class MainWindow;
+class MainWindow;
 }
 
 //! MainWindow is TepSonic's main window
@@ -80,14 +80,18 @@ public:
       \param pluginsManager pointer to PluginsManager object
       \sa pluginsManager()
     */
-    inline void setPluginsManager(PluginsManager *pluginsManager) { _pluginsManager = pluginsManager; }
+    inline void setPluginsManager(PluginsManager *pluginsManager) {
+        _pluginsManager = pluginsManager;
+    }
 
     //! Returns pointer to PluginsManager
     /*!
       \return Returns pointer to plugins manager
       \sa setPluginsManager()
     */
-    PluginsManager* pluginsManager() { return _pluginsManager; }
+    PluginsManager* pluginsManager() {
+        return _pluginsManager;
+    }
 
 private:
     //! Pointer to main window's UI (generated from mainwindow.ui)
@@ -245,22 +249,34 @@ private slots:
     void on_actionPrevious_track_triggered();
 
     //! Stop the playback and reset the Player::CurrentSource
-    void on_actionStop_triggered() { _player->stop(); }
+    void on_actionStop_triggered() {
+        _player->stop();
+    }
 
     //! Set player repeat mode to \p RepeatAll
-    void on_actionRepeat_playlist_triggered() { _player->setRepeatMode(Player::RepeatAll); }
+    void on_actionRepeat_playlist_triggered() {
+        _player->setRepeatMode(Player::RepeatAll);
+    }
 
     //! Set player repeat mode to \p RepeatOff (disable repeat)
-    void on_actionRepeat_OFF_triggered() { _player->setRepeatMode(Player::RepeatOff); }
+    void on_actionRepeat_OFF_triggered() {
+        _player->setRepeatMode(Player::RepeatOff);
+    }
 
     //! Set player repeat mode to \p RepeatTrack
-    void on_actionRepeat_track_triggered() { _player->setRepeatMode(Player::RepeatTrack); }
+    void on_actionRepeat_track_triggered() {
+        _player->setRepeatMode(Player::RepeatTrack);
+    }
 
     //! Disable player random mode
-    void on_actionRandom_OFF_triggered() { _player->setRandomMode(false); }
+    void on_actionRandom_OFF_triggered() {
+        _player->setRandomMode(false);
+    }
 
     //! Enable player random mode
-    void on_actionRandom_ON_triggered() { _player->setRandomMode(true); }
+    void on_actionRandom_ON_triggered() {
+        _player->setRandomMode(true);
+    }
 
     //! Called when player status is changed
     /*!
@@ -280,7 +296,9 @@ private slots:
     void on_actionAdd_folder_triggered();
 
     //! Removes all items from playlist
-    void on_actionClear_playlist_triggered() { _playlistModel->removeRows(0,_playlistModel->rowCount(QModelIndex()),QModelIndex()); }
+    void on_actionClear_playlist_triggered() {
+        _playlistModel->removeRows(0,_playlistModel->rowCount(QModelIndex()),QModelIndex());
+    }
 
     //! Opens preferences dialog
     void on_actionPreferences_triggered();
@@ -289,10 +307,15 @@ private slots:
     void on_actionAdd_file_triggered();
 
     //! toggle visibility of main window
-    void on_actionShow_Hide_triggered() { trayClicked(QSystemTrayIcon::Trigger); }
+    void on_actionShow_Hide_triggered() {
+        trayClicked(QSystemTrayIcon::Trigger);
+    }
 
     //! Quit TepSonic
-    void on_actionQuit_TepSonic_triggered() { _canClose = true; this->close(); }
+    void on_actionQuit_TepSonic_triggered() {
+        _canClose = true;
+        this->close();
+    }
 
     //! Called when tray icon is clicked and toggles visibility of main window
     /*!
@@ -307,7 +330,9 @@ private slots:
     void on_actionAbout_TepSonic_triggered();
 
     //! Shows 'About Qt' dialog
-    void on_actionAbout_Qt_triggered() { QMessageBox::aboutQt(this,tr("About Qt")); }
+    void on_actionAbout_Qt_triggered() {
+        QMessageBox::aboutQt(this,tr("About Qt"));
+    }
 
     //! Called when new track is set in Player.
     void updatePlayerTrack();

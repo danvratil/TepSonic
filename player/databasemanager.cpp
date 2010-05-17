@@ -60,17 +60,17 @@ bool DatabaseManager::connectToDB()
     }
 
     switch (_driverType) {
-        case MySQL: {
-            _sqlDb = QSqlDatabase::addDatabase("QMYSQL",_connectionName);
-            _sqlDb.setHostName(_server);
-            _sqlDb.setUserName(_username);
-            _sqlDb.setPassword(_password);
-            _sqlDb.setDatabaseName(_db);
-        } break;
-        case SQLite: {
-            _sqlDb = QSqlDatabase::addDatabase("QSQLITE",_connectionName);
-            _sqlDb.setDatabaseName(QString(_CONFIGDIR).append("/collection.db"));
-        } break;
+    case MySQL: {
+        _sqlDb = QSqlDatabase::addDatabase("QMYSQL",_connectionName);
+        _sqlDb.setHostName(_server);
+        _sqlDb.setUserName(_username);
+        _sqlDb.setPassword(_password);
+        _sqlDb.setDatabaseName(_db);
+    } break;
+    case SQLite: {
+        _sqlDb = QSqlDatabase::addDatabase("QSQLITE",_connectionName);
+        _sqlDb.setDatabaseName(QString(_CONFIGDIR).append("/collection.db"));
+    } break;
     }
 
     if (!_sqlDb.open()) {
@@ -95,28 +95,28 @@ void DatabaseManager::initDb()
 {
     qDebug() << "Initializing database structure";
     switch (_driverType) {
-        case MySQL: {
-            QSqlQuery query("CREATE TABLE IF NOT EXISTS `Tracks` (" \
-                            "   `filename` varchar(300) NOT NULL," \
-                            "   `trackNo` int(11) NOT NULL DEFAULT '0'," \
-                            "   `artist` varchar(120) NOT NULL," \
-                            "   `album` varchar(120) NOT NULL," \
-                            "   `title` varchar(300) NOT NULL," \
-                            "   `mtime` int(10) unsigned NOT NULL DEFAULT '0'," \
-                            "   PRIMARY KEY (`filename`)," \
-                            "   KEY `artist` (`artist`)," \
-                            "   KEY `album` (`album`)"  \
-                            ") ENGINE=MyISAM DEFAULT CHARSET=utf8;",_sqlDb);
-        } break;
-        case SQLite: {
-            QSqlQuery query("CREATE TABLE Tracks("\
-                            "   filename TEXT," \
-                            "   trackNo INTEGER," \
-                            "   artist TEXT," \
-                            "   album TEXT," \
-                            "   title TEXT," \
-                            "   mtime INTEGER,"\
-                            "   PRIMARY KEY(filename ASC));",_sqlDb);
-        } break;
+    case MySQL: {
+        QSqlQuery query("CREATE TABLE IF NOT EXISTS `Tracks` (" \
+                        "   `filename` varchar(300) NOT NULL," \
+                        "   `trackNo` int(11) NOT NULL DEFAULT '0'," \
+                        "   `artist` varchar(120) NOT NULL," \
+                        "   `album` varchar(120) NOT NULL," \
+                        "   `title` varchar(300) NOT NULL," \
+                        "   `mtime` int(10) unsigned NOT NULL DEFAULT '0'," \
+                        "   PRIMARY KEY (`filename`)," \
+                        "   KEY `artist` (`artist`)," \
+                        "   KEY `album` (`album`)"  \
+                        ") ENGINE=MyISAM DEFAULT CHARSET=utf8;",_sqlDb);
+    } break;
+    case SQLite: {
+        QSqlQuery query("CREATE TABLE Tracks("\
+                        "   filename TEXT," \
+                        "   trackNo INTEGER," \
+                        "   artist TEXT," \
+                        "   album TEXT," \
+                        "   title TEXT," \
+                        "   mtime INTEGER,"\
+                        "   PRIMARY KEY(filename ASC));",_sqlDb);
+    } break;
     }
 }

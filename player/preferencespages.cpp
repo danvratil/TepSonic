@@ -62,13 +62,13 @@ void PreferencesPages::Collections::on_dbEngineCombo_currentIndexChanged(QString
 void PreferencesPages::Collections::on_addPathButton_clicked()
 {
     QString dirName = QFileDialog::getExistingDirectory(this,
-                                                        tr("Add directory"),
-                                                        QString(),
-                                                        QFileDialog::ShowDirsOnly);
-     if(!dirName.isEmpty()) {
-         ui->collectionsPathsList->addItem(dirName);
-     }
-     _collectionsSourceChanged = true;
+                      tr("Add directory"),
+                      QString(),
+                      QFileDialog::ShowDirsOnly);
+    if (!dirName.isEmpty()) {
+        ui->collectionsPathsList->addItem(dirName);
+    }
+    _collectionsSourceChanged = true;
 }
 
 void PreferencesPages::Collections::on_removePathButton_clicked()
@@ -84,8 +84,6 @@ void PreferencesPages::Collections::on_removeAllPathsButton_clicked()
     ui->collectionsPathsList->clear();
     _collectionsSourceChanged = true;
 }
-
-#include "moc_preferencespages.cpp"
 
 void PreferencesPages::Collections::on_pushButton_clicked()
 {

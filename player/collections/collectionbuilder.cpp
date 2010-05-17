@@ -22,7 +22,6 @@
 #include "collectionmodel.h"
 #include "databasemanager.h"
 
-#include <taglib/taglib.h>
 #include <taglib/fileref.h>
 #include <taglib/tag.h>
 #include <taglib/tstring.h>
@@ -106,8 +105,8 @@ void CollectionBuilder::run()
                         if (fileInfo.isFile()) {
                             // If the file is not in database OR mtime are different then the file will be updated
                             if ((!dbFiles.contains(fileInfo.filePath().toUtf8())) ||
-                                (dbFiles[fileInfo.filePath().toUtf8()]!=fileInfo.lastModified().toTime_t())) {
-                                    toBeUpdated << fileInfo.filePath();
+                                    (dbFiles[fileInfo.filePath().toUtf8()]!=fileInfo.lastModified().toTime_t())) {
+                                toBeUpdated << fileInfo.filePath();
                             }
                             if (!dbFiles.contains(fileInfo.filePath().toUtf8())) {
                                 toBeUpdated << fileInfo.filePath();
@@ -123,7 +122,7 @@ void CollectionBuilder::run()
                     i.next();
                     //toBeRemoved << sqlConn.driver()->escapeIdentifier(i.key().toUtf8(),QSqlDriver::);
                     toBeRemoved << i.key().toUtf8();
-                 }
+                }
                 dbFiles.clear();
 
                 QSqlQuery removeQuery(sqlConn);
@@ -176,7 +175,7 @@ void CollectionBuilder::run()
         // We don't want to lock the thread when the thread is allowed to close
         if (!_canClose)
             emit buildingFinished();
-            _lock.wait(&_mutex);
+        _lock.wait(&_mutex);
 
     } while (!_canClose);
 
@@ -185,7 +184,7 @@ void CollectionBuilder::run()
 void CollectionBuilder::rebuildFolder(QStringList folder)
 {
     _mutex.lock();
-        _folders.append(folder);
+    _folders.append(folder);
     _mutex.unlock();
     _lock.wakeAll();
 }

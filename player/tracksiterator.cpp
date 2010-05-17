@@ -35,9 +35,9 @@ TracksIterator::TracksIterator(QString  topDir, PlaylistModel *model)
 
 void TracksIterator::run()
 {
-/**
-     * @todo: Complete list of supported extensions
-     */
+    /**
+         * @todo: Complete list of supported extensions
+         */
     QStringList filters;
     filters << "*.mp3" << "*.mp4" << "*.wav" << "*.flac";
     QDir dirlist(_rootDir);

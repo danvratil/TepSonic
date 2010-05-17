@@ -34,13 +34,12 @@
 
 #include <QDebug>
 
-
 int main(int argc, char *argv[])
 {
     QApplication tepsonic(argc, argv);
     tepsonic.setApplicationName("TepSonic");
     tepsonic.setOrganizationName("Dan Vrátil");
-    tepsonic.setApplicationVersion("0.95-alpha");
+    tepsonic.setApplicationVersion(TEPSONIC_VERSION);
 
     QString locale = QLocale::system().name();
 
@@ -53,10 +52,10 @@ int main(int argc, char *argv[])
     // App translations
     QTranslator translator;
     QString dataDir = QLatin1String(PKGDATADIR);
-    QString localeDir = dataDir + QDir::separator() + "locale/tepsonic";
+    QString localeDir = dataDir + QDir::separator() + "tepsonic" + QDir::separator() + "locale" + QDir::separator() + "tepsonic";
     // If app was not "installed" use the app directory
     if (!QFile::exists(localeDir)) {
-        localeDir = qApp->applicationDirPath() + QDir::separator() + "locale/tepsonic";
+        localeDir = qApp->applicationDirPath() + QDir::separator() +  "tepsonic" + QDir::separator() + "locale" + QDir::separator() + "tepsonic";
     }
     translator.load(locale,localeDir);
     tepsonic.installTranslator(&translator);

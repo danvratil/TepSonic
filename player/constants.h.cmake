@@ -23,8 +23,15 @@
 #include <QString>
 #include <stdlib.h>
 
+#cmakedefine TEPSONIC_VERSION_MAJOR "${TEPSONIC_VERSION_MAJOR}"
+#cmakedefine TEPSONIC_VERSION_MINOR "${TEPSONIC_VERSION_MINOR}"
+#cmakedefine TEPSONIC_VERSION_PATCH "${TEPSONIC_VERSION_PATCH}"
+#cmakedefine TEPSONIC_VERSION "${TEPSONIC_VERSION}"
+
+
 QString getConfigDir();
 
 const QString _CONFIGDIR = getConfigDir();
+
 
 #endif // CONSTANTS_H

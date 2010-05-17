@@ -29,16 +29,16 @@ class TracksIterator : public QThread
 {
     Q_OBJECT
 
-    public:
-        TracksIterator(QString topDir, PlaylistModel *model);
-        void run();
+public:
+    TracksIterator(QString topDir, PlaylistModel *model);
+    void run();
 
-    private:
-        QString _rootDir;
-        PlaylistModel *_model;
+private:
+    QString _rootDir;
+    PlaylistModel *_model;
 
-    signals:
-        void fileFound(QString filename);
+signals:
+    void fileFound(QString filename);
 };
 
 #endif // TRACKSITERATOR_H

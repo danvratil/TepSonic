@@ -24,39 +24,39 @@
 
 CollectionItem::CollectionItem(const QVector<QVariant> &data, CollectionItem *parent)
 {
-     _parentItem = parent;
-     _itemData = data;
+    _parentItem = parent;
+    _itemData = data;
 }
 
 CollectionItem::~CollectionItem()
 {
-     qDeleteAll(_childItems);
+    qDeleteAll(_childItems);
 }
 
 CollectionItem *CollectionItem::child(int index)
 {
-     if (index > _childItems.count())
-         return NULL;
+    if (index > _childItems.count())
+        return NULL;
 
-     return _childItems.value(index);
+    return _childItems.value(index);
 }
 
 int CollectionItem::childCount() const
 {
-     return _childItems.count();
+    return _childItems.count();
 }
 
 int CollectionItem::childNumber() const
 {
-     if (_parentItem)
-         return _parentItem->_childItems.indexOf(const_cast<CollectionItem*>(this));
+    if (_parentItem)
+        return _parentItem->_childItems.indexOf(const_cast<CollectionItem*>(this));
 
-     return 0;
+    return 0;
 }
 
 int CollectionItem::columnCount() const
 {
-     return _itemData.count();
+    return _itemData.count();
 }
 
 QVariant CollectionItem::data(int column) const
@@ -69,40 +69,40 @@ QVariant CollectionItem::data(int column) const
 
 bool CollectionItem::insertChildren(int position, int count, int columns)
 {
-     if (position < 0 || position > _childItems.size())
-         return false;
+    if (position < 0 || position > _childItems.size())
+        return false;
 
-     for (int row = 0; row < count; ++row) {
-         QVector<QVariant> data(columns);
-         CollectionItem *item = new CollectionItem(data, this);
-         _childItems.insert(position, item);
-     }
+    for (int row = 0; row < count; ++row) {
+        QVector<QVariant> data(columns);
+        CollectionItem *item = new CollectionItem(data, this);
+        _childItems.insert(position, item);
+    }
 
-     return true;
+    return true;
 }
 
 CollectionItem *CollectionItem::parent()
 {
-     return _parentItem;
+    return _parentItem;
 }
 
 bool CollectionItem::removeChildren(int position, int count)
 {
-     if (position < 0 || position + count > _childItems.size())
-         return false;
+    if (position < 0 || position + count > _childItems.size())
+        return false;
 
-     for (int row = 0; row < count; ++row)
-         delete _childItems.takeAt(position);
+    for (int row = 0; row < count; ++row)
+        delete _childItems.takeAt(position);
 
-     return true;
+    return true;
 }
 
 bool CollectionItem::setData(int column, const QVariant &value)
 {
 
-     if (column < 0 || column >= _itemData.size())
-         return false;
+    if (column < 0 || column >= _itemData.size())
+        return false;
 
-     _itemData[column] = value;
-     return true;
+    _itemData[column] = value;
+    return true;
 }

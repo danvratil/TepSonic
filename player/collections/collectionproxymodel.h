@@ -34,36 +34,36 @@
 */
 class CollectionProxyModel : public QSortFilterProxyModel
 {
-Q_OBJECT
+    Q_OBJECT
 
-    public:
-        //! Constructor
-        /*!
-          Initializes the model
-          \param parent parent of the model
-        */
-        CollectionProxyModel(QObject *parent = 0);
+public:
+    //! Constructor
+    /*!
+      Initializes the model
+      \param parent parent of the model
+    */
+    CollectionProxyModel(QObject *parent = 0);
 
-    protected:
-        //! Called for each item in model, decides wheter the item will be displayed or not
-        /*!
-          Checks, wheter the item determined by \p sourceParent and \p sourceRow matches the
-          filter or not.
-          \param sourceRow position of the item relatively to it's parent
-          \param sourceParent QModelIndex of the item's parent
-          \return Returns true when the item matches the filter and should be displayed. When the item
-          does not match the filter or simply should not be displayed, returns false.
-        */
-        bool filterAcceptsRow(int sourceRow, const QModelIndex &sourceParent) const;
+protected:
+    //! Called for each item in model, decides wheter the item will be displayed or not
+    /*!
+      Checks, wheter the item determined by \p sourceParent and \p sourceRow matches the
+      filter or not.
+      \param sourceRow position of the item relatively to it's parent
+      \param sourceParent QModelIndex of the item's parent
+      \return Returns true when the item matches the filter and should be displayed. When the item
+      does not match the filter or simply should not be displayed, returns false.
+    */
+    bool filterAcceptsRow(int sourceRow, const QModelIndex &sourceParent) const;
 
-    private:
-        //! Returns list of children of given parent
-        /*!
-          Recursively returns list of all parent's children including children's children.
-          \param parent QModelIndex of parent item
-          \return Returns list of parent's children
-        */
-        QModelIndexList getChildren(const QModelIndex parent) const;
+private:
+    //! Returns list of children of given parent
+    /*!
+      Recursively returns list of all parent's children including children's children.
+      \param parent QModelIndex of parent item
+      \return Returns list of parent's children
+    */
+    QModelIndexList getChildren(const QModelIndex parent) const;
 
 };
 

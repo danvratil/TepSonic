@@ -28,43 +28,45 @@
 
 namespace PreferencesPages {
 
-    class Player: public QWidget
-    {
-        Q_OBJECT
-        public:
-            Player(QWidget *parent = 0);
-            Ui::Player *ui;
-    };
+class Player: public QWidget
+{
+    Q_OBJECT
+public:
+    Player(QWidget *parent = 0);
+    Ui::Player *ui;
+};
 
-    class Collections: public QWidget
-    {
-        Q_OBJECT
-        public:
-            Collections(QWidget *parent = 0);
-            Ui::Collections *ui;
-            bool collectionsSourceChanged() { return _collectionsSourceChanged; }
+class Collections: public QWidget
+{
+    Q_OBJECT
+public:
+    Collections(QWidget *parent = 0);
+    Ui::Collections *ui;
+    bool collectionsSourceChanged() {
+        return _collectionsSourceChanged;
+    }
 
-        private:
-            bool _collectionsSourceChanged;
+private:
+    bool _collectionsSourceChanged;
 
-        private slots:
-            void on_pushButton_clicked();
-            void on_removeAllPathsButton_clicked();
-            void on_removePathButton_clicked();
-            void on_addPathButton_clicked();
-            void on_dbEngineCombo_currentIndexChanged(QString );
+private slots:
+    void on_pushButton_clicked();
+    void on_removeAllPathsButton_clicked();
+    void on_removePathButton_clicked();
+    void on_addPathButton_clicked();
+    void on_dbEngineCombo_currentIndexChanged(QString );
 
-        signals:
-            void rebuildCollections();
-    };
+signals:
+    void rebuildCollections();
+};
 
-    class Plugins: public QWidget
-    {
-        Q_OBJECT
-        public:
-            Plugins(QWidget *parent = 0);
-            Ui::Plugins *ui;
-    };
+class Plugins: public QWidget
+{
+    Q_OBJECT
+public:
+    Plugins(QWidget *parent = 0);
+    Ui::Plugins *ui;
+};
 
 }
 

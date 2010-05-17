@@ -1,0 +1,11 @@
+[Desktop Entry]
+Name=TepSonic
+Comment=A simple lightweight audioplayer
+Comment[cs]=Malý jednoduchý hudební přehrávač
+GenericName=A simple audioplayer
+Exec=tepsonic
+Terminal=false
+Type=Application
+Icon=tepsonic
+Categories=Application;Qt;Audio
+StartupNotify=true

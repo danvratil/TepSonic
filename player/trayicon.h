@@ -26,16 +26,16 @@
 class TrayIcon : public QSystemTrayIcon
 {
     Q_OBJECT
-    public:
-        explicit TrayIcon(QObject *parent = 0);
-        explicit TrayIcon(const QIcon &icon, QObject *parent = 0);
+public:
+    explicit TrayIcon(QObject *parent = 0);
+    explicit TrayIcon(const QIcon &icon, QObject *parent = 0);
 
 
-    protected:
-        bool event(QEvent *event);
+protected:
+    bool event(QEvent *event);
 
-    signals:
-        void mouseWheelScrolled(int delta);
+signals:
+    void mouseWheelScrolled(int delta);
 
 
 

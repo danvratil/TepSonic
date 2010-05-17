@@ -30,24 +30,24 @@
 */
 class CollectionBrowser : public QTreeView
 {
-    public:
+public:
 
-        //! Constructor
-        CollectionBrowser(QWidget* = 0);
+    //! Constructor
+    CollectionBrowser(QWidget* = 0);
 
-        //! Destructor
-        ~CollectionBrowser();
+    //! Destructor
+    ~CollectionBrowser();
 
-    protected:
-        //! Event that is fired when drag operation is started
-        void startDrag(Qt::DropActions);
+protected:
+    //! Event that is fired when drag operation is started
+    void startDrag(Qt::DropActions);
 
-        //! Event handler that is fired when a key is pressed
-        /*!
-          It is called only when CollectionBrowser has focus when the key
-          is pressed
-        */
-        void keyPressEvent(QKeyEvent*);
+    //! Event handler that is fired when a key is pressed
+    /*!
+      It is called only when CollectionBrowser has focus when the key
+      is pressed
+    */
+    void keyPressEvent(QKeyEvent*);
 
 };
 

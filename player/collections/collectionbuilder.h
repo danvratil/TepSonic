@@ -39,53 +39,53 @@ class CollectionModel;
 class CollectionBuilder : public QThread
 {
     Q_OBJECT
-    public:
+public:
 
-        //! Constructor
-        /*!
-          \param model pointer to a CollectionModel that should be populated
-        */
-        CollectionBuilder(CollectionModel *model);
+    //! Constructor
+    /*!
+      \param model pointer to a CollectionModel that should be populated
+    */
+    CollectionBuilder(CollectionModel *model);
 
-        //! Destructor
-        ~CollectionBuilder();
+    //! Destructor
+    ~CollectionBuilder();
 
-        //! Start the thread
-        /*!
-          Main thread method. Loads data from database and populates the model
-        */
-        void run();
+    //! Start the thread
+    /*!
+      Main thread method. Loads data from database and populates the model
+    */
+    void run();
 
-    public slots:
-        //! Wake the thread and load given folder.
-        void rebuildFolder(QStringList folder);
+public slots:
+    //! Wake the thread and load given folder.
+    void rebuildFolder(QStringList folder);
 
-    signals:
-        //! Emitted when a change in collections is made
-        void collectionChanged();
+signals:
+    //! Emitted when a change in collections is made
+    void collectionChanged();
 
-        //! Informs that building has begun
-        void buildingStarted();
+    //! Informs that building has begun
+    void buildingStarted();
 
-        //! Informs that building has finished
-        void buildingFinished();
+    //! Informs that building has finished
+    void buildingFinished();
 
 
-    private:
-        //! Pointer to CollectionModel that is populated
-        CollectionModel *_collectionModel;
+private:
+    //! Pointer to CollectionModel that is populated
+    CollectionModel *_collectionModel;
 
-        //! Mutex for syncing access to model
-        QMutex _mutex;
+    //! Mutex for syncing access to model
+    QMutex _mutex;
 
-        //! Lock holds the thread sleeping when there's nothing to do
-        QWaitCondition _lock;
+    //! Lock holds the thread sleeping when there's nothing to do
+    QWaitCondition _lock;
 
-        //! Allows thread to quit
-        bool _canClose;
+    //! Allows thread to quit
+    bool _canClose;
 
-        //! List of folder to go through
-        QStringList _folders;
+    //! List of folder to go through
+    QStringList _folders;
 };
 
 #endif // COLLECTIONBUILDER_H

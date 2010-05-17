@@ -21,7 +21,7 @@
 #include "qdebug.h"
 
 CollectionProxyModel::CollectionProxyModel(QObject *parent) :
-    QSortFilterProxyModel(parent)
+        QSortFilterProxyModel(parent)
 {
 }
 
