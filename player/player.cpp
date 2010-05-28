@@ -22,10 +22,10 @@
 
 #include <QFileInfo>
 #include <QStringList>
-#include <phonon/MediaObject>
-#include <phonon/Path>
-#include <phonon/AudioOutput>
-#include <phonon/MediaSource>
+#include <Phonon/MediaObject>
+#include <Phonon/Path>
+#include <Phonon/AudioOutput>
+#include <Phonon/MediaSource>
 
 #include <taglib/fileref.h>
 #include <taglib/tag.h>
