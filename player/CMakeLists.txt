@@ -95,14 +95,30 @@ set(player_RCCS
     icons.qrc
 )
 
-set(player_TRANS
-    ts/cs_CZ.ts
-)
+option(LANGUAGES "Using translations")
+if (NOT LANGS)
+  set (LANGUAGES cs CACHE STRING "Using translations" FORCE)
+else (NOT LANGS)
+  string(REGEX MATCHALL [a-zA-Z]+
+         langs1 ${LANGS})
+  set (LANGUAGES ${langs1} CACHE STRING "Using translations" FORCE)
+endif (NOT LANGS)
 
 qt4_wrap_ui(player_QUIS_HDRS ${player_QUIS})
 qt4_wrap_cpp(player_QMOC_SRCS ${player_HDRS})
 qt4_add_resources(player_RCCS_SRCS ${player_RCCS})
-qt4_add_translation(player_TRANS_QM ${player_TRANS})
+#Create translations
+foreach (LANGUAGE ${LANGUAGES})
+        set (TS ${CMAKE_CURRENT_SOURCE_DIR}/ts/${LANGUAGE}.ts)
+        set (QM ${CMAKE_CURRENT_SOURCE_DIR}/ts/${LANGUAGE}.qm)
+        set (TRANSLATIONS ${TRANSLATIONS} ${TS})
+        set (TRANSLATIONS_BINARY ${TRANSLATIONS_BINARY} ${QM})
+        add_custom_command (
+                OUTPUT ${QM}
+                COMMAND ${QT_LRELEASE_EXECUTABLE} ${TS}
+                MAIN_DEPENDENCY ${TS})
+endforeach()
+
 
 if (WIN32)
   set(GUI_TYPE WIN32)
@@ -113,8 +129,8 @@ add_executable(tepsonic
 	       ${player_RCCS_SRCS}
 	       ${player_QUIS_HDRS}
 	       ${player_QMOC_SRCS}
-	       ${player_TRANS_QM}
 	       ${player_SRCS}
+	       ${TRANSLATIONS_BINARY}
 )
 
 target_link_libraries(tepsonic
@@ -130,7 +146,7 @@ install(TARGETS tepsonic
 )
 
 if (UNIX)
-	install(FILES ${player_TRANS_QM}
+	install(FILES ${TRANSLATIONS_BINARY}
 		DESTINATION ${INSTALL_DATA_DIR}/tepsonic/locale/tepsonic
 	)
 

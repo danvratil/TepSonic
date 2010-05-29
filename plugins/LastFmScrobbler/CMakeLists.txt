@@ -44,19 +44,36 @@ set(lastfmscrobbler_QUIS
     ui/lastfmscrobblerconfig.ui
 )
 
-set(lastfmscrobbler_TRNS
-    ts/cs_CZ.ts
-)
+option(LANGUAGES "Using translations")
+if (NOT LANGS)
+  set (LANGUAGES cs CACHE STRING "Using translations" FORCE)
+else (NOT LANGS)
+  string(REGEX MATCHALL [a-zA-Z]+
+         langs1 ${LANGS})
+  set (LANGUAGES ${langs1} CACHE STRING "Using translations" FORCE)
+endif (NOT LANGS)
+
 
 qt4_wrap_ui(lastfmscrobbler_QUIS_HDRS ${lastfmscrobbler_QUIS})
 qt4_wrap_cpp(lastfmscrobbler_QMOC_SRCS ${lastfmscrobbler_HDRS})
-qt4_add_translation(lastfmscrobbler_TRNS_QM ${lastfmscrobbler_TRNS})
+#Create translations
+foreach (LANGUAGE ${LANGUAGES})
+        set (TS ${CMAKE_CURRENT_SOURCE_DIR}/ts/${LANGUAGE}.ts)
+        set (QM ${CMAKE_CURRENT_SOURCE_DIR}/ts/${LANGUAGE}.qm)
+        set (TRANSLATIONS ${TRANSLATIONS} ${TS})
+        set (TRANSLATIONS_BINARY ${TRANSLATIONS_BINARY} ${QM})
+        add_custom_command (
+                OUTPUT ${QM}
+                COMMAND ${QT_LRELEASE_EXECUTABLE} ${TS}
+                MAIN_DEPENDENCY ${TS})
+endforeach()
+
 
 add_library(tepsonic_lastfmscrobbler SHARED
 	       ${lastfmscrobbler_SRCS}
 	       ${lastfmscrobbler_QUIS_HDRS}
 	       ${lastfmscrobbler_QMOC_SRCS}
-	       ${lastfmscrobbler_TRNS_QM}
+	       ${TRANSLATIONS_BINARY}
 )
 
 set_target_properties(tepsonic_lastfmscrobbler
@@ -73,6 +90,6 @@ target_link_libraries(tepsonic_lastfmscrobbler
 install(TARGETS tepsonic_lastfmscrobbler
 	DESTINATION ${INSTALL_LIBRARY_DIR}/
 )
-install(FILES ${lastfmscrobbler_TRNS_QM}
+install(FILES ${TRANSLATIONS_BINARY}
 	DESTINATION ${INSTALL_DATA_DIR}/tepsonic/locale/lastfmscrobbler
 )
