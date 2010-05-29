@@ -1,2 +1,7 @@
-
-add_subdirectory(LastFmScrobbler)
+if (DEFINED WITH_LASTFMSCROBBLER)
+  if (NOT WITH_LASTFMSCROBBLER MATCHES OFF)
+    add_subdirectory(LastFmScrobbler)
+  endif (NOT WITH_LASTFMSCROBBLER MATCHES OFF)
+else (DEFINED WITH_LASTFMSCROBBLER)
+  add_subdirectory(LastFmScrobbler)
+endif (DEFINED WITH_LASTFMSCROBBLER)
