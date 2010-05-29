@@ -36,15 +36,6 @@ add_definitions(${QT_DEFINITIONS}
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)
 set(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/lib)
 
-# Some translations targets 
-add_custom_target (    
-        translations_qt
-        COMMAND ${QT_LUPDATE_EXECUTABLE} ${HEADERS} ${SOURCES} -ts ${TRANSLATIONS})
-add_custom_command (
-        TARGET translations_qt
-        COMMAND ${QT_LRELEASE_EXECUTABLE} ${TRANSLATIONS})
-
-
 # First player, then plugins, this is strict order!
 add_subdirectory(player)
 add_subdirectory(plugins)

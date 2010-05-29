@@ -119,6 +119,14 @@ foreach (LANGUAGE ${LANGUAGES})
                 MAIN_DEPENDENCY ${TS})
 endforeach()
 
+add_custom_target (
+        translations_qt
+        COMMAND ${QT_LUPDATE_EXECUTABLE} ${HEADERS} ${SOURCES} -ts ${TRANSLATIONS})
+add_custom_command (
+        TARGET translations_qt
+        COMMAND ${QT_LRELEASE_EXECUTABLE} ${TRANSLATIONS})
+
+
 
 if (WIN32)
   set(GUI_TYPE WIN32)
