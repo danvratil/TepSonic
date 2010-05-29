@@ -25,7 +25,7 @@
 #include "player.h"
 
 #include <QObject>
-#include <phonon/MediaObject>
+#include <phonon/mediaobject.h>
 
 class QString;
 class QWidget;

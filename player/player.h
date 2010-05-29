@@ -22,9 +22,9 @@
 #define PLAYER_H
 
 #include <QObject>
-#include <Phonon/MediaSource>
-#include <Phonon/AudioOutput>
-#include <Phonon/MediaObject>
+#include <phonon/mediasource.h>
+#include <phonon/audiooutput.h>
+#include <phonon/mediaobject.h>
 
 //! Player class provides simplified API to control the playback
 /*!
@@ -44,8 +44,6 @@ class Player: public QObject
                WRITE setRandomMode)
     Q_PROPERTY(Player::MetaData metadata
                READ currentMetaData)
-    Q_PROPERTY(Phonon::State playerState
-               READ playerState)
   public:
     //! Structure to pass track's metadata
     struct MetaData {

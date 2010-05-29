@@ -47,8 +47,8 @@
 #include <QDate>
 #include <QDateTime>
 #include <QTime>
-#include <phonon/SeekSlider>
-#include <phonon/VolumeSlider>
+#include <phonon/seekslider.h>
+#include <phonon/volumeslider.h>
 
 #include <QDebug>
 

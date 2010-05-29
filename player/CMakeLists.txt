@@ -13,21 +13,20 @@ set(TEPSONIC_VERSION ${TEPSONIC_VERSION_MAJOR}.${TEPSONIC_VERSION_MINOR}.${TEPSO
 find_package(PkgConfig REQUIRED)
 find_package(Qt4 REQUIRED)
 find_package(Taglib REQUIRED)
+find_package(Phonon REQUIRED)
 
 add_definitions(${TAGLIB_CFLAGS})
 
 # Make sure all Qt parts will be available
 set(QT_USE_QTMAIN 1)
 set(QT_USE_QTSQL 1)
-set(QT_USE_PHONON 1)
 
 include(${QT_USE_FILE})
 
 include_directories(
         ${CMAKE_CURRENT_BINARY_DIR}
         ${QT_INCLUDE_DIR}
-	/usr/include/KDE
-        ${QT_PHONON_INCLUDE_DIR}
+        ${PHONON_INCLUDES}
 	${CMAKE_CURRENT_SOURCE_DIR}
 	"collections"
 	"playlist"
@@ -120,8 +119,8 @@ add_executable(tepsonic
 
 target_link_libraries(tepsonic
 		      ${QT_LIBRARIES}
-		      ${QT_PHONON_LIBRARIES}
 		      ${QT_QTSQL_LIBRARIES}
+		      ${PHONON_LIBS}
                       ${TAGLIB_LIBRARIES}
 )
 

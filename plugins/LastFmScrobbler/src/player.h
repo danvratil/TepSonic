@@ -22,9 +22,9 @@
 #define PLAYER_H
 
 #include <QObject>
-#include <phonon/MediaSource>
-#include <phonon/AudioOutput>
-#include <phonon/MediaObject>
+#include <phonon/mediasource.h>
+#include <phonon/audiooutput.h>
+#include <phonon/mediaobject.h>
 
 //! Player class provides simplified API to control the playback
 /*!

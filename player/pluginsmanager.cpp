@@ -34,7 +34,7 @@
 #include <QPluginLoader>
 #include <QDebug>
 #include <QSettings>
-#include <Phonon/MediaObject>
+#include <phonon/mediaobject.h>
 
 PluginsManager::PluginsManager(MainWindow *mainWindow, Player *player)
 {
