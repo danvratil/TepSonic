@@ -25,6 +25,7 @@
 #include <QMutex>
 #include <QWaitCondition>
 #include <QStringList>
+#include <QSqlDatabase>
 
 class CollectionModel;
 
@@ -86,6 +87,33 @@ private:
 
     //! List of folder to go through
     QStringList _folders;
+
+    //! Load informations about given file and store it in database
+    /*!
+      \param filename File to process
+      \param    sqlDb Pointer to SQL connection to be used
+    */
+    void insertTrack(QString filename, QSqlDatabase *sqlDb);
+
+    //! Load new informations about given file and update the database
+    /*!
+      \param filename File to process
+      \param sqlDb Pointer to SQL connection to be used
+    */
+    void updateTrack(QString filename, QSqlDatabase *sqlDb);
+
+    //! Remove given track from database
+    /*!
+      \param filename File to process
+      \param sqlDb Pointer to SQL connection to be used
+    */
+    void removeTrack(QString filename, QSqlDatabase *sqlDb);
+
+    //! Check for interprets/albums/genres...that are not used anymore
+    /*!
+      \param sqlDb Pointer to SQL connection to be used
+    */
+    void cleanUpDatabase(QSqlDatabase *sqlDb);
 };
 
 #endif // COLLECTIONBUILDER_H

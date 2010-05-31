@@ -54,6 +54,23 @@
 
 MainWindow::MainWindow(Player *player)
 {
+
+    _settings = new QSettings(_CONFIGDIR + QDir::separator() + "main.conf",QSettings::IniFormat,this);
+
+    /* Check if user have been already warned, but warn him only when this is not a
+       first run (in that case user has to build collections anyway) */
+    if ((!_settings->value("collectionDBIncompatWarned",false).toBool()) &&
+        (_settings->contains("Window/Geometry"))) {
+        QMessageBox::warning(this,
+                            QString("Warning: Collections database has changed"),
+                            QString("The structure of collections database has been changed " \
+                                    "and is now incompatible with the old version.\n\n" \
+                                    "If you don't have automatic collections rebuilding enabled, " \
+                                    "please rebuild them manually now from menu Settings->Preferences->Collections."),
+                            QMessageBox::Ok);
+        _settings->setValue("collectionDBIncompatWarned",true);
+    }
+
     // Initialize pseudo-random numbers generator
     srand(time(NULL));
 
@@ -121,7 +138,6 @@ MainWindow::MainWindow(Player *player)
     // This refreshes the filter when an item is added to the playlist so the item appears immediately
     connect(_taskManager,SIGNAL(playlistPopulated()),_playlistProxyModel,SLOT(invalidate()));
 
-    _settings = new QSettings(QString(QString(_CONFIGDIR)).append("/main.conf"),QSettings::IniFormat,this);
     restoreGeometry(_settings->value("Window/Geometry", saveGeometry()).toByteArray());
     restoreState(_settings->value("Window/State", saveState()).toByteArray());
     _ui->viewsSplitter->restoreState(_settings->value("Window/ViewsSplit").toByteArray());

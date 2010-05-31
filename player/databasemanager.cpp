@@ -84,7 +84,13 @@ bool DatabaseManager::connectToDB()
         QSqlQuery query("SET CHARACTER SET utf8;",_sqlDb);
     }
 
-    if (!_sqlDb.tables(QSql::Tables).contains("Tracks",Qt::CaseSensitive)) {
+    QStringList tables = _sqlDb.tables(QSql::AllTables);
+    if (!(tables.contains("albums") &&
+          tables.contains("genres") &&
+          tables.contains("interprets") &&
+          tables.contains("tracks") &&
+          tables.contains("years") &&
+          tables.contains("view_tracks"))) {
         initDb();
     }
 
@@ -96,27 +102,119 @@ void DatabaseManager::initDb()
     qDebug() << "Initializing database structure";
     switch (_driverType) {
     case MySQL: {
-        QSqlQuery query("CREATE TABLE IF NOT EXISTS `Tracks` (" \
-                        "   `filename` varchar(300) NOT NULL," \
-                        "   `trackNo` int(11) NOT NULL DEFAULT '0'," \
-                        "   `artist` varchar(120) NOT NULL," \
-                        "   `album` varchar(120) NOT NULL," \
-                        "   `title` varchar(300) NOT NULL," \
-                        "   `mtime` int(10) unsigned NOT NULL DEFAULT '0'," \
-                        "   PRIMARY KEY (`filename`)," \
-                        "   KEY `artist` (`artist`)," \
-                        "   KEY `album` (`album`)"  \
-                        ") ENGINE=MyISAM DEFAULT CHARSET=utf8;",_sqlDb);
+        QSqlQuery query(_sqlDb);
+
+        query.exec("DROP TABLE IF EXISTS `albums`,`genres`,`interprets`,`tracks`,`years`;");
+        query.exec("DROP VIEW `view_tracks`;");
+
+        query.exec("CREATE TABLE `albums` (" \
+                   "   `id` int(11) NOT NULL AUTO_INCREMENT," \
+                   "   `album` varchar(250) NOT NULL," \
+                   "   PRIMARY KEY (`id`)," \
+                   ") ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1;");
+
+        query.exec("CREATE TABLE `genres` (" \
+                   "   `id` int(11) NOT NULL AUTO_INCREMENT," \
+                   "   `genre` varchar(80) NOT NULL," \
+                   "   PRIMARY KEY (`id`)" \
+                   ") ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1;");
+
+        query.exec("CREATE TABLE `interprets` (" \
+                   "   `id` int(11) NOT NULL AUTO_INCREMENT," \
+                   "   `interpret` varchar(300) NOT NULL," \
+                   "   PRIMARY KEY (`id`)" \
+                   ") ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1;");
+
+        query.exec("CREATE TABLE `tracks` (" \
+                   "   `id` int(11) NOT NULL AUTO_INCREMENT," \
+                   "   `filename` text NOT NULL," \
+                   "   `trackname` varchar(300) NOT NULL," \
+                   "   `track` int(11) NOT NULL," \
+                   "   `length` int(11) unsigned NOT NULL," \
+                   "   `interpret` int(11) NOT NULL," \
+                   "   `album` int(11) NOT NULL," \
+                   "   `genre` int(11) NOT NULL," \
+                   "   `year` int(11) NOT NULL," \
+                   "   `mtime` int(11) unsigned NOT NULL," \
+                   "   PRIMARY KEY (`id`)," \
+                   "   KEY `interpret` (`interpret`,`album`,`year`,`genre`)" \
+                   ") ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1;");
+
+        query.exec("CREATE TABLE `years` (" \
+                   "   `id` int(11) NOT NULL AUTO_INCREMENT," \
+                   "   `year` int(11) NOT NULL," \
+                   "   PRIMARY KEY (`id`)" \
+                   ") ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1;");
+
+        query.exec("CREATE VIEW `view_tracks` AS" \
+                   "   SELECT `tracks`.`id` AS `id`," \
+                   "          `tracks`.`filename` AS `filename`," \
+                   "          `tracks`.`trackname` AS `trackname`," \
+                   "          `tracks`.`track` AS `track`," \
+                   "          `tracks`.`length` AS `length`," \
+                   "          `interprets`.`interpret` AS `interpret`," \
+                   "          `genres`.`genre` AS `genre`," \
+                   "          `albums`.`album` AS `album`," \
+                   "          `years`.`year` AS `year`" \
+                   "   FROM `tracks`" \
+                   "   LEFT JOIN `interprets` ON `tracks`.`interpret` = `interprets`.`id`" \
+                   "   LEFT JOIN `genres` ON `tracks`.`genre` = `genres`.`id`" \
+                   "   LEFT JOIN `albums` ON `tracks`.`album` = `albums`.`id`" \
+                   "   LEFT JOIN `years` ON `tracks`.`year` = `years`.`id`;");
     } break;
     case SQLite: {
-        QSqlQuery query("CREATE TABLE Tracks("\
-                        "   filename TEXT," \
-                        "   trackNo INTEGER," \
-                        "   artist TEXT," \
-                        "   album TEXT," \
-                        "   title TEXT," \
-                        "   mtime INTEGER,"\
-                        "   PRIMARY KEY(filename ASC));",_sqlDb);
+        QSqlQuery query(_sqlDb);
+
+        query.exec("DROP TABLE IF EXISTS `albums`;");
+        query.exec("DROP TABLE IF EXISTS `genres`;");
+        query.exec("DROP TABLE IF EXISTS ``interprets`;");
+        query.exec("DROP TABLE IF EXISTS `tracks`;");
+        query.exec("DROP TABLE IF EXISTS `years`;");
+        query.exec("DROP VIEW IF EXISTS `view_tracks`;");
+
+        query.exec("CREATE TABLE `genres` (" \
+                   "    `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL," \
+                   "    `genre` TEXT NOT NULL);");
+
+        query.exec("CREATE TABLE `interprets` (" \
+                   "    `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL," \
+                   "    `interpret` TEXT NOT NULL);");
+
+        query.exec("CREATE TABLE `albums` (" \
+                   "    `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL," \
+                   "    `album` TEXT NOT NULL);");
+
+        query.exec("CREATE TABLE `tracks` (" \
+                   "    `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL," \
+                   "    `filename` TEXT NOT NULL," \
+                   "    `trackname` TEXT NOT NULL," \
+                   "    `track` INTEGER," \
+                   "    `length` INTEGER NULL," \
+                   "    `interpret` INTEGER," \
+                   "    `album` INTEGER," \
+                   "    `genre` INTEGER," \
+                   "    `year` INTEGER, "\
+                   "    `mtime` INTEGER);");
+
+        query.exec("CREATE TABLE `years` (" \
+                   "    `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL," \
+                   "    `year` INTEGER NOT NULL);");
+
+        query.exec("CREATE VIEW `view_tracks` AS" \
+                   "    SELECT `tracks`.`id`," \
+                   "           `tracks`.`filename`," \
+                   "           `tracks`.`trackname`," \
+                   "           `tracks`.`track`," \
+                   "           `tracks`.`length`," \
+                   "           `interprets`.`interpret`," \
+                   "           `genres`.`genre`," \
+                   "           `albums`.`album`," \
+                   "           `years`.`year`" \
+                   "    FROM `tracks`" \
+                   "    LEFT JOIN `interprets` ON `tracks`.`interpret` = `interprets`.`id`" \
+                   "    LEFT JOIN `genres` ON `tracks`.`genre` = `genres`.`id`" \
+                   "    LEFT JOIN `albums` ON `tracks`.`album` = `albums`.`id`" \
+                   "    LEFT JOIN `years` ON `tracks`.`year` = `years`.`id`;");
     } break;
     }
 }

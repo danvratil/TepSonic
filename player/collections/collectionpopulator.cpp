@@ -68,20 +68,15 @@ void CollectionPopulator::run()
             QModelIndex albumsParent;
             QModelIndex tracksParent;
             {
-                QSqlField data("album",QVariant::String);
-                QSqlQuery artistsQuery("SELECT artist FROM Tracks GROUP BY artist ORDER BY artist ASC",sqlConn);
+                QSqlQuery artistsQuery("SELECT id,interpret FROM interprets ORDER BY interpret ASC",sqlConn);
                 while (artistsQuery.next()) {
-                    albumsParent = (*_collectionModel)->addChild(QModelIndex(),artistsQuery.value(0).toString(),QString());
-                    data.setValue(artistsQuery.value(0).toString());
-                    QString artist = sqlConn.driver()->formatValue(data,false);
-                    QSqlQuery albumsQuery("SELECT album FROM Tracks WHERE artist="+artist+" GROUP BY album ORDER BY album ASC;",
+                    albumsParent = (*_collectionModel)->addChild(QModelIndex(),artistsQuery.value(1).toString(),QString());
+                    QSqlQuery albumsQuery("SELECT id,album FROM albums WHERE id IN (SELECT album FROM tracks WHERE interpret="+artistsQuery.value(0).toString()+") ORDER BY album ASC;",
                                       sqlConn);
                     while (albumsQuery.next()) {
-                        tracksParent = (*_collectionModel)->addChild(albumsParent,albumsQuery.value(0).toString(),QString());
+                        tracksParent = (*_collectionModel)->addChild(albumsParent,albumsQuery.value(1).toString(),QString());
 
-                        data.setValue(albumsQuery.value(0).toString());
-                        QString album = sqlConn.driver()->formatValue(data,false);
-                        QSqlQuery tracksQuery("SELECT title,filename FROM Tracks WHERE album="+album+" AND artist="+artist+" ORDER BY trackNo ASC;",
+                        QSqlQuery tracksQuery("SELECT trackname,filename FROM tracks WHERE album="+albumsQuery.value(0).toString()+" AND interpret="+artistsQuery.value(0).toString()+" ORDER BY track ASC;",
                                               sqlConn);
                         while (tracksQuery.next()) {
                             (*_collectionModel)->addChild(tracksParent,tracksQuery.value(0).toString(),tracksQuery.value(1).toString());
