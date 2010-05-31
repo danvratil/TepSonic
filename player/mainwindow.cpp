@@ -290,6 +290,9 @@ void MainWindow::createMenus()
     _trayIconMenu->addAction(_ui->actionQuit_TepSonic);
 
     _collectionsPopupMenu = new QMenu(this);
+    _collectionsPopupMenu->addAction(tr("Expand all"),_ui->collectionBrowser,SLOT(expandAll()));
+    _collectionsPopupMenu->addAction(tr("Collapse all"),_ui->collectionBrowser,SLOT(collapseAll()));
+    _collectionsPopupMenu->addSeparator();
     _collectionsPopupMenu->addAction(tr("Delete file from disk"),this,SLOT(removeFileFromDisk()));
     _ui->collectionBrowser->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(_ui->collectionBrowser,SIGNAL(customContextMenuRequested(QPoint)),this,SLOT(showCollectionsContextMenu(QPoint)));
