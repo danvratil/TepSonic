@@ -95,9 +95,9 @@ MainWindow::MainWindow(Player *player)
             this,SLOT(playlistLengthChanged(int,int)));
     _playlistProxyModel = new PlaylistProxyModel(this);
     _playlistProxyModel->setSourceModel(_playlistModel);
-    _playlistProxyModel->setDynamicSortFilter(true);
+    _playlistProxyModel->setDynamicSortFilter(false);
 
-    _ui->playlistBrowser->setModel(_playlistProxyModel);
+    _ui->playlistBrowser->setModel(_playlistModel);
     _ui->playlistBrowser->setDragEnabled(true);
     _ui->playlistBrowser->setDropIndicatorShown(true);
     _ui->playlistBrowser->setSortingEnabled(true);
