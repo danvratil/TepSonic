@@ -45,7 +45,7 @@ public:
     /*!
       \param model pointer to a CollectionModel that should be populated
     */
-    CollectionBuilder(CollectionModel *model);
+    CollectionBuilder(CollectionModel **model);
 
     //! Destructor
     ~CollectionBuilder();
@@ -72,8 +72,8 @@ signals:
 
 
 private:
-    //! Pointer to CollectionModel that is populated
-    CollectionModel *_collectionModel;
+    //! Pointer to pointer to CollectionModel that is populated
+    CollectionModel **_collectionModel;
 
     //! Mutex for syncing access to model
     QMutex _mutex;

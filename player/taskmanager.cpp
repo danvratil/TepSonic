@@ -31,13 +31,13 @@
 #include <QSettings>
 #include <QStringList>
 
-TaskManager::TaskManager(PlaylistModel *playlistModel, CollectionModel *collectionModel)
+TaskManager::TaskManager(PlaylistModel **playlistModel, CollectionModel **collectionModel)
 {
     _playlistModel = playlistModel;
     _collectionModel = collectionModel;
 
-    _playlistPopulator = new PlaylistPopulator(_playlistModel);
-    _playlistWriter = new PlaylistWriter(_playlistModel);
+    _playlistPopulator = new PlaylistPopulator(*_playlistModel);
+    _playlistWriter = new PlaylistWriter(*_playlistModel);
     _collectionPopulator = new CollectionPopulator(_collectionModel);
     _collectionBuilder = new CollectionBuilder(_collectionModel);
 

@@ -166,6 +166,18 @@ private:
     */
     void createMenus();
 
+    //! Create CollectionModel and CollectionProxyModel
+    /*!
+      This method is called only when collections are enabled in configuration
+    */
+    void setupCollections();
+
+    //! Destroy CollectionModel and CollectionProxyModel
+    /*!
+      This method is called when preferences dialog is closed and collections were disabled in it
+    */
+    void destroyCollections();
+
 
 protected:
     //! Close event handler

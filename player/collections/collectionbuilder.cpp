@@ -40,7 +40,7 @@
 #include <QHash>
 #include <QHashIterator>
 
-CollectionBuilder::CollectionBuilder(CollectionModel *collectionModel)
+CollectionBuilder::CollectionBuilder(CollectionModel **collectionModel)
 {
     moveToThread(this);
 

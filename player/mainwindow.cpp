@@ -58,6 +58,8 @@ MainWindow::MainWindow(Player *player)
     srand(time(NULL));
 
     _canClose = false;
+    _collectionProxyModel = NULL;
+    _collectionModel = NULL;
 
     // Create default UI
     _ui = new Ui::MainWindow();
@@ -111,27 +113,7 @@ MainWindow::MainWindow(Player *player)
     _ui->playlistBrowser->hideColumn(0);
     _selectionModel = _ui->playlistBrowser->selectionModel();
 
-    // Not translatable
-    headers = QStringList() << "title" << "filename";
-    _collectionModel = new CollectionModel(headers,this);
-    _collectionProxyModel = new CollectionProxyModel(this);
-    //_collectionProxyModel->setSourceModel(_collectionModel);
-    _collectionProxyModel->setFilterCaseSensitivity(Qt::CaseInsensitive);
-    _collectionProxyModel->setFilterKeyColumn(0);
-    _collectionProxyModel->setDynamicSortFilter(true);
-
-    _ui->collectionBrowser->setModel(_collectionModel);
-    _ui->collectionBrowser->setSelectionMode(QAbstractItemView::ExtendedSelection);
-    _ui->collectionBrowser->setDragEnabled(true);
-    _ui->collectionBrowser->setDropIndicatorShown(true);
-    _ui->collectionBrowser->setAlternatingRowColors(true);
-    _ui->collectionBrowser->setRootIsDecorated(true);
-    // Hide the second column that contains real filename
-    _ui->collectionBrowser->hideColumn(1);
-    // Hide the header
-    _ui->collectionBrowser->header()->setHidden(true);
-
-    _taskManager = new TaskManager(_playlistModel,_collectionModel);
+    _taskManager = new TaskManager(&_playlistModel,&_collectionModel);
     connect(_ui->playlistBrowser,SIGNAL(addedFiles(QStringList)),_taskManager,SLOT(addFilesToPlaylist(QStringList)));
     connect(_taskManager,SIGNAL(collectionsPopulated()),this,SLOT(fixCollectionProxyModel()));
     connect(_taskManager,SIGNAL(taskStarted(QString)),_ui->statusBar,SLOT(showWorkingBar(QString)));
@@ -144,13 +126,14 @@ MainWindow::MainWindow(Player *player)
     restoreState(_settings->value("Window/State", saveState()).toByteArray());
     _ui->viewsSplitter->restoreState(_settings->value("Window/ViewsSplit").toByteArray());
 
-    if (_settings->value("Collections/EnableCollections",true).toBool()==false) {
-        _ui->collectionWidget->hide();
-    } else {
+    if (_settings->value("Collections/EnableCollections",true).toBool()==true) {
+        setupCollections();
         _taskManager->populateCollections();
         if (_settings->value("Collections/AutoRebuildAfterStart",false).toBool()==true) {
             _taskManager->rebuildCollections();
         }
+    } else {
+        _ui->collectionWidget->hide();
     }
 
     _player = player;
@@ -295,7 +278,7 @@ void MainWindow::createMenus()
     _collectionsPopupMenu->addSeparator();
     _collectionsPopupMenu->addAction(tr("Delete file from disk"),this,SLOT(removeFileFromDisk()));
     _ui->collectionBrowser->setContextMenuPolicy(Qt::CustomContextMenu);
-    connect(_ui->collectionBrowser,SIGNAL(customContextMenuRequested(QPoint)),this,SLOT(showCollectionsContextMenu(QPoint)));
+
 }
 
 /* Show "About Tepsonic" dialog */
@@ -681,12 +664,15 @@ void MainWindow::trayIconMouseWheelScrolled(int delta)
 void MainWindow::preferencesAccepted()
 {
     if (_settings->value("Collections/EnableCollections").toBool()) {
-        _ui->collectionWidget->setVisible(true);
-        _taskManager->populateCollections();
+        /* When collections were enabled in preferences but were not created during program startup,
+           create them now otherwise we can expect that collectionBrowser is already displayed and
+           working so no action is needed */
+        if (_collectionModel == NULL) {
+          setupCollections();
+          _taskManager->populateCollections();
+        }
     } else {
-        _ui->collectionWidget->setHidden(true);
-        // Clear the collections to save memory
-        _collectionModel->clear();
+        destroyCollections();
     }
 }
 
@@ -737,4 +723,43 @@ void MainWindow::removeFileFromDisk()
             _taskManager->rebuildCollections(QFileInfo(file).absolutePath());
         }
     }
+}
+
+void MainWindow::setupCollections()
+{
+    // Not translatable
+    QStringList headers;
+    headers = QStringList() << "title" << "filename";
+    _collectionModel = new CollectionModel(headers,this);
+    _collectionProxyModel = new CollectionProxyModel(this);
+    //_collectionProxyModel->setSourceModel(_collectionModel);
+    _collectionProxyModel->setFilterCaseSensitivity(Qt::CaseInsensitive);
+    _collectionProxyModel->setFilterKeyColumn(0);
+    _collectionProxyModel->setDynamicSortFilter(true);
+
+    _ui->collectionBrowser->setModel(_collectionModel);
+    _ui->collectionBrowser->setSelectionMode(QAbstractItemView::ExtendedSelection);
+    _ui->collectionBrowser->setDragEnabled(true);
+    _ui->collectionBrowser->setDropIndicatorShown(true);
+    _ui->collectionBrowser->setAlternatingRowColors(true);
+    _ui->collectionBrowser->setRootIsDecorated(true);
+    // Hide the second column that contains real filename
+    _ui->collectionBrowser->hideColumn(1);
+    // Hide the header
+    _ui->collectionBrowser->header()->setHidden(true);
+
+    connect(_ui->collectionBrowser,SIGNAL(customContextMenuRequested(QPoint)),this,SLOT(showCollectionsContextMenu(QPoint)));
+
+    _ui->collectionWidget->show();
+}
+
+void MainWindow::destroyCollections()
+{
+    _ui->collectionBrowser->setModel(NULL);
+    delete _collectionProxyModel;
+    _collectionProxyModel = NULL;
+    delete _collectionModel;
+    _collectionModel = NULL;
+
+    _ui->collectionWidget->hide();
 }

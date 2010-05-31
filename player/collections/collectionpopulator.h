@@ -39,9 +39,9 @@ public:
     //! Constructor
     /*!
       Constructor that sets up collectionModel and launches the thread
-      \param collectionModel pointer to CollectionModel
+      \param collectionModel ptr-to-ptr CollectionModel
     */
-    explicit CollectionPopulator(CollectionModel *collectionModel);
+    explicit CollectionPopulator(CollectionModel **collectionModel);
 
     //! Destructor
     /*!
@@ -61,8 +61,8 @@ signals:
     void collectionsPopulated();
 
 private:
-    //! Pointer to CollectionModel
-    CollectionModel *_collectionModel;
+    //! Pointer to pointer to CollectionModel
+    CollectionModel **_collectionModel;
 
     //! Mutex for syncing access to model
     QMutex _mutex;

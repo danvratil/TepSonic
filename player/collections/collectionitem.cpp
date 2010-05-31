@@ -30,7 +30,8 @@ CollectionItem::CollectionItem(const QVector<QVariant> &data, CollectionItem *pa
 
 CollectionItem::~CollectionItem()
 {
-    qDeleteAll(_childItems);
+    qDeleteAll(_childItems.begin(),_childItems.end());
+    _childItems.clear();
 }
 
 CollectionItem *CollectionItem::child(int index)

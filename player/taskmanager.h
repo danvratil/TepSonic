@@ -49,7 +49,7 @@ class TaskManager : public QObject
           \param playlistModel pointer to PlaylistModel
           \param collectionModel pointer to CollectionModel
         */
-        explicit TaskManager(PlaylistModel *playlistModel, CollectionModel *collectionModel);
+        explicit TaskManager(PlaylistModel **playlistModel, CollectionModel **collectionModel);
 
         //! Destructor
         /*!
@@ -143,11 +143,11 @@ class TaskManager : public QObject
         //! Pointer to CollectionBuilder
         CollectionBuilder *_collectionBuilder;
 
-        //! Pointer to PlaylistModel
-        PlaylistModel *_playlistModel;
+        //! Pointer to pointer to PlaylistModel
+        PlaylistModel **_playlistModel;
 
-        //! Pointer to CollectionModel
-        CollectionModel *_collectionModel;
+        //! Pointer to pointer to CollectionModel
+        CollectionModel **_collectionModel;
 };
 
 #endif // TASKMANAGER_H
