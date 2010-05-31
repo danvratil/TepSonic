@@ -70,13 +70,21 @@ int main(int argc, char *argv[])
 
     mainWindow.show();
 
+
     for (int i=1; i<tepsonic.arguments().count(); i++) {
         qDebug() << tepsonic.arguments().at(i);
         QFileInfo param(tepsonic.arguments().at(i));
         if ((param.isFile()) && (param.exists())) {
             mainWindow.addPlaylistItem(param.absoluteFilePath());
+            // If this is a first file added, start playback immediatelly
+            if (i==1) {
+                player->setTrack(param.absoluteFilePath());
+                player->play();
+            }
         }
+
     }
+
 
 
     return tepsonic.exec();
