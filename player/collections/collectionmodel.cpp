@@ -172,7 +172,6 @@ bool CollectionModel::setHeaderData(int section, Qt::Orientation orientation, co
 
 QModelIndex CollectionModel::addChild(const QModelIndex &parent, QString title, QString filename)
 {
-    moveToThread(QThread::currentThread());
 
     if (!insertRow(rowCount(parent), parent))
         return QModelIndex();
