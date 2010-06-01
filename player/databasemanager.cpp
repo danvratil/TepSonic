@@ -61,7 +61,7 @@ bool DatabaseManager::connectToDB()
 
     switch (_driverType) {
     case MySQL: {
-        *_sqlDb = new QSqlDatabase(QSqlDatabase::addDatabase("QMYSQL",_connectionName));
+        _sqlDb = new QSqlDatabase(QSqlDatabase::addDatabase("QMYSQL",_connectionName));
         _sqlDb->setHostName(_server);
         _sqlDb->setUserName(_username);
         _sqlDb->setPassword(_password);
