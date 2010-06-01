@@ -27,7 +27,6 @@
 
 PlaylistPopulator::PlaylistPopulator(PlaylistModel *playlistModel)
 {
-    moveToThread(this);
 
     _playlistModel = playlistModel;
     _canClose = false;

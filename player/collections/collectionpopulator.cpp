@@ -30,7 +30,6 @@
 
 CollectionPopulator::CollectionPopulator(CollectionModel **collectionModel)
 {
-    moveToThread(this);
 
     _collectionModel = collectionModel;
     _canClose = false;
@@ -60,24 +59,23 @@ void CollectionPopulator::run()
             if (!dbManager.connectToDB()) {
                 return;
             }
-            QSqlDatabase sqlConn = QSqlDatabase::database("populateCollectionBrowserConnection");
-
             _mutex.lock();
             (*_collectionModel)->clear();
 
             QModelIndex albumsParent;
             QModelIndex tracksParent;
             {
-                QSqlQuery artistsQuery("SELECT id,interpret FROM interprets ORDER BY interpret ASC",sqlConn);
+                QSqlQuery artistsQuery("SELECT id,interpret FROM interprets ORDER BY interpret ASC",
+                                       *dbManager.sqlDb());
                 while (artistsQuery.next()) {
                     albumsParent = (*_collectionModel)->addChild(QModelIndex(),artistsQuery.value(1).toString(),QString());
                     QSqlQuery albumsQuery("SELECT id,album FROM albums WHERE id IN (SELECT album FROM tracks WHERE interpret="+artistsQuery.value(0).toString()+") ORDER BY album ASC;",
-                                      sqlConn);
+                                      *dbManager.sqlDb());
                     while (albumsQuery.next()) {
                         tracksParent = (*_collectionModel)->addChild(albumsParent,albumsQuery.value(1).toString(),QString());
 
                         QSqlQuery tracksQuery("SELECT trackname,filename FROM tracks WHERE album="+albumsQuery.value(0).toString()+" AND interpret="+artistsQuery.value(0).toString()+" ORDER BY track ASC;",
-                                              sqlConn);
+                                              *dbManager.sqlDb());
                         while (tracksQuery.next()) {
                             (*_collectionModel)->addChild(tracksParent,tracksQuery.value(0).toString(),tracksQuery.value(1).toString());
                         }

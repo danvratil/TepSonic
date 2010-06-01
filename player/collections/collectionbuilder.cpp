@@ -44,7 +44,6 @@
 
 CollectionBuilder::CollectionBuilder(CollectionModel **collectionModel)
 {
-    moveToThread(this);
 
     _collectionModel = collectionModel;
     _canClose = false;
@@ -77,8 +76,6 @@ void CollectionBuilder::run()
             DatabaseManager dbManager("collectionsUpdateConnection");
             if (dbManager.connectToDB()) {
 
-                QSqlDatabase sqlConn = QSqlDatabase::database("collectionsUpdateConnection");
-
                 qDebug() << "Starting collections update...";
 
                 QFileInfo fileInfo;
@@ -89,7 +86,7 @@ void CollectionBuilder::run()
                 QStringList filters;
 
                 {   // Populate dbFiles map by _ALL_ tracks from db
-                    QSqlQuery query("SELECT filename, mtime FROM tracks;",sqlConn);
+                    QSqlQuery query("SELECT filename, mtime FROM tracks;",*dbManager.sqlDb());
                     while (query.next()) {
                         dbFiles.insert(query.value(0).toString(),query.value(1).toUInt());
                     }
@@ -105,7 +102,7 @@ void CollectionBuilder::run()
                    disk write and therefore writing data into the SQLite database takes < 1 second
                    (with separate transactions it takes tens of minites...) */
                 if (dbManager.driverType()==DatabaseManager::SQLite) {
-                    QSqlQuery("BEGIN TRANSACTION;",sqlConn);
+                    QSqlQuery("BEGIN TRANSACTION;",*dbManager.sqlDb());
                 }
 
                 do {
@@ -119,7 +116,7 @@ void CollectionBuilder::run()
                         if (fileInfo.isFile()) {
                             // If the file is not in database then insert
                             if (!dbFiles.contains(fileInfo.filePath().toUtf8())) {
-                                insertTrack(fileInfo.absoluteFilePath(), &sqlConn);
+                                insertTrack(fileInfo.absoluteFilePath(), dbManager.sqlDb());
                                 dbFiles.remove(fileInfo.filePath().toUtf8());
                                 collectionsChanged = true;
                             }
@@ -127,7 +124,7 @@ void CollectionBuilder::run()
                             // If the file is in database but has another mtime then update it
                             if ((dbFiles.contains(fileInfo.filePath().toUtf8())) &&
                                 (dbFiles[fileInfo.filePath().toUtf8()]!=fileInfo.lastModified().toTime_t())) {
-                                updateTrack(fileInfo.absoluteFilePath(), &sqlConn);
+                                updateTrack(fileInfo.absoluteFilePath(), dbManager.sqlDb());
                                 dbFiles.remove(fileInfo.filePath().toUtf8());
                                 collectionsChanged = true;
                             }
@@ -148,17 +145,17 @@ void CollectionBuilder::run()
                 QHashIterator<QString, uint> i(dbFiles);
                 while (i.hasNext()) {
                     i.next();
-                    removeTrack(i.key(), &sqlConn);
+                    removeTrack(i.key(), dbManager.sqlDb());
                     collectionsChanged = true;
                 }
                 dbFiles.clear();
 
                 // Check for interprets/albums/genres... that are not used anymore
-                cleanUpDatabase(&sqlConn);
+                cleanUpDatabase(dbManager.sqlDb());
 
                 // Now write all data to the disk
                 if (dbManager.driverType()==DatabaseManager::SQLite) {
-                    QSqlQuery("COMMIT TRANSACTION;",sqlConn);
+                    QSqlQuery("COMMIT TRANSACTION;",*dbManager.sqlDb());
                 }
 
                 /* If anything has changed in collections, this signal will

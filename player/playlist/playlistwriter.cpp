@@ -26,7 +26,6 @@
 
 PlaylistWriter::PlaylistWriter(PlaylistModel *playlistModel)
 {
-    moveToThread(this);
 
     _outputFile = QString();
     _playlistModel = playlistModel;

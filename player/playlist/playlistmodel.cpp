@@ -20,6 +20,12 @@
 
 #include <QtGui>
 #include <QTime>
+#include <QtSql/QSqlDriver>
+#include <QtSql/QSqlDatabase>
+#include <QtSql/QSqlError>
+#include <QtSql/QSqlField>
+#include <QtSql/QSqlQuery>
+
 
 #include <taglib/fileref.h>
 #include <taglib/tag.h>
@@ -27,6 +33,7 @@
 
 #include "playlistmodel.h"
 #include "playlistitem.h"
+#include "databasemanager.h"
 
 
 PlaylistModel::PlaylistModel(const QStringList &headers, QObject *parent)
@@ -220,46 +227,86 @@ bool PlaylistModel::addItem(QString file)
     if ((!finfo.exists()) || (!finfo.isFile()))
         return false;
 
-    // Select the root item
-    QModelIndex root;
+    QString filename = "";
+    uint track;
+    QString title;
+    QString interpret;
+    QString album;
+    QString genre;
+    uint year;
+    QTime length(0,0,0,0);
+    uint lengthSeconds;
 
-    /**
-     * TAGLIB comes here
-     */
-    TagLib::FileRef f(file.toUtf8().constData());
-    int trackNumber = f.tag()->track();
-    TagLib::String artist = f.tag()->artist();
-    TagLib::String title = f.tag()->title();
-    TagLib::String album = f.tag()->album();
-    TagLib::String genre = f.tag()->genre();
-    int year = f.tag()->year();
-    int totalTimeNum = f.audioProperties()->length();
-    // And length of the track to the total length of the playlist
-    _totalLength += totalTimeNum;
-    QTime trackLength(0,0,0,0);
-    trackLength = trackLength.addSecs(totalTimeNum);
-    QString trackLengthString;
-    if (trackLength.hour()>0) {
-        trackLengthString=trackLength.toString("hh:mm:ss");
-    } else {
-        trackLengthString=trackLength.toString("mm:ss");
+    // Just a harmless check wheter the file is in DB - reading data from DB will be faster then from file
+    DatabaseManager dbManager("playlistModelConnection");
+    if (dbManager.connectToDB()) {
+        QSqlField data("col",QVariant::String);
+        data.setValue(file);
+        QString fname = dbManager.sqlDb()->driver()->formatValue(data,false);
+        QSqlQuery query("SELECT `filename`," \
+                        "       `trackname`," \
+                        "       `track`," \
+                        "       `length`," \
+                        "       `interpret`," \
+                        "       `genre`," \
+                        "       `album`," \
+                        "       `year`" \
+                        "FROM `view_tracks` "\
+                        "WHERE `filename`="+fname+ \
+                        "LIMIT 1;",
+                        *dbManager.sqlDb());
+        if (query.first()) {
+            filename = query.value(0).toString();
+            title = query.value(1).toString();
+            track = query.value(2).toUInt();
+            lengthSeconds = query.value(3).toUInt();
+            interpret = query.value(4).toString();
+            genre = query.value(5).toString();
+            album = query.value(6).toString();
+            year = query.value(7).toUInt();
+        }
+     }
+
+    if (filename.isEmpty()) {
+        TagLib::FileRef f(file.toUtf8().constData());
+
+        filename = file.toUtf8().constData();
+        title = f.tag()->title().toCString(true);
+        track = f.tag()->track();
+        interpret = f.tag()->artist().toCString(true);
+        lengthSeconds = f.audioProperties()->length();
+        album = f.tag()->album().toCString(true);
+        genre = f.tag()->genre().toCString(true);
+        year = f.tag()->year();
+
+        if (title.isEmpty())
+            title = finfo.fileName();
     }
 
-    QString sTitle = title.toCString(true);
-    if (sTitle.isEmpty())
-        sTitle = finfo.fileName();
+    length.addSecs(lengthSeconds);
+    // And length of the track to the total length of the playlist
+    _totalLength += lengthSeconds;
+    QString trackLengthString;
+    if (length.hour()>0) {
+        trackLengthString=length.toString("hh:mm:ss");
+    } else {
+        trackLengthString=length.toString("mm:ss");
+    }
+
+    // Select the root item
+    QModelIndex root;
 
 
     // Insert new row
     if (!insertRow(rowCount(root), root))
         return false;
 
-    rootItem->child(rootItem->childCount()-1)->setData(0,QVariant(file));
-    rootItem->child(rootItem->childCount()-1)->setData(1,QVariant(trackNumber));
-    rootItem->child(rootItem->childCount()-1)->setData(2,QVariant(artist.toCString(true)));
-    rootItem->child(rootItem->childCount()-1)->setData(3,QVariant(sTitle));
-    rootItem->child(rootItem->childCount()-1)->setData(4,QVariant(album.toCString(true)));
-    rootItem->child(rootItem->childCount()-1)->setData(5,QVariant(genre.toCString(true)));
+    rootItem->child(rootItem->childCount()-1)->setData(0,QVariant(filename));
+    rootItem->child(rootItem->childCount()-1)->setData(1,QVariant(track));
+    rootItem->child(rootItem->childCount()-1)->setData(2,QVariant(interpret));
+    rootItem->child(rootItem->childCount()-1)->setData(3,QVariant(title));
+    rootItem->child(rootItem->childCount()-1)->setData(4,QVariant(album));
+    rootItem->child(rootItem->childCount()-1)->setData(5,QVariant(genre));
     rootItem->child(rootItem->childCount()-1)->setData(6,QVariant(year));
     rootItem->child(rootItem->childCount()-1)->setData(7,QVariant(trackLengthString));
 
