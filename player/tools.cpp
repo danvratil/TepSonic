@@ -63,7 +63,7 @@ QString formatTimestamp(qint64 time)
     return sWeeks+sDays+sHours+":"+sMins+":"+sSecs;
 }
 
-QString formatMilliseconds(qint64 msecs)
+QString formatMilliseconds(qint64 msecs, bool forceHours)
 {
     int secs = (int)(msecs/1000);
     int hours = secs/3600;
@@ -91,5 +91,9 @@ QString formatMilliseconds(qint64 msecs)
         sSecs = QString::number(secs);
     }
 
-    return sHours+":"+sMins+":"+sSecs;
+    if ((hours > 0) || (forceHours)) {
+        return sHours+":"+sMins+":"+sSecs;
+    } else {
+        return sMins+":"+sSecs;
+    }
 }

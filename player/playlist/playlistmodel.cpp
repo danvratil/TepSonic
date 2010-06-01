@@ -34,6 +34,7 @@
 #include "playlistmodel.h"
 #include "playlistitem.h"
 #include "databasemanager.h"
+#include "tools.h"
 
 
 PlaylistModel::PlaylistModel(const QStringList &headers, QObject *parent)
@@ -283,15 +284,9 @@ bool PlaylistModel::addItem(QString file)
             title = finfo.fileName();
     }
 
-    length.addSecs(lengthSeconds);
     // And length of the track to the total length of the playlist
     _totalLength += lengthSeconds;
-    QString trackLengthString;
-    if (length.hour()>0) {
-        trackLengthString=length.toString("hh:mm:ss");
-    } else {
-        trackLengthString=length.toString("mm:ss");
-    }
+    QString trackLengthString = formatMilliseconds(lengthSeconds*1000);
 
     // Select the root item
     QModelIndex root;

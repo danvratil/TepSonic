@@ -33,11 +33,12 @@ QString formatTimestamp(qint64 time);
 
 //! Parses given time in milliseconds
 /*!
-  Parses time given in milliseconds and returns it in format "hh:mm:ss"
+  Parses time given in milliseconds and returns it in format "hh:mm:ss or mm:ss when hh=0"
   \param msecs time in milliseconds
+  \param forceHours force format hh:mm:ss even when hh=0
   \return Returns formatted time
 */
-QString formatMilliseconds(qint64 msecs);
+QString formatMilliseconds(qint64 msecs, bool forceHours = false);
 
 
 #endif // TOOLS_H
