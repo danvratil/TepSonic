@@ -24,7 +24,7 @@ PlaylistProxyModel::PlaylistProxyModel(QObject *parent):
 {
     setFilterRole(Qt::EditRole);
     setFilterCaseSensitivity(Qt::CaseInsensitive);
-    setDynamicSortFilter(true);
+    setDynamicSortFilter(false);
 }
 
 bool PlaylistProxyModel::filterAcceptsRow(int sourceRow,

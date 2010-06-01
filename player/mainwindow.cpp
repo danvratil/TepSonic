@@ -116,13 +116,14 @@ MainWindow::MainWindow(Player *player)
     _playlistProxyModel->setSourceModel(_playlistModel);
     _playlistProxyModel->setDynamicSortFilter(false);
 
-    _ui->playlistBrowser->setModel(_playlistModel);
+    _ui->playlistBrowser->setModel(_playlistProxyModel);
     _ui->playlistBrowser->setDragEnabled(true);
     _ui->playlistBrowser->setDropIndicatorShown(true);
     _ui->playlistBrowser->setSortingEnabled(true);
     _ui->playlistBrowser->viewport()->setAcceptDrops(true);
     _ui->playlistBrowser->header()->setContextMenuPolicy(Qt::CustomContextMenu);
     _ui->playlistBrowser->setAlternatingRowColors(true);
+    _ui->playlistBrowser->sortByColumn(-1);
     // Open ui->menuVisible_columns when PlaylistBrowser's header's context menu is requested
     connect(_ui->playlistBrowser->header(),SIGNAL(customContextMenuRequested(QPoint)),
             this,SLOT(showPlaylistContextMenu(QPoint)));
