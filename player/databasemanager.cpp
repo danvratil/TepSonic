@@ -48,7 +48,7 @@ DatabaseManager::DatabaseManager(QString connectionName)
 
 DatabaseManager::~DatabaseManager()
 {
-    _sqlDb.close();
+    delete _sqlDb;
     QSqlDatabase::removeDatabase(_connectionName);
 }
 
@@ -61,30 +61,30 @@ bool DatabaseManager::connectToDB()
 
     switch (_driverType) {
     case MySQL: {
-        _sqlDb = QSqlDatabase::addDatabase("QMYSQL",_connectionName);
-        _sqlDb.setHostName(_server);
-        _sqlDb.setUserName(_username);
-        _sqlDb.setPassword(_password);
-        _sqlDb.setDatabaseName(_db);
+        *_sqlDb = new QSqlDatabase(QSqlDatabase::addDatabase("QMYSQL",_connectionName));
+        _sqlDb->setHostName(_server);
+        _sqlDb->setUserName(_username);
+        _sqlDb->setPassword(_password);
+        _sqlDb->setDatabaseName(_db);
     } break;
     case SQLite: {
-        _sqlDb = QSqlDatabase::addDatabase("QSQLITE",_connectionName);
-        _sqlDb.setDatabaseName(QString(_CONFIGDIR).append("/collection.db"));
+        _sqlDb = new QSqlDatabase(QSqlDatabase::addDatabase("QSQLITE",_connectionName));
+        _sqlDb->setDatabaseName(QString(_CONFIGDIR).append("/collection.db"));
     } break;
     }
 
-    if (!_sqlDb.open()) {
-        qDebug() << "Failed to establish '" << _sqlDb.connectionName() <<"' connection to database!";
-        qDebug() << "Reason: " << _sqlDb.lastError().text();
+    if (!_sqlDb->open()) {
+        qDebug() << "Failed to establish '" << _sqlDb->connectionName() <<"' connection to database!";
+        qDebug() << "Reason: " << _sqlDb->lastError().text();
         return false;
     }
 
     // We want to use UTF8!!!
     if (_driverType == MySQL ) {
-        QSqlQuery query("SET CHARACTER SET utf8;",_sqlDb);
+        QSqlQuery query("SET CHARACTER SET utf8;",*_sqlDb);
     }
 
-    QStringList tables = _sqlDb.tables(QSql::AllTables);
+    QStringList tables = _sqlDb->tables(QSql::AllTables);
     if (!(tables.contains("albums") &&
           tables.contains("genres") &&
           tables.contains("interprets") &&
@@ -102,7 +102,7 @@ void DatabaseManager::initDb()
     qDebug() << "Initializing database structure";
     switch (_driverType) {
     case MySQL: {
-        QSqlQuery query(_sqlDb);
+        QSqlQuery query(*_sqlDb);
 
         query.exec("DROP TABLE IF EXISTS `albums`,`genres`,`interprets`,`tracks`,`years`;");
         query.exec("DROP VIEW `view_tracks`;");
@@ -163,7 +163,7 @@ void DatabaseManager::initDb()
                    "   LEFT JOIN `years` ON `tracks`.`year` = `years`.`id`;");
     } break;
     case SQLite: {
-        QSqlQuery query(_sqlDb);
+        QSqlQuery query(*_sqlDb);
 
         query.exec("DROP TABLE IF EXISTS `albums`;");
         query.exec("DROP TABLE IF EXISTS `genres`;");

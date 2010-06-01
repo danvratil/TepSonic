@@ -71,7 +71,7 @@ class DatabaseManager : public QObject
         DriverTypes driverType()  { return _driverType; };
 
         //! Returns QSqlDatabase connection object
-        QSqlDatabase sqlDb() { return _sqlDb; }
+        QSqlDatabase* sqlDb() { return _sqlDb; }
 
     private:
         //! Check if the database contains all required tables and if not creates them
@@ -102,7 +102,7 @@ class DatabaseManager : public QObject
         QString _db;
 
         //! SQL database
-        QSqlDatabase _sqlDb;
+        QSqlDatabase *_sqlDb;
 
 };
 
