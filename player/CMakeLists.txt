@@ -50,7 +50,6 @@ set(player_HDRS
     collections/collectionitem.h
     collections/collectionbuilder.h
     collections/collectionproxymodel.h
-    collections/collectionitemdelegate.h
     playlist/playlistbrowser.h
     playlist/playlistitem.h
     playlist/playlistmodel.h
@@ -78,7 +77,6 @@ set(player_SRCS
     collections/collectionitem.cpp
     collections/collectionbuilder.cpp
     collections/collectionproxymodel.cpp
-    collections/collectionitemdelegate.cpp
     playlist/playlistbrowser.cpp
     playlist/playlistitem.cpp
     playlist/playlistmodel.cpp
