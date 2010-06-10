@@ -44,15 +44,19 @@ set(player_HDRS
     preferencesdialog.h
     preferencespages.h
     trayicon.h
+    collections/collectionpopulator.h
+    collections/collectionbrowser.h
     collections/collectionmodel.h
+    collections/collectionitem.h
     collections/collectionbuilder.h
     collections/collectionproxymodel.h
-    collections/collectionpopulator.h
+    collections/collectionitemdelegate.h
     playlist/playlistbrowser.h
+    playlist/playlistitem.h
     playlist/playlistmodel.h
+    playlist/playlistproxymodel.h
     playlist/playlistpopulator.h
     playlist/playlistwriter.h
-    playlist/playlistproxymodel.h
 )
 
 set(player_SRCS
@@ -74,6 +78,7 @@ set(player_SRCS
     collections/collectionitem.cpp
     collections/collectionbuilder.cpp
     collections/collectionproxymodel.cpp
+    collections/collectionitemdelegate.cpp
     playlist/playlistbrowser.cpp
     playlist/playlistitem.cpp
     playlist/playlistmodel.cpp
@@ -95,13 +100,19 @@ set(player_RCCS
 )
 
 option(LANGUAGES "Using translations")
-if (NOT LANGS)
+if (NOT DEFINED LANGS)
   set (LANGUAGES cs CACHE STRING "Using translations" FORCE)
-else (NOT LANGS)
-  string(REGEX MATCHALL [a-zA-Z]+
-         langs1 ${LANGS})
-  set (LANGUAGES ${langs1} CACHE STRING "Using translations" FORCE)
-endif (NOT LANGS)
+else (NOT DEFINED LANGS)
+  if (NOT LANGS) 
+    set (LANGUAGES "")
+  else (NOT LANGS)
+    string(REGEX MATCHALL [a-zA-Z]+
+           langs1 ${LANGS})
+    set (LANGUAGES ${langs1} CACHE STRING "Using translations" FORCE)
+  endif (NOT LANGS)
+endif (NOT DEFINED LANGS)
+
+message("Translations to build: ${LANGUAGES}")
 
 qt4_wrap_ui(player_QUIS_HDRS ${player_QUIS})
 qt4_wrap_cpp(player_QMOC_SRCS ${player_HDRS})

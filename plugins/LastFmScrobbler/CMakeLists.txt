@@ -45,13 +45,17 @@ set(lastfmscrobbler_QUIS
 )
 
 option(LANGUAGES "Using translations")
-if (NOT LANGS)
+if (NOT DEFINED LANGS)
   set (LANGUAGES cs CACHE STRING "Using translations" FORCE)
-else (NOT LANGS)
-  string(REGEX MATCHALL [a-zA-Z]+
-         langs1 ${LANGS})
-  set (LANGUAGES ${langs1} CACHE STRING "Using translations" FORCE)
-endif (NOT LANGS)
+else (NOT DEFINED LANGS)
+  if (NOT LANGS)
+    set(LANGUAGES "")
+  else (NOT LANGS)
+    string(REGEX MATCHALL [a-zA-Z]+
+           langs1 ${LANGS})
+    set (LANGUAGES ${langs1} CACHE STRING "Using translations" FORCE)
+  endif (NOT LANGS)
+endif (NOT DEFINED LANGS)
 
 
 qt4_wrap_ui(lastfmscrobbler_QUIS_HDRS ${lastfmscrobbler_QUIS})
