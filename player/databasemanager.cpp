@@ -110,7 +110,7 @@ void DatabaseManager::initDb()
         query.exec("CREATE TABLE `albums` (" \
                    "   `id` int(11) NOT NULL AUTO_INCREMENT," \
                    "   `album` varchar(250) NOT NULL," \
-                   "   PRIMARY KEY (`id`)," \
+                   "   PRIMARY KEY (`id`)" \
                    ") ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1;");
 
         query.exec("CREATE TABLE `genres` (" \
