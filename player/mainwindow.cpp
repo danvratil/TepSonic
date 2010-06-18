@@ -58,20 +58,6 @@ MainWindow::MainWindow(Player *player)
 
     _settings = new QSettings(_CONFIGDIR + QDir::separator() + "main.conf",QSettings::IniFormat,this);
 
-    /* Check if user have been already warned, but warn him only when this is not a
-       first run (in that case user has to build collections anyway) */
-    if ((!_settings->value("collectionDBIncompatWarned",false).toBool()) &&
-        (_settings->contains("Window/Geometry"))) {
-        QMessageBox::warning(this,
-                            QString("Warning: Collections database has changed"),
-                            QString("The structure of collections database has been changed " \
-                                    "and is now incompatible with the old version.\n\n" \
-                                    "If you don't have automatic collections rebuilding enabled, " \
-                                    "please rebuild them manually now from menu Settings->Preferences->Collections."),
-                            QMessageBox::Ok);
-        _settings->setValue("collectionDBIncompatWarned",true);
-    }
-
     // Initialize pseudo-random numbers generator
     srand(time(NULL));
 
