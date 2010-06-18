@@ -101,6 +101,9 @@ class PreferencesDialog : public QDialog {
           settingsAccepted() is called so plugins could store their settings
         */
         void on_buttonBox_accepted();
+
+        //! Saves current confugration and then emits signal rebuildCollections()
+        void emitRebuildCollections();
 };
 
 #endif // PREFERENCESDIALOG_H

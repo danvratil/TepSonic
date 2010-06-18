@@ -40,7 +40,7 @@ PreferencesDialog::PreferencesDialog(MainWindow *parent):
     _collections = new PreferencesPages::Collections;
     _plugins = new PreferencesPages::Plugins;
     connect(_collections,SIGNAL(rebuildCollections()),
-            this,SIGNAL(rebuildCollections()));
+            this,SLOT(emitRebuildCollections()));
 
     _ui->pages->addWidget(_player);
     _ui->pages->addWidget(_collections);
@@ -165,4 +165,27 @@ void PreferencesDialog::on_pagesButtons_currentItemChanged(QListWidgetItem* curr
 {
     Q_UNUSED(previous);
     _ui->pages->setCurrentIndex(_ui->pagesButtons->row(current));
+}
+
+void PreferencesDialog::emitRebuildCollections()
+{
+    // Save current state of collections configurations and emit rebuilding
+
+    QSettings settings(QString(_CONFIGDIR).append("/main.conf"),QSettings::IniFormat,this);
+    settings.beginGroup("Collections");
+    QStringList items;
+    for (int i = 0; i < _collections->ui->collectionsPathsList->count(); i++) {
+        items.append(_collections->ui->collectionsPathsList->item(i)->text());
+    }
+    settings.setValue("SourcePaths",items);
+    settings.setValue("StorageEngine",_collections->ui->dbEngineCombo->currentIndex());
+    settings.beginGroup("MySQL");
+    settings.setValue("Server",_collections->ui->mysqlServerEdit->text());
+    settings.setValue("Username",_collections->ui->mysqlUsernameEdit->text());
+    // I'd like to have the password encrypted (but not hashed!) - I don't like password in plaintext...
+    settings.setValue("Password",_collections->ui->mysqlPasswordEdit->text());
+    settings.setValue("Database",_collections->ui->mysqlDatabaseEdit->text());
+    settings.endGroup(); // MySQL group
+    settings.endGroup(); // Collections group
+    emit rebuildCollections();
 }
