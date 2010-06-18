@@ -41,7 +41,7 @@ int main(int argc, char *argv[])
     tepsonic.setOrganizationName("Dan Vrátil");
     tepsonic.setApplicationVersion(TEPSONIC_VERSION);
 
-    QString locale = QLocale::system().name();
+    QString locale = QLocale::system().name().left(2);
 
     // Qt translations
     QTranslator qtTranslator;
