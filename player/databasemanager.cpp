@@ -32,6 +32,7 @@
 DatabaseManager::DatabaseManager(QString connectionName)
 {
     _connectionName = connectionName;
+    _sqlDb = NULL;
 
     QSettings settings(QString(_CONFIGDIR).append("/main.conf"),QSettings::IniFormat,this);
     _driverType = (DriverTypes)settings.value("Collections/StorageEngine",0).toInt();
@@ -48,7 +49,8 @@ DatabaseManager::DatabaseManager(QString connectionName)
 
 DatabaseManager::~DatabaseManager()
 {
-    delete _sqlDb;
+    if (_sqlDb != NULL)
+        delete _sqlDb;
     QSqlDatabase::removeDatabase(_connectionName);
 }
 
@@ -76,6 +78,7 @@ bool DatabaseManager::connectToDB()
     if (!_sqlDb->open()) {
         qDebug() << "Failed to establish '" << _sqlDb->connectionName() <<"' connection to database!";
         qDebug() << "Reason: " << _sqlDb->lastError().text();
+        _sqlDb = NULL;
         return false;
     }
 
@@ -110,6 +113,8 @@ void DatabaseManager::initDb()
         query.exec("CREATE TABLE `albums` (" \
                    "   `id` int(11) NOT NULL AUTO_INCREMENT," \
                    "   `album` varchar(250) NOT NULL," \
+                   "   `tracksCnt` int(11) NOT NULL DEFAULT '0'," \
+                   "   `totalLength` int(11) NOT NULL DEFAULT '0'," \
                    "   PRIMARY KEY (`id`)" \
                    ") ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1;");
 
@@ -122,6 +127,8 @@ void DatabaseManager::initDb()
         query.exec("CREATE TABLE `interprets` (" \
                    "   `id` int(11) NOT NULL AUTO_INCREMENT," \
                    "   `interpret` varchar(300) NOT NULL," \
+                   "   `albumsCnt` int(11) NOT NULL DEFAULT '0'," \
+                   "   `totalLength` int(11) NOT NULL DEFAULT '0'," \
                    "   PRIMARY KEY (`id`)" \
                    ") ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1;");
 
@@ -152,6 +159,8 @@ void DatabaseManager::initDb()
                    "          `tracks`.`trackname` AS `trackname`," \
                    "          `tracks`.`track` AS `track`," \
                    "          `tracks`.`length` AS `length`," \
+                   "          `tracks`.`album` AS `albumID`," \
+                   "          `tracks`.`interpret` AS `interpretID`," \
                    "          `interprets`.`interpret` AS `interpret`," \
                    "          `genres`.`genre` AS `genre`," \
                    "          `albums`.`album` AS `album`," \
@@ -161,6 +170,7 @@ void DatabaseManager::initDb()
                    "   LEFT JOIN `genres` ON `tracks`.`genre` = `genres`.`id`" \
                    "   LEFT JOIN `albums` ON `tracks`.`album` = `albums`.`id`" \
                    "   LEFT JOIN `years` ON `tracks`.`year` = `years`.`id`;");
+
     } break;
     case SQLite: {
         QSqlQuery query(*_sqlDb);
@@ -178,11 +188,15 @@ void DatabaseManager::initDb()
 
         query.exec("CREATE TABLE `interprets` (" \
                    "    `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL," \
-                   "    `interpret` TEXT NOT NULL);");
+                   "    `interpret` TEXT NOT NULL," \
+                   "    `albumsCnt` INTEGER NOT NULL DEFAULT='0'," \
+                   "    `totalLength` INTEGER NOT NULL DEFAULT='0');");
 
         query.exec("CREATE TABLE `albums` (" \
                    "    `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL," \
-                   "    `album` TEXT NOT NULL);");
+                   "    `album` TEXT NOT NULL," \
+                   "    `tracksCnt` INTEGER NOT NULL DEFAULT='0'," \
+                   "    `totalLength` INTEGER NOT NULL DEFAULT='0');");
 
         query.exec("CREATE TABLE `tracks` (" \
                    "    `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL," \
@@ -206,6 +220,8 @@ void DatabaseManager::initDb()
                    "           `tracks`.`trackname`," \
                    "           `tracks`.`track`," \
                    "           `tracks`.`length`," \
+                   "           `tracks`.`album` AS `albumID`," \
+                   "           `tracks`.`interpret` AS `interpretID`," \
                    "           `interprets`.`interpret`," \
                    "           `genres`.`genre`," \
                    "           `albums`.`album`," \
@@ -215,6 +231,7 @@ void DatabaseManager::initDb()
                    "    LEFT JOIN `genres` ON `tracks`.`genre` = `genres`.`id`" \
                    "    LEFT JOIN `albums` ON `tracks`.`album` = `albums`.`id`" \
                    "    LEFT JOIN `years` ON `tracks`.`year` = `years`.`id`;");
+
     } break;
     }
 }

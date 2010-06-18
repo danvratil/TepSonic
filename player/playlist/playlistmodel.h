@@ -195,6 +195,8 @@ class PlaylistModel : public QAbstractItemModel
 
      QMutex _mutex;
 
+     bool _dbConnectionAvailable;
+
  signals:
      //! This signal is emmited when length of playlist is changed
      /*!

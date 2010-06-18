@@ -36,6 +36,8 @@
 #include "databasemanager.h"
 #include "tools.h"
 
+#include <QDebug>
+
 
 PlaylistModel::PlaylistModel(const QStringList &headers, QObject *parent)
         : QAbstractItemModel(parent)
@@ -45,6 +47,7 @@ PlaylistModel::PlaylistModel(const QStringList &headers, QObject *parent)
     rootData << header;
 
     _totalLength = 0;
+    _dbConnectionAvailable = true;
 
     rootItem = new PlaylistItem(rootData);
 }
@@ -240,33 +243,40 @@ bool PlaylistModel::addItem(QString file)
 
     // Just a harmless check wheter the file is in DB - reading data from DB will be faster then from file
     DatabaseManager dbManager("playlistModelConnection");
-    if (dbManager.connectToDB()) {
-        QSqlField data("col",QVariant::String);
-        data.setValue(file);
-        QString fname = dbManager.sqlDb()->driver()->formatValue(data,false);
-        QSqlQuery query("SELECT `filename`," \
-                        "       `trackname`," \
-                        "       `track`," \
-                        "       `length`," \
-                        "       `interpret`," \
-                        "       `genre`," \
-                        "       `album`," \
-                        "       `year`" \
-                        "FROM `view_tracks` "\
-                        "WHERE `filename`="+fname+ \
-                        "LIMIT 1;",
-                        *dbManager.sqlDb());
-        if (query.first()) {
-            filename = query.value(0).toString();
-            title = query.value(1).toString();
-            track = query.value(2).toUInt();
-            lengthSeconds = query.value(3).toUInt();
-            interpret = query.value(4).toString();
-            genre = query.value(5).toString();
-            album = query.value(6).toString();
-            year = query.value(7).toUInt();
+    /* Don't try to connect when connection was not available previously - attempts to connect are
+      just slowing everything down */
+    if (_dbConnectionAvailable) {
+        if (dbManager.connectToDB()) {
+            QSqlField data("col",QVariant::String);
+            data.setValue(file);
+            QString fname = dbManager.sqlDb()->driver()->formatValue(data,false);
+            QSqlQuery query("SELECT `filename`," \
+                            "       `trackname`," \
+                            "       `track`," \
+                            "       `length`," \
+                            "       `interpret`," \
+                            "       `genre`," \
+                            "       `album`," \
+                            "       `year`" \
+                            "FROM `view_tracks` "\
+                            "WHERE `filename`="+fname+ \
+                            "LIMIT 1;",
+                            *dbManager.sqlDb());
+            if (query.first()) {
+                filename = query.value(0).toString();
+                title = query.value(1).toString();
+                track = query.value(2).toUInt();
+                lengthSeconds = query.value(3).toUInt();
+                interpret = query.value(4).toString();
+                genre = query.value(5).toString();
+                album = query.value(6).toString();
+                year = query.value(7).toUInt();
+            }
+        } else {
+            _dbConnectionAvailable = false;
+            qDebug() << "PlaylistModel: Disabling connection to DB for this session";
         }
-     }
+    }
 
     if (filename.isEmpty()) {
         TagLib::FileRef f(file.toUtf8().constData());
