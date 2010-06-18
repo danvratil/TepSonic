@@ -24,6 +24,13 @@
 #include <QSettings>
 #include <QtSql/QSqlDatabase>
 
+
+// Current DB revision
+/* When connecting to DB, we automatically checked for DB revision. When the numbers
+   don't match, the DB is dropped and collections are rebuilt
+*/
+#define _DBREVISION "5";
+
 //! DatabaseManager handles connection to database
 /*!
   DatabaseManager provides simple interface for Collections to establish connection

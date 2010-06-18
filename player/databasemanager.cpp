@@ -93,7 +93,18 @@ bool DatabaseManager::connectToDB()
           tables.contains("interprets") &&
           tables.contains("tracks") &&
           tables.contains("years") &&
+          tables.contains("db_rev") &&
           tables.contains("view_tracks"))) {
+        initDb();
+    }
+
+    // Now check if DB revision match
+    QSqlQuery query("SELECT `revision` FROM `db_rev` LIMIT 1;",*_sqlDb);
+    query.next();
+    QString rev = _DBREVISION;
+    if (query.value(0).toString() != rev) {
+        qDebug() << "Database revisions don't match: Found revision" << query.value(0).toString() << ", expected revision " << rev;
+        qDebug() << "Collections will be rebuilt";
         initDb();
     }
 
@@ -107,7 +118,7 @@ void DatabaseManager::initDb()
     case MySQL: {
         QSqlQuery query(*_sqlDb);
 
-        query.exec("DROP TABLE IF EXISTS `albums`,`genres`,`interprets`,`tracks`,`years`;");
+        query.exec("DROP TABLE IF EXISTS `albums`,`genres`,`interprets`,`tracks`,`years`,`db_rev`;");
         query.exec("DROP VIEW `view_tracks`;");
 
         query.exec("CREATE TABLE `albums` (" \
@@ -153,6 +164,13 @@ void DatabaseManager::initDb()
                    "   PRIMARY KEY (`id`)" \
                    ") ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1;");
 
+        QString rev = _DBREVISION;
+        QString sql = "CREATE TABLE `db_rev` (" \
+                      "   `revision` int(11) NOT NULL DEFAULT "+rev+" " \
+                      ") ENGINE=MyISAM DEFAULT CHARSET=utf8;";
+        query.exec(sql);
+        query.exec("INSERT INTO `db_rev` VALUES('"+rev+"');");
+
         query.exec("CREATE VIEW `view_tracks` AS" \
                    "   SELECT `tracks`.`id` AS `id`," \
                    "          `tracks`.`filename` AS `filename`," \
@@ -180,6 +198,7 @@ void DatabaseManager::initDb()
         query.exec("DROP TABLE IF EXISTS ``interprets`;");
         query.exec("DROP TABLE IF EXISTS `tracks`;");
         query.exec("DROP TABLE IF EXISTS `years`;");
+        query.exec("DROP TABLE IF EXISTS `db_rev`;");
         query.exec("DROP VIEW IF EXISTS `view_tracks`;");
 
         query.exec("CREATE TABLE `genres` (" \
@@ -213,6 +232,12 @@ void DatabaseManager::initDb()
         query.exec("CREATE TABLE `years` (" \
                    "    `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL," \
                    "    `year` INTEGER NOT NULL);");
+
+        QString rev = _DBREVISION;
+        QString sql = "CREATE TABLE `db_rev` (" \
+                      "    `revision` INTEGER NOT NULL DEFAULT("+rev+"));";
+        query.exec(sql);
+        query.exec("INSERT INTO `db_rev` VALUES('"+rev+"');");
 
         query.exec("CREATE VIEW `view_tracks` AS" \
                    "    SELECT `tracks`.`id`," \
