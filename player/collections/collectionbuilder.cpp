@@ -205,118 +205,92 @@ void CollectionBuilder::insertTrack(QString filename, QSqlDatabase *sqlDB)
     if (album.isEmpty()) album = tr("Unknown album");
     if (title.isEmpty()) title = fileInfo.baseName();
 
-    if (sqlDB->driverName()=="QMYSQL") {
+    bool albumInserted = false;
 
-        QSqlField data("col",QVariant::String);
-        {
-            data.setValue(album);
-            album = sqlDB->driver()->formatValue(data,false);
-            QSqlQuery query("INSERT `albums`(`album`) (SELECT "+album+" FROM `albums` WHERE `album`="+album+" HAVING COUNT(*)=0)", *sqlDB);
-        }
-
-        {
-            data.setValue(genre);
-            genre = sqlDB->driver()->formatValue(data,false);
-            QSqlQuery query("INSERT `genres`(`genre`) (SELECT "+genre+" FROM `genres` WHERE `genre`="+genre+" HAVING COUNT(*)=0)", *sqlDB);
-        }
-
-        {
-            data.setValue(interpret);
-            interpret = sqlDB->driver()->formatValue(data,false);
-            QSqlQuery query("INSERT `interprets`(`interpret`) (SELECT "+interpret+" FROM `interprets` WHERE `interpret`="+interpret+" HAVING COUNT(*)=0)", *sqlDB);
-        }
-
-        QString s_year;
-        {
-            data.setValue(year);
-            s_year = sqlDB->driver()->formatValue(data,false);
-            QSqlQuery query("INSERT `years`(`year`) (SELECT "+s_year+" FROM `years` WHERE `year`="+s_year+" HAVING COUNT(*)=0)",*sqlDB);
-        }
-
-        {
-            QSqlQuery query(*sqlDB);
-            query.prepare("INSERT INTO `tracks`(`filename`,`trackname`,`track`,`length`,`interpret`,`album`,`year`,`genre`,`mtime`)" \
-                          "VALUES(?," \
-                          "       ?," \
-                          "       ?," \
-                          "       ?," \
-                          "       (SELECT `id` FROM `interprets` WHERE `interpret`="+interpret+")," \
-                          "       (SELECT `id` FROM `albums` WHERE `album`="+album+")," \
-                          "       (SELECT `id` FROM `years` WHERE `year`="+s_year+")," \
-                          "       (SELECT `id` FROM `genres` WHERE `genre`="+genre+")," \
-                          "       ?);");
-            query.addBindValue(fname);
-            query.addBindValue(title);
-            query.addBindValue(trackNo);
-            query.addBindValue(length);
-            query.addBindValue(mtime);
-            query.exec();
+    QSqlField data("col",QVariant::String);
+    {
+        data.setValue(album);
+        album = sqlDB->driver()->formatValue(data,false);
+        QSqlQuery query("SELECT `id` FROM `albums` WHERE `album`="+album+";", *sqlDB);
+        query.next();
+        if (!query.isValid()) {
+            QSqlQuery query("INSERT INTO `albums`(`album`,`tracksCnt`,`totalLength`) " \
+                            "VALUES("+album+",1,"+QString::number(length)+");", *sqlDB);
+            albumInserted = true;
+        } else {
+            data.setValue(query.value(0).toString());
+            QString albumID = sqlDB->driver()->formatValue(data,false);
+            QSqlQuery query("UPDATE `albums` " \
+                            "SET `tracksCnt`=`tracksCnt`+1," \
+                            "    `totalLength`=`totalLength`+"+QString::number(length)+" " \
+                            "WHERE `id`="+albumID+";",*sqlDB);
         }
     }
 
-    if (sqlDB->driverName()=="QSQLITE") {
-
-        QSqlField data("col",QVariant::String);
-        {
-            data.setValue(album);
-            album = sqlDB->driver()->formatValue(data,false);
-            QSqlQuery query("SELECT COUNT(*) FROM `albums` WHERE `album`="+album+";", *sqlDB);
-            query.next();
-            if (query.value(0).toInt() == 0) {
-                QSqlQuery query("INSERT INTO `albums`(`album`) VALUES("+album+");", *sqlDB);
-            }
+    {
+        data.setValue(genre);
+        genre = sqlDB->driver()->formatValue(data,false);
+        QSqlQuery query("SELECT COUNT(*) FROM `genres` WHERE `genre`="+genre+";", *sqlDB);
+        query.next();
+        if (query.value(0).toInt() == 0) {
+            QSqlQuery query("INSERT INTO `genres`(`genre`) VALUES("+genre+");", *sqlDB);
         }
+    }
 
-        {
-            data.setValue(genre);
-            genre = sqlDB->driver()->formatValue(data,false);
-            QSqlQuery query("SELECT COUNT(*) FROM `genres` WHERE `genre`="+genre+";", *sqlDB);
-            query.next();
-            if (query.value(0).toInt() == 0) {
-                QSqlQuery query("INSERT INTO `genres`(`genre`) VALUES("+genre+");", *sqlDB);
-            }
-        }
+    {
+        data.setValue(interpret);
+        interpret = sqlDB->driver()->formatValue(data,false);
+        QSqlQuery query("SELECT `id` FROM `interprets` WHERE `interpret`="+interpret+";", *sqlDB);
+        query.next();
+        if (!query.isValid()) {
+            QSqlQuery query("INSERT INTO `interprets`(`interpret`,`albumsCnt`,`totalLength`) " \
+                            "VALUES("+interpret+",1,"+QString::number(length)+");", *sqlDB);
+        } else {
+            QString albumsCntQuery;
+            if (albumInserted) {
+                 albumsCntQuery = "`albumsCnt`=`albumsCnt`+1,";
+             } else {
+                 albumsCntQuery = "";
+             }
 
-        {
-            data.setValue(interpret);
-            interpret = sqlDB->driver()->formatValue(data,false);
-            QSqlQuery query("SELECT COUNT(*) FROM `interprets` WHERE `interpret`="+interpret+";", *sqlDB);
-            query.next();
-            if (query.value(0).toInt() == 0) {
-                QSqlQuery query("INSERT INTO `interprets`(`interpret`) VALUES("+interpret+");", *sqlDB);
-            }
+            data.setValue(query.value(0).toString());
+            QString interpretID = sqlDB->driver()->formatValue(data,false);
+            QSqlQuery query("UPDATE `interprets` " \
+                            "SET "+albumsCntQuery+
+                            "    `totalLength`=`totalLength`+"+QString::number(length)+" " \
+                            "WHERE `id`="+interpretID+";", *sqlDB);
         }
+    }
 
-        QString s_year;
-        {
-            data.setValue(year);
-            s_year = sqlDB->driver()->formatValue(data,false);
-            QSqlQuery query("SELECT COUNT(*) FROM `years` WHERE \"year\"="+s_year+";", *sqlDB);
-            query.next();
-            if (query.value(0).toInt() == 0) {
-                QSqlQuery query("INSERT INTO `years`(`year`) VALUES("+s_year+");", *sqlDB);
-            }
+    QString s_year;
+    {
+        data.setValue(year);
+        s_year = sqlDB->driver()->formatValue(data,false);
+        QSqlQuery query("SELECT COUNT(*) FROM `years` WHERE `year`="+s_year+";", *sqlDB);
+        query.next();
+        if (query.value(0).toInt() == 0) {
+            QSqlQuery query("INSERT INTO `years`(`year`) VALUES("+s_year+");", *sqlDB);
         }
+    }
 
-        {
-            QSqlQuery query(*sqlDB);
-            query.prepare("INSERT INTO `tracks`(`filename`,`trackname`,`track`,`length`,`interpret`,`album`,`year`,`genre`,`mtime`)" \
-                          "VALUES(?," \
-                          "       ?," \
-                          "       ?," \
-                          "       ?," \
-                          "       (SELECT `id` FROM `interprets` WHERE `interpret`="+interpret+")," \
-                          "       (SELECT `id` FROM `albums` WHERE `album`="+album+")," \
-                          "       (SELECT `id` FROM `years` WHERE `year`="+s_year+")," \
-                          "       (SELECT `id` FROM `genres` WHERE `genre`="+genre+")," \
-                          "       ?);");
-            query.addBindValue(fname);
-            query.addBindValue(title);
-            query.addBindValue(trackNo);
-            query.addBindValue(length);
-            query.addBindValue(mtime);
-            query.exec();
-        }
+    {
+        QSqlQuery query(*sqlDB);
+        query.prepare("INSERT INTO `tracks`(`filename`,`trackname`,`track`,`length`,`interpret`,`album`,`year`,`genre`,`mtime`)" \
+                      "VALUES(?," \
+                      "       ?," \
+                      "       ?," \
+                      "       ?," \
+                      "       (SELECT `id` FROM `interprets` WHERE `interpret`="+interpret+")," \
+                      "       (SELECT `id` FROM `albums` WHERE `album`="+album+")," \
+                      "       (SELECT `id` FROM `years` WHERE `year`="+s_year+")," \
+                      "       (SELECT `id` FROM `genres` WHERE `genre`="+genre+")," \
+                      "       ?);");
+        query.addBindValue(fname);
+        query.addBindValue(title);
+        query.addBindValue(trackNo);
+        query.addBindValue(length);
+        query.addBindValue(mtime);
+        query.exec();
     }
 
 }

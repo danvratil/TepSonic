@@ -40,6 +40,7 @@
 class PlaylistProxyModel;
 class CollectionModel;
 class CollectionProxyModel;
+class CollectionItemDelegate;
 class DatabaseManager;
 class PluginsManager;
 class TaskManager;
@@ -108,6 +109,9 @@ private:
 
     //! Pointer to CollectionProxyModel
     CollectionProxyModel *_collectionProxyModel;
+
+    //! Pointer to CollectionItemDelegate
+    CollectionItemDelegate *_collectionItemDelegate;
 
     //! Pointer to Player
     Player *_player;

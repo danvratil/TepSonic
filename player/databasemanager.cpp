@@ -189,14 +189,14 @@ void DatabaseManager::initDb()
         query.exec("CREATE TABLE `interprets` (" \
                    "    `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL," \
                    "    `interpret` TEXT NOT NULL," \
-                   "    `albumsCnt` INTEGER NOT NULL DEFAULT='0'," \
-                   "    `totalLength` INTEGER NOT NULL DEFAULT='0');");
+                   "    `albumsCnt` INTEGER NOT NULL DEFAULT(0)," \
+                   "    `totalLength` INTEGER NOT NULL DEFAULT(0));");
 
         query.exec("CREATE TABLE `albums` (" \
                    "    `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL," \
                    "    `album` TEXT NOT NULL," \
-                   "    `tracksCnt` INTEGER NOT NULL DEFAULT='0'," \
-                   "    `totalLength` INTEGER NOT NULL DEFAULT='0');");
+                   "    `tracksCnt` INTEGER NOT NULL DEFAULT(0)," \
+                   "    `totalLength` INTEGER NOT NULL DEFAULT(0));");
 
         query.exec("CREATE TABLE `tracks` (" \
                    "    `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL," \

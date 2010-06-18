@@ -31,6 +31,7 @@
 #include "collections/collectionproxymodel.h"
 #include "collections/collectionmodel.h"
 #include "collections/collectionitem.h"
+#include "collections/collectionitemdelegate.h"
 #include "abstractplugin.h"
 #include "taskmanager.h"
 #include "pluginsmanager.h"
@@ -635,7 +636,7 @@ void MainWindow::randomModeChanged(bool newMode)
 
 void MainWindow::playerPosChanged(qint64 newPos)
 {
-    _ui->playbackTimeLabel->setText(formatMilliseconds(newPos));
+    _ui->playbackTimeLabel->setText(formatMilliseconds(newPos,true));
 }
 
 void MainWindow::changeEvent(QEvent *e)
@@ -746,22 +747,28 @@ void MainWindow::setupCollections()
 {
     // Not translatable
     QStringList headers;
-    headers = QStringList() << "title" << "filename";
+    headers = QStringList() << "title" << "filename" << "data1" << "data2";
     _collectionModel = new CollectionModel(headers,this);
+
     _collectionProxyModel = new CollectionProxyModel(this);
     //_collectionProxyModel->setSourceModel(_collectionModel);
     _collectionProxyModel->setFilterCaseSensitivity(Qt::CaseInsensitive);
     _collectionProxyModel->setFilterKeyColumn(0);
     _collectionProxyModel->setDynamicSortFilter(true);
 
+    _collectionItemDelegate = new CollectionItemDelegate(this);
+
     _ui->collectionBrowser->setModel(_collectionModel);
+    _ui->collectionBrowser->setItemDelegate(_collectionItemDelegate);
     _ui->collectionBrowser->setSelectionMode(QAbstractItemView::ExtendedSelection);
     _ui->collectionBrowser->setDragEnabled(true);
     _ui->collectionBrowser->setDropIndicatorShown(true);
     _ui->collectionBrowser->setAlternatingRowColors(true);
     _ui->collectionBrowser->setRootIsDecorated(true);
-    // Hide the second column that contains real filename
+    // Hide the last three columns that cotain filename and additional data
     _ui->collectionBrowser->hideColumn(1);
+    _ui->collectionBrowser->hideColumn(2);
+    _ui->collectionBrowser->hideColumn(3);
     // Hide the header
     _ui->collectionBrowser->header()->setHidden(true);
 

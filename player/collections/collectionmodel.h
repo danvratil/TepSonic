@@ -168,9 +168,11 @@
        \param index QModelIndex of parent the new children will be appended to
        \param title title of the children (value of the first column) with name of artist/ablum/track
        \param filename name of file with a song. Mandatory only for tracks.
+       \param data1 additional informations such as genre, albums/tracks count, total length etc.
+       \param data2 additional informations such as genre, albums/tracks count, total length etc.
        \return Returns QModelIndex of created child.
      */
-     QModelIndex addChild(const QModelIndex &index, QString title, QString filename = "");
+     QModelIndex addChild(const QModelIndex &index, QString title, QString filename = "", QString data1 = "", QString data2 = "");
 
      //! Remove all items and their children from model
      /*!
@@ -186,6 +188,14 @@
        \return Returns list of filenames of found tracks
      */
      QStringList getItemChildrenTracks(const QModelIndex &parent);
+
+     //! Emits layoutChanged() so the content is redrawn
+     /*!
+       This method is called remotly by delegate when an item is selected. Such item is resized (it's height
+       is changed) and the model has to notify the View so it could request the delegates to be redrawn
+       and reflect the change.
+     */
+     void redraw() { emit layoutChanged(); }
 
  protected:
      //! Returns list of accepted drop acctions.

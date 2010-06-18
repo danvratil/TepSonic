@@ -20,7 +20,7 @@
 
 #include "collectionpopulator.h"
 #include "collectionmodel.h"
-
+#include "tools.h"
 #include "databasemanager.h"
 
 #include <QSqlField>
@@ -65,19 +65,31 @@ void CollectionPopulator::run()
             QModelIndex albumsParent;
             QModelIndex tracksParent;
             {
-                QSqlQuery artistsQuery("SELECT id,interpret FROM interprets ORDER BY interpret ASC",
+                QSqlQuery artistsQuery("SELECT id,interpret,albumsCnt,totalLength FROM interprets ORDER BY interpret ASC",
                                        *dbManager.sqlDb());
                 while (artistsQuery.next()) {
-                    albumsParent = (*_collectionModel)->addChild(QModelIndex(),artistsQuery.value(1).toString(),QString());
-                    QSqlQuery albumsQuery("SELECT id,album FROM albums WHERE id IN (SELECT album FROM tracks WHERE interpret="+artistsQuery.value(0).toString()+") ORDER BY album ASC;",
-                                      *dbManager.sqlDb());
+                    albumsParent = (*_collectionModel)->addChild(QModelIndex(),
+                                                                 artistsQuery.value(1).toString(),
+                                                                 QString(),
+                                                                 tr("%n album(s)","",artistsQuery.value(2).toInt()),
+                                                                 formatMilliseconds(artistsQuery.value(3).toInt()*1000));
+                    QSqlQuery albumsQuery("SELECT id,album,tracksCnt,totalLength FROM albums WHERE id IN (SELECT album FROM tracks WHERE interpret="+artistsQuery.value(0).toString()+") ORDER BY album ASC;",
+                                          *dbManager.sqlDb());
                     while (albumsQuery.next()) {
-                        tracksParent = (*_collectionModel)->addChild(albumsParent,albumsQuery.value(1).toString(),QString());
+                        tracksParent = (*_collectionModel)->addChild(albumsParent,
+                                                                     albumsQuery.value(1).toString(),
+                                                                     QString(),
+                                                                     tr("%n track(s)","",albumsQuery.value(2).toInt()),
+                                                                     formatMilliseconds(albumsQuery.value(3).toInt()*1000, true));
 
-                        QSqlQuery tracksQuery("SELECT trackname,filename FROM tracks WHERE album="+albumsQuery.value(0).toString()+" AND interpret="+artistsQuery.value(0).toString()+" ORDER BY track ASC;",
+                        QSqlQuery tracksQuery("SELECT trackname,filename,genre,length FROM view_tracks WHERE albumID="+albumsQuery.value(0).toString()+" AND interpretID="+artistsQuery.value(0).toString()+" ORDER BY track ASC;",
                                               *dbManager.sqlDb());
                         while (tracksQuery.next()) {
-                            (*_collectionModel)->addChild(tracksParent,tracksQuery.value(0).toString(),tracksQuery.value(1).toString());
+                            (*_collectionModel)->addChild(tracksParent,
+                                                          tracksQuery.value(0).toString(),
+                                                          tracksQuery.value(1).toString(),
+                                                          tracksQuery.value(2).toString(),
+                                                          formatMilliseconds(tracksQuery.value(3).toInt()*1000));
                         }
                     }
                 }

@@ -170,14 +170,20 @@ bool CollectionModel::setHeaderData(int section, Qt::Orientation orientation, co
     return result;
 }
 
-QModelIndex CollectionModel::addChild(const QModelIndex &parent, QString title, QString filename)
+QModelIndex CollectionModel::addChild(const QModelIndex &parent, QString title, QString filename, QString data1, QString data2)
 {
 
     if (!insertRow(rowCount(parent), parent))
         return QModelIndex();
 
-    getItem(parent)->child(getItem(parent)->childCount()-1)->setData(0,title);
-    getItem(parent)->child(getItem(parent)->childCount()-1)->setData(1,filename);
+    CollectionItem *item = getItem(parent);
+    int childCount = item->childCount()-1;
+
+    item->child(childCount)->setData(0,title);
+    item->child(childCount)->setData(1,filename);
+    item->child(childCount)->setData(2,data1);
+    item->child(childCount)->setData(3,data2);
+
 
     return index(rowCount(parent)-1,0,parent);
 }
