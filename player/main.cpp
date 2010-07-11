@@ -34,6 +34,9 @@
 
 #include <QDebug>
 
+Player *player;
+PluginsManager *pluginsManager;
+
 int main(int argc, char *argv[])
 {
     QApplication tepsonic(argc, argv);
@@ -63,10 +66,16 @@ int main(int argc, char *argv[])
     QTextCodec::setCodecForTr(QTextCodec::codecForName("utf8"));
     QTextCodec::setCodecForCStrings(QTextCodec::codecForName("UTF-8"));
 
-    Player *player = new Player();
+    player = new Player();
+    pluginsManager = new PluginsManager();
     MainWindow mainWindow(player);
-    PluginsManager *pluginsManager = new PluginsManager(&mainWindow,player);
-    mainWindow.setPluginsManager(pluginsManager);
+
+    QObject::connect(player,SIGNAL(stateChanged(Phonon::State,Phonon::State)),pluginsManager,SIGNAL(playerStatusChanged(Phonon::State,Phonon::State)));
+    QObject::connect(player,SIGNAL(trackChanged(Player::MetaData)),pluginsManager,SIGNAL(trackChanged(Player::MetaData)));
+    QObject::connect(player,SIGNAL(trackFinished(Player::MetaData)),pluginsManager,SIGNAL(trackFinished(Player::MetaData)));
+    QObject::connect(player,SIGNAL(trackPositionChanged(qint64)),pluginsManager,SIGNAL(trackPositionChanged(qint64)));
+    QObject::connect(&mainWindow,SIGNAL(settingsAccepted()),pluginsManager,SIGNAL(settingsAccepted()));
+    pluginsManager->loadPlugins();
 
     mainWindow.show();
 

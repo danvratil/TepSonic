@@ -32,6 +32,8 @@
 PreferencesDialog::PreferencesDialog(MainWindow *parent):
         _ui(new Ui::PreferencesDialog)
 {
+    extern PluginsManager *pluginsManager;
+
     _ui->setupUi(this);
 
     _parent = parent;
@@ -68,16 +70,17 @@ PreferencesDialog::PreferencesDialog(MainWindow *parent):
     settings.endGroup();
 
     // Iterate through all plugins
-    for (int i=0; i < _parent->pluginsManager()->pluginsCount(); i++) {
+    for (int i=0; i < pluginsManager->pluginsCount(); i++) {
 
         // Get plugin name
-        QString pluginName = static_cast<AbstractPlugin*>(_parent->pluginsManager()->pluginAt(i)->instance())->pluginName();
+        QString pluginName = pluginsManager->pluginAt(i)->pluginName;
 
+        AbstractPlugin *plugin = qobject_cast<AbstractPlugin*>(pluginsManager->pluginAt(i)->pluginLoader->instance());
         // If the plugin has a config UI then add a tab with the UI to Plugins page
-        if (static_cast<AbstractPlugin*>(_parent->pluginsManager()->pluginAt(i)->instance())->hasConfigUI()) {
+        if (plugin->hasConfigUI()) {
             QWidget *pluginWidget = new QWidget();
             _plugins->ui->tabs->addTab(pluginWidget,pluginName);
-            static_cast<AbstractPlugin*>(_parent->pluginsManager()->pluginAt(i)->instance())->settingsWidget(pluginWidget);
+            plugin->settingsWidget(pluginWidget);
         }
 
         bool enabled;
@@ -118,6 +121,8 @@ void PreferencesDialog::changeEvent(QEvent *e)
 
 void PreferencesDialog::on_buttonBox_accepted()
 {
+    extern PluginsManager *pluginsManager;
+
     QSettings settings(QString(_CONFIGDIR).append("/main.conf"),QSettings::IniFormat,this);
     settings.beginGroup("Collections");
     settings.setValue("EnableCollections",_collections->ui->enableCollectionsCheckbox->isChecked());
@@ -144,6 +149,11 @@ void PreferencesDialog::on_buttonBox_accepted()
     for (int i = 0; i < _plugins->ui->pluginsList->count(); i++) {
         QListWidgetItem *item = _plugins->ui->pluginsList->item(i);
         plugins.insert(item->text(),QVariant(item->checkState()));
+        if (item->checkState()) {
+            pluginsManager->enablePlugin(pluginsManager->pluginAt(i));
+        } else {
+            pluginsManager->disablePlugin(pluginsManager->pluginAt(i));
+        }
     }
     settings.setValue("pluginsEnabled",QVariant(plugins));
     settings.endGroup();

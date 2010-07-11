@@ -49,8 +49,7 @@ DatabaseManager::DatabaseManager(QString connectionName)
 
 DatabaseManager::~DatabaseManager()
 {
-    if (_sqlDb != NULL)
-        delete _sqlDb;
+    delete _sqlDb;
     QSqlDatabase::removeDatabase(_connectionName);
 }
 

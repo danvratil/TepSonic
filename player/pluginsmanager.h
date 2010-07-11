@@ -25,8 +25,8 @@
 #include <QList>
 #include <QPluginLoader>
 
-class MainWindow;
-class Player;
+#include "player.h"
+
 class AbstractPlugin;
 
 //! PluginsManager is a class for loading and providing access to plugins
@@ -38,17 +38,15 @@ class PluginsManager : public QObject
 {
     Q_OBJECT
     public:
+        struct Plugin {
+            QString pluginName;
+            QPluginLoader *pluginLoader;
+            uint pluginID;
+            bool enabled;
+        };
 
         //! Constructor
-        /*!
-          At the end of constructor the method loadPlugins() is called to load
-          all available plugins.
-          \param mainWindow pointer to main window object. This allows manager to connect
-          plugins' slots with main window's signals and vice versa
-          \param player pointer to Player object. This allows manager to connect plugins' slots
-          with player's signals and vice versa.
-        */
-        explicit PluginsManager(MainWindow *mainWindow, Player *player);
+        explicit PluginsManager();
 
         //! Destructor
         /*!
@@ -68,36 +66,52 @@ class PluginsManager : public QObject
           \param index index of plugin to return
           \return Returns pointer to QPluginLoader on given index
         */
-        QPluginLoader *pluginAt(int index);
+        struct Plugin* pluginAt(int index);
 
     public slots:
-        //! Initializes enabled plugins
+        //! Disables given plugin
         /*!
-          Initializes enabled plugins
+          Disable given plugin
+          \param plugin
         */
-        void initPlugins();
+        void disablePlugin(Plugin *plugin);
 
-    private slots:
+        //! Enables given plugin
+        /*!
+          Enable given plugin
+          \param plugin
+        */
+        void enablePlugin(Plugin *plugin);
+
         //! Loads all available plugins
         /*!
           Loads all available plugin libraries. By default it searches in following directories: \n
           ./ (on Linux and Windows) \n
           ./plugins (on Linux and Windows) \n
-          /usr/lib (on Linux) \n
-          /usr/local/lib (on Linux) \n
           All plugins must be prefixed libtepsonic_ and must have .so (Linux) or .dll (Windows) extension.
         */
         void loadPlugins();
 
     private:
-        //! List of QPluginLoaders containing loaded plugins
-        QList<QPluginLoader*> _plugins;
+        //! Initializes given plugin
+        /*!
+          Initializes given plugin
+        */
+        void initPlugin(Plugin *plugin);
 
-        //! Pointer to main window
-        MainWindow *_mainWindow;
+        //! List of Plugins containing loaded plugins
+        QList<Plugin*> _pluginsList;
 
-        //! Pointer to player
-        Player *_player;
+        int _lastPluginID;
+
+    signals:
+         void settingsAccepted();
+         void playerStatusChanged(Phonon::State,Phonon::State);
+         void trackChanged(Player::MetaData);
+         void trackFinished(Player::MetaData);
+         void trackPositionChanged(qint64);
+
+
 
 };
 

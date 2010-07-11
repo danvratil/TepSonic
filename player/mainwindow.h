@@ -381,6 +381,8 @@ private slots:
     //! Deletes file locally on hardisk and calls for collections rebuild
     void removeFileFromDisk();
 
+signals:
+    void settingsAccepted();
 
 
 };

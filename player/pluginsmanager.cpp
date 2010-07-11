@@ -36,30 +36,28 @@
 #include <QSettings>
 #include <phonon/mediaobject.h>
 
-PluginsManager::PluginsManager(MainWindow *mainWindow, Player *player)
+PluginsManager::PluginsManager()
 {
-    _mainWindow = mainWindow;
-    _player = player;
-    loadPlugins();
+    _lastPluginID = 0;
 }
 
 PluginsManager::~PluginsManager()
 {
     // Unload all plugins
-    foreach (QPluginLoader *pluginLoader, _plugins) {
-        disconnect(static_cast<AbstractPlugin*>(pluginLoader->instance()),SLOT(settingsAccepted()));
-        disconnect(static_cast<AbstractPlugin*>(pluginLoader->instance()),SLOT(playerStatusChanged(Phonon::State,Phonon::State)));
-        disconnect(static_cast<AbstractPlugin*>(pluginLoader->instance()),SLOT(trackChanged(MetaData)));
-        disconnect(static_cast<AbstractPlugin*>(pluginLoader->instance()),SLOT(trackFinished(MetaData)));
-        disconnect(static_cast<AbstractPlugin*>(pluginLoader->instance()),SLOT(trackPositionChanged(qint64)));
-        static_cast<AbstractPlugin*>(pluginLoader->instance())->quit();
-        pluginLoader->unload();
+    foreach (Plugin *plugin, _pluginsList) {
+        disablePlugin(plugin);
+        plugin->pluginLoader->unload();
     }
 }
 
 
 void PluginsManager::loadPlugins()
 {
+    QSettings settings(QString(_CONFIGDIR).append("/main.conf"),QSettings::IniFormat,this);
+    settings.beginGroup("Plugins");
+    QMap<QString,QVariant> pluginsEnabled = settings.value("pluginsEnabled").toMap();
+    settings.endGroup();
+
     QStringList pluginsDirs;
     /* By default we will search in applicationDirPath/plugins
        This is common situation on Windows where the plugins will probably be stored in
@@ -88,60 +86,63 @@ void PluginsManager::loadPlugins()
                 qDebug() << "Loading plugin " << pluginsDir.absoluteFilePath(filename);
 
                 QPluginLoader *pluginLoader = new QPluginLoader(pluginsDir.absoluteFilePath(filename));
-                QObject *plugin = pluginLoader->instance();
-                qDebug() << pluginLoader->errorString();
-                if (plugin) {
-                    _plugins.append(pluginLoader);
-                    static_cast<AbstractPlugin*>(plugin)->_initialized = false;
+                pluginLoader->load();
+                Plugin *plugin = new PluginsManager::Plugin;
+                plugin->pluginLoader = pluginLoader;
+                plugin->pluginID = (_lastPluginID+1);
+                AbstractPlugin *aplg = qobject_cast<AbstractPlugin*>(pluginLoader->instance());
+                plugin->pluginName = aplg->pluginName();
+                if ((pluginsEnabled.contains(plugin->pluginName)) || (pluginsEnabled[plugin->pluginName]==true)) {
+                    enablePlugin(plugin);
+                } else {
+                    plugin->enabled = false;
                 }
+
+                _pluginsList.append(plugin);
+
+                _lastPluginID++;
             }
         }
     }
-    initPlugins();
-}
-
-void PluginsManager::initPlugins()
-{
-    QSettings settings(QString(_CONFIGDIR).append("/main.conf"),QSettings::IniFormat,this);
-    settings.beginGroup("Plugins");
-    QMap<QString,QVariant> plugins = settings.value("pluginsEnabled").toMap();
-    settings.endGroup();
-
-    foreach (QPluginLoader *pluginLoader, _plugins) {
-        QObject *plugin = pluginLoader->instance();
-        QString pluginName = static_cast<AbstractPlugin*>(plugin)->pluginName();
-        if (((!plugins.contains(pluginName)) || (plugins[pluginName].toBool()==true)) && (static_cast<AbstractPlugin*>(plugin)->_initialized==false)) {
-            connect(_player,SIGNAL(trackChanged(Player::MetaData)),static_cast<AbstractPlugin*>(plugin),SLOT(trackChanged(Player::MetaData)));
-            connect(_player,SIGNAL(trackFinished(Player::MetaData)),static_cast<AbstractPlugin*>(plugin),SLOT(trackFinished(Player::MetaData)));
-            connect(_player,SIGNAL(stateChanged(Phonon::State,Phonon::State)),static_cast<AbstractPlugin*>(plugin),SLOT(playerStatusChanged(Phonon::State,Phonon::State)));
-            connect(_player,SIGNAL(trackPositionChanged(qint64)),static_cast<AbstractPlugin*>(plugin),SLOT(trackPositionChanged(qint64)));
-            connect(static_cast<AbstractPlugin*>(plugin),SIGNAL(error(QString)),_mainWindow,SLOT(showError(QString)));
-            static_cast<AbstractPlugin*>(plugin)->init();
-            static_cast<AbstractPlugin*>(plugin)->_initialized = true;
-        }
-
-        /* If the plugins is formally disabled, but still initialized then remove all connections and call it's metod
-           quit()
-        */
-        if ((plugins[pluginName].toBool()==false) && (static_cast<AbstractPlugin*>(plugin)->_initialized==true)) {
-            disconnect(static_cast<AbstractPlugin*>(plugin),SLOT(settingsAccepted()));
-            disconnect(static_cast<AbstractPlugin*>(plugin),SLOT(playerStatusChanged(Phonon::State,Phonon::State)));
-            disconnect(static_cast<AbstractPlugin*>(plugin),SLOT(trackChanged(MetaData)));
-            disconnect(static_cast<AbstractPlugin*>(plugin),SLOT(trackFinished(MetaData)));
-            disconnect(static_cast<AbstractPlugin*>(plugin),SLOT(trackPositionChanged(qint64)));
-            static_cast<AbstractPlugin*>(plugin)->_initialized = false;
-            static_cast<AbstractPlugin*>(plugin)->quit();
-        }
-
-    } // end of loop
 }
 
 int PluginsManager::pluginsCount()
 {
-    return _plugins.count();
+    return _pluginsList.count();
 }
 
-QPluginLoader* PluginsManager::pluginAt(int index)
+struct PluginsManager::Plugin* PluginsManager::pluginAt(int index)
 {
-    return _plugins.at(index);
+    return _pluginsList.at(index);
+}
+
+void PluginsManager::disablePlugin(Plugin *plugin)
+{
+    if (!plugin->enabled) return;
+
+    AbstractPlugin* aplg = qobject_cast<AbstractPlugin*>(plugin->pluginLoader->instance());
+
+    disconnect(aplg,SLOT(settingsAccepted()));
+    disconnect(aplg,SLOT(playerStatusChanged(Phonon::State,Phonon::State)));
+    disconnect(aplg,SLOT(trackChanged(Player::MetaData)));
+    disconnect(aplg,SLOT(trackFinished(Player::MetaData)));
+    disconnect(aplg,SLOT(trackPositionChanged(qint64)));
+    aplg->quit();
+    plugin->enabled=false;
+}
+
+void PluginsManager::enablePlugin(Plugin *plugin)
+{
+    if (plugin->enabled) return;
+
+    AbstractPlugin *aplg = qobject_cast<AbstractPlugin*>(plugin->pluginLoader->instance());
+
+    connect(this,SIGNAL(trackChanged(Player::MetaData)),aplg,SLOT(trackChanged(Player::MetaData)));
+    connect(this,SIGNAL(trackFinished(Player::MetaData)),aplg,SLOT(trackFinished(Player::MetaData)));
+    connect(this,SIGNAL(stateChanged(Phonon::State,Phonon::State)),aplg,SLOT(playerStatusChanged(Phonon::State,Phonon::State)));
+    connect(this,SIGNAL(trackPositionChanged(qint64)),aplg,SLOT(trackPositionChanged(qint64)));
+    connect(aplg,SIGNAL(error(QString)),this,SIGNAL(error(QString)));
+    aplg->init();
+    aplg->_initialized = true;
+    plugin->enabled = true;
 }
