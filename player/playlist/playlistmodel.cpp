@@ -48,6 +48,7 @@ PlaylistModel::PlaylistModel(const QStringList &headers, QObject *parent)
 
     _totalLength = 0;
     _dbConnectionAvailable = true;
+    _currentItem = QModelIndex();
 
     rootItem = new PlaylistItem(rootData);
 }
@@ -318,4 +319,53 @@ bool PlaylistModel::addItem(QString file)
     emit playlistLengthChanged(_totalLength, rowCount(QModelIndex()));
 
     return true;
+}
+
+QModelIndex PlaylistModel::currentItem()
+{
+    if (_currentItem.isValid()) {
+        return _currentItem;
+    } else {
+        return index(0,0,QModelIndex());
+    }
+}
+
+void PlaylistModel::setCurrentItem(QModelIndex currentIndex)
+{
+    if (!currentIndex.isValid())
+        return;
+
+    _currentItem = currentIndex;
+    rootItem->child(currentIndex.row())->setSelected(true);
+    emit layoutChanged();
+
+}
+
+
+QModelIndex PlaylistModel::nextItem(QModelIndex index)
+{
+    if (!index.isValid()) {
+        index = currentItem();
+    }
+
+    if (index.row() >= rowCount()) {
+        return QModelIndex();
+    }
+
+    QModelIndex nextItem = this->index(index.row()+1, 0, QModelIndex());
+    return nextItem;
+}
+
+QModelIndex PlaylistModel::previousItem(QModelIndex index)
+{
+    if (!index.isValid()) {
+        return QModelIndex();
+    }
+
+    if (index.row() == 0) {
+        return QModelIndex();
+    }
+
+    QModelIndex prevItem = this->index(index.row()-1, 0, QModelIndex());
+    return prevItem;
 }

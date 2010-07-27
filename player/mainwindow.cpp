@@ -26,6 +26,7 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "preferencesdialog.h"
+#include "playlist/playlistitemdelegate.h"
 #include "playlist/playlistproxymodel.h"
 #include "playlist/playlistmodel.h"
 #include "collections/collectionproxymodel.h"
@@ -97,6 +98,7 @@ MainWindow::MainWindow(Player *player)
                           << tr("Year")
                           << tr("Length");
     _playlistModel = new PlaylistModel(headers,this);
+    _playlistItemDelegate = new PlaylistItemDelegate(this,_playlistModel);
     connect(_playlistModel,SIGNAL(playlistLengthChanged(int,int)),
             this,SLOT(playlistLengthChanged(int,int)));
     _playlistProxyModel = new PlaylistProxyModel(this);
@@ -104,6 +106,7 @@ MainWindow::MainWindow(Player *player)
     _playlistProxyModel->setDynamicSortFilter(false);
 
     _ui->playlistBrowser->setModel(_playlistProxyModel);
+    _ui->playlistBrowser->setItemDelegate(_playlistItemDelegate);
     _ui->playlistBrowser->setDragEnabled(true);
     _ui->playlistBrowser->setDropIndicatorShown(true);
     _ui->playlistBrowser->setSortingEnabled(true);
@@ -383,8 +386,8 @@ void MainWindow::updatePlayerTrack()
 void MainWindow::on_playlistBrowser_doubleClicked(QModelIndex index)
 {
     // Play item on row double click
-    QString filename = index.sibling(index.row(),0).data().toString();
-    _player->setTrack(filename,true);
+    _playlistModel->setCurrentItem(_playlistModel->index(index.row(),0,QModelIndex()));
+    setTrack(index.row());
 }
 
 void MainWindow::playerStatusChanged(Phonon::State newState, Phonon::State oldState)
@@ -434,29 +437,20 @@ void MainWindow::playerStatusChanged(Phonon::State newState, Phonon::State oldSt
         _ui->statusBar->showMessage(_player->errorString(),5000);
         break;
     case Phonon::LoadingState:
+        //todo
         break;
     case Phonon::BufferingState:
+        //todo
         break;
     }
 }
 
 void MainWindow::on_actionPrevious_track_triggered()
 {
-    QModelIndexList selected = _selectionModel->selectedRows(0);
-    // Only when there is an item above
-    if ((selected.count() > 0) && (selected.at(0).row()>0)) {
-        QModelIndex topLeft = _playlistModel->index(selected.at(0).row()-1,0,QModelIndex());
-        QModelIndex bottomRight = _playlistModel->index(selected.at(0).row()-1,
-                                  _playlistModel->columnCount(QModelIndex())-1,
-                                  QModelIndex());
-        // First cancel all selections
-        for (int i=0;i<selected.count();i++) {
-            _selectionModel->select(selected.at(i),QItemSelectionModel::Clear);
-        }
-        // And then select the new row
-        _selectionModel->select(QItemSelection(topLeft,bottomRight),
-                                QItemSelectionModel::Select);
-        _player->setTrack(_selectionModel->selectedRows(0).at(0).data().toString(),true);
+    QModelIndex currentItem = _playlistModel->currentItem();
+    if ((currentItem.row() > 0) && (_playlistModel->rowCount(QModelIndex()) > 0)) {
+        _playlistModel->setCurrentItem(_playlistModel->previousItem(currentItem));
+        setTrack(currentItem.row()-1);
     }
 }
 
@@ -469,12 +463,8 @@ void MainWindow::on_actionPlay_pause_triggered()
            first row and load it as current source */
         if ((_player->currentSource().fileName().isEmpty()) &&
                 (_playlistModel->rowCount() > 0)) {
-            QModelIndex topLeft = _playlistModel->index(0,0,QModelIndex());
-            QModelIndex bottomRight = _playlistModel->index(0,_playlistModel->columnCount(QModelIndex())-1,QModelIndex());
-            _selectionModel->select(QItemSelection(topLeft,bottomRight),
-                                    QItemSelectionModel::Select);
-            _player->setTrack(_selectionModel->selectedRows(0).at(0).data().toString(),true);
-
+            _playlistModel->setCurrentItem(_playlistModel->index(0,0,QModelIndex()));
+            setTrack(0);
         }
         _player->play();
     }
@@ -483,63 +473,24 @@ void MainWindow::on_actionPlay_pause_triggered()
 
 void MainWindow::on_actionNext_track_triggered()
 {
-    QModelIndexList selected = _selectionModel->selectedRows(0);
-    if (selected.count() > 0) {
-        // Is Random mode on?
-        if (_player->randomMode()) {
-            // Choose random row (generator initialized in constructor)
-            int row = rand() % _playlistModel->rowCount(QModelIndex());
-            QModelIndex topLeft = _playlistModel->index(row,
-                                  0,
-                                  QModelIndex());
-            QModelIndex bottomRight = _playlistModel->index(row,
-                                      _playlistModel->columnCount(QModelIndex())-1,
-                                      QModelIndex());
-            // Clear current selection(s)
-            for (int i=0;i<selected.count();i++) {
-                _selectionModel->select(selected.at(i),QItemSelectionModel::Clear);
-            }
-            // Select the new item
-            _selectionModel->select(QItemSelection(topLeft,bottomRight),
-                                    QItemSelectionModel::Select);
-        } else { // When random mode is off...
-            // Check if there is an item below the current
-            if (selected.at(0).row() < _playlistModel->rowCount(QModelIndex())-1) {
-                QModelIndex topLeft = _playlistModel->index(selected.at(0).row()+1,0,QModelIndex());
-                QModelIndex bottomRight = _playlistModel->index(selected.at(0).row()+1,
-                                          _playlistModel->columnCount(QModelIndex())-1,
-                                          QModelIndex());
-                // First clear current selection
-                for (int i = 0; i < selected.count(); i++) {
-                    _selectionModel->select(selected.at(i),QItemSelectionModel::Clear);
-                }
-                // Select the next item
-                _selectionModel->select(QItemSelection(topLeft,bottomRight),
-                                        QItemSelectionModel::Select);
-                // If there is now row below, but player is set to "RepeatAll" then jump to the first track
-            } else {
-                if (_player->repeatMode() == Player::RepeatAll) {
-                    QModelIndex topLeft = _playlistModel->index(0,0,QModelIndex());
-                    QModelIndex bottomRight = _playlistModel->index(0,
-                                              _playlistModel->columnCount(QModelIndex())-1,
-                                              QModelIndex());
-                    // First clear current selection
-                    for (int i = 0; i < selected.count(); i++) {
-                        _selectionModel->select(selected.at(i),QItemSelectionModel::Clear);
-                    }
-                    // Now select the first item in playlist
-                    _selectionModel->select(QItemSelection(topLeft,bottomRight),
-                                            QItemSelectionModel::Select);
-                    // If there is no row below and we are not in repeat mode, then stop the playback
-                } else {
-                    return;
-                } // if (_player->repeatMode() == Player::RepeatAll)
-            } // if (selected.at(0).row() == playlistModel->rowCount(QModelIndex()))
-        } // if (_player->randomMode() == false)
-        // Now set the selected item as mediasource into Phonon player
-        _player->setTrack(_selectionModel->selectedRows(0).at(0).data().toString(),true);
-    } // if (selected.count() == 0)
+    QModelIndex currentItem = _playlistModel->currentItem();
 
+    if (_player->randomMode()) {
+        int row = rand() % _playlistModel->rowCount(QModelIndex());
+        _playlistModel->setCurrentItem(_playlistModel->index(row,0,QModelIndex()));
+    } else {
+        if (_playlistModel->nextItem(currentItem).isValid()) {
+            _playlistModel->setCurrentItem(_playlistModel->nextItem(currentItem));
+        } else {
+            if (_player->repeatMode() == Player::RepeatAll) {
+                _playlistModel->setCurrentItem(_playlistModel->index(0,0,QModelIndex()));
+            } else {
+                return;
+            }
+        }
+    }
+
+    setTrack(_playlistModel->currentItem().row());
 }
 
 void MainWindow::addPlaylistItem(const QString &filename)
@@ -772,4 +723,11 @@ void MainWindow::destroyCollections()
     _collectionModel = NULL;
 
     _ui->collectionWidget->hide();
+}
+
+void MainWindow::setTrack(int row)
+{
+    QModelIndex currentItem = _playlistModel->currentItem();
+    QString filename = currentItem.sibling(currentItem.row(),0).data().toString();
+    _player->setTrack(filename,true);
 }

@@ -37,6 +37,7 @@
 #include "player.h"
 #include "trayicon.h"
 
+class PlaylistItemDelegate;
 class PlaylistProxyModel;
 class CollectionModel;
 class CollectionProxyModel;
@@ -103,6 +104,9 @@ private:
 
     //! Pointer to PlaylistProxyModel
     PlaylistProxyModel *_playlistProxyModel;
+
+    //! Pointer to PlaylistItemDelegate
+    PlaylistItemDelegate *_playlistItemDelegate;
 
     //! Pointer to CollectionModel
     CollectionModel *_collectionModel;
@@ -181,6 +185,12 @@ private:
       This method is called when preferences dialog is closed and collections were disabled in it
     */
     void destroyCollections();
+
+    //! Set as current track the track on given row in playlist
+    /*!
+      \param row location of the new track in playlist
+    */
+    void setTrack(int row);
 
 
 protected:

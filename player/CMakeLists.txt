@@ -53,6 +53,7 @@ set(player_HDRS
     collections/collectionitemdelegate.h
     playlist/playlistbrowser.h
     playlist/playlistitem.h
+    playlist/playlistitemdelegate.h
     playlist/playlistmodel.h
     playlist/playlistproxymodel.h
     playlist/playlistpopulator.h
@@ -81,6 +82,7 @@ set(player_SRCS
     collections/collectionitemdelegate.cpp
     playlist/playlistbrowser.cpp
     playlist/playlistitem.cpp
+    playlist/playlistitemdelegate.cpp
     playlist/playlistmodel.cpp
     playlist/playlistproxymodel.cpp
     playlist/playlistpopulator.cpp

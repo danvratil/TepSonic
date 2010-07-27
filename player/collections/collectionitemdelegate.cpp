@@ -72,7 +72,8 @@ void CollectionItemDelegate::paint(QPainter *painter, const QStyleOptionViewItem
 
 
     } else {
-        // Remove index from list (if it is in it) <= cool :D
+        // Remove index from list (if it is in it)
+        //                              ^-------- cool :D
         if (_currentIndexes.removeOne(index)) {
             parentModel->redraw();
         }

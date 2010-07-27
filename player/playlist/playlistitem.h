@@ -33,6 +33,7 @@
 */
 class PlaylistItem: public QStandardItem
  {
+
  public:
      //! Constructor
      /*!
@@ -119,6 +120,18 @@ class PlaylistItem: public QStandardItem
       */
      bool setData(int column, const QVariant &value);
 
+     //! Sets new item state
+     /*!
+       \param newState new state
+     */
+     void setSelected(bool selected);
+
+     //! Returns current state of item selection
+     /*!
+       \return Returns current state of item selection
+     */
+     bool selected();
+
  private:
      //! List of item's child PlaylistItems
      QList<PlaylistItem*> childItems;
@@ -128,5 +141,8 @@ class PlaylistItem: public QStandardItem
 
      //! Pointer to parent PlaylistItem
      PlaylistItem *parentItem;
+
+     //! Holds current state of the item
+     bool _selected;
  };
 #endif // PLAYLISTITEM_H

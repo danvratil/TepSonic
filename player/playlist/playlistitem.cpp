@@ -20,6 +20,8 @@
 
 #include "playlistitem.h"
 
+#include <QDebug>
+
 PlaylistItem::PlaylistItem(const QVector<QVariant> &data, PlaylistItem *parent)
 {
     if (data.isEmpty()) {
@@ -28,6 +30,7 @@ PlaylistItem::PlaylistItem(const QVector<QVariant> &data, PlaylistItem *parent)
         itemData = data;
     }
     parentItem = parent;
+    _selected = false;
 }
 
 PlaylistItem::~PlaylistItem()
@@ -108,4 +111,14 @@ bool PlaylistItem::setData(int column, const QVariant &value)
 
     itemData[column] = value;
     return true;
+}
+
+void PlaylistItem::setSelected(bool selected)
+{
+    _selected = selected;
+}
+
+bool PlaylistItem::selected()
+{
+    return _selected;
 }

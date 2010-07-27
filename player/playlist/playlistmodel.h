@@ -169,6 +169,33 @@ class PlaylistModel : public QAbstractItemModel
      bool removeRows(int position, int rows,
                      const QModelIndex &parent = QModelIndex());
 
+
+     //! Returns QModelIndex of currently played item
+     QModelIndex currentItem();
+
+     //! Sets current item
+     /*!
+       \param index of the current item
+     */
+     void setCurrentItem(QModelIndex currentIndex);
+
+
+     //! Returns QModelIndex of following item
+     /*!
+       If given index is empty of invalid the currently played item is used
+       \param index index of item of which the next item will be found
+       \return Returns index of item next to the given one
+     */
+     QModelIndex nextItem(QModelIndex index = QModelIndex());
+
+     //! Returns QModelIndex of previous item
+     /*!
+       If given index is empty or invalid the currently played item is used
+       \param index index of item of which the previous item will found
+       \return Returns index of item before the given one
+     */
+     QModelIndex previousItem(QModelIndex index = QModelIndex());
+
  public slots:
     //! Appends new file to the playlist
     /*!
@@ -179,13 +206,15 @@ class PlaylistModel : public QAbstractItemModel
     */
     bool addItem(QString file);
 
+    //! Returns pointer to PlaylistModel located on given index
+    /*!
+      \param index index of item to convert
+      \return Returns pointer to PlaylistModel
+    */
+    PlaylistItem *getItem(const QModelIndex &index) const;
+
  private:
-     //! Returns pointer to PlaylistModel located on given index
-     /*!
-       \param index index of item to convert
-       \return Returns pointer to PlaylistModel
-     */
-     PlaylistItem *getItem(const QModelIndex &index) const;
+
 
      //! Root item. It's parent for all rows
      PlaylistItem *rootItem;
@@ -196,6 +225,8 @@ class PlaylistModel : public QAbstractItemModel
      QMutex _mutex;
 
      bool _dbConnectionAvailable;
+
+     QModelIndex _currentItem;
 
  signals:
      //! This signal is emmited when length of playlist is changed
