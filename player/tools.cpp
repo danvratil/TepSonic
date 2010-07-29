@@ -15,6 +15,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Cambridge, MA 02110-1301, USA.
+ *
+ * Contributors: Petr Vaněk
  */
 
 #include <QString>
@@ -91,9 +93,9 @@ QString formatMilliseconds(qint64 msecs, bool forceHours)
         sSecs = QString::number(secs);
     }
 
-    if ((hours > 0) || (forceHours)) {
+    if ((hours > 0) || (forceHours)) 
         return sHours+":"+sMins+":"+sSecs;
-    } else {
-        return sMins+":"+sSecs;
-    }
+
+    return sMins+":"+sSecs;
 }
+

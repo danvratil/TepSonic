@@ -42,6 +42,13 @@ if(TAGLIBCONFIG_EXECUTABLE)
         set(TAGLIB_FOUND TRUE)
      endif(TAGLIB_LIBRARIES AND TAGLIB_CFLAGS)
      string(REGEX REPLACE " *-I" ";" TAGLIB_INCLUDES "${TAGLIB_CFLAGS}")
+
+     # location of headers is /opt/local/include/taglib in macports
+     # we need to get it /opt/local/include for taglib/tag.h inclusions...
+     if (APPLE)
+        string(REPLACE "/taglib" "/" TAGLIB_INCLUDES "${TAGLIB_INCLUDES}")
+     endif (APPLE)
+	
   endif(TAGLIB_VERSION STRLESS "${TAGLIB_MIN_VERSION}") 
   mark_as_advanced(TAGLIB_CFLAGS TAGLIB_LIBRARIES TAGLIB_INCLUDES)
 

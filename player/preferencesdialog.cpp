@@ -15,6 +15,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Cambridge, MA 02110-1301, USA.
+ * 
+ * Contributors: Petr Vaněk 
  */
 
 #include "preferencesdialog.h"
@@ -75,7 +77,7 @@ PreferencesDialog::PreferencesDialog(MainWindow *parent):
         // Get plugin name
         QString pluginName = pluginsManager->pluginAt(i)->pluginName;
 
-        AbstractPlugin *plugin = qobject_cast<AbstractPlugin*>(pluginsManager->pluginAt(i)->pluginLoader->instance());
+        AbstractPlugin *plugin = reinterpret_cast<AbstractPlugin*>(pluginsManager->pluginAt(i)->pluginLoader->instance());
         // If the plugin has a config UI then add a tab with the UI to Plugins page
         if (plugin->hasConfigUI()) {
             QWidget *pluginWidget = new QWidget();

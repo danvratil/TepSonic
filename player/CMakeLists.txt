@@ -27,6 +27,7 @@ include_directories(
         ${QT_INCLUDE_DIR}
         ${PHONON_INCLUDES}
 	${CMAKE_CURRENT_SOURCE_DIR}
+	${TAGLIB_INCLUDES}
 	"collections"
 	"playlist"
 )
@@ -45,14 +46,14 @@ set(player_HDRS
     preferencespages.h
     trayicon.h
     collections/collectionpopulator.h
-    collections/collectionbrowser.h
+#    collections/collectionbrowser.h
     collections/collectionmodel.h
-    collections/collectionitem.h
+#    collections/collectionitem.h
     collections/collectionbuilder.h
     collections/collectionproxymodel.h
     collections/collectionitemdelegate.h
     playlist/playlistbrowser.h
-    playlist/playlistitem.h
+#    playlist/playlistitem.h
     playlist/playlistitemdelegate.h
     playlist/playlistmodel.h
     playlist/playlistproxymodel.h

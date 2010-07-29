@@ -15,6 +15,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Cambridge, MA 02110-1301, USA.
+ *
+ * Contributors: Petr Vaněk
  */
 
 
@@ -68,8 +70,16 @@ void PluginsManager::loadPlugins()
        same-called plugins installed somewhere in system */
     pluginsDirs << qApp->applicationDirPath()+QDir::separator()+"plugins";
     // Default extension on windows
-    QString ext = "dll";
-#ifndef Q_OS_WIN32
+    QString ext;
+#ifdef Q_WS_WIN
+    ext = "dll";
+#endif
+#ifdef Q_WS_MAC
+    pluginsDirs << LIBDIR;
+    qDebug() << "Searching in " << pluginsDirs;    
+    ext = "dylib";
+#endif
+#ifdef Q_WS_X11
     // LIBDIR is defined in dirs.pri and it is a location where all project's libs are installed
     pluginsDirs << LIBDIR;
     qDebug() << "Searching in " << pluginsDirs;
@@ -81,16 +91,20 @@ void PluginsManager::loadPlugins()
     pluginsDir.setNameFilters(QStringList() << "libtepsonic_*."+ext);
     foreach(QString folder, pluginsDirs) {
         pluginsDir.setPath(folder);
-        foreach(QString filename, pluginsDir.entryList(QDir::Files)) {
+        foreach(QString filename, pluginsDir.entryList(QDir::Files|QDir::NoSymLinks)) {
             if (QLibrary::isLibrary(filename)) {
                 qDebug() << "Loading plugin " << pluginsDir.absoluteFilePath(filename);
 
                 QPluginLoader *pluginLoader = new QPluginLoader(pluginsDir.absoluteFilePath(filename));
-                pluginLoader->load();
+                if (! pluginLoader->load()) {
+                    qDebug() << filename << "load error:" << pluginLoader->errorString();
+                    continue;
+                }
                 Plugin *plugin = new PluginsManager::Plugin;
                 plugin->pluginLoader = pluginLoader;
                 plugin->pluginID = (_lastPluginID+1);
-                AbstractPlugin *aplg = qobject_cast<AbstractPlugin*>(pluginLoader->instance());
+//                qDebug() << pluginLoader << pluginLoader->instance() <<  pluginLoader->instance()->inherits("AbstractPlugin");
+                AbstractPlugin *aplg = reinterpret_cast<AbstractPlugin*>(pluginLoader->instance());
                 plugin->pluginName = aplg->pluginName();
                 if ((pluginsEnabled.contains(plugin->pluginName)) || (pluginsEnabled[plugin->pluginName]==true)) {
                     enablePlugin(plugin);
@@ -120,7 +134,7 @@ void PluginsManager::disablePlugin(Plugin *plugin)
 {
     if (!plugin->enabled) return;
 
-    AbstractPlugin* aplg = qobject_cast<AbstractPlugin*>(plugin->pluginLoader->instance());
+    AbstractPlugin* aplg = reinterpret_cast<AbstractPlugin*>(plugin->pluginLoader->instance());
 
     disconnect(aplg,SLOT(settingsAccepted()));
     disconnect(aplg,SLOT(playerStatusChanged(Phonon::State,Phonon::State)));
@@ -135,7 +149,7 @@ void PluginsManager::enablePlugin(Plugin *plugin)
 {
     if (plugin->enabled) return;
 
-    AbstractPlugin *aplg = qobject_cast<AbstractPlugin*>(plugin->pluginLoader->instance());
+    AbstractPlugin *aplg = reinterpret_cast<AbstractPlugin*>(plugin->pluginLoader->instance());
 
     connect(this,SIGNAL(trackChanged(Player::MetaData)),aplg,SLOT(trackChanged(Player::MetaData)));
     connect(this,SIGNAL(trackFinished(Player::MetaData)),aplg,SLOT(trackFinished(Player::MetaData)));
