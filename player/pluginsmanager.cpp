@@ -69,29 +69,23 @@ void PluginsManager::loadPlugins()
        Putting this folder first will also result in preferring these plugins before
        same-called plugins installed somewhere in system */
     pluginsDirs << qApp->applicationDirPath()+QDir::separator()+"plugins";
-    // Default extension on windows
-    QString ext;
-#ifdef Q_WS_WIN
-    ext = "dll";
-#endif
 #ifdef Q_WS_MAC
     pluginsDirs << LIBDIR;
     qDebug() << "Searching in " << pluginsDirs;    
-    ext = "dylib";
 #endif
 #ifdef Q_WS_X11
-    // LIBDIR is defined in dirs.pri and it is a location where all project's libs are installed
+    // LIBDIR is defined in player/CMakeLists.txt and it is a location where all project's libs are installed
     pluginsDirs << LIBDIR;
     qDebug() << "Searching in " << pluginsDirs;
-    // If we are on Linux, override the extension
-    ext = "so";
 #endif
 
     QDir pluginsDir;
-    pluginsDir.setNameFilters(QStringList() << "libtepsonic_*."+ext);
+    pluginsDir.setNameFilters(QStringList() << "libtepsonic_*");
+    pluginsDir.setFilter(QDir::Files | QDir::NoSymLinks);
+    qDebug() << pluginsDir.entryList();
     foreach(QString folder, pluginsDirs) {
         pluginsDir.setPath(folder);
-        foreach(QString filename, pluginsDir.entryList(QDir::Files|QDir::NoSymLinks)) {
+        foreach(QString filename, pluginsDir.entryList()) {
             if (QLibrary::isLibrary(filename)) {
                 qDebug() << "Loading plugin " << pluginsDir.absoluteFilePath(filename);
 
