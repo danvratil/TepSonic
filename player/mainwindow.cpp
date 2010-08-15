@@ -354,7 +354,7 @@ void MainWindow::on_actionAdd_file_triggered()
 }
 
 
-void MainWindow::on_actionPreferences_triggered()
+void MainWindow::on_actionSettings_triggered()
 {
     // Show preferences dialog
     PreferencesDialog *prefDlg = new PreferencesDialog(this);

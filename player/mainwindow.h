@@ -326,8 +326,8 @@ private slots:
         _playlistModel->removeRows(0,_playlistModel->rowCount(QModelIndex()),QModelIndex());
     }
 
-    //! Opens preferences dialog
-    void on_actionPreferences_triggered();
+    //! Opens settings dialog
+    void on_actionSettings_triggered();
 
     //! Opens dialog for files and then calls PlaylistManager to populate the playlist
     void on_actionAdd_file_triggered();
