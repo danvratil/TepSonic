@@ -21,24 +21,26 @@
 #ifndef PLAYLISTITEMDELEGATE_H
 #define PLAYLISTITEMDELEGATE_H
 
-#include <QList>
 #include <QModelIndex>
 #include <QPainter>
-#include <QSize>
 #include <QStyledItemDelegate>
 #include <QStyleOptionViewItem>
 
 class PlaylistModel;
+class PlaylistBrowser;
 
 class PlaylistItemDelegate : public QStyledItemDelegate
 {
     Q_OBJECT
     public:
-        explicit PlaylistItemDelegate(QObject *parent = 0, PlaylistModel *playlistModel = 0);
+        explicit PlaylistItemDelegate(QObject *parent = 0, PlaylistModel *playlistModel = 0,
+                                      PlaylistBrowser *playlistBrowser = 0);
         void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const;
 
     private:
         PlaylistModel *_playlistModel;
+        PlaylistBrowser *_playlistBrowser;
+
 
 };
 

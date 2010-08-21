@@ -59,7 +59,6 @@ void Player::setTrack(const QString fileName, bool autoPlay)
         _phononPlayer->setCurrentSource(Phonon::MediaSource(fileName));
     }
 
-    qDebug() << "New track set, emittng trackChanged()";
     emit trackChanged(currentMetaData());
     if (autoPlay==true) {
         play();

@@ -99,7 +99,7 @@ MainWindow::MainWindow(Player *player)
                           << tr("Year")
                           << tr("Length");
     _playlistModel = new PlaylistModel(headers,this);
-    _playlistItemDelegate = new PlaylistItemDelegate(this,_playlistModel);
+    _playlistItemDelegate = new PlaylistItemDelegate(this,_playlistModel, _ui->playlistBrowser);
     connect(_playlistModel,SIGNAL(playlistLengthChanged(int,int)),
             this,SLOT(playlistLengthChanged(int,int)));
     _playlistProxyModel = new PlaylistProxyModel(this);
