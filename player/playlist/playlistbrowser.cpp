@@ -36,6 +36,9 @@ PlaylistBrowser::PlaylistBrowser(QWidget* parent):
         QTreeView(parent)
 {
     setAcceptDrops(true);
+    setWordWrap(false);
+    setTextElideMode(Qt::ElideRight);
+    setSelectionMode(QAbstractItemView::ExtendedSelection);
 }
 
 PlaylistBrowser::~PlaylistBrowser()
@@ -59,7 +62,6 @@ void PlaylistBrowser::dragMoveEvent(QDragMoveEvent* event)
 // Drop event (item is dropped on the widget)
 void PlaylistBrowser::dropEvent(QDropEvent* event)
 {
-
     event->acceptProposedAction();
     QByteArray encodedData = event->mimeData()->data("data/tepsonic-tracks");
     QDataStream stream(&encodedData, QIODevice::ReadOnly);
@@ -73,6 +75,9 @@ void PlaylistBrowser::dropEvent(QDropEvent* event)
         files << text;
     }
 
+    //row where the items were dropped
+    //int row = indexAt(event->pos()).row();
+
     emit addedFiles(files);
 
     event->setAccepted(true);
@@ -80,9 +85,11 @@ void PlaylistBrowser::dropEvent(QDropEvent* event)
 
 void PlaylistBrowser::keyPressEvent(QKeyEvent* event)
 {
-    // When 'delete' pressed, remove selected row from playlist
+    // When 'delete' pressed, remove selected rows from playlist
     if (event->matches(QKeySequence::Delete)) {
-        model()->removeRow(selectionModel()->currentIndex().row());
+        for (int i = 0; i < selectedIndexes().size(); i++) {
+            model()->removeRow(selectedIndexes().at(i).row());
+        }
     }
 }
 

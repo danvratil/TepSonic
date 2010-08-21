@@ -80,7 +80,10 @@ class PlaylistBrowser : public QTreeView
         PlaylistManager *_playlistManager;
 
     signals:
-        void addedFiles(QStringList);
+        /** Passes list of dropped files
+         * \param files list of files to insert
+         */
+        void addedFiles(QStringList files);
 
 
 
