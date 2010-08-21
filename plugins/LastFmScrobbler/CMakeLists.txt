@@ -5,10 +5,11 @@ cmake_minimum_required(VERSION 2.6)
 # Add custom cmake modules
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/../../cmake/modules ${CMAKE_MODULE_PATH})
 
-set(CMAKE_BUILD_TYPE "Release")
+set(CMAKE_BUILD_TYPE "Debug")
 
 find_package(PkgConfig REQUIRED)
 find_package(Qt4 REQUIRED)
+find_package(LastFmLib REQUIRED)
 
 # Make sure all Qt parts will be available
 set(QT_USE_QTMAIN 1)
@@ -24,19 +25,21 @@ add_definitions(${QT_DEFINITIONS}
 include_directories(
 	${QT_INCLUDE_DIR}
 	${QT_QTNETWORK_INCLUDE_DIR}
+        ${LASTFMLIB_INCLUDES}
 	${CMAKE_CURRENT_SOURCE_DIR}
 	${CMAKE_CURRENT_BINARY_DIR}
+        ${CMAKE_CURRENT_SOURCE_DIR}/../../player
 )
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/../../player/constants.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/constants.h)
 
 set(lastfmscrobbler_HDRS
-    src/lastfmscrobbler.h
-    src/abstractplugin.h
+    src/lastfmscrobblerplugin.h
+    ../../player/abstractplugin.h
 )
 
 set(lastfmscrobbler_SRCS
-    src/lastfmscrobbler.cpp
+    src/lastfmscrobblerplugin.cpp
     ../../player/constants.cpp
 )
 
@@ -82,13 +85,14 @@ add_library(tepsonic_lastfmscrobbler SHARED
 
 set_target_properties(tepsonic_lastfmscrobbler
                       PROPERTIES
-                      VERSION 0.1.0
+                      VERSION 0.2.0
                       SOVERSION 1
 )
 
 target_link_libraries(tepsonic_lastfmscrobbler
 	       ${QT_LIBRARIES}
 	       ${QT_QTNETWORK_LIBRARIES}
+               ${LASTFMLIB_LIBS}
 )
 
 install(TARGETS tepsonic_lastfmscrobbler

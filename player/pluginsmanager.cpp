@@ -135,6 +135,7 @@ void PluginsManager::disablePlugin(Plugin *plugin)
     disconnect(aplg,SLOT(trackChanged(Player::MetaData)));
     disconnect(aplg,SLOT(trackFinished(Player::MetaData)));
     disconnect(aplg,SLOT(trackPositionChanged(qint64)));
+    disconnect(aplg,SLOT(trackPaused(bool)));
     aplg->quit();
     plugin->enabled=false;
 }
@@ -147,8 +148,9 @@ void PluginsManager::enablePlugin(Plugin *plugin)
 
     connect(this,SIGNAL(trackChanged(Player::MetaData)),aplg,SLOT(trackChanged(Player::MetaData)));
     connect(this,SIGNAL(trackFinished(Player::MetaData)),aplg,SLOT(trackFinished(Player::MetaData)));
-    connect(this,SIGNAL(stateChanged(Phonon::State,Phonon::State)),aplg,SLOT(playerStatusChanged(Phonon::State,Phonon::State)));
+    connect(this,SIGNAL(playerStatusChanged(Phonon::State,Phonon::State)),aplg,SLOT(playerStatusChanged(Phonon::State,Phonon::State)));
     connect(this,SIGNAL(trackPositionChanged(qint64)),aplg,SLOT(trackPositionChanged(qint64)));
+    connect(this,SIGNAL(trackPaused(bool)),aplg,SLOT(trackPaused(bool)));
     connect(aplg,SIGNAL(error(QString)),this,SIGNAL(error(QString)));
     aplg->init();
     aplg->_initialized = true;

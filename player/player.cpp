@@ -43,7 +43,7 @@ Player::Player()
     connect(_phononPlayer,SIGNAL(finished()),this,SLOT(emitFinished()));
     connect(_phononPlayer,SIGNAL(stateChanged(Phonon::State,Phonon::State)),this,SIGNAL(stateChanged(Phonon::State,Phonon::State)));
     connect(_phononPlayer,SIGNAL(tick(qint64)),this,SIGNAL(trackPositionChanged(qint64)));
-    connect(_phononPlayer,SIGNAL(currentSourceChanged(Phonon::MediaSource)),this,SLOT(emitTrackChanged()));
+    //connect(_phononPlayer,SIGNAL(currentSourceChanged(Phonon::MediaSource)),this,SLOT(emitTrackChanged()));
 
     _randomMode = false;
     _repeatMode = RepeatOff;
@@ -59,9 +59,10 @@ void Player::setTrack(const QString fileName, bool autoPlay)
         _phononPlayer->setCurrentSource(Phonon::MediaSource(fileName));
     }
 
+    qDebug() << "New track set, emittng trackChanged()";
     emit trackChanged(currentMetaData());
     if (autoPlay==true) {
-        _phononPlayer->play();
+        play();
     }
 }
 
@@ -79,6 +80,12 @@ void Player::setRepeatMode(RepeatMode repeatMode)
         _repeatMode = repeatMode;
         emit repeatModeChanged(repeatMode);
     }
+}
+
+void Player::pause()
+{
+    _phononPlayer->pause();
+    emit trackPaused((_phononPlayer->state() == Phonon::PausedState));
 }
 
 Player::MetaData Player::currentMetaData()
@@ -114,13 +121,7 @@ void Player::stop()
 
 void Player::emitFinished()
 {
+    // Emit both signals - with parameter and without!!!!
     emit trackFinished(currentMetaData());
     emit trackFinished();
 }
-
-void Player::emitTrackChanged()
-{
-    emit trackChanged(currentMetaData());
-}
-
-

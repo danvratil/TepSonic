@@ -17,8 +17,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Cambridge, MA 02110-1301, USA.
  */
 
-#ifndef LASTFMSCROBBLER_H
-#define LASTFMSCROBBLER_H
+#ifndef LASTFMSCROBBLERPLUGIN_H
+#define LASTFMSCROBBLERPLUGIN_H
 
 #include "abstractplugin.h"
 #include "player.h"
@@ -28,10 +28,9 @@
 #include <QObject>
 #include <QWidget>
 #include <QString>
-#include <QNetworkAccessManager>
-#include <QNetworkReply>
 #include <QTranslator>
-#include <QUrl>
+
+#include "lastfmlib/lastfmscrobbler.h"
 
 
 
@@ -40,7 +39,7 @@
   LastFmScrobbler is a plugin for scrobbling recently played tracks to Last.fm
   via their submission API.
 */
-class LastFmScrobbler : public AbstractPlugin
+class LastFmScrobblerPlugin : public AbstractPlugin
 {
     Q_OBJECT
     public:
@@ -53,10 +52,10 @@ class LastFmScrobbler : public AbstractPlugin
         /*!
           Creates the plugin.
         */
-        LastFmScrobbler();
+        LastFmScrobblerPlugin();
 
         //! Destructor
-        ~LastFmScrobbler() {}
+        ~LastFmScrobblerPlugin() {}
 
         //! Initialize the plugins
         /*!
@@ -108,51 +107,23 @@ class LastFmScrobbler : public AbstractPlugin
         /*!
           \param newPos position in the playback in milliseconds
         */
-        void trackPositionChanged(qint64 newPos);
+        void trackPositionChanged(qint64 newPos) {};
+
+        void stateChanged(Phonon::State, Phonon::State) {};
+
+        void trackPaused(bool paused);
 
     private:
-        //! Creates URL to be sent to server for handshake
-        /*!
-          \param username username to use
-          \param password password to use (password is not sent in plain)
-        */
-        QUrl prepareHandshakeURL(QString username, QString password);
-
-        //! Makes a HTTP request on URL prepared by prepareHandshakeURL() method
-        /*!
-          When the request is sucessfull and server replies, loginFinished() slot is invoked
-          \sa loginFinished()
-        */
-        void login();
-
-        //! Makes a submission to Last.fm server
-        /*!
-          Appends new track to the queue (cache) and calls submitTrack() to try to submit the track.
-          \param metadata meta data of the track to be submitted
-          \sa submitTrack()
-        */
-        void scrobble(Player::MetaData metadata);
-
         //! Configuration UI
         Ui::LastFmScrobblerConfig *_configWidget;
 
-        //! User token - identifies the session
-        QString _token;
-
-        //! URL where "now playing" can be sumitted
-        QString _nowPlayingURL;
-
-        //! URL where track submissions are sent
-        QString _submissionURL;
-
-        //! Amount of time played
-        qint64 _played;
-
         int _failedAttempts;
 
-        QList<LastFmScrobbler::MetaData> _cache;
+        QList<LastFmScrobblerPlugin::MetaData> _cache;
 
         QTranslator *_translator;
+
+        LastFmScrobbler *_scrobbler;
 
     private slots:
         //! Called when testLoginButton is clicked
@@ -164,32 +135,6 @@ class LastFmScrobbler : public AbstractPlugin
           \sa testLoginFinished()
         */
         void on_testLoginButton_clicked();
-
-        //! Called when data from request made in on_testLoginButton_clicked() are recieved.
-        /*!
-          The reply is evaluated and proper message is displayed to user on the configuration dialog
-          \param reply reply from Last.fm server
-          \sa on_testLoginButton_clicked()
-        */
-        void testLoginFinished(QNetworkReply *reply);
-
-        //! Called when data from request made in login() are recieved
-        /*!
-          The reply is then evaluated. When OK, the token and URLs are read and stored to be used for submissions.
-          If the reply is not OK an error message is displayed in main window via inherited signal error()
-          \param reply reply from Last.fm server
-          \sa login(), error()
-        */
-        void loginFinished(QNetworkReply *reply);
-
-        //! Called when data from request made in scrobble() are recieved
-        /*!
-          When reply is recieved, the response is evaluated. When there is an error, an error message with description
-          recieved from server is displayed in main window via inherited signal error()
-          \param reply reply from Last.fm server
-          \sa reply(), error()
-        */
-        void scrobblingFinished(QNetworkReply *reply);
 
         //! Submit first track in cache
         /*!
@@ -214,6 +159,10 @@ class LastFmScrobbler : public AbstractPlugin
         */
         void saveCache();
 
+    signals:
+
+        void error(QString);
+
 };
 
-#endif // LASTFMSCROBBLER_H
+#endif // LASTFMSCROBBLERPLUGIN_H

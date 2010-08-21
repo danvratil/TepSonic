@@ -138,6 +138,14 @@ class AbstractPlugin : public QObject, public PluginInterface
         */
         virtual void trackPositionChanged(qint64 newPos) { Q_UNUSED(newPos) }
 
+        //! Informs that the playback has been (un)paused
+        /*!
+          When TRUE is passed as an argument, the playback has been paused. FALSE means, that
+          playback has been unpaused
+          \param paused paused (true) or unpaused (false)
+        */
+        virtual void trackPaused(bool paused) { Q_UNUSED(paused) }
+
     signals:
         //! Signalize failure of the plugin to main window
         /*!

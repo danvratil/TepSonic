@@ -110,6 +110,8 @@ class PluginsManager : public QObject
          void trackChanged(Player::MetaData);
          void trackFinished(Player::MetaData);
          void trackPositionChanged(qint64);
+         void trackPaused(bool);
+         void error(QString);
 
 
 

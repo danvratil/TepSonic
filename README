@@ -27,7 +27,8 @@ CONTENT
 ----------------
  * Qt >= 4.5
  * Phonon
- * TagLib
+ * TagLib (http://developer.kde.org/~wheeler/taglib.html)
+ * lastfmlib (http://code.google.com/p/lastfmlib/)
  * SQLite or MySQL database for collections
  * some music
 

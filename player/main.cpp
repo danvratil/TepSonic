@@ -74,6 +74,7 @@ int main(int argc, char *argv[])
     QObject::connect(player,SIGNAL(trackChanged(Player::MetaData)),pluginsManager,SIGNAL(trackChanged(Player::MetaData)));
     QObject::connect(player,SIGNAL(trackFinished(Player::MetaData)),pluginsManager,SIGNAL(trackFinished(Player::MetaData)));
     QObject::connect(player,SIGNAL(trackPositionChanged(qint64)),pluginsManager,SIGNAL(trackPositionChanged(qint64)));
+    QObject::connect(player,SIGNAL(trackPaused(bool)),pluginsManager,SIGNAL(trackPaused(bool)));
     QObject::connect(&mainWindow,SIGNAL(settingsAccepted()),pluginsManager,SIGNAL(settingsAccepted()));
     pluginsManager->loadPlugins();
 

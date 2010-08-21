@@ -140,12 +140,6 @@ class Player: public QObject
     */
     void emitFinished();
 
-    //! When a track is changed calls currentSource() and then emits trackChanged(MetaData)
-    /*!
-      \sa trackChanged()
-    */
-    void emitTrackChanged();
-
  public slots:
     //! Changes repeat mode to \p repeatMode
     /*!
@@ -169,7 +163,7 @@ class Player: public QObject
     /*!
       \sa stateChanged()
     */
-    void pause() { _phononPlayer->pause(); }
+    void pause();
 
     //! Stops playback and removes current MediaSource
     /*!
@@ -228,6 +222,13 @@ class Player: public QObject
       \param newPos position in track in milliseconds
     */
     void trackPositionChanged(qint64 newPos);
+
+    //! Informs that the playback has been (un)paused
+    /*!
+      Passes true when the playback was paused and false when unpaused
+      \param paused paused (true) or unpaused (false)
+    */
+    void trackPaused(bool paused);
 
 };
 
