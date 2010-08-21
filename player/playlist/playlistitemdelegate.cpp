@@ -21,15 +21,18 @@
 #include "playlistitemdelegate.h"
 #include "playlistmodel.h"
 #include "playlistbrowser.h"
+#include "playlistproxymodel.h"
 
 #include <QRect>
 
 
-PlaylistItemDelegate::PlaylistItemDelegate(QObject *parent, PlaylistModel *playlistModel, PlaylistBrowser *playlistBrowser):
+PlaylistItemDelegate::PlaylistItemDelegate(QObject *parent, PlaylistModel *playlistModel,
+                                           PlaylistBrowser *playlistBrowser, PlaylistProxyModel *playlistProxyModel):
         QStyledItemDelegate(parent)
 {
     _playlistModel = playlistModel;
     _playlistBrowser = playlistBrowser;
+    _playlistProxyModel = playlistProxyModel;
 
 
 }
@@ -42,7 +45,9 @@ void PlaylistItemDelegate::paint(QPainter *painter, const QStyleOptionViewItem &
     painter->setPen(option.font.pixelSize());
     painter->setFont(option.font);
 
-    if (index.row() == _playlistModel->currentItem().row()) {
+    QModelIndex mappedIndex = _playlistProxyModel->mapToSource(index);
+
+    if (mappedIndex.row() == _playlistModel->currentItem().row()) {
         painter->fillRect(rect,option.palette.link());
         painter->setPen(option.palette.dark().color());
     } else if (option.state & QStyle::State_Selected) {
@@ -53,9 +58,9 @@ void PlaylistItemDelegate::paint(QPainter *painter, const QStyleOptionViewItem &
                             option.rect.top(),
                             _playlistBrowser->columnWidth(index.column()),
                             option.rect.bottom()),
-                      option.fontMetrics.elidedText(index.data().toString(),
+                      option.fontMetrics.elidedText(mappedIndex.data().toString(),
                                                     Qt::ElideRight,
-                                                    _playlistBrowser->columnWidth(index.column()))
+                                                    _playlistBrowser->columnWidth(mappedIndex.column()))
                       );
 
 }

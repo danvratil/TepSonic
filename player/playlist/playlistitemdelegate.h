@@ -28,18 +28,20 @@
 
 class PlaylistModel;
 class PlaylistBrowser;
+class PlaylistProxyModel;
 
 class PlaylistItemDelegate : public QStyledItemDelegate
 {
     Q_OBJECT
     public:
         explicit PlaylistItemDelegate(QObject *parent = 0, PlaylistModel *playlistModel = 0,
-                                      PlaylistBrowser *playlistBrowser = 0);
+                                      PlaylistBrowser *playlistBrowser = 0, PlaylistProxyModel *playlistProxyModel = 0);
         void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const;
 
     private:
         PlaylistModel *_playlistModel;
         PlaylistBrowser *_playlistBrowser;
+        PlaylistProxyModel *_playlistProxyModel;
 
 
 };

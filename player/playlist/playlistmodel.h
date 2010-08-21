@@ -25,8 +25,10 @@
 #include <QModelIndex>
 #include <QVariant>
 #include <QMutex>
+#include <QStringList>
 
 class PlaylistItem;
+class PlaylistProxyModel;
 
 //! PlaylistModel is a list model that contains items in playlist
 /*!
@@ -43,10 +45,12 @@ class PlaylistModel : public QAbstractItemModel
      //! Constructor
      /*!
        Intializes the model and sets headers values
-       \param headers list of column headers
        \parent parent object
+       \param headers list of column headers
+       \param playlistProxyModel proxy model
      */
-     PlaylistModel(const QStringList &headers, QObject *parent = 0);
+     PlaylistModel(QObject *parent = 0, const QStringList &headers = QStringList(),
+                   PlaylistProxyModel *playlistProxyModel = 0);
 
      //! Destructor
      ~PlaylistModel();
@@ -227,6 +231,8 @@ class PlaylistModel : public QAbstractItemModel
      bool _dbConnectionAvailable;
 
      QModelIndex _currentItem;
+
+     PlaylistProxyModel *_proxyModel;
 
  signals:
      //! This signal is emmited when length of playlist is changed

@@ -98,11 +98,14 @@ MainWindow::MainWindow(Player *player)
                           << tr("Genre")
                           << tr("Year")
                           << tr("Length");
-    _playlistModel = new PlaylistModel(headers,this);
-    _playlistItemDelegate = new PlaylistItemDelegate(this,_playlistModel, _ui->playlistBrowser);
+
+    _playlistProxyModel = new PlaylistProxyModel(this);
+    _playlistModel = new PlaylistModel(this, headers, _playlistProxyModel);
+    _playlistItemDelegate = new PlaylistItemDelegate(this, _playlistModel, _ui->playlistBrowser, _playlistProxyModel);
+
     connect(_playlistModel,SIGNAL(playlistLengthChanged(int,int)),
             this,SLOT(playlistLengthChanged(int,int)));
-    _playlistProxyModel = new PlaylistProxyModel(this);
+
     _playlistProxyModel->setSourceModel(_playlistModel);
     _playlistProxyModel->setDynamicSortFilter(false);
 
@@ -193,7 +196,8 @@ MainWindow::MainWindow(Player *player)
     connect(_ui->playlistSearchEdit,SIGNAL(textChanged(QString)),_playlistProxyModel,SLOT(setFilterRegExp(QString)));
     // Workaround for QTBUG 7585 (http://bugreports.qt.nokia.com/browse/QTBUG-7585)
     // Calling invalidate() before changing filter solves problem with expand icons being displayed incorrectly
-    //connect(_ui->colectionSearchEdit,SIGNAL(textChanged(QString)),_playlistProxyModel,SLOT(invalidate()));
+    // Affects Qt 4.6.0 to 4.6.3
+    connect(_ui->colectionSearchEdit,SIGNAL(textChanged(QString)),_playlistProxyModel,SLOT(invalidate()));
     connect(_ui->colectionSearchEdit,SIGNAL(textChanged(QString)),_collectionProxyModel,SLOT(setFilterRegExp(QString)));
 
 
@@ -386,9 +390,10 @@ void MainWindow::updatePlayerTrack()
 
 void MainWindow::on_playlistBrowser_doubleClicked(QModelIndex index)
 {
+    QModelIndex mappedIndex = _playlistProxyModel->mapToSource(index);
     // Play item on row double click
-    _playlistModel->setCurrentItem(_playlistModel->index(index.row(),0,QModelIndex()));
-    setTrack(index.row());
+    _playlistModel->setCurrentItem(_playlistModel->index(mappedIndex.row(),0,QModelIndex()));
+    setTrack(mappedIndex.row());
 }
 
 void MainWindow::playerStatusChanged(Phonon::State newState, Phonon::State oldState)
@@ -448,10 +453,13 @@ void MainWindow::playerStatusChanged(Phonon::State newState, Phonon::State oldSt
 
 void MainWindow::on_actionPrevious_track_triggered()
 {
-    QModelIndex currentItem = _playlistModel->currentItem();
+    // We must remap the current item to get it's real position in current filter
+    QModelIndex currentItem = _playlistProxyModel->mapFromSource(_playlistModel->currentItem());
     if ((currentItem.row() > 0) && (_playlistModel->rowCount(QModelIndex()) > 0)) {
-        _playlistModel->setCurrentItem(_playlistModel->previousItem(currentItem));
-        setTrack(currentItem.row()-1);
+
+        _playlistModel->setCurrentItem(_playlistModel->previousItem());
+
+        setTrack(_playlistModel->currentItem().row());
     }
 }
 
@@ -480,8 +488,8 @@ void MainWindow::on_actionNext_track_triggered()
         int row = rand() % _playlistModel->rowCount(QModelIndex());
         _playlistModel->setCurrentItem(_playlistModel->index(row,0,QModelIndex()));
     } else {
-        if (_playlistModel->nextItem(currentItem).isValid()) {
-            _playlistModel->setCurrentItem(_playlistModel->nextItem(currentItem));
+        if (_playlistModel->nextItem().isValid()) {
+            _playlistModel->setCurrentItem(_playlistModel->nextItem());
         } else {
             if (_player->repeatMode() == Player::RepeatAll) {
                 _playlistModel->setCurrentItem(_playlistModel->index(0,0,QModelIndex()));
@@ -591,7 +599,9 @@ void MainWindow::changeEvent(QEvent *e)
 void MainWindow::on_collectionBrowser_doubleClicked(QModelIndex index)
 {
     QString file;
-    file = index.sibling(index.row(),1).data().toString();
+    QModelIndex mappedIndex = _collectionProxyModel->mapToSource(index);
+
+    file = mappedIndex.sibling(index.row(),1).data().toString();
 
     if (not file.isEmpty()) {
         _taskManager->addFileToPlaylist(file);
@@ -729,6 +739,7 @@ void MainWindow::destroyCollections()
 void MainWindow::setTrack(int row)
 {
     QModelIndex currentItem = _playlistModel->currentItem();
-    QString filename = currentItem.sibling(currentItem.row(),0).data().toString();
+    QModelIndex index = _playlistModel->index(currentItem.row(),0,QModelIndex());
+    QString filename = _playlistModel->data(index,0).toString();
     _player->setTrack(filename,true);
 }

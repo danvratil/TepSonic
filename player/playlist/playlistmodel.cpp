@@ -33,13 +33,14 @@
 
 #include "playlistmodel.h"
 #include "playlistitem.h"
+#include "playlistproxymodel.h"
 #include "databasemanager.h"
 #include "tools.h"
 
 #include <QDebug>
 
 
-PlaylistModel::PlaylistModel(const QStringList &headers, QObject *parent)
+PlaylistModel::PlaylistModel(QObject *parent, const QStringList &headers, PlaylistProxyModel *playlistProxyModel)
         : QAbstractItemModel(parent)
 {
     QVector<QVariant> rootData;
@@ -49,6 +50,7 @@ PlaylistModel::PlaylistModel(const QStringList &headers, QObject *parent)
     _totalLength = 0;
     _dbConnectionAvailable = true;
     _currentItem = QModelIndex();
+    _proxyModel = playlistProxyModel;
 
     rootItem = new PlaylistItem(rootData);
 }
@@ -150,6 +152,7 @@ bool PlaylistModel::removeRows(int position, int rows, const QModelIndex &parent
 {
     PlaylistItem *parentItem = getItem(parent);
     bool success = true;
+    bool renewCurrentItem = false;
 
     int totalRemoveTime = 0;
     for (int i=position;i<position+rows;i++) {
@@ -159,6 +162,10 @@ bool PlaylistModel::removeRows(int position, int rows, const QModelIndex &parent
         }
         QTime tl(0,0,0,0);
         totalRemoveTime += tl.secsTo(QTime::fromString(trackLength,"hh:mm:ss"));
+
+        if (i == _currentItem.row()) {
+            renewCurrentItem = true;
+        }
     }
 
      _mutex.lock();
@@ -166,6 +173,10 @@ bool PlaylistModel::removeRows(int position, int rows, const QModelIndex &parent
     beginRemoveRows(parent, position, position + rows - 1);
     success = parentItem->removeChildren(position, rows);
     endRemoveRows();
+
+    if (renewCurrentItem) {
+        setCurrentItem(index(position,0,QModelIndex()));
+    }
 
      _mutex.unlock();
 
@@ -336,7 +347,8 @@ void PlaylistModel::setCurrentItem(QModelIndex currentIndex)
         return;
 
     _currentItem = currentIndex;
-    rootItem->child(currentIndex.row())->setSelected(true);
+
+    rootItem->child(_currentItem.row())->setSelected(true);
     emit layoutChanged();
 
 }
@@ -344,28 +356,45 @@ void PlaylistModel::setCurrentItem(QModelIndex currentIndex)
 
 QModelIndex PlaylistModel::nextItem(QModelIndex index)
 {
+    if (rowCount(QModelIndex()) == 0) return QModelIndex();
+
     if (!index.isValid()) {
         index = currentItem();
     }
+
+    // remap the given index from PlaylistModel to PlaylistProxyModel (if possible)
+    QModelIndex mappedIndex = _proxyModel->mapFromSource(index);
+    if (!mappedIndex.isValid()) mappedIndex = index;
 
     if (index.row() >= rowCount()) {
         return QModelIndex();
     }
 
-    QModelIndex nextItem = this->index(index.row()+1, 0, QModelIndex());
-    return nextItem;
+    // Get ModelIndex of the next item in the PlaylistProxyModel
+    QModelIndex prevItem =  _proxyModel->index(mappedIndex.row()+1,0,QModelIndex());
+    // Remap the result to PlaylistModel
+    return _proxyModel->mapToSource(prevItem);
 }
 
 QModelIndex PlaylistModel::previousItem(QModelIndex index)
 {
+    if (rowCount(QModelIndex()) == 0) QModelIndex();
+
     if (!index.isValid()) {
-        return QModelIndex();
+        index = currentItem();
     }
+
+    // remap the given index from PlaylistModel to PlaylistProxyModel (if possible)
+    QModelIndex mappedIndex = _proxyModel->mapFromSource(index);
+    if (!mappedIndex.isValid()) mappedIndex = index;
 
     if (index.row() == 0) {
         return QModelIndex();
     }
 
-    QModelIndex prevItem = this->index(index.row()-1, 0, QModelIndex());
-    return prevItem;
-}
+    // Get index of the previous item in PlaylistProxyModel
+    QModelIndex prevItem =  _proxyModel->index(mappedIndex.row()-1,0,QModelIndex());
+    // And remap the result to PlaylistModel
+    return _proxyModel->mapToSource(prevItem);
+
+ }
