@@ -37,40 +37,52 @@ CollectionItemDelegate::CollectionItemDelegate(QObject *parent):
 
 void CollectionItemDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const
 {
-    painter->setFont(QFont(painter->font().family(),8));
+    painter->setFont(option.font);
     painter->setPen(option.palette.text().color());
     CollectionModel *parentModel = const_cast<CollectionModel*>(dynamic_cast<const CollectionModel*>(index.model()));
     CollectionItem *item = static_cast<CollectionItem*>(index.internalPointer());
 
+    // If item is selected or opened
     if ((option.state & QStyle::State_Selected) ||
         (option.state & QStyle::State_Open)) {
 
+        /* If item is selected or opened but not in list of selected/opened items then
+           add it to the list and force redrawing it */
         QModelIndex moi = index;
         if (!_currentIndexes.contains(moi)) {
             _currentIndexes.append(moi);
             parentModel->redraw();
         }
 
+        // It item is selected then draw highlighted background
         if (option.state & QStyle::State_Selected) {
             QRect rect(option.rect);
             rect.setLeft(rect.left()-3);
             painter->fillRect(rect,option.palette.highlight());
         }
 
+        // Draw first row containing the interpret/album/track name
         painter->drawText(QPoint(option.rect.left(),
-                                 option.rect.top()+10),
+                                 option.rect.top()+option.fontMetrics.height()),
                           item->data(0).toString());
 
-        painter->setFont(QFont(painter->font().family(),7));
+        painter->setFont(QFont(option.font.family(),8));
         painter->setPen(Qt::gray);
+        //bottom line that is height of the first row + height of the second row + some padding
+        int bottomLine = option.rect.top()+option.fontMetrics.height()+painter->fontMetrics().height()+4;
+
+        // Draw number of albums/tracks
         painter->drawText(QPoint(option.rect.left(),
-                                 option.rect.top()+25),
+                                 bottomLine),
                           item->data(2).toString());
-        painter->drawText(QPoint((painter->viewport().width()-painter->fontMetrics().width(item->data(3).toString())-8),
-                                 option.rect.top()+25),
+        // Draw collection/album/track length
+        int textLength = painter->fontMetrics().width(item->data(3).toString()+" ");
+        painter->drawText(QPoint((painter->viewport().width()-textLength),
+                                 bottomLine),
                           item->data(3).toString());
 
 
+        // if the item is nor selected or opened then draw it traditional way
     } else {
         // Remove index from list (if it is in it)
         //                              ^-------- cool :D
@@ -78,7 +90,7 @@ void CollectionItemDelegate::paint(QPainter *painter, const QStyleOptionViewItem
             parentModel->redraw();
         }
         painter->drawText(QPoint(option.rect.left(),
-                                 option.rect.top()+10),
+                                 option.rect.top()+option.fontMetrics.height()),
                           item->data(0).toString());
     }
 
@@ -86,9 +98,14 @@ void CollectionItemDelegate::paint(QPainter *painter, const QStyleOptionViewItem
 
 QSize CollectionItemDelegate::sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const
 {
-    QSize size(option.decorationSize.width(),option.decorationSize.height());
+    QSize size(option.decorationSize.width(),
+               option.decorationSize.height()+2);
+    // When the item is selected or opened, it will be higher
     if (_currentIndexes.contains(index)) {
-        size.setHeight(30);
+        // Get height of the second row, which uses smaller font
+        QFontMetrics fm(QFont(option.font.family(),8));
+        // The height of item is height of first row + second row + padding + bottom margin
+        size.setHeight(option.fontMetrics.height()+fm.height()+8);
     }
 
     return size;
