@@ -21,6 +21,8 @@
 #include "collectionitemdelegate.h"
 #include "collectionmodel.h"
 #include "collectionitem.h"
+#include "collectionproxymodel.h"
+#include "collectionbrowser.h"
 
 #include <QApplication>
 #include <QFont>
@@ -29,18 +31,26 @@
 
 #include <QDebug>
 
-CollectionItemDelegate::CollectionItemDelegate(QObject *parent):
+CollectionItemDelegate::CollectionItemDelegate(QObject *parent, CollectionProxyModel *proxyModel):
         QStyledItemDelegate(parent)
 {
-
+    _proxyModel = proxyModel;
 }
 
 void CollectionItemDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const
 {
+    if (!index.isValid()) return;
+
+    // Set default font and color
     painter->setFont(option.font);
     painter->setPen(option.palette.text().color());
-    CollectionModel *parentModel = const_cast<CollectionModel*>(dynamic_cast<const CollectionModel*>(index.model()));
-    CollectionItem *item = static_cast<CollectionItem*>(index.internalPointer());
+
+    // We need to remap the modelIndex from the proxy model to the original model
+    QModelIndex mappedIndex = _proxyModel->mapToSource(index);
+    if (!mappedIndex.isValid()) return;
+
+    CollectionModel *parentModel = const_cast<CollectionModel*>(dynamic_cast<const CollectionModel*>(mappedIndex.model()));
+    CollectionItem *item = static_cast<CollectionItem*>(mappedIndex.internalPointer());
 
     // If item is selected or opened
     if ((option.state & QStyle::State_Selected) ||
@@ -48,7 +58,7 @@ void CollectionItemDelegate::paint(QPainter *painter, const QStyleOptionViewItem
 
         /* If item is selected or opened but not in list of selected/opened items then
            add it to the list and force redrawing it */
-        QModelIndex moi = index;
+        QModelIndex moi = mappedIndex;
         if (!_currentIndexes.contains(moi)) {
             _currentIndexes.append(moi);
             parentModel->redraw();
@@ -84,9 +94,8 @@ void CollectionItemDelegate::paint(QPainter *painter, const QStyleOptionViewItem
 
         // if the item is nor selected or opened then draw it traditional way
     } else {
-        // Remove index from list (if it is in it)
-        //                              ^-------- cool :D
-        if (_currentIndexes.removeOne(index)) {
+        // Remove index from list (if listed) and force it's redrawal
+        if (_currentIndexes.removeOne(mappedIndex)) {
             parentModel->redraw();
         }
         painter->drawText(QPoint(option.rect.left(),
@@ -98,10 +107,12 @@ void CollectionItemDelegate::paint(QPainter *painter, const QStyleOptionViewItem
 
 QSize CollectionItemDelegate::sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const
 {
+    QModelIndex mappedIndex = _proxyModel->mapToSource(index);
+
     QSize size(option.decorationSize.width(),
                option.decorationSize.height()+2);
     // When the item is selected or opened, it will be higher
-    if (_currentIndexes.contains(index)) {
+    if (_currentIndexes.contains(mappedIndex)) {
         // Get height of the second row, which uses smaller font
         QFontMetrics fm(QFont(option.font.family(),8));
         // The height of item is height of first row + second row + padding + bottom margin

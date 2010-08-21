@@ -193,7 +193,7 @@ MainWindow::MainWindow(Player *player)
     connect(_ui->playlistSearchEdit,SIGNAL(textChanged(QString)),_playlistProxyModel,SLOT(setFilterRegExp(QString)));
     // Workaround for QTBUG 7585 (http://bugreports.qt.nokia.com/browse/QTBUG-7585)
     // Calling invalidate() before changing filter solves problem with expand icons being displayed incorrectly
-    connect(_ui->colectionSearchEdit,SIGNAL(textChanged(QString)),_playlistProxyModel,SLOT(invalidate()));
+    //connect(_ui->colectionSearchEdit,SIGNAL(textChanged(QString)),_playlistProxyModel,SLOT(invalidate()));
     connect(_ui->colectionSearchEdit,SIGNAL(textChanged(QString)),_collectionProxyModel,SLOT(setFilterRegExp(QString)));
 
 
@@ -689,14 +689,14 @@ void MainWindow::setupCollections()
     _collectionModel = new CollectionModel(headers,this);
 
     _collectionProxyModel = new CollectionProxyModel(this);
-    //_collectionProxyModel->setSourceModel(_collectionModel);
+    _collectionProxyModel->setSourceModel(_collectionModel);
     _collectionProxyModel->setFilterCaseSensitivity(Qt::CaseInsensitive);
     _collectionProxyModel->setFilterKeyColumn(0);
     _collectionProxyModel->setDynamicSortFilter(true);
 
-    _collectionItemDelegate = new CollectionItemDelegate(this);
+    _collectionItemDelegate = new CollectionItemDelegate(this, _collectionProxyModel);
 
-    _ui->collectionBrowser->setModel(_collectionModel);
+    _ui->collectionBrowser->setModel(_collectionProxyModel);
     _ui->collectionBrowser->setItemDelegate(_collectionItemDelegate);
     _ui->collectionBrowser->setSelectionMode(QAbstractItemView::ExtendedSelection);
     _ui->collectionBrowser->setDragEnabled(true);
