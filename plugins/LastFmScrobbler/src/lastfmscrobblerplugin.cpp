@@ -48,24 +48,26 @@ LastFmScrobblerPlugin::LastFmScrobblerPlugin()
 
 void LastFmScrobblerPlugin::init()
 {
-     // Login
-     _scrobbler = new LastFmScrobbler(QString("tps").toStdString(),
-                                      QString("1.0").toStdString(),
-                                      settings.value("username","").toString().toStdString(),
-                                      settings.value("password","").toString().toStdString(),
-                                      false,
-                                      false);
+    QSettings settings(QString(_CONFIGDIR) + QDir::separator() + "lastfmscrobbler.conf",QSettings::IniFormat,this);
 
-     settings.beginGroup("Proxy");
-     if (settings.value("enabled",false).toBool()) {
-         _scrobbler->setProxy(settings.value("server",QString()).toString().toStdString(),
-                              settings.value("port",0).toUInt(),
-                              settings.value("username",QString()).toString().toStdString(),
-                              settings.value("password",QString()).toString().toStdString());
-     }
+    // Login
+    _scrobbler = new LastFmScrobbler(QString("tps").toStdString(),
+                                     QString("1.0").toStdString(),
+                                     settings.value("username","").toString().toStdString(),
+                                     settings.value("password","").toString().toStdString(),
+                                     false,
+                                     false);
+
+    settings.beginGroup("Proxy");
+    if (settings.value("enabled",false).toBool()) {
+        _scrobbler->setProxy(settings.value("server",QString()).toString().toStdString(),
+                             settings.value("port",0).toUInt(),
+                             settings.value("username",QString()).toString().toStdString(),
+                             settings.value("password",QString()).toString().toStdString());
+    }
+    settings.endGroup();
 
      _scrobbler->authenticate();
-
 }
 
 void LastFmScrobblerPlugin::quit()
