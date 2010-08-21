@@ -37,17 +37,12 @@
 //! LastFmScrobbler is a plugin for scrobbling recently played tracks to Last.fm
 /*!
   LastFmScrobbler is a plugin for scrobbling recently played tracks to Last.fm
-  via their submission API.
+  via their submission API using lastfmlib.
 */
 class LastFmScrobblerPlugin : public AbstractPlugin
 {
     Q_OBJECT
     public:
-        struct MetaData {
-            Player::MetaData trackInfo;
-            uint playbackStart;
-        };
-
         //! Constructor
         /*!
           Creates the plugin.
@@ -59,8 +54,7 @@ class LastFmScrobblerPlugin : public AbstractPlugin
 
         //! Initialize the plugins
         /*!
-          Loads settings, calls login() for the first time
-          \sa login()
+          Loads settings
         */
         void init();
 
@@ -117,47 +111,9 @@ class LastFmScrobblerPlugin : public AbstractPlugin
         //! Configuration UI
         Ui::LastFmScrobblerConfig *_configWidget;
 
-        int _failedAttempts;
-
-        QList<LastFmScrobblerPlugin::MetaData> _cache;
-
         QTranslator *_translator;
 
         LastFmScrobbler *_scrobbler;
-
-    private slots:
-        //! Called when testLoginButton is clicked
-        /*!
-          This attempts to get a session token from Last.fm server using recently
-          set username and password.
-          When HTTP request on Last.fm server is sucessfull and server replies, testLoginFinished()
-          slot is invoked
-          \sa testLoginFinished()
-        */
-        void on_testLoginButton_clicked();
-
-        //! Submit first track in cache
-        /*!
-          Attempts to submit first track in cache (if there's any) and when successfull, keeps posting until all tracks
-          are submitted.
-        */
-        void submitTrack();
-
-        //! Creates a timer which starts new attempt to submit a track
-        /*!
-          This method is called when the scrobblers fails to submit a track. First, number of failed attempts is incremented
-          and then the timer is set up. The tick interval is growing exponentialy with one half of square of failed attempts
-          which makes the interval to be longer and longer.
-          The intervals are 7 seconds, 2 minutes, 10 minutes, 30 minutes, 1 hour, 2.7 hours etc...
-        */
-        void setupTimer();
-
-        //! Saves current cache
-        /*!
-          Saves current cache to config file. This is performed after every change in cache in order to prevent
-          lost of some tracks
-        */
-        void saveCache();
 
     signals:
 

@@ -21,20 +21,14 @@
 #include "constants.h"
 
 #include "lastfmlib/lastfmscrobbler.h"
-#include "lastfmlib/lastfmexceptions.h"
-#include "lastfmlib/lastfmclient.h"
-#include "lastfmlib/nowplayinginfo.h"
 #include "lastfmlib/submissioninfo.h"
 
 #include <QObject>
 #include <QDir>
-#include <QDateTime>
 #include <QDebug>
 #include <QSettings>
 #include <QString>
 #include <QWidget>
-#include <QPushButton>
-#include <QFormLayout>
 #include <QTranslator>
 
 LastFmScrobblerPlugin::LastFmScrobblerPlugin()
@@ -49,30 +43,11 @@ LastFmScrobblerPlugin::LastFmScrobblerPlugin()
     _translator->load(locale,localeDir);
     qApp->installTranslator(_translator);
 
+    _scrobbler = NULL;
 }
 
 void LastFmScrobblerPlugin::init()
 {
-    _cache.clear();
-    qDebug() << "Initialized";
-
-    // Load cache first
-    QSettings settings(QString(_CONFIGDIR) + QDir::separator() + "lastfmscrobbler.conf",QSettings::IniFormat,this);
-    int size = settings.beginReadArray("Cache");
-    for (int i = 0; i < size; i++) {
-        settings.setArrayIndex(i);
-        LastFmScrobblerPlugin::MetaData metadata;
-        metadata.trackInfo.album = settings.value("album").toString();
-        metadata.trackInfo.artist = settings.value("artist").toString();
-        metadata.trackInfo.filename = settings.value("filename").toString();
-        metadata.trackInfo.length = settings.value("length").toUInt();
-        metadata.trackInfo.title = settings.value("title").toString();
-        metadata.trackInfo.trackNumber = settings.value("trackNumber").toInt();
-        metadata.playbackStart = settings.value("playbackStart").toUInt();
-        _cache.append(metadata);
-     }
-     settings.endArray();
-
      // Login
      _scrobbler = new LastFmScrobbler(QString("tps").toStdString(),
                                       QString("1.0").toStdString(),
@@ -80,6 +55,15 @@ void LastFmScrobblerPlugin::init()
                                       settings.value("password","").toString().toStdString(),
                                       false,
                                       false);
+
+     settings.beginGroup("Proxy");
+     if (settings.value("enabled",false).toBool()) {
+         _scrobbler->setProxy(settings.value("server",QString()).toString().toStdString(),
+                              settings.value("port",0).toUInt(),
+                              settings.value("username",QString()).toString().toStdString(),
+                              settings.value("password",QString()).toString().toStdString());
+     }
+
      _scrobbler->authenticate();
 
 }
@@ -89,10 +73,6 @@ void LastFmScrobblerPlugin::quit()
     _scrobbler->finishedPlaying();
 
     delete _scrobbler;
-
-    saveCache();
-
-    _cache.clear();
 }
 
 void LastFmScrobblerPlugin::settingsWidget(QWidget *parentWidget)
@@ -103,9 +83,17 @@ void LastFmScrobblerPlugin::settingsWidget(QWidget *parentWidget)
     QSettings settings(QString(_CONFIGDIR) + QDir::separator() + "lastfmscrobbler.conf",QSettings::IniFormat,this);
     _configWidget->usernameEdit->setText(settings.value("username",QString()).toString());
     _configWidget->passwordEdit->setText(settings.value("password",QString()).toString());
-    connect(_configWidget->testLoginButton,SIGNAL(clicked()),this,SLOT(on_testLoginButton_clicked()));
-    connect(_configWidget->testLoginButton,SIGNAL(clicked(bool)),_configWidget->testLoginButton,SLOT(setDisabled(bool)));
+    settings.beginGroup("Proxy");
+    _configWidget->useProxyCheckBox->setChecked(settings.value("enabled",false).toBool());
+    _configWidget->proxyServerEdit->setText(settings.value("server",QString()).toString());
+    _configWidget->proxyPortEdit->setText(settings.value("port",0).toString());
+    _configWidget->proxyUsernameEdit->setText(settings.value("username",QString()).toString());
+    _configWidget->proxyPasswordEdit->setText(settings.value("password",QString()).toString());
+    settings.endGroup();
 
+    _configWidget->proxyGroup->setEnabled( _configWidget->useProxyCheckBox->isChecked() );
+    connect(_configWidget->useProxyCheckBox,SIGNAL(toggled(bool)),
+            _configWidget->proxyGroup,SLOT(setEnabled(bool)));
 }
 
 void LastFmScrobblerPlugin::trackFinished(Player::MetaData trackdata)
@@ -117,6 +105,7 @@ void LastFmScrobblerPlugin::trackChanged(Player::MetaData trackData)
 {
     SubmissionInfo info = SubmissionInfo(trackData.artist.toStdString(),
                                          trackData.title.toStdString());
+    // The length is in milliseconds, lastfm accepts seconds!
     info.setTrackLength(trackData.length/1000);
     info.setTrackNr(trackData.trackNumber);
 
@@ -133,36 +122,31 @@ void LastFmScrobblerPlugin::settingsAccepted()
     QSettings settings(_CONFIGDIR + QDir::separator() + "lastfmscrobbler.conf",QSettings::IniFormat,this);
     settings.setValue("username",_configWidget->usernameEdit->text());
     settings.setValue("password",_configWidget->passwordEdit->text());
-}
+    settings.beginGroup("Proxy");
+    settings.setValue("enabled",_configWidget->useProxyCheckBox->isChecked());
+    settings.setValue("server",_configWidget->proxyServerEdit->text());
+    settings.setValue("port",_configWidget->proxyPortEdit->text().toUInt());
+    settings.setValue("username",_configWidget->proxyUsernameEdit->text());
+    settings.setValue("password",_configWidget->proxyPasswordEdit->text());
+    settings.endGroup();
 
-void LastFmScrobblerPlugin::on_testLoginButton_clicked()
-{
-/*    QNetworkAccessManager *testNAM = new QNetworkAccessManager();
-    QNetworkRequest nr;
-    nr.setUrl(prepareHandshakeURL(_configWidget->usernameEdit->text(),
-                                  _configWidget->passwordEdit->text()));
-    nr.setRawHeader("Host", "post.audioscrobbler.com");
-    connect(testNAM,SIGNAL(finished(QNetworkReply*)),this,SLOT(testLoginFinished(QNetworkReply*)));
-    testNAM->get(nr);*/
-}
 
-void LastFmScrobblerPlugin::saveCache()
-{
-    QSettings settings(QString(_CONFIGDIR).append("/lastfmscrobbler.conf"),QSettings::IniFormat,this);
-    settings.beginWriteArray("Cache");
-    for (int i = 0; i < _cache.size(); ++i) {
-        settings.setArrayIndex(i);
-        settings.setValue("album", _cache.at(i).trackInfo.album);
-        settings.setValue("artist", _cache.at(i).trackInfo.artist);
-        settings.setValue("filename", _cache.at(i).trackInfo.filename);
-        settings.setValue("length", _cache.at(i).trackInfo.length);
-        settings.setValue("title", _cache.at(i).trackInfo.title);
-        settings.setValue("trackNumber", _cache.at(i).trackInfo.trackNumber);
-        settings.setValue("playbackStart",_cache.at(i).playbackStart);
+    // Reinitialize the scrobbler with new credentials
+    delete _scrobbler;
+    _scrobbler = new LastFmScrobbler(_configWidget->usernameEdit->text().toStdString(),
+                                     _configWidget->passwordEdit->text().toStdString(),
+                                     false,
+                                     false);
+
+    if (_configWidget->useProxyCheckBox->isChecked()) {
+        _scrobbler->setProxy(_configWidget->proxyServerEdit->text().toStdString(),
+                             _configWidget->proxyPortEdit->text().toUInt(),
+                             _configWidget->proxyUsernameEdit->text().toStdString(),
+                             _configWidget->proxyPasswordEdit->text().toStdString());
     }
-    settings.endArray();
+
+    _scrobbler->authenticate();
+
 }
 
 Q_EXPORT_PLUGIN2(tepsonic_lastfmscrobbler, LastFmScrobblerPlugin)
-
-
