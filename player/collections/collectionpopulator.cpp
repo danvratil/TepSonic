@@ -62,10 +62,51 @@ void CollectionPopulator::run()
             _mutex.lock();
             (*_collectionModel)->clear();
 
+
             QModelIndex albumsParent;
             QModelIndex tracksParent;
+
+            // First load Various Artists
+            QSqlQuery artistsQuery("SELECT COUNT(album) AS albumsCnt,SUM(totalLength) AS totalLength " \
+                                   "FROM view_various_artists;",
+                                   *dbManager.sqlDb());
+            artistsQuery.next();
+            albumsParent = (*_collectionModel)->addChild(QModelIndex(),
+                                                         tr("Various Artists"),
+                                                         QString(),
+                                                         tr("%n album(s)","",artistsQuery.value(0).toInt()),
+                                                         formatMilliseconds(artistsQuery.value(1).toInt()*1000));
+            QSqlQuery albumsQuery("SELECT view_various_artists.album AS id,albums.album,view_various_artists.tracksCnt," \
+                                  "view_various_artists.totalLength FROM view_various_artists " \
+                                  "LEFT JOIN albums ON view_various_artists.album=albums.id " \
+                                  "ORDER BY albums.album ASC;",
+                                  *dbManager.sqlDb());
+            while (albumsQuery.next()) {
+                tracksParent = (*_collectionModel)->addChild(albumsParent,
+                                                             albumsQuery.value(1).toString(),
+                                                             QString(),
+                                                             tr("%n tracks(s)","",albumsQuery.value(2).toInt()),
+                                                             formatMilliseconds(albumsQuery.value(3).toInt()*1000));
+
+                QSqlQuery tracksQuery("SELECT trackname,filename,genre,length,interpret FROM view_tracks WHERE albumID="+albumsQuery.value(0).toString()+" ORDER BY track ASC;",
+                                      *dbManager.sqlDb());
+                while (tracksQuery.next()) {
+                    (*_collectionModel)->addChild(tracksParent,
+                                                  tracksQuery.value(4).toString()+" - "+tracksQuery.value(0).toString(),
+                                                  tracksQuery.value(1).toString(),
+                                                  tracksQuery.value(2).toString(),
+                                                  formatMilliseconds(tracksQuery.value(3).toInt()*1000));
+                }
+            }
+
+
+
+    
             {
-                QSqlQuery artistsQuery("SELECT id,interpret,albumsCnt,totalLength FROM interprets ORDER BY interpret ASC",
+                QSqlQuery artistsQuery("SELECT id,interpret,albumsCnt,totalLength FROM interprets " \
+                                       "WHERE id NOT IN (SELECT interpret FROM tracks " \
+                                       "    WHERE album IN(SELECT album FROM view_various_artists)) "\
+                                       "ORDER BY interpret ASC",
                                        *dbManager.sqlDb());
                 while (artistsQuery.next()) {
                     albumsParent = (*_collectionModel)->addChild(QModelIndex(),
@@ -73,7 +114,10 @@ void CollectionPopulator::run()
                                                                  QString(),
                                                                  tr("%n album(s)","",artistsQuery.value(2).toInt()),
                                                                  formatMilliseconds(artistsQuery.value(3).toInt()*1000));
-                    QSqlQuery albumsQuery("SELECT id,album,tracksCnt,totalLength FROM albums WHERE id IN (SELECT album FROM tracks WHERE interpret="+artistsQuery.value(0).toString()+") ORDER BY album ASC;",
+                    QSqlQuery albumsQuery("SELECT id,album,tracksCnt,totalLength FROM albums " \
+                                          "WHERE id IN (SELECT album FROM tracks WHERE interpret="+artistsQuery.value(0).toString()+") AND " \
+                                          "id NOT IN (SELECT album FROM view_various_artists) " \
+                                          "ORDER BY album ASC;",
                                           *dbManager.sqlDb());
                     while (albumsQuery.next()) {
                         tracksParent = (*_collectionModel)->addChild(albumsParent,
