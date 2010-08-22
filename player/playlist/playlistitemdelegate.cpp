@@ -41,7 +41,7 @@ void PlaylistItemDelegate::paint(QPainter *painter, const QStyleOptionViewItem &
 {
     QRect rect(option.rect);
     rect.setLeft(rect.left()-3);
-    painter->setPen(option.palette.text().color());
+    painter->setPen(option.palette.windowText().color());
     painter->setPen(option.font.pixelSize());
     painter->setFont(option.font);
 

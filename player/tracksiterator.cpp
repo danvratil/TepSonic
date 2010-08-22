@@ -19,6 +19,7 @@
 
 #include "tracksiterator.h"
 #include "playlistmodel.h"
+#include "supportedformats.h"
 
 #include <QDir>
 #include <QDirIterator>
@@ -38,8 +39,7 @@ void TracksIterator::run()
     /**
          * @todo: Complete list of supported extensions
          */
-    QStringList filters;
-    filters << "*.mp3" << "*.mp4" << "*.wav" << "*.flac";
+    QStringList filters = SupportedFormats::getExtensionList();
     QDir dirlist(_rootDir);
     dirlist.setNameFilters(filters);
     QFileInfo fileInfo;

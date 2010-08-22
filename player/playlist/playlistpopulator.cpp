@@ -19,6 +19,7 @@
 
 #include "playlistpopulator.h"
 #include "playlistmodel.h"
+#include "supportedformats.h"
 
 #include <QDirIterator>
 #include <QMutexLocker>
@@ -83,8 +84,7 @@ void PlaylistPopulator::run()
 
 void PlaylistPopulator::expandDir(QString dir)
 {
-    QStringList filters;
-    filters << "*.mp3" << "*.mp4" << "*.wav" << "*.flac";
+    QStringList filters = SupportedFormats::getExtensionList();
     //QDir dirlist(dir,QString(),QDir::Name,QDir::NoDotAndDotDot);
     QDir dirlist(dir);
     dirlist.setNameFilters(filters);

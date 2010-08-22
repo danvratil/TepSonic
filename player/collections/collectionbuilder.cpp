@@ -21,6 +21,7 @@
 #include "collectionbuilder.h"
 #include "collectionmodel.h"
 #include "databasemanager.h"
+#include "supportedformats.h"
 
 #include <taglib/fileref.h>
 #include <taglib/tag.h>
@@ -83,7 +84,7 @@ void CollectionBuilder::run()
                 QHash<QString,uint> dbFiles;
                 QStringList toBeUpdated;
                 QStringList toBeRemoved;
-                QStringList filters;
+                QStringList filters = SupportedFormats::getExtensionList();
 
                 {   // Populate dbFiles map by _ALL_ tracks from db
                     QSqlQuery query("SELECT filename, mtime FROM tracks;",*dbManager.sqlDb());
@@ -91,9 +92,6 @@ void CollectionBuilder::run()
                         dbFiles.insert(query.value(0).toString(),query.value(1).toUInt());
                     }
                 }
-
-                filters << "*.mp3" << "*.mp4" << "*.wav" << "*.flac";
-
 
                 /* We don't need to do transaction on MySQL.
                    On SQLite it makes it MUCH faster because otherwise SQLite will commit

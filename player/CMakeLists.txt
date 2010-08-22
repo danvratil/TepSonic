@@ -74,6 +74,7 @@ set(player_SRCS
     preferencespages.cpp
     tools.cpp
     trayicon.cpp
+    supportedformats.cpp
     collections/collectionpopulator.cpp
     collections/collectionbrowser.cpp
     collections/collectionmodel.cpp

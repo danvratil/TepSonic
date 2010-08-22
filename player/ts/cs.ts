@@ -5,18 +5,18 @@
     <name>CollectionBuilder</name>
     <message>
         <source>Unkown artist</source>
-        <translation type="obsolete">Neznámý umělec</translation>
+        <translation>Neznámý umělec</translation>
     </message>
     <message>
         <source>Unknown album</source>
-        <translation type="obsolete">Neznámé album</translation>
+        <translation>Neznámé album</translation>
     </message>
 </context>
 <context>
     <name>CollectionPopulator</name>
     <message numerus="yes">
         <source>%n album(s)</source>
-        <translation type="obsolete">
+        <translation>
             <numerusform>%n album</numerusform>
             <numerusform>%n alba</numerusform>
             <numerusform>%n alb</numerusform>
@@ -24,7 +24,7 @@
     </message>
     <message numerus="yes">
         <source>%n track(s)</source>
-        <translation type="obsolete">
+        <translation>
             <numerusform>%n skladba</numerusform>
             <numerusform>%n skladby</numerusform>
             <numerusform>%n skladeb</numerusform>
@@ -35,71 +35,102 @@
     <name>Collections</name>
     <message>
         <source>Form</source>
-        <translation type="obsolete">Formulář</translation>
+        <translation>Formulář</translation>
     </message>
     <message>
         <source>Collections</source>
-        <translation type="obsolete">Kolekce</translation>
+        <translation>Kolekce</translation>
     </message>
     <message>
         <source>Enable collections</source>
-        <translation type="obsolete">Zapnout kolekce</translation>
+        <translation>Zapnout kolekce</translation>
     </message>
     <message>
         <source>Update collections automatically after start</source>
-        <translation type="obsolete">Automaticky aktualizovat kolekce po spuštění</translation>
+        <translation>Automaticky aktualizovat kolekce po spuštění</translation>
     </message>
     <message>
         <source>Rebuild collections now</source>
-        <translation type="obsolete">Aktualizovat kolekce nyní</translation>
+        <translation>Aktualizovat kolekce nyní</translation>
     </message>
     <message>
         <source>Database engine</source>
-        <translation type="obsolete">Databáze</translation>
+        <translation>Databáze</translation>
     </message>
     <message>
         <source>SQLite</source>
-        <translation type="obsolete">SQLite</translation>
+        <translation>SQLite</translation>
     </message>
     <message>
         <source>MySQL</source>
-        <translation type="obsolete">MySQL</translation>
+        <translation>MySQL</translation>
     </message>
     <message>
         <source>MySQL settings</source>
-        <translation type="obsolete">Konfigurace MySQL</translation>
+        <translation>Konfigurace MySQL</translation>
     </message>
     <message>
         <source>Server</source>
-        <translation type="obsolete">Server</translation>
+        <translation>Server</translation>
     </message>
     <message>
         <source>Password</source>
-        <translation type="obsolete">Heslo</translation>
+        <translation>Heslo</translation>
     </message>
     <message>
         <source>Username</source>
-        <translation type="obsolete">Uživ. jméno</translation>
+        <translation>Uživ. jméno</translation>
     </message>
     <message>
         <source>Database</source>
-        <translation type="obsolete">Databáze</translation>
+        <translation>Databáze</translation>
     </message>
     <message>
         <source>Collections paths</source>
-        <translation type="obsolete">Cesty kolekcí</translation>
+        <translation>Cesty kolekcí</translation>
     </message>
     <message>
         <source>Add...</source>
-        <translation type="obsolete">Přidat...</translation>
+        <translation>Přidat...</translation>
     </message>
     <message>
         <source>Remove</source>
-        <translation type="obsolete">Odstranit</translation>
+        <translation>Odstranit</translation>
     </message>
     <message>
         <source>Remove all</source>
-        <translation type="obsolete">Odtranit vše</translation>
+        <translation>Odtranit vše</translation>
+    </message>
+</context>
+<context>
+    <name>LastFmScrobblerConfig</name>
+    <message>
+        <source>Form</source>
+        <translation>Formulář</translation>
+    </message>
+    <message>
+        <source>Username</source>
+        <translation>Uživ. jméno</translation>
+    </message>
+    <message>
+        <source>Password</source>
+        <translation>Heslo</translation>
+    </message>
+    <message>
+        <source>Proxy settings</source>
+        <translation>Nastavení proxy</translation>
+    </message>
+    <message>
+        <source>Server</source>
+        <translation>Server</translation>
+    </message>
+    <message>
+        <source>Port</source>
+        <translation>Port</translation>
+    </message>
+    <message>
+        <source>Use proxy</source>
+        <translation>Použít proxy</translation>
     </message>
 </context>
 <context>
@@ -159,10 +190,6 @@
     <message>
         <source>&amp;Help</source>
         <translation>&amp;Nápověda</translation>
-    </message>
-    <message>
-        <source>&amp;Settings</source>
-        <translation type="obsolete">N&amp;astavení</translation>
     </message>
     <message>
         <source>&amp;Show/Hide</source>
@@ -361,10 +388,6 @@
         <translation>Vyberte soubor</translation>
     </message>
     <message>
-        <source>Supported files (*.mp3 *.wav *.ogg *.flac *.m3u);;Playlists (*.m3u);;All files (*.*)</source>
-        <translation>Podporované soubory (*.mp3 *.wav *.ogg *.flac *.m3u);;Playlisty (*.m3u);;Všechny soubor (*.*)</translation>
-    </message>
-    <message>
         <source>Add directory</source>
         <translation>Přidat adresář</translation>
     </message>
@@ -397,10 +420,6 @@
         <translation>Potvrzení odstranění</translation>
     </message>
     <message>
-        <source>Settings</source>
-        <translation type="obsolete">N&amp;astavení</translation>
-    </message>
-    <message>
         <source>Configure TepSonic</source>
         <translation>Nastavit TepSonic</translation>
     </message>
@@ -408,60 +427,76 @@
         <source>Se&amp;ttings</source>
         <translation>N&amp;astavení</translation>
     </message>
+    <message>
+        <source>Supported files</source>
+        <translation>Podporované soubory</translation>
+    </message>
+    <message>
+        <source>Playlists</source>
+        <translation>Playlisty</translation>
+    </message>
+    <message>
+        <source>All files</source>
+        <translation>Všechny soubory</translation>
+    </message>
+    <message>
+        <source>About Qt</source>
+        <translation>O Qt</translation>
+    </message>
 </context>
 <context>
     <name>Player</name>
     <message>
         <source>Form</source>
-        <translation type="obsolete">Formulář</translation>
+        <translation>Formulář</translation>
     </message>
     <message>
         <source>Restore previous session</source>
-        <translation type="obsolete">Obnovit přechozí sezení</translation>
+        <translation>Obnovit přechozí sezení</translation>
     </message>
 </context>
 <context>
     <name>Plugins</name>
     <message>
         <source>Form</source>
-        <translation type="obsolete">Formulář</translation>
+        <translation>Formulář</translation>
     </message>
     <message>
         <source>General</source>
-        <translation type="obsolete">Hlavní</translation>
+        <translation>Hlavní</translation>
     </message>
 </context>
 <context>
     <name>PreferencesDialog</name>
     <message>
         <source>Dialog</source>
-        <translation type="obsolete">Dialog</translation>
+        <translation>Dialog</translation>
     </message>
     <message>
         <source>Player</source>
-        <translation type="obsolete">Přehrávač</translation>
+        <translation>Přehrávač</translation>
     </message>
     <message>
         <source>Collections</source>
-        <translation type="obsolete">Kolekce</translation>
+        <translation>Kolekce</translation>
     </message>
     <message>
         <source>Plugins</source>
-        <translation type="obsolete">Pluginy</translation>
+        <translation>Pluginy</translation>
     </message>
 </context>
 <context>
     <name>PreferencesPages::Collections</name>
     <message>
         <source>Add directory</source>
-        <translation type="obsolete">Přidat adresář</translation>
+        <translation>Přidat adresář</translation>
     </message>
 </context>
 <context>
     <name>QObject</name>
     <message numerus="yes">
         <source>%n week(s)</source>
-        <translation type="obsolete">
+        <translation>
             <numerusform>%n týden</numerusform>
             <numerusform>%n týdny</numerusform>
             <numerusform>%n týdnů</numerusform>
@@ -469,7 +504,7 @@
     </message>
     <message numerus="yes">
         <source>%n day(s)</source>
-        <translation type="obsolete">
+        <translation>
             <numerusform>%n den</numerusform>
             <numerusform>%n dny</numerusform>
             <numerusform>%n dní</numerusform>
@@ -480,7 +515,7 @@
     <name>TaskManager</name>
     <message>
         <source>Rebuilding collections</source>
-        <translation type="obsolete">Aktualizuji kolekce</translation>
+        <translation>Aktualizuji kolekce</translation>
     </message>
 </context>
 </TS>

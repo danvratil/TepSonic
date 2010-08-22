@@ -37,6 +37,7 @@
 #include "taskmanager.h"
 #include "pluginsmanager.h"
 #include "tools.h"
+#include "supportedformats.h"
 
 #include <QMessageBox>
 #include <QDir>
@@ -346,8 +347,9 @@ void MainWindow::on_actionAdd_file_triggered()
 {
     QStringList fileNames = QFileDialog::getOpenFileNames(this,
                             tr("Select file"),
-                            "",
-                            tr("Supported files (*.mp3 *.wav *.ogg *.flac *.m3u);;Playlists (*.m3u);;All files (*.*)"));
+			    QDir::homePath(),
+			    tr("Supported files") + " (" + SupportedFormats::getExtensionList().join(" ") +
+				");;" + tr("Playlists") + " (*.m3u);;" + tr("All files") + " (*.*)");
     _taskManager->addFilesToPlaylist(fileNames);
 }
 
