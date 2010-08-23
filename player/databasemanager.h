@@ -29,7 +29,7 @@
 /* When connecting to DB, we automatically checked for DB revision. When the numbers
    don't match, the DB is dropped and collections are rebuilt
 */
-#define _DBREVISION "5";
+#define _DBREVISION "6";
 
 //! DatabaseManager handles connection to database
 /*!

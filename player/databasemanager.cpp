@@ -118,7 +118,7 @@ void DatabaseManager::initDb()
         QSqlQuery query(*_sqlDb);
 
         query.exec("DROP TABLE IF EXISTS `albums`,`genres`,`interprets`,`tracks`,`years`,`db_rev`;");
-        query.exec("DROP VIEW `view_tracks`;");
+        query.exec("DROP VIEW `view_tracks`,`view_various_artists`;");
 
         query.exec("CREATE TABLE `albums` (" \
                    "   `id` int(11) NOT NULL AUTO_INCREMENT," \
@@ -188,6 +188,15 @@ void DatabaseManager::initDb()
                    "   LEFT JOIN `albums` ON `tracks`.`album` = `albums`.`id`" \
                    "   LEFT JOIN `years` ON `tracks`.`year` = `years`.`id`;");
 
+        query.exec("CREATE VIEW `view_various_artists` AS" \
+                   "  SELECT `tracks`.`album`," \
+                   "         COUNT(DISTINCT `interpret`) AS `interpretsCnt`," \
+                   "         SUM(`length`) AS `totalLength`," \
+                   "         COUNT(`id`) AS `tracksCnt`" \
+                   "  FROM `tracks`" \
+                   "  GROUP BY `album`" \
+                   "  HAVING `interpretsCnt` > 1;");
+
     } break;
     case SQLite: {
         QSqlQuery query(*_sqlDb);
@@ -199,6 +208,7 @@ void DatabaseManager::initDb()
         query.exec("DROP TABLE IF EXISTS `years`;");
         query.exec("DROP TABLE IF EXISTS `db_rev`;");
         query.exec("DROP VIEW IF EXISTS `view_tracks`;");
+        query.exec("DROP VIEW IF EXISTS `view_various_artists`;");
 
         query.exec("CREATE TABLE `genres` (" \
                    "    `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL," \
@@ -255,6 +265,15 @@ void DatabaseManager::initDb()
                    "    LEFT JOIN `genres` ON `tracks`.`genre` = `genres`.`id`" \
                    "    LEFT JOIN `albums` ON `tracks`.`album` = `albums`.`id`" \
                    "    LEFT JOIN `years` ON `tracks`.`year` = `years`.`id`;");
+
+        query.exec("CREATE VIEW `view_various_artists` AS" \
+                   "  SELECT `tracks`.`album`," \
+                   "         COUNT(DISTINCT `interpret`) AS `interpretsCnt`," \
+                   "         SUM(`length`) AS `totalLength`," \
+                   "         COUNT(`id`) AS `tracksCnt`" \
+                   "  FROM `tracks`" \
+                   "  GROUP BY `album`" \
+                   "  HAVING `interpretsCnt` > 1;");
 
     } break;
     }
