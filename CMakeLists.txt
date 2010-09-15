@@ -43,6 +43,14 @@ add_definitions(${QT_DEFINITIONS}
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)
 set(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/lib)
 
+if (PROFILING)
+    SET(CMAKE_CXX_FLAGS_PROFILE "-pg -O0")
+    SET(CMAKE_CXX_FLAGS_COVERAGE "-ftest-coverage -fprofile-arcs -O0")
+    SET(CMAKE_CXX_LINK_FLAGS "${CMAKE_CXX_LINK_FLAGS} -pg")
+    SET(LINK_FLAGS "${LINK_FLAGS} -pg")
+    MESSAGE("Profiling enabled")
+endif (PROFILING)
+
 # First player, then plugins, this is strict order!
 add_subdirectory(player)
 add_subdirectory(plugins)
