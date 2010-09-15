@@ -46,8 +46,8 @@ void CollectionItemDelegate::paint(QPainter *painter, const QStyleOptionViewItem
     painter->setPen(option.palette.text().color());
 
     // We need to remap the modelIndex from the proxy model to the original model
-    QModelIndex mappedIndex = _proxyModel->mapToSource(index);
-    if (!mappedIndex.isValid()) return;
+    //QModelIndex mappedIndex = _proxyModel->mapToSource(index);
+    QModelIndex mappedIndex = index;
 
     CollectionModel *parentModel = const_cast<CollectionModel*>(dynamic_cast<const CollectionModel*>(mappedIndex.model()));
     CollectionItem *item = static_cast<CollectionItem*>(mappedIndex.internalPointer());
@@ -94,7 +94,7 @@ void CollectionItemDelegate::paint(QPainter *painter, const QStyleOptionViewItem
 
         // if the item is nor selected or opened then draw it traditional way
     } else {
-        // Remove index from list (if listed) and force it's redrawal
+        //Remove index from list (if listed) and force it's redrawal
         if (_currentIndexes.removeOne(mappedIndex)) {
             parentModel->redraw();
         }
@@ -102,12 +102,12 @@ void CollectionItemDelegate::paint(QPainter *painter, const QStyleOptionViewItem
                                  option.rect.top()+option.fontMetrics.height()),
                           item->data(0).toString());
     }
-
 }
 
 QSize CollectionItemDelegate::sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const
 {
-    QModelIndex mappedIndex = _proxyModel->mapToSource(index);
+    //QModelIndex mappedIndex = _proxyModel->mapToSource(index);
+    QModelIndex mappedIndex = index;
 
     QSize size(option.decorationSize.width(),
                option.decorationSize.height()+2);

@@ -548,8 +548,8 @@ void MainWindow::fixCollectionProxyModel()
 {
     // Workaround for QTBUG 7585
     // http://bugreports.qt.nokia.com/browse/QTBUG-7585
-    _collectionProxyModel->invalidate();
-    _collectionProxyModel->setFilterRegExp("");
+    /*_collectionProxyModel->invalidate();
+    _collectionProxyModel->setFilterRegExp("");*/
 }
 
 void MainWindow::repeatModeChanged(Player::RepeatMode newMode)
@@ -595,7 +595,8 @@ void MainWindow::changeEvent(QEvent *e)
 void MainWindow::on_collectionBrowser_doubleClicked(QModelIndex index)
 {
     QString file;
-    QModelIndex mappedIndex = _collectionProxyModel->mapToSource(index);
+    //QModelIndex mappedIndex = _collectionProxyModel->mapToSource(index);
+    QModelIndex mappedIndex = index;
 
     file = mappedIndex.sibling(index.row(),1).data().toString();
 
@@ -694,15 +695,16 @@ void MainWindow::setupCollections()
     headers = QStringList() << "title" << "filename" << "data1" << "data2";
     _collectionModel = new CollectionModel(headers,this);
 
-    _collectionProxyModel = new CollectionProxyModel(this);
+    /*_collectionProxyModel = new CollectionProxyModel(this);
     _collectionProxyModel->setSourceModel(_collectionModel);
     _collectionProxyModel->setFilterCaseSensitivity(Qt::CaseInsensitive);
     _collectionProxyModel->setFilterKeyColumn(0);
-    _collectionProxyModel->setDynamicSortFilter(true);
+    _collectionProxyModel->setDynamicSortFilter(true);*/
 
-    _collectionItemDelegate = new CollectionItemDelegate(this, _collectionProxyModel);
+    //_collectionItemDelegate = new CollectionItemDelegate(this, _collectionProxyModel);
+    _collectionItemDelegate = new CollectionItemDelegate(this);
 
-    _ui->collectionBrowser->setModel(_collectionProxyModel);
+    _ui->collectionBrowser->setModel(_collectionModel);
     _ui->collectionBrowser->setItemDelegate(_collectionItemDelegate);
     _ui->collectionBrowser->setSelectionMode(QAbstractItemView::ExtendedSelection);
     _ui->collectionBrowser->setDragEnabled(true);
@@ -723,6 +725,10 @@ void MainWindow::setupCollections()
     connect(_ui->colectionSearchEdit,SIGNAL(textChanged(QString)),_collectionProxyModel,SLOT(invalidate()));
     connect(_ui->colectionSearchEdit,SIGNAL(textChanged(QString)),_collectionProxyModel,SLOT(setFilterRegExp(QString)));
 
+    // Since we disabled the Proxy model, no search inputs are needed
+    _ui->label_2->hide();
+    _ui->colectionSearchEdit->hide();
+    _ui->clearCollectionSearch->hide();
 
     _ui->collectionWidget->show();
 }
