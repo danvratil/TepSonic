@@ -133,6 +133,7 @@ MainWindow::MainWindow(Player *player)
     connect(_taskManager,SIGNAL(taskDone()),_ui->statusBar,SLOT(cancelAction()));
     // This refreshes the filter when an item is added to the playlist so the item appears immediately
     connect(_taskManager,SIGNAL(playlistPopulated()),_playlistProxyModel,SLOT(invalidate()));
+    connect(_taskManager, SIGNAL(clearCollectionModel()), _collectionModel, SLOT(clear()));
 
     restoreGeometry(_settings->value("Window/Geometry", saveGeometry()).toByteArray());
     restoreState(_settings->value("Window/State", saveState()).toByteArray());

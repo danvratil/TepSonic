@@ -47,32 +47,16 @@ CollectionBuilder::CollectionBuilder(CollectionModel **collectionModel)
 {
 
     _collectionModel = collectionModel;
-    _canClose = false;
 
-    start();
-}
-
-CollectionBuilder::~CollectionBuilder()
-{
-    if (isRunning()) {
-        _canClose = true;
-        _lock.wakeAll();
-    }
-    wait();
 }
 
 void CollectionBuilder::run()
 {
 
-    do {
-
         if (!_folders.isEmpty()) {
             emit buildingStarted();
 
             bool collectionsChanged = false;
-
-            // This does not take any effect on Linux but on Windows it will not freeze the whole system :-)
-            setPriority(QThread::LowPriority);
 
             DatabaseManager dbManager("collectionsUpdateConnection");
             if (dbManager.connectToDB()) {
@@ -166,21 +150,11 @@ void CollectionBuilder::run()
 
         }
 
-        // We don't want to lock the thread when the thread is allowed to close
-        if (!_canClose)
-            emit buildingFinished();
-        _lock.wait(&_mutex);
-
-    } while (!_canClose);
-
 }
 
 void CollectionBuilder::rebuildFolder(QStringList folder)
 {
-    _mutex.lock();
     _folders.append(folder);
-    _mutex.unlock();
-    _lock.wakeAll();
 }
 
 void CollectionBuilder::insertTrack(QString filename, QSqlDatabase *sqlDB)

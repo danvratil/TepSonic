@@ -174,12 +174,6 @@
      */
      QModelIndex addChild(const QModelIndex &index, QString title, QString filename = "", QString data1 = "", QString data2 = "");
 
-     //! Remove all items and their children from model
-     /*!
-       This is the best method how to remove all items from collections
-     */
-     void clear();
-
      //! Returns list of filenames of all tracks that are children of given item
      /*!
        Goes recursively through all parent's children and all tracks (eg. items that
@@ -215,6 +209,15 @@
 
      //! Pointer to root CollectionItem
      CollectionItem *_rootItem;
+
+   public slots:
+
+     //! Remove all items and their children from model
+     /*!
+       This is the best method how to remove all items from collections
+     */
+     void clear();
+
  };
 
 

@@ -20,7 +20,8 @@
 #ifndef PLAYLISTWRITER_H
 #define PLAYLISTWRITER_H
 
-#include <QThread>
+#include <QRunnable>
+#include <QObject>
 #include <QMutex>
 #include <QWaitCondition>
 
@@ -31,7 +32,7 @@ class PlaylistModel;
   PlaylistWriter is sublcassed from QThread. When the thread is awoken current playlist
   is saved to given file in m3u plain format
 */
-class PlaylistWriter : public QThread
+class PlaylistWriter : public QObject, public QRunnable
 {
     Q_OBJECT
     public:
@@ -42,11 +43,6 @@ class PlaylistWriter : public QThread
         */
         explicit PlaylistWriter(PlaylistModel *playlistModel);
 
-        //! Destructor
-        /*!
-          Destructor sets \p _canClose to true and wakes the tread. Then waits until the thread quits
-        */
-        ~PlaylistWriter();
 
         //! Main loop
         void run();
@@ -65,15 +61,6 @@ class PlaylistWriter : public QThread
 
         //! File to output the playlist into
         QString _outputFile;
-
-        //! Mutex to sync access to _outputFile between main thread and this
-        QMutex _mutex;
-
-        //! Locks the thread until awaken
-        QWaitCondition _lock;
-
-        //! Can the thread be quit?
-        bool _canClose;
 
     signals:
         //! Emitted when playlist is succesfully written to a file

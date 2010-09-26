@@ -21,9 +21,8 @@
 #ifndef COLLECTIONBUILDER_H
 #define COLLECTIONBUILDER_H
 
-#include <QThread>
-#include <QMutex>
-#include <QWaitCondition>
+#include <QRunnable>
+#include <QObject>
 #include <QStringList>
 #include <QSqlDatabase>
 
@@ -37,7 +36,7 @@ class CollectionModel;
   The threads is waiting sleeping and is awoken only when new folder is added to the list.
   When the work is done the thread falls asleep again.
 */
-class CollectionBuilder : public QThread
+class CollectionBuilder : public QObject, public QRunnable
 {
     Q_OBJECT
 public:
@@ -47,9 +46,6 @@ public:
       \param model pointer to a CollectionModel that should be populated
     */
     CollectionBuilder(CollectionModel **model);
-
-    //! Destructor
-    ~CollectionBuilder();
 
     //! Start the thread
     /*!
@@ -75,15 +71,6 @@ signals:
 private:
     //! Pointer to pointer to CollectionModel that is populated
     CollectionModel **_collectionModel;
-
-    //! Mutex for syncing access to model
-    QMutex _mutex;
-
-    //! Lock holds the thread sleeping when there's nothing to do
-    QWaitCondition _lock;
-
-    //! Allows thread to quit
-    bool _canClose;
 
     //! List of folder to go through
     QStringList _folders;

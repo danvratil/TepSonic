@@ -29,27 +29,13 @@ PlaylistWriter::PlaylistWriter(PlaylistModel *playlistModel)
 
     _outputFile = QString();
     _playlistModel = playlistModel;
-    _canClose = false;
 
-    start();
 }
 
-PlaylistWriter::~PlaylistWriter()
-{
-    // Allow thread to close and wake it
-    if (isRunning()) {
-        _canClose = true;
-        _lock.wakeAll();
-    }
-    // Now wait until terminated
-    wait();
-}
 
 void PlaylistWriter::run()
 {
-    do {
 
-        _mutex.lock();
         if (!_outputFile.isEmpty())
         {
             QDir playlistDir(QFileInfo(_outputFile).path());
@@ -65,20 +51,11 @@ void PlaylistWriter::run()
             }
             file.close();
         }
-        _mutex.unlock();
         emit playlistSaved();
 
-        // Wait until awaken again
-        if (!_canClose)
-            _lock.wait(&_mutex);
-
-    } while (!_canClose);
 }
 
 void PlaylistWriter::saveToFile(QString filename)
 {
-    _mutex.lock();
     _outputFile = filename;
-    _mutex.unlock();
-    _lock.wakeAll();
 }

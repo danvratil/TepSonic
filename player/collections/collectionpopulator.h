@@ -21,9 +21,8 @@
 #ifndef COLLECTIONPOPULATOR_H
 #define COLLECTIONPOPULATOR_H
 
-#include <QThread>
-#include <QMutex>
-#include <QWaitCondition>
+#include <QRunnable>
+#include <QObject>
 
 class CollectionModel;
 
@@ -32,7 +31,7 @@ class CollectionModel;
   CollectionPopulator is subclassed from QThread. The thread is sleeping until awoken by calling
   populate() method. When the model is populated by data from the SQL the thread falls asleep again
 */
-class CollectionPopulator : public QThread
+class CollectionPopulator : public QObject, public QRunnable
 {
     Q_OBJECT
 public:
@@ -43,35 +42,18 @@ public:
     */
     explicit CollectionPopulator(CollectionModel **collectionModel);
 
-    //! Destructor
-    /*!
-      Allows thread to quit and wakes the thread and wait until it quits
-    */
-    ~CollectionPopulator();
-
     //! Main thread method
     void run();
-
-public slots:
-    //! Wakes up the thread
-    void populate();
 
 signals:
     //! Emitted when whole collections are populated
     void collectionsPopulated();
 
+    void clearCollectionModel();
+
 private:
     //! Pointer to pointer to CollectionModel
     CollectionModel **_collectionModel;
-
-    //! Mutex for syncing access to model
-    QMutex _mutex;
-
-    //! Locks the thread until awaken
-    QWaitCondition _lock;
-
-    //! Can I quit the thread daddy?
-    bool _canClose;
 
 };
 

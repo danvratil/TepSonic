@@ -20,7 +20,8 @@
 #ifndef PLAYLISTPOPULATOR_H
 #define PLAYLISTPOPULATOR_H
 
-#include <QThread>
+#include <QRunnable>
+#include <QObject>
 #include <QStringList>
 #include <QMutex>
 #include <QWaitCondition>
@@ -33,7 +34,7 @@ class PlaylistModel;
   the list is empty using FIFO method. When the list is empty the thread is suspended until new files are added
   by addFiles() or addFile() methods.
 */
-class PlaylistPopulator : public QThread
+class PlaylistPopulator : public QObject, public QRunnable
 {
     Q_OBJECT
     public:
@@ -43,12 +44,6 @@ class PlaylistPopulator : public QThread
           \param playlistModel pointer to PlaylistModel
         */
         explicit PlaylistPopulator(PlaylistModel *playlistModel);
-
-        //! Destructor
-        /*!
-          Destructor sets \p _canClose to true and wakes the tread. Then waits until the thread quits
-        */
-        ~PlaylistPopulator();
 
         //! Main loop
         void run();
@@ -110,15 +105,6 @@ class PlaylistPopulator : public QThread
 
         //! List of files that are loaded
         QStringList _files;
-
-        //! Mutex to sync access to \p _files
-        QMutex _mutex;
-
-        //! Locks the thread until awaken
-        QWaitCondition _lock;
-
-        //! Can the thread be quit?
-        bool _canClose;
 
 };
 

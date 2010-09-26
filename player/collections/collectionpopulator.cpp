@@ -32,26 +32,11 @@ CollectionPopulator::CollectionPopulator(CollectionModel **collectionModel)
 {
 
     _collectionModel = collectionModel;
-    _canClose = false;
 
-    start();
-}
-
-CollectionPopulator::~CollectionPopulator()
-{
-    // Let the thread end
-    if (isRunning()) {
-        _canClose = true;
-        _lock.wakeAll();
-    }
-    // Wait for it to quit
-    wait();
 }
 
 void CollectionPopulator::run()
 {
-
-    do {
 
         if ((*_collectionModel) != NULL) {
 
@@ -59,8 +44,8 @@ void CollectionPopulator::run()
             if (!dbManager.connectToDB()) {
                 return;
             }
-            _mutex.lock();
-            (*_collectionModel)->clear();
+
+            emit clearCollectionModel();
 
 
             QModelIndex albumsParent;
@@ -138,24 +123,9 @@ void CollectionPopulator::run()
                     }
                 }
             }
-            _mutex.unlock();
 
             emit collectionsPopulated();
 
         }
 
-        // We don't want to lock the thread when the thread is allowed to quit
-        if (!_canClose)
-            // Wait for next awaking
-            _lock.wait(&_mutex);
-
-    } while (!_canClose);
-
-}
-
-void CollectionPopulator::populate()
-{
-
-    // Unlock thread for one iteration
-    _lock.wakeAll();
 }

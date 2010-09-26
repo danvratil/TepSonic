@@ -21,6 +21,7 @@
 #define TASKMANAGER_H
 
 #include <QObject>
+#include <QThreadPool>
 
 class PlaylistPopulator;
 class CollectionPopulator;
@@ -82,6 +83,8 @@ class TaskManager : public QObject
         */
         void taskStarted(QString action);
 
+        void clearCollectionModel();
+
     public slots:
         //! Appends given file to playlist
         /*!
@@ -131,23 +134,13 @@ class TaskManager : public QObject
         void collectionsRebuildingStarted();
 
     private:
-        //! Pointer to PlaylistPopulator
-        PlaylistPopulator *_playlistPopulator;
-
-        //! Pointer to CollectionPopulator
-        CollectionPopulator *_collectionPopulator;
-
-        //! Pointer to PlaylistWriter
-        PlaylistWriter *_playlistWriter;
-
-        //! Pointer to CollectionBuilder
-        CollectionBuilder *_collectionBuilder;
-
         //! Pointer to pointer to PlaylistModel
         PlaylistModel **_playlistModel;
 
         //! Pointer to pointer to CollectionModel
         CollectionModel **_collectionModel;
+
+        QThreadPool *_threadPool;
 };
 
 #endif // TASKMANAGER_H

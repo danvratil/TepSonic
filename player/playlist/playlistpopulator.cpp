@@ -28,31 +28,15 @@
 
 PlaylistPopulator::PlaylistPopulator(PlaylistModel *playlistModel)
 {
-
     _playlistModel = playlistModel;
-    _canClose = false;
     _files.clear();
 
-    // Start the thread and pause it immediatelly
-    start();
-}
-
-PlaylistPopulator::~PlaylistPopulator()
-{
-    // Allow closing and wake the thread.
-    if (isRunning()) {
-        _canClose = true;
-        _lock.wakeAll();
-    }
-    // Wait until sucessfully terminated
-    wait();
 }
 
 void PlaylistPopulator::run()
 {
-    do
-    {
-        _mutex.lock();
+    do {
+
         if (_files.size() > 0) {
             if (QFileInfo(_files.first()).isDir()) {
                 expandDir(_files.takeFirst());
@@ -67,19 +51,8 @@ void PlaylistPopulator::run()
                     emit fileAdded();
             }
         }
-        _mutex.unlock();
 
-        _mutex.lock();
-        bool empty = _files.isEmpty();
-        _mutex.unlock();
-
-        /* When the _files is empty thread is suspended until awoken again
-           by adding new file */
-        if ((empty) && (!_canClose)) {
-            emit filesAdded();
-            _lock.wait(&_mutex);
-        }
-    } while (!_canClose);
+    } while (!_files.isEmpty());
 }
 
 void PlaylistPopulator::expandDir(QString dir)
@@ -139,18 +112,10 @@ void PlaylistPopulator::expandPlaylist(QString filename)
 
 void PlaylistPopulator::addFile(const QString &file)
 {
-    // Add new file to the list and wake the worker thread (if sleeping)
-    _mutex.lock();
     _files.append(file);
-    _mutex.unlock();
-    _lock.wakeAll();
 }
 
 void PlaylistPopulator::addFiles(const QStringList &files)
 {
-    // Add new file to the list and wake the workert thread (if sleeping)
-    _mutex.lock();
     _files.append(files);
-    _mutex.unlock();
-    _lock.wakeAll();
 }
