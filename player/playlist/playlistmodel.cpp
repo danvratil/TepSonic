@@ -346,6 +346,7 @@ void PlaylistModel::setCurrentItem(QModelIndex currentIndex)
     if (!currentIndex.isValid())
         return;
 
+    emit layoutAboutToBeChanged();
     _currentItem = currentIndex;
 
     rootItem->child(_currentItem.row())->setSelected(true);
