@@ -42,7 +42,7 @@ void CollectionItemDelegate::paint(QPainter *painter, const QStyleOptionViewItem
     if (!index.isValid()) return;
 
     // Set default font and color
-    painter->setFont(option.font);
+        painter->setFont(option.font);
     painter->setPen(option.palette.text().color());
 
     // We need to remap the modelIndex from the proxy model to the original model
@@ -77,7 +77,6 @@ void CollectionItemDelegate::paint(QPainter *painter, const QStyleOptionViewItem
                           item->data(0).toString());
 
         painter->setFont(QFont(option.font.family(),8));
-        painter->setPen(Qt::gray);
         //bottom line that is height of the first row + height of the second row + some padding
         int bottomLine = option.rect.top()+option.fontMetrics.height()+painter->fontMetrics().height()+4;
 

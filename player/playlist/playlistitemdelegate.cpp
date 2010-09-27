@@ -41,15 +41,15 @@ void PlaylistItemDelegate::paint(QPainter *painter, const QStyleOptionViewItem &
 {
     QRect rect(option.rect);
     rect.setLeft(rect.left()-3);
-    painter->setPen(option.palette.windowText().color());
-    painter->setPen(option.font.pixelSize());
+
     painter->setFont(option.font);
+    painter->setPen(option.palette.text().color());
 
     QModelIndex mappedIndex = _playlistProxyModel->mapToSource(index);
 
     if (mappedIndex.row() == _playlistModel->currentItem().row()) {
         painter->fillRect(rect,option.palette.link());
-        painter->setPen(option.palette.dark().color());
+        painter->setPen(option.palette.highlightedText().color());
     } else if (option.state & QStyle::State_Selected) {
         painter->fillRect(rect,option.palette.highlight());
     }
