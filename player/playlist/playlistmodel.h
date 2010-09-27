@@ -27,6 +27,8 @@
 #include <QMutex>
 #include <QStringList>
 
+#include "player.h"
+
 class PlaylistItem;
 class PlaylistProxyModel;
 
@@ -201,14 +203,13 @@ class PlaylistModel : public QAbstractItemModel
      QModelIndex previousItem(QModelIndex index = QModelIndex());
 
  public slots:
-    //! Appends new file to the playlist
+    //! Insert new item to the playlist
     /*!
-      First a new row is appended to the end of the playlist and then meta data are loaded using
-      TagLib library and inserted into columns.
-      \param file track file to load
-      \sa PlaylistManager
+      Insertes given metadata to the playlist
+      \param metadata data to insert
+      \param row row where to insert the data
     */
-    bool addItem(QString file);
+     bool insertItem(Player::MetaData metadata, int row);
 
     //! Returns pointer to PlaylistModel located on given index
     /*!

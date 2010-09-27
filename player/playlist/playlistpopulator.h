@@ -26,7 +26,8 @@
 #include <QMutex>
 #include <QWaitCondition>
 
-class PlaylistModel;
+#include "player.h"
+
 
 //! PlaylistPopulator is thread that populates the playlist by given data
 /*!
@@ -41,25 +42,22 @@ class PlaylistPopulator : public QObject, public QRunnable
         //! Constructor
         /*!
           Constructor sets the playlistModel pointer and launches the thread
-          \param playlistModel pointer to PlaylistModel
         */
-        explicit PlaylistPopulator(PlaylistModel *playlistModel);
+        explicit PlaylistPopulator();
 
         //! Main loop
         void run();
 
     signals:
-        //! Emitted when new all items from list are populated into the model.
+        //! Emitted when new item is parsed and data are ready to be send to the model
         /*!
-          The signal is emitted just before the thread is suspended.
+          The signal is connected to PlaylistModel::insertItem(metadata, row) slot
         */
-        void filesAdded();
+        void insertItemToPlaylist(Player::MetaData metadata, int row);
 
-        //! Emited when each new file is added to the model
-        /*!
-          \warning This can enormously slow down populating!
-        */
-        void fileAdded();
+        //! Emitted when task has finished
+        void playlistPopulated();
+
 
     public slots:
         //! Appends given list to \p _files list
@@ -69,9 +67,10 @@ class PlaylistPopulator : public QObject, public QRunnable
           \note This is a blocking method.
           \note Folders and playlists are supported too. They are parsed by expandDir() or expandPlaylist().
           \param files list of files to be appended
+          \param firstRow first row in playlist to insert the items to
           \sa addFile()
         */
-        void addFiles(const QStringList &files);
+        void addFiles(const QStringList &files, int firstRow = 0);
 
         //! Appends given file to \p _files list
         /*!
@@ -80,9 +79,10 @@ class PlaylistPopulator : public QObject, public QRunnable
           \note This is a blocking method.
           \note Folders and playlists are supported too. They are parsed by expandDir() or expandPlaylist().
           \param file file to be appended
+          \param row row in playlist to insert the item to
           \sa addFiles()
         */
-        void addFile(const QString &file);
+        void addFile(const QString &file, int row = 0);
 
     private:
         //! Expands the _files by list of files in \p dir
@@ -100,11 +100,19 @@ class PlaylistPopulator : public QObject, public QRunnable
         */
         void expandPlaylist(QString filename);
 
-        //! Pointer to playlist
-        PlaylistModel *_playlistModel;
+        //! Loads metadata from given file
+        /*!
+          Loads metadata from given file \p filename and returns Player::MetaData metadata. The data are loaded
+          from database when available or directly from file using taglib when not available
+          \param filename the file to read
+        */
+        Player::MetaData getFileMetaData(QString file);
 
         //! List of files that are loaded
         QStringList _files;
+
+        //! Row where to insert the first item
+        int _row;
 
 };
 

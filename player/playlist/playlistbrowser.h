@@ -82,8 +82,9 @@ class PlaylistBrowser : public QTreeView
     signals:
         /** Passes list of dropped files
          * \param files list of files to insert
+         * \param row where files should be inserted
          */
-        void addedFiles(QStringList files);
+        void addedFiles(QStringList files, int row);
 
 
 

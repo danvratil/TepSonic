@@ -29,10 +29,13 @@
 #include <QtSql/QSqlQuery>
 
 
+bool DatabaseManager::_static_connectionAvailable;
+
 DatabaseManager::DatabaseManager(QString connectionName)
 {
     _connectionName = connectionName;
     _sqlDb = NULL;
+    _static_connectionAvailable = false;
 
     QSettings settings(QString(_CONFIGDIR).append("/main.conf"),QSettings::IniFormat,this);
     _driverType = (DriverTypes)settings.value("Collections/StorageEngine",0).toInt();
@@ -57,6 +60,7 @@ bool DatabaseManager::connectToDB()
 {
     if (QSqlDatabase::contains(_connectionName)) {
         qDebug() << "Connection with name " << _connectionName << " exists.";
+        _static_connectionAvailable = true;
         return true;
     }
 
@@ -78,6 +82,7 @@ bool DatabaseManager::connectToDB()
         qDebug() << "Failed to establish '" << _sqlDb->connectionName() <<"' connection to database!";
         qDebug() << "Reason: " << _sqlDb->lastError().text();
         _sqlDb = NULL;
+        _static_connectionAvailable = false;
         return false;
     }
 
@@ -107,6 +112,7 @@ bool DatabaseManager::connectToDB()
         initDb();
     }
 
+    _static_connectionAvailable = true;
     return true;
 }
 

@@ -76,9 +76,10 @@ void PlaylistBrowser::dropEvent(QDropEvent* event)
     }
 
     //row where the items were dropped
-    //int row = indexAt(event->pos()).row();
+    int row = indexAt(event->pos()).row();
+    if (row == -1) row = model()->rowCount(QModelIndex());
 
-    emit addedFiles(files);
+    emit addedFiles(files, row);
 
     event->setAccepted(true);
 }

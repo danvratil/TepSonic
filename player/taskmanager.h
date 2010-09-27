@@ -23,6 +23,8 @@
 #include <QObject>
 #include <QThreadPool>
 
+#include "player.h"
+
 class PlaylistPopulator;
 class CollectionPopulator;
 class PlaylistWriter;
@@ -59,8 +61,11 @@ class TaskManager : public QObject
         ~TaskManager();
 
     signals:
-        //! Emitted when all items from playlist are populated
+        //! Emitted when all data in PlaylistPopulator are processed
         void playlistPopulated();
+
+        //! Emitted when data from PlaylistPopulator are send
+        void insertItemToPlaylist(Player::MetaData metadata, int row);
 
         //! Emitted when the playlist is sucessfully saved
         void playlistSaved();
@@ -92,7 +97,7 @@ class TaskManager : public QObject
           the thread is resumed to append the file to the model
           \param filename file to add
         */
-        void addFileToPlaylist(const QString &filename);
+        void addFileToPlaylist(const QString &filename, int row = 0);
 
         //! Appends given files to playlist
         /*!
@@ -100,7 +105,7 @@ class TaskManager : public QObject
           the thread is resumed to append the files to the model
           \param files files to add
         */
-        void addFilesToPlaylist(const QStringList &files);
+        void addFilesToPlaylist(const QStringList &files, int row = 0);
 
         //! Saves current playlist to given file
         /*!

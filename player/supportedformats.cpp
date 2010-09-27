@@ -59,7 +59,7 @@ QStringList SupportedFormats::getExtensionList()
 	if(list.isEmpty())
 		list << "*.flac" << "*.mp3" << "*.ogg" << "*.wav";
 
-	qDebug() << "the final supported extension list:" << list;
+        //qDebug() << "the final supported extension list:" << list;
 
 	return list;
 }

@@ -44,20 +44,24 @@ TaskManager::~TaskManager()
 {
 }
 
-void TaskManager::addFilesToPlaylist(const QStringList &files)
+void TaskManager::addFilesToPlaylist(const QStringList &files, int row)
 {
-    PlaylistPopulator *playlistPopulator = new PlaylistPopulator(*_playlistModel);
-    playlistPopulator->addFiles(files);
-    connect(playlistPopulator, SIGNAL(filesAdded()),
+    PlaylistPopulator *playlistPopulator = new PlaylistPopulator();
+    playlistPopulator->addFiles(files, row);
+    connect(playlistPopulator, SIGNAL(insertItemToPlaylist(Player::MetaData,int)),
+            this, SIGNAL(insertItemToPlaylist(Player::MetaData,int)));
+    connect(playlistPopulator, SIGNAL(playlistPopulated()),
             this, SIGNAL(playlistPopulated()));
     _threadPool->start(playlistPopulator);
 }
 
-void TaskManager::addFileToPlaylist(const QString &filename)
+void TaskManager::addFileToPlaylist(const QString &filename, int row)
 {
-    PlaylistPopulator *playlistPopulator = new PlaylistPopulator(*_playlistModel);
-    playlistPopulator->addFile(filename);
-    connect(playlistPopulator, SIGNAL(fileAdded()),
+    PlaylistPopulator *playlistPopulator = new PlaylistPopulator();
+    playlistPopulator->addFile(filename, row);
+    connect(playlistPopulator, SIGNAL(insertItemToPlaylist(Player::MetaData,int)),
+            this, SIGNAL(insertItemToPlaylist(Player::MetaData,int)));
+    connect(playlistPopulator, SIGNAL(playlistPopulated()),
             this, SIGNAL(playlistPopulated()));
     _threadPool->start(playlistPopulator);
 }

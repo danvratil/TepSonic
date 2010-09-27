@@ -18,17 +18,25 @@
  */
 
 #include "playlistpopulator.h"
-#include "playlistmodel.h"
 #include "supportedformats.h"
+#include "player.h"
+#include "databasemanager.h"
+#include "tools.h"
 
 #include <QDirIterator>
 #include <QMutexLocker>
 #include <QDebug>
 #include <QFileInfo>
+#include <QSqlField>
+#include <QSqlDriver>
+#include <QSqlQuery>
 
-PlaylistPopulator::PlaylistPopulator(PlaylistModel *playlistModel)
+#include <taglib/taglib.h>
+#include <taglib/fileref.h>
+#include <taglib/tag.h>
+
+PlaylistPopulator::PlaylistPopulator()
 {
-    _playlistModel = playlistModel;
     _files.clear();
 
 }
@@ -47,12 +55,16 @@ void PlaylistPopulator::run()
                 }
             }
             if (_files.size() > 0) {
-                if (_playlistModel->addItem(_files.takeFirst()))
-                    emit fileAdded();
+
+                Player::MetaData metadata = getFileMetaData(_files.takeFirst());
+                emit insertItemToPlaylist(metadata, _row);
+                _row++; // Next item will be inserted AFTER the recently inserted
             }
         }
 
     } while (!_files.isEmpty());
+
+    emit playlistPopulated();
 }
 
 void PlaylistPopulator::expandDir(QString dir)
@@ -110,12 +122,83 @@ void PlaylistPopulator::expandPlaylist(QString filename)
     _files = files;
 }
 
-void PlaylistPopulator::addFile(const QString &file)
+Player::MetaData PlaylistPopulator::getFileMetaData(QString file)
 {
-    _files.append(file);
+    QFileInfo finfo(file);
+
+    Player::MetaData metadata;
+
+    if ((!finfo.exists()) || (!finfo.isFile()))
+        return metadata;
+
+
+
+    // Just a harmless check wheter the file is in DB - reading data from DB will be faster then from file
+    DatabaseManager dbManager("playlistPopulatorConnection");
+    /* Don't try to connect when connection was not available previously - attempts to connect are
+      just slowing everything down */
+    if (DatabaseManager::connectionAvailable()) {
+        if (dbManager.connectToDB()) {
+            QSqlField data("col",QVariant::String);
+            data.setValue(file);
+            QString fname = dbManager.sqlDb()->driver()->formatValue(data,false);
+            QSqlQuery query("SELECT `filename`," \
+                            "       `trackname`," \
+                            "       `track`," \
+                            "       `length`," \
+                            "       `interpret`," \
+                            "       `genre`," \
+                            "       `album`," \
+                            "       `year`" \
+                            "FROM `view_tracks` "\
+                            "WHERE `filename`="+fname+ \
+                            "LIMIT 1;",
+                            *dbManager.sqlDb());
+            if (query.first()) {
+                metadata.filename = query.value(0).toString();
+                metadata.title = query.value(1).toString();
+                metadata.trackNumber = query.value(2).toUInt();
+                metadata.length = query.value(3).toUInt();
+                metadata.artist = query.value(4).toString();
+                metadata.genre = query.value(5).toString();
+                metadata.album = query.value(6).toString();
+                metadata.year = query.value(7).toUInt();
+            }
+        } else {
+            qDebug() << "PlaylistPopulator: Disabling connection to DB for this session";
+        }
+    }
+
+    if (metadata.filename.isEmpty()) {
+        TagLib::FileRef f(file.toUtf8().constData());
+
+        metadata.filename = file.toUtf8().constData();
+        metadata.title = f.tag()->title().toCString(true);
+        metadata.trackNumber = f.tag()->track();
+        metadata.artist = f.tag()->artist().toCString(true);
+        metadata.length = f.audioProperties()->length()*1000;
+        metadata.album = f.tag()->album().toCString(true);
+        metadata.genre = f.tag()->genre().toCString(true);
+        metadata.year = f.tag()->year();
+
+        if (metadata.title.isEmpty())
+            metadata.title = finfo.fileName();
+    }
+
+    // And length of the track to the total length of the playlist
+    metadata.formattedLength = formatMilliseconds(metadata.length);
+
+    return metadata;
 }
 
-void PlaylistPopulator::addFiles(const QStringList &files)
+void PlaylistPopulator::addFile(const QString &file, int row)
+{
+    _files.append(file);
+    _row = row;
+}
+
+void PlaylistPopulator::addFiles(const QStringList &files, int firstRow)
 {
     _files.append(files);
+    _row = firstRow;
 }

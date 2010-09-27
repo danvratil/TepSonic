@@ -127,12 +127,15 @@ MainWindow::MainWindow(Player *player)
     _selectionModel = _ui->playlistBrowser->selectionModel();
 
     _taskManager = new TaskManager(&_playlistModel,&_collectionModel);
-    connect(_ui->playlistBrowser,SIGNAL(addedFiles(QStringList)),_taskManager,SLOT(addFilesToPlaylist(QStringList)));
+    connect(_ui->playlistBrowser,SIGNAL(addedFiles(QStringList,int)),_taskManager,SLOT(addFilesToPlaylist(QStringList,int)));
     connect(_taskManager,SIGNAL(collectionsPopulated()),this,SLOT(fixCollectionProxyModel()));
     connect(_taskManager,SIGNAL(taskStarted(QString)),_ui->statusBar,SLOT(showWorkingBar(QString)));
     connect(_taskManager,SIGNAL(taskDone()),_ui->statusBar,SLOT(cancelAction()));
     // This refreshes the filter when an item is added to the playlist so the item appears immediately
-    connect(_taskManager,SIGNAL(playlistPopulated()),_playlistProxyModel,SLOT(invalidate()));
+    connect(_taskManager,SIGNAL(playlistPopulated()),
+            _playlistProxyModel, SLOT(invalidate()));
+    connect(_taskManager,SIGNAL(insertItemToPlaylist(Player::MetaData,int)),
+            _playlistModel,SLOT(insertItem(Player::MetaData, int)));
     connect(_taskManager, SIGNAL(clearCollectionModel()), _collectionModel, SLOT(clear()));
 
     restoreGeometry(_settings->value("Window/Geometry", saveGeometry()).toByteArray());
@@ -501,7 +504,7 @@ void MainWindow::on_actionNext_track_triggered()
 
 void MainWindow::addPlaylistItem(const QString &filename)
 {
-    _playlistModel->addItem(filename);
+    _taskManager->addFileToPlaylist(filename);
 }
 
 void MainWindow::showPlaylistContextMenu(QPoint pos)

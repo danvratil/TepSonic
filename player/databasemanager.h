@@ -43,6 +43,7 @@ class DatabaseManager : public QObject
 {
     Q_OBJECT
     Q_ENUMS(DriverTypes)
+
     public:
         //! Enumerates supported database storage backends.
         /*!
@@ -80,6 +81,12 @@ class DatabaseManager : public QObject
         //! Returns QSqlDatabase connection object
         QSqlDatabase* sqlDb() { return _sqlDb; }
 
+        //! Returns wheter connection is now available or not
+        static bool connectionAvailable() { return _static_connectionAvailable; }
+
+        //! Force new state of connection availability
+        static void forceConnectionAvailable(bool forceState = true) { _static_connectionAvailable = forceState; }
+
     private:
         //! Check if the database contains all required tables and if not creates them
         /*!
@@ -110,6 +117,12 @@ class DatabaseManager : public QObject
 
         //! SQL database
         QSqlDatabase *_sqlDb;
+
+        //! Is connection available?
+        static bool _static_connectionAvailable;
+
+        bool _connectionAvailable;
+
 
 };
 

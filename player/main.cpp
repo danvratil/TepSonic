@@ -66,6 +66,7 @@ int main(int argc, char *argv[])
     QTextCodec::setCodecForTr(QTextCodec::codecForName("utf8"));
     QTextCodec::setCodecForCStrings(QTextCodec::codecForName("UTF-8"));
 
+    qRegisterMetaType<Player::MetaData>("Player::MetaData");
     player = new Player();
     pluginsManager = new PluginsManager();
     MainWindow mainWindow(player);

@@ -51,8 +51,12 @@ class Player: public QObject
         QString artist;    /*! < Track artist */
         QString title;     /*! < Track title */
         QString album;     /*! < Album name */
+        QString genre;     /*! < Genre string */
         qint64 length;     /*! < Length of song in milliseconds */
+        QString formattedLength; /* ! < Formatted time (mm:ss) */
         int trackNumber;   /*! < Track number */
+        uint year;         /*! < Year of release */
+
     };
 
     //! Enumeration of repeat modes.
