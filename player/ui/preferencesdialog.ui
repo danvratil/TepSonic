@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>491</width>
-    <height>360</height>
+    <width>489</width>
+    <height>358</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -68,7 +68,7 @@
          <string>Player</string>
         </property>
         <property name="icon">
-         <iconset resource="icons.qrc">
+         <iconset resource="../icons.qrc">
           <normaloff>:/icons/player</normaloff>:/icons/player</iconset>
         </property>
        </item>
@@ -87,8 +87,13 @@
          <string>Plugins</string>
         </property>
         <property name="icon">
-         <iconset resource="icons.qrc">
+         <iconset resource="../icons.qrc">
           <normaloff>:/icons/plugins</normaloff>:/icons/plugins</iconset>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Shortcuts</string>
         </property>
        </item>
       </widget>
@@ -118,7 +123,7 @@
   <tabstop>buttonBox</tabstop>
  </tabstops>
  <resources>
-  <include location="icons.qrc"/>
+  <include location="../icons.qrc"/>
  </resources>
  <connections/>
 </ui>

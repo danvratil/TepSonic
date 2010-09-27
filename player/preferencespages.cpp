@@ -89,3 +89,28 @@ void PreferencesPages::Collections::on_pushButton_clicked()
 {
     emit collectionsSourceChanged();
 }
+
+
+PreferencesPages::Shortcuts::Shortcuts(QWidget *parent)
+{
+    ui = new Ui::Shortcuts();
+    ui->setupUi(this);
+    connect(ui->shortcutsList, SIGNAL(doubleClicked(QModelIndex)),
+            this, SLOT(changeShortcut(QModelIndex)));
+}
+
+void PreferencesPages::Shortcuts::changeShortcut(QModelIndex index)
+{
+    csw = new ChangeShortcutDialog(index, this);
+    connect(csw,SIGNAL(shortcutChanged(QModelIndex,QKeySequence)),
+            this, SLOT(shortcutChanged(QModelIndex,QKeySequence)));
+    csw->show();
+}
+
+void PreferencesPages::Shortcuts::shortcutChanged(QModelIndex index, QKeySequence shortcut)
+{
+    QTreeWidgetItem *item = static_cast<QTreeWidgetItem*>(index.internalPointer());
+    item->setData(1,
+                  Qt::EditRole,
+                  QVariant(shortcut.toString(QKeySequence::NativeText)));
+}

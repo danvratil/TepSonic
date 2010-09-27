@@ -16,6 +16,10 @@ find_package(Phonon REQUIRED)
 
 add_definitions(${TAGLIB_CFLAGS})
 
+add_definitions(-DQXT_STATIC -DBUILD_QXT_GUI -DBUILD_QXT_CORE)
+set(QXT_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../3rdparty/qxt)
+set(QXT_LIBRARY qxt)
+
 # Make sure all Qt parts will be available
 set(QT_USE_QTMAIN 1)
 set(QT_USE_QTSQL 1)
@@ -28,6 +32,7 @@ include_directories(
         ${PHONON_INCLUDES}
 	${CMAKE_CURRENT_SOURCE_DIR}
 	${TAGLIB_INCLUDES}
+        ${QXT_INCLUDE_DIR}
 	"collections"
 	"playlist"
 )
@@ -45,6 +50,7 @@ set(player_HDRS
     preferencesdialog.h
     preferencespages.h
     trayicon.h
+    changeshortcutdialog.h
     collections/collectionpopulator.h
 #    collections/collectionbrowser.h
     collections/collectionmodel.h
@@ -59,6 +65,7 @@ set(player_HDRS
     playlist/playlistproxymodel.h
     playlist/playlistpopulator.h
     playlist/playlistwriter.h
+
 )
 
 set(player_SRCS
@@ -75,6 +82,7 @@ set(player_SRCS
     tools.cpp
     trayicon.cpp
     supportedformats.cpp
+    changeshortcutdialog.cpp
     collections/collectionpopulator.cpp
     collections/collectionbrowser.cpp
     collections/collectionmodel.cpp
@@ -89,6 +97,7 @@ set(player_SRCS
     playlist/playlistproxymodel.cpp
     playlist/playlistpopulator.cpp
     playlist/playlistwriter.cpp
+    ../3rdparty/qxt/qxtglobalshortcut.cpp
 )
 
 set(player_QUIS
@@ -97,6 +106,8 @@ set(player_QUIS
     ui/preferencesdialog.ui
     ui/collections.ui
     ui/plugins.ui
+    ui/shortcuts.ui
+    ui/changeshortcutdialog.ui
 )
 
 set(player_RCCS  
@@ -160,6 +171,7 @@ target_link_libraries(tepsonic
 		      ${QT_QTSQL_LIBRARIES}
 		      ${PHONON_LIBS}
                       ${TAGLIB_LIBRARIES}
+                      ${QXT_LIBRARY}
 )
 
 install(TARGETS tepsonic

@@ -174,6 +174,12 @@ private:
     */
     void createMenus();
 
+    //! Binds global shortcuts to individual events
+    /*!
+      This method is called from constructor just after menus are created.
+    */
+    void bindShortcuts();
+
     //! Create CollectionModel and CollectionProxyModel
     /*!
       This method is called only when collections are enabled in configuration

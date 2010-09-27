@@ -36,6 +36,7 @@ namespace PreferencesPages {
     class Player;
     class Plugins;
     class Collections;
+    class Shortcuts;
 }
 
 class MainWindow;
@@ -83,6 +84,9 @@ class PreferencesDialog : public QDialog {
 
         //! Plugins page
         PreferencesPages::Plugins *_plugins;
+
+        //! Shorcuts settings page
+        PreferencesPages::Shortcuts *_shortcuts;
 
         //! Main window
         MainWindow *_parent;

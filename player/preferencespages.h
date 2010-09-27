@@ -22,9 +22,14 @@
 #define PREFERENCESPAGES_H
 
 #include <QWidget>
+#include <QModelIndex>
+#include <QKeySequence>
 #include "ui_player.h"
 #include "ui_collections.h"
 #include "ui_plugins.h"
+#include "ui_shortcuts.h"
+
+#include "changeshortcutdialog.h"
 
 namespace PreferencesPages {
 
@@ -66,6 +71,19 @@ class Plugins: public QWidget
 public:
     Plugins(QWidget *parent = 0);
     Ui::Plugins *ui;
+};
+
+class Shortcuts: public QWidget
+{
+    Q_OBJECT
+public:
+    Shortcuts(QWidget *parent = 0);
+    Ui::Shortcuts *ui;
+private slots:
+    void changeShortcut(QModelIndex index);
+    void shortcutChanged(QModelIndex index, QKeySequence shortcut);
+private:
+    ChangeShortcutDialog *csw;
 };
 
 }

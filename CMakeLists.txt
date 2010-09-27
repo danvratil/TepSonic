@@ -52,6 +52,7 @@ if (PROFILING)
 endif (PROFILING)
 
 # First player, then plugins, this is strict order!
+add_subdirectory(3rdparty)
 add_subdirectory(player)
 add_subdirectory(plugins)
 

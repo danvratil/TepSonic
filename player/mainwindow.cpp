@@ -53,6 +53,7 @@
 #include <QTime>
 #include <phonon/seekslider.h>
 #include <phonon/volumeslider.h>
+#include "qxtglobalshortcut.h"
 
 #include <QDebug>
 
@@ -73,6 +74,7 @@ MainWindow::MainWindow(Player *player)
     _ui->setupUi(this);
 
     createMenus();
+    bindShortcuts();
 
     _appIcon = new QIcon(":/icons/mainIcon");
     QApplication::setWindowIcon(*_appIcon);
@@ -290,6 +292,27 @@ void MainWindow::createMenus()
     _collectionsPopupMenu->addAction(tr("Delete file from disk"),this,SLOT(removeFileFromDisk()));
     _ui->collectionBrowser->setContextMenuPolicy(Qt::CustomContextMenu);
 
+}
+
+void MainWindow::bindShortcuts()
+{
+    _settings->beginGroup("Shortcuts");
+    QxtGlobalShortcut *sc1 = new QxtGlobalShortcut(this);
+    sc1->setShortcut(QKeySequence::fromString(_settings->value("PlayPause","Meta+P").toString()));
+    connect(sc1,SIGNAL(activated()),this,SLOT(on_actionPlay_pause_triggered()));
+    QxtGlobalShortcut *sc2 = new QxtGlobalShortcut(this);
+    sc2->setShortcut(QKeySequence::fromString(_settings->value("Stop","Meta+S").toString()));
+    connect(sc2,SIGNAL(activated()),this,SLOT(on_actionStop_triggered()));
+    QxtGlobalShortcut *sc3 = new QxtGlobalShortcut(this);
+    sc3->setShortcut(QKeySequence::fromString(_settings->value("PrevTrack","Meta+P").toString()));
+    connect(sc3,SIGNAL(activated()),this,SLOT(on_actionPrevious_track_triggered()));
+    QxtGlobalShortcut *sc4 = new QxtGlobalShortcut(this);
+    sc4->setShortcut(QKeySequence::fromString(_settings->value("NextTrack","Meta+N").toString()));
+    connect(sc4,SIGNAL(activated()),this,SLOT(on_actionNext_track_triggered()));
+    QxtGlobalShortcut *sc5 = new QxtGlobalShortcut(this);
+    sc5->setShortcut(QKeySequence::fromString(_settings->value("ShowHideWin","Meta+H").toString()));
+    connect(sc5,SIGNAL(activated()),this,SLOT(on_actionShow_Hide_triggered()));
+    _settings->endGroup();
 }
 
 /* Show "About Tepsonic" dialog */
