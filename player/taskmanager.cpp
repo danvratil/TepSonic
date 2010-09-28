@@ -42,6 +42,8 @@ TaskManager::TaskManager(PlaylistModel **playlistModel, CollectionModel **collec
 
 TaskManager::~TaskManager()
 {
+    _threadPool->waitForDone();
+    delete _threadPool;
 }
 
 void TaskManager::addFilesToPlaylist(const QStringList &files, int row)
