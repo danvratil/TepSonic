@@ -66,8 +66,6 @@ void CollectionBuilder::run()
                 QFileInfo fileInfo;
                 // List of files in database
                 QHash<QString,uint> dbFiles;
-                QStringList toBeUpdated;
-                QStringList toBeRemoved;
                 QStringList filters = SupportedFormats::getExtensionList();
 
                 {   // Populate dbFiles map by _ALL_ tracks from db
