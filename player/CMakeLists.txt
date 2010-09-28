@@ -170,9 +170,12 @@ target_link_libraries(tepsonic
 		      ${QT_LIBRARIES}
 		      ${QT_QTSQL_LIBRARIES}
 		      ${PHONON_LIBS}
-                      ${TAGLIB_LIBRARIES}
-                      ${QXT_LIBRARY}
+              ${TAGLIB_LIBRARIES}
+              ${QXT_LIBRARY}
 )
+if (APPLE)
+    target_link_libraries(tepsonic ${CARBON_LIBRARY})
+endif (APPLE)
 
 install(TARGETS tepsonic
 	RUNTIME DESTINATION ${INSTALL_BINARY_DIR}

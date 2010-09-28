@@ -22,10 +22,13 @@ add_definitions(${QT_DEFINITIONS}
 		-DQT_SHARED
 )
 
+# LASTFMLIB_INCLUDES points to BASE/lastfmlib/ and source uses "lastfmlib/foo.h"
+# the LASTFMLIB_INCLUDES/../ solves it
 include_directories(
 	${QT_INCLUDE_DIR}
 	${QT_QTNETWORK_INCLUDE_DIR}
         ${LASTFMLIB_INCLUDES}
+        ${LASTFMLIB_INCLUDES}/../
 	${CMAKE_CURRENT_SOURCE_DIR}
 	${CMAKE_CURRENT_BINARY_DIR}
         ${CMAKE_CURRENT_SOURCE_DIR}/../../player

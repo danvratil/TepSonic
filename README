@@ -2,15 +2,12 @@
 ==========
  Homepage: www.tepsonic.org
  Author: Dan Vratil <vratil@progdansoft.com>
- Contributors: Petr Los
+ Contributors: Petr Los, David Watzke
 
  TepSonic is just yet another audio player. It is based on Qt and as an audio 
  backend it uses Phonon. For retrieving metadata from media files is used TagLib. 
  This player should provide all the user-comfort functions such as collections, 
  but it should not be as big as for example Amarok. 
-
- This is just a development release - not everything is implementend and what is
- implemented should be consider as unstable.
 
  Have fun with TepSonic!
 
@@ -29,6 +26,7 @@ CONTENT
  * Phonon
  * TagLib (http://developer.kde.org/~wheeler/taglib.html)
  * lastfmlib (http://code.google.com/p/lastfmlib/)
+ * libmusicbrainz3 (http://musicbrainz.org/doc/libmusicbrainz)
  * SQLite or MySQL database for collections
  * some music
 
@@ -46,13 +44,12 @@ CONTENT
 3) BUGS
 --------
 
- Currently, TepSonic is under heavy development and many things were not yet even implemented and most of the implemented stuff is still
- considered unstable. 
- Altough, if you find something you think that is a bug, please use bugizlla on http://bugs.tepsonic.org
+ If you find something you think that is a bug, please use bugzilla on http://bugs.tepsonic.org. Also if you have any suggestions,
+ ideas, fill a feature request in bugzilla.
 
 
 4) CONTRIBUTING
 ----------------
- Please, feel free to contribute to TepSonic in any way. You can get latest sources from git://git.gitorious.org/tepsonic/tepsonic.git and
+ Please, feel free to contribute to TepSonic in any way. You can get latest sources from http://git.gitorious.org/tepsonic/tepsonic.git and
  start working on it. If you have any question, I'll be happy to answer it :-)
 
