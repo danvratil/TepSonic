@@ -170,7 +170,7 @@ Player::MetaData PlaylistPopulator::getFileMetaData(QString file)
     }
 
     if (metadata.filename.isEmpty()) {
-        TagLib::FileRef f(file.toUtf8().constData());
+        TagLib::FileRef f(file.toLocal8Bit().constData());
 
         metadata.filename = file.toUtf8().constData();
         metadata.title = f.tag()->title().toCString(true);

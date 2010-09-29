@@ -161,7 +161,7 @@ void CollectionBuilder::insertTrack(QString filename, QSqlDatabase *sqlDB)
     QString fname = fileInfo.filePath().toUtf8();
     uint mtime = fileInfo.lastModified().toTime_t();
 
-    TagLib::FileRef f(fname.toUtf8().constData());
+    TagLib::FileRef f(fname.toLocal8Bit().constData());
 
     uint trackNo      = f.tag()->track();
     QString interpret = f.tag()->artist().toCString(true);
