@@ -29,7 +29,7 @@
        </property>
        <property name="minimumSize">
         <size>
-         <width>90</width>
+         <width>106</width>
          <height>0</height>
         </size>
        </property>
@@ -94,6 +94,10 @@
        <item>
         <property name="text">
          <string>Shortcuts</string>
+        </property>
+        <property name="icon">
+         <iconset resource="../icons.qrc">
+          <normaloff>:/icons/shortcuts</normaloff>:/icons/shortcuts</iconset>
         </property>
        </item>
       </widget>

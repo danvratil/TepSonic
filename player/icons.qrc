@@ -18,5 +18,6 @@
         <file alias="collections">../icons/collections.png</file>
         <file alias="player">../icons/player.png</file>
         <file alias="plugins">../icons/plugins.png</file>
+	<file alias="shortcuts">../icons/shortcuts.png</file>
     </qresource>
 </RCC>
