@@ -405,6 +405,7 @@ void MainWindow::on_actionAdd_folder_triggered()
 void MainWindow::updatePlayerTrack()
 {
     if (_player->repeatMode()==Player::RepeatTrack) {
+        _player->setTrack(_player->currentSource().fileName());
         _player->play();
     } else {
         on_actionNext_track_triggered();
