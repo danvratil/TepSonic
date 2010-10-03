@@ -10,7 +10,7 @@ set(TEPSONIC_VERSION_PATCH 0)
 set(TEPSONIC_VERSION ${TEPSONIC_VERSION_MAJOR}.${TEPSONIC_VERSION_MINOR}.${TEPSONIC_VERSION_PATCH})
 
 find_package(PkgConfig REQUIRED)
-find_package(Qt4 4.3 REQUIRED)
+find_package(Qt4 4.5 REQUIRED)
 find_package(Taglib REQUIRED)
 find_package(Phonon REQUIRED)
 
