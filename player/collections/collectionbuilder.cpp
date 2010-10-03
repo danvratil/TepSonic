@@ -148,6 +148,8 @@ void CollectionBuilder::run()
 
         }
 
+        emit buildingFinished();
+
 }
 
 void CollectionBuilder::rebuildFolder(QStringList folder)

@@ -195,7 +195,8 @@ Qt::DropActions CollectionModel::supportedDropActions() const
 
 void CollectionModel::clear()
 {
-    removeRows(0,rowCount(QModelIndex()),QModelIndex());
+    if (rowCount(QModelIndex()) > 0)
+        removeRows(0,rowCount(QModelIndex()),QModelIndex());
 }
 
 QStringList CollectionModel::getItemChildrenTracks(const QModelIndex &parent)

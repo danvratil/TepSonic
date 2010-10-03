@@ -40,6 +40,8 @@ void CollectionPopulator::run()
 
         if ((*_collectionModel) != NULL) {
 
+            (*_collectionModel)->clear();
+
             DatabaseManager dbManager("populateCollectionBrowserConnection");
             if (!dbManager.connectToDB()) {
                 return;

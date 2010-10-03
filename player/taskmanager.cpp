@@ -101,10 +101,10 @@ void TaskManager::rebuildCollections(const QString &folder)
 
         CollectionBuilder *collectionBuilder = new CollectionBuilder(_collectionModel);
         collectionBuilder->rebuildFolder(dirs);
-        connect(collectionBuilder,SIGNAL(collectionChanged()),
-                this,SLOT(populateCollections()));
         connect(collectionBuilder,SIGNAL(buildingStarted()),
                 this,SLOT(collectionsRebuildingStarted()));
+        connect(collectionBuilder,SIGNAL(buildingFinished()),
+                this,SIGNAL(collectionsRebuilt()));
         connect(collectionBuilder,SIGNAL(buildingFinished()),
                 this,SIGNAL(taskDone()));
         _threadPool->start(collectionBuilder);
