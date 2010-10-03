@@ -26,7 +26,6 @@ CONTENT
  * Phonon
  * TagLib (http://developer.kde.org/~wheeler/taglib.html)
  * lastfmlib (http://code.google.com/p/lastfmlib/)
- * libmusicbrainz3 (http://musicbrainz.org/doc/libmusicbrainz)
  * SQLite or MySQL database for collections
  * some music
 
