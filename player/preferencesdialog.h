@@ -21,7 +21,7 @@
 #define PREFERENCESDIALOG_H
 
 #include <QtGui/QDialog>
-
+#include <QAbstractButton>
 #include <QDirModel>
 #include <QPluginLoader>
 #include <QTreeWidgetItem>
@@ -96,15 +96,12 @@ class PreferencesDialog : public QDialog {
         //! Called when button in the left list is clicked
         void on_pagesButtons_currentItemChanged(QListWidgetItem* current, QListWidgetItem* previous);
 
-        //! Called when the dialog is closed via "Cancel" button
-        void on_buttonBox_rejected();
-
         //! Called when the dialog is closed via "OK" button
         /*!
           The current configuration is written to the settings file and also plugins' method
           settingsAccepted() is called so plugins could store their settings
         */
-        void on_buttonBox_accepted();
+        void dialogAccepted();
 
         //! Saves current confugration and then emits signal rebuildCollections()
         void emitRebuildCollections();

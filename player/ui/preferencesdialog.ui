@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>489</width>
-    <height>358</height>
+    <width>485</width>
+    <height>354</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -123,9 +123,6 @@
    </item>
   </layout>
  </widget>
- <tabstops>
-  <tabstop>buttonBox</tabstop>
- </tabstops>
  <resources>
   <include location="../icons.qrc"/>
  </resources>

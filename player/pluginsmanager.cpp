@@ -151,7 +151,9 @@ void PluginsManager::enablePlugin(Plugin *plugin)
     connect(this,SIGNAL(playerStatusChanged(Phonon::State,Phonon::State)),aplg,SLOT(playerStatusChanged(Phonon::State,Phonon::State)));
     connect(this,SIGNAL(trackPositionChanged(qint64)),aplg,SLOT(trackPositionChanged(qint64)));
     connect(this,SIGNAL(trackPaused(bool)),aplg,SLOT(trackPaused(bool)));
+    connect(this,SIGNAL(settingsAccepted()),aplg,SLOT(settingsAccepted()));
     connect(aplg,SIGNAL(error(QString)),this,SIGNAL(error(QString)));
+
     aplg->init();
     aplg->_initialized = true;
     plugin->enabled = true;

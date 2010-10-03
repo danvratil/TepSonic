@@ -38,6 +38,7 @@ PreferencesDialog::PreferencesDialog(MainWindow *parent):
 
     _ui->setupUi(this);
 
+
     _parent = parent;
 
     _player = new PreferencesPages::Player;
@@ -46,6 +47,8 @@ PreferencesDialog::PreferencesDialog(MainWindow *parent):
     _shortcuts = new PreferencesPages::Shortcuts;
     connect(_collections,SIGNAL(rebuildCollections()),
             this,SLOT(emitRebuildCollections()));
+    connect(_ui->buttonBox, SIGNAL(accepted()),
+            this, SLOT(dialogAccepted()));
 
     _ui->pages->addWidget(_player);
     _ui->pages->addWidget(_collections);
@@ -147,7 +150,7 @@ void PreferencesDialog::changeEvent(QEvent *e)
     }
 }
 
-void PreferencesDialog::on_buttonBox_accepted()
+void PreferencesDialog::dialogAccepted()
 {
     extern PluginsManager *pluginsManager;
 
@@ -198,12 +201,7 @@ void PreferencesDialog::on_buttonBox_accepted()
         emit rebuildCollections();
     }
 
-    emit accepted();
-    this->close();
-}
-
-void PreferencesDialog::on_buttonBox_rejected()
-{
+    accept();
     this->close();
 }
 
