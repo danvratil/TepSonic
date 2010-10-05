@@ -1,0 +1,3 @@
+if (APPLEBUNDLE_STANDALONE)
+    install(SCRIPT ${CMAKE_SOURCE_DIR}/macosx/bundle.cmake)
+endif (APPLEBUNDLE_STANDALONE)
