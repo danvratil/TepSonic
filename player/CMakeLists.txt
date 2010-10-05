@@ -157,6 +157,26 @@ if (WIN32)
   set(GUI_TYPE WIN32)
 endif (WIN32)
 
+if (APPLEBUNDLE)
+    set(GUI_TYPE MACOSX_BUNDLE)
+    # create Info.plist file
+    SET(MACOSX_BUNDLE_ICON_FILE tepsonic.icns)
+    SET(MACOSX_BUNDLE_INFO_STRING "tepsonic ${VERSION}")
+    SET(MACOSX_BUNDLE_GUI_IDENTIFIER "org.tepsonic")
+    SET(MACOSX_BUNDLE_LONG_VERSION_STRING "${TEPSONIC_VERSION}")
+    SET(MACOSX_BUNDLE_BUNDLE_NAME "${tepsonic}")
+    SET(MACOSX_BUNDLE_SHORT_VERSION_STRING "${TEPSONIC_VERSION}")
+    SET(MACOSX_BUNDLE_BUNDLE_VERSION "${TEPSONIC_VERSION}")
+    SET(MACOSX_BUNDLE_COPYRIGHT "(c) tepsonic.org")
+    SET_SOURCE_FILES_PROPERTIES(${CMAKE_SOURCE_DIR}/macosx/tepsonic.icns
+                                PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
+    # use icon for app bundle to be visible in finder
+    SET(APPLE_BUNDLE_SOURCES ${CMAKE_SOURCE_DIR}/macosx/tepsonic.icns)
+else (APPLEBUNDLE)
+    # failback variable settings for non-bundle environments
+    SET(APPLE_BUNDLE_SOURCES "")
+endif (APPLEBUNDLE)
+
 add_executable(tepsonic
   	       ${GUI_TYPE}
 	       ${player_RCCS_SRCS}
@@ -164,6 +184,7 @@ add_executable(tepsonic
 	       ${player_QMOC_SRCS}
 	       ${player_SRCS}
 	       ${TRANSLATIONS_BINARY}
+           ${APPLE_BUNDLE_SOURCES}
 )
 
 target_link_libraries(tepsonic
@@ -177,12 +198,28 @@ if (APPLE)
     target_link_libraries(tepsonic ${CARBON_LIBRARY})
 endif (APPLE)
 
-install(TARGETS tepsonic
-	RUNTIME DESTINATION ${INSTALL_BINARY_DIR}
-	PERMISSIONS OWNER_READ OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
-)
 
-if (UNIX)
+
+if (APPLEBUNDLE)
+    
+    # Used only for mac's bundle builds
+    # Warning: This is dangerous to touch. Except you know what are you doing.
+    #          I ususaly don't know anything about it. But it's working ;)
+    INSTALL(TARGETS tepsonic BUNDLE DESTINATION ${CMAKE_INSTALL_PREFIX})
+
+else (APPLEBUNDLE)        
+
+    # standard instalation of the binary
+    install(TARGETS tepsonic
+	    RUNTIME DESTINATION ${INSTALL_BINARY_DIR}
+    	PERMISSIONS OWNER_READ OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
+    )
+
+endif (APPLEBUNDLE)
+
+
+
+if (UNIX AND NOT APPLEBUNDLE)
 	install(FILES ${TRANSLATIONS_BINARY}
 		DESTINATION ${INSTALL_DATA_DIR}/tepsonic/locale/tepsonic
 	)
@@ -208,4 +245,10 @@ if (UNIX)
 	install(FILES ../icons/app_icons/256x256/tepsonic.png
         	DESTINATION ${INSTALL_DATA_DIR}/icons/hicolor/256x256/apps
 	)
-endif(UNIX)
+endif(UNIX AND NOT APPLEBUNDLE)
+
+if (APPLEBUNDLE)
+    install(FILES ${TRANSLATIONS_BINARY}
+            DESTINATION ${CMAKE_INSTALL_PREFIX}/tepsonic.app/Contents/Resources)
+endif (APPLEBUNDLE)
+

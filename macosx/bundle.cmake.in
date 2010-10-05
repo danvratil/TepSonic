@@ -1,16 +1,35 @@
+#
+# This is evil! I don't know why it works this way.
+# But it works.
+#
+# First - collect all Qt and Tepsonic plugins. Then call that bloody
+# cmake FIXUP_BUNDLE macro which copis all files into MacOS directory.
+# So it's moved back to plugins tree where its expected by a) Qt b) tepsonic
+#
+# I hate it.
+#
+
+# Dunno what id this var for...
 SET(DIRS @QT_LIBRARY_DIRS@;@QT_PLUGINS_DIR@;@CMAKE_INSTALL_PREFIX@/Contents/plugins/)
 
+# qt_menu.nib is mandatory for mac
 file(COPY @QT_LIBRARY_DIR@/QtGui.framework/Resources/qt_menu.nib
      DESTINATION @CMAKE_INSTALL_PREFIX@/tepsonic.app/Contents/Resources)
 
+# the qt.conf is mandatory too
 file(WRITE @CMAKE_INSTALL_PREFIX@/tepsonic.app/Contents/Resources/qt.conf "[Paths]
 Plugins = plugins")
 
+# copy all (required) Qt plugs into bundle
 message(STATUS "Searching for Qt plugs in: @QT_PLUGINS_DIR@/*@CMAKE_SHARED_LIBRARY_SUFFIX@")
 file(COPY @QT_PLUGINS_DIR@/
         DESTINATION @CMAKE_INSTALL_PREFIX@/tepsonic.app/Contents/plugins/
         REGEX "(designer|script|debug|mysql|psql|odbc|ico|gif)" EXCLUDE)
 
+# try to FIXUP_BUNDLE - to change otool -L paths
+# currently it creates lots of false warnings when plugins are compiled as dylibs
+# warning: cannot resolve item 'libtepsonic_lastfmscrobbler.dylib'
+# etc. Ignore it.
 message(STATUS "Searching for plugs in bundle: @CMAKE_INSTALL_PREFIX@/tepsonic.app/Contents/plugins/*@CMAKE_SHARED_LIBRARY_SUFFIX@")
 file(GLOB_RECURSE inplugs
         @CMAKE_INSTALL_PREFIX@/tepsonic.app/Contents/plugins/*@CMAKE_SHARED_LIBRARY_SUFFIX@)
@@ -21,6 +40,8 @@ file(GLOB_RECURSE inplugs
 include(BundleUtilities)
 fixup_bundle(@CMAKE_INSTALL_PREFIX@/tepsonic.app "${inplugs}" @CMAKE_INSTALL_PREFIX@/Contents/plugins/)#${DIRS} )
 
+# FIXUP_BUNDLE copies it into MacOS dir. But we need it in plugins *tree*,
+# not a flat dir.
 foreach (item IN LISTS inplugs)
     #message(STATUS "IN: ${item}")
     get_filename_component(fname ${item} NAME)

@@ -54,12 +54,18 @@ int main(int argc, char *argv[])
 
     // App translations
     QTranslator translator;
+#ifndef APPLEBUNDLE
+    // standard unix/windows
     QString dataDir = QLatin1String(PKGDATADIR);
     QString localeDir = dataDir + QDir::separator() + "tepsonic" + QDir::separator() + "locale" + QDir::separator() + "tepsonic";
     // If app was not "installed" use the app directory
     if (!QFile::exists(localeDir)) {
         localeDir = qApp->applicationDirPath() + QDir::separator() +  "tepsonic" + QDir::separator() + "locale" + QDir::separator() + "tepsonic";
     }
+#else
+    // mac's bundle. Special stuff again.
+    QString localeDir = QCoreApplication::applicationDirPath() + "/../Resources/";
+#endif
     translator.load(locale,localeDir);
     tepsonic.installTranslator(&translator);
 

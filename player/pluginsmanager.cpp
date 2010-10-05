@@ -70,8 +70,12 @@ void PluginsManager::loadPlugins()
        same-called plugins installed somewhere in system */
     pluginsDirs << qApp->applicationDirPath()+QDir::separator()+"plugins";
 #ifdef Q_WS_MAC
+    #ifdef APPLEBUNDLE
+    pluginsDirs << QCoreApplication::applicationDirPath() + "/../plugins/";
+    #else
     pluginsDirs << LIBDIR;
-    qDebug() << "Searching in " << pluginsDirs;    
+    #endif
+    qDebug() << "Searching in " << pluginsDirs;
 #endif
 #ifdef Q_WS_X11
     // LIBDIR is defined in player/CMakeLists.txt and it is a location where all project's libs are installed
