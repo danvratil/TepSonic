@@ -129,6 +129,19 @@ MainWindow::MainWindow(Player *player)
     _ui->playlistBrowser->hideColumn(0);
     _selectionModel = _ui->playlistBrowser->selectionModel();
 
+    _fileSystemModel = new QFileSystemModel(this);
+    _fileSystemModel->setRootPath(QDir::rootPath());
+    _fileSystemModel->setNameFilters(SupportedFormats::getExtensionList());
+    _ui->filesystemBrowser->setModel(_fileSystemModel);
+    // Hide Size, Type and Created/Modified columns
+    _ui->filesystemBrowser->hideColumn(1);
+    _ui->filesystemBrowser->hideColumn(2);
+    _ui->filesystemBrowser->hideColumn(3);
+    // Automatically expand home dir
+    _ui->filesystemBrowser->expand(_fileSystemModel->index(QDir::homePath()));
+    int depth = QDir::homePath().split("/",QString::KeepEmptyParts).size();
+    _ui->filesystemBrowser->expandToDepth(depth);
+
     _taskManager = new TaskManager(&_playlistModel,&_collectionModel);
     connect(_ui->playlistBrowser,SIGNAL(addedFiles(QStringList,int)),_taskManager,SLOT(addFilesToPlaylist(QStringList,int)));
     connect(_taskManager,SIGNAL(collectionsPopulated()),this,SLOT(fixCollectionProxyModel()));
@@ -153,7 +166,7 @@ MainWindow::MainWindow(Player *player)
             _taskManager->rebuildCollections();
         }
     } else {
-        _ui->collectionWidget->hide();
+        _ui->collectionTab->hide();
     }
 
     _player = player;
@@ -757,7 +770,7 @@ void MainWindow::setupCollections()
     _ui->colectionSearchEdit->hide();
     _ui->clearCollectionSearch->hide();
 
-    _ui->collectionWidget->show();
+    _ui->viewsTab->setTabEnabled(0,true);
 }
 
 void MainWindow::destroyCollections()
@@ -768,7 +781,7 @@ void MainWindow::destroyCollections()
     delete _collectionModel;
     _collectionModel = NULL;
 
-    _ui->collectionWidget->hide();
+    _ui->viewsTab->setTabEnabled(0,false);
 }
 
 void MainWindow::setTrack(int row)
