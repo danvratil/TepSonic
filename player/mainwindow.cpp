@@ -751,11 +751,6 @@ void MainWindow::setupCollections()
     _ui->collectionBrowser->header()->setHidden(true);
 
     connect(_ui->collectionBrowser,SIGNAL(customContextMenuRequested(QPoint)),this,SLOT(showCollectionsContextMenu(QPoint)));
-    // Workaround for QTBUG 7585 (http://bugreports.qt.nokia.com/browse/QTBUG-7585)
-    // Calling invalidate() before changing filter solves problem with expand icons being displayed incorrectly
-    // Affects Qt 4.6.0 to 4.6.3
-    connect(_ui->colectionSearchEdit,SIGNAL(textChanged(QString)),_collectionProxyModel,SLOT(invalidate()));
-    connect(_ui->colectionSearchEdit,SIGNAL(textChanged(QString)),_collectionProxyModel,SLOT(setFilterRegExp(QString)));
 
     // Since we disabled the Proxy model, no search inputs are needed
     _ui->label_2->hide();
