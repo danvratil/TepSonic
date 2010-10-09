@@ -236,7 +236,7 @@ MainWindow::~MainWindow()
     _settings->setValue("Window/ViewsSplit",_ui->viewsSplitter->saveState());
     QList<QVariant> playlistColumnsStates;
     QList<QVariant> playlistColumnsWidths;
-    for (int i = 0; i < _ui->playlistBrowser->model()->columnCount(QModelIndex())-1; i++) {
+    for (int i = 0; i < _ui->playlistBrowser->model()->columnCount(QModelIndex()); i++) {
         // Don't store "isColumnHidden" but "isColumnVisible"
         playlistColumnsStates.append(!_ui->playlistBrowser->isColumnHidden(i));
         playlistColumnsWidths.append(_ui->playlistBrowser->columnWidth(i));

@@ -33,7 +33,7 @@ PlaylistModel::PlaylistModel(QObject *parent, const QStringList &headers, Playli
 {
     QVector<QVariant> rootData;
     foreach (QString header, headers)
-    rootData << header;
+        rootData << header;
 
     _totalLength = 0;
     _dbConnectionAvailable = true;
