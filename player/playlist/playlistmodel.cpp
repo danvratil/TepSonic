@@ -239,6 +239,7 @@ bool PlaylistModel::insertItem(Player::MetaData metadata, int row)
     rootItem->child(row)->setData(5,QVariant(metadata.genre));
     rootItem->child(row)->setData(6,QVariant(metadata.year));
     rootItem->child(row)->setData(7,QVariant(metadata.formattedLength));
+    rootItem->child(row)->setData(8,QVariant(QString::number(metadata.bitrate)+" kbps"));
 
     _totalLength += (metadata.length/1000);
     emit playlistLengthChanged(_totalLength, rowCount(QModelIndex()));

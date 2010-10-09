@@ -100,7 +100,8 @@ MainWindow::MainWindow(Player *player)
                           << tr("Album")
                           << tr("Genre")
                           << tr("Year")
-                          << tr("Length");
+                          << tr("Length")
+                          << tr("Bitrate");
 
     _playlistProxyModel = new PlaylistProxyModel(this);
     _playlistModel = new PlaylistModel(this, headers, _playlistProxyModel);
@@ -221,6 +222,8 @@ MainWindow::MainWindow(Player *player)
     _playlistVisibleColumnContextMenuMapper->setMapping(_ui->actionYear,6);
     connect(_ui->actionLength,SIGNAL(toggled(bool)),_playlistVisibleColumnContextMenuMapper,SLOT(map()));
     _playlistVisibleColumnContextMenuMapper->setMapping(_ui->actionLength,7);
+    connect(_playlistVisibleColumnContextMenuMapper,SIGNAL(mapped(int)),this,SLOT(togglePlaylistColumnVisible(int)));
+    _playlistVisibleColumnContextMenuMapper->setMapping(_ui->actionLength,8);
     connect(_playlistVisibleColumnContextMenuMapper,SIGNAL(mapped(int)),this,SLOT(togglePlaylistColumnVisible(int)));
 
 }

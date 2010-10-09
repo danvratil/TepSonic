@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>628</width>
-    <height>401</height>
+    <width>626</width>
+    <height>399</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -429,7 +429,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>628</width>
+     <width>626</width>
      <height>20</height>
     </rect>
    </property>
@@ -459,6 +459,7 @@
      <addaction name="actionGenre"/>
      <addaction name="actionYear"/>
      <addaction name="actionLength"/>
+     <addaction name="actionBitrate"/>
     </widget>
     <addaction name="actionAdd_file"/>
     <addaction name="actionAdd_folder"/>
@@ -809,6 +810,17 @@
    </property>
    <property name="toolTip">
     <string>Configure TepSonic</string>
+   </property>
+  </action>
+  <action name="actionBitrate">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Bitrate</string>
    </property>
   </action>
  </widget>

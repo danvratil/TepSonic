@@ -56,6 +56,7 @@ class Player: public QObject
         QString formattedLength; /* ! < Formatted time (mm:ss) */
         int trackNumber;   /*! < Track number */
         uint year;         /*! < Year of release */
+        int bitrate;      /*! < bitrate */
 
     };
 
