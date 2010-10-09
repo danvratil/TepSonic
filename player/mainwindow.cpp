@@ -299,7 +299,7 @@ void MainWindow::bindShortcuts()
 {
     _settings->beginGroup("Shortcuts");
     QxtGlobalShortcut *sc1 = new QxtGlobalShortcut(this);
-    sc1->setShortcut(QKeySequence::fromString(_settings->value("PlayPause","Meta+P").toString()));
+    sc1->setShortcut(QKeySequence::fromString(_settings->value("PlayPause","Meta+Space").toString()));
     connect(sc1,SIGNAL(activated()),this,SLOT(on_actionPlay_pause_triggered()));
     QxtGlobalShortcut *sc2 = new QxtGlobalShortcut(this);
     sc2->setShortcut(QKeySequence::fromString(_settings->value("Stop","Meta+S").toString()));
