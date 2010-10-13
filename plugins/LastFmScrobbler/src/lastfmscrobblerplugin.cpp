@@ -38,8 +38,15 @@ LastFmScrobblerPlugin::LastFmScrobblerPlugin()
 
     QString locale = QLocale::system().name();
     _translator = new QTranslator(this);
+#ifndef APPLEBUNDLE
+    // standard unix/windows
     QString dataDir = QLatin1String(PKGDATADIR);
     QString localeDir = dataDir + QDir::separator() + "tepsonic" + QDir::separator() +  "locale" + QDir::separator() + "lastfmscrobbler";
+#else
+    // mac's bundle. Special stuff again.
+    QString localeDir = QCoreApplication::applicationDirPath() + "/../Resources/lastfmscrobbler";
+#endif
+
     _translator->load(locale,localeDir);
     qApp->installTranslator(_translator);
 
