@@ -33,7 +33,7 @@ PlaylistModel::PlaylistModel(QObject *parent, const QStringList &headers, Playli
 {
     QVector<QVariant> rootData;
     foreach (QString header, headers)
-    rootData << header;
+        rootData << header;
 
     _totalLength = 0;
     _dbConnectionAvailable = true;
@@ -239,6 +239,7 @@ bool PlaylistModel::insertItem(Player::MetaData metadata, int row)
     rootItem->child(row)->setData(5,QVariant(metadata.genre));
     rootItem->child(row)->setData(6,QVariant(metadata.year));
     rootItem->child(row)->setData(7,QVariant(metadata.formattedLength));
+    rootItem->child(row)->setData(8,QVariant(QString::number(metadata.bitrate)+" kbps"));
 
     _totalLength += (metadata.length/1000);
     emit playlistLengthChanged(_totalLength, rowCount(QModelIndex()));

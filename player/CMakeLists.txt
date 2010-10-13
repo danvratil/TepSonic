@@ -51,6 +51,7 @@ set(player_HDRS
     preferencespages.h
     trayicon.h
     changeshortcutdialog.h
+    filesystembrowser.h
     collections/collectionpopulator.h
 #    collections/collectionbrowser.h
     collections/collectionmodel.h
@@ -83,6 +84,7 @@ set(player_SRCS
     trayicon.cpp
     supportedformats.cpp
     changeshortcutdialog.cpp
+    filesystembrowser.cpp
     collections/collectionpopulator.cpp
     collections/collectionbrowser.cpp
     collections/collectionmodel.cpp

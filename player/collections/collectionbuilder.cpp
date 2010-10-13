@@ -172,6 +172,7 @@ void CollectionBuilder::insertTrack(QString filename, QSqlDatabase *sqlDB)
     uint year         = f.tag()->year();
     QString genre     = f.tag()->genre().toCString(true);
     uint length       = f.audioProperties()->length();
+    int bitrate      = f.audioProperties()->bitrate();
 
     if (interpret.isEmpty()) interpret = tr("Unkown artist");
     if (album.isEmpty()) album = tr("Unknown album");
@@ -247,7 +248,7 @@ void CollectionBuilder::insertTrack(QString filename, QSqlDatabase *sqlDB)
 
     {
         QSqlQuery query(*sqlDB);
-        query.prepare("INSERT INTO `tracks`(`filename`,`trackname`,`track`,`length`,`interpret`,`album`,`year`,`genre`,`mtime`)" \
+        query.prepare("INSERT INTO `tracks`(`filename`,`trackname`,`track`,`length`,`interpret`,`album`,`year`,`genre`,`mtime`,`bitrate`)" \
                       "VALUES(?," \
                       "       ?," \
                       "       ?," \
@@ -256,12 +257,14 @@ void CollectionBuilder::insertTrack(QString filename, QSqlDatabase *sqlDB)
                       "       (SELECT `id` FROM `albums` WHERE `album`="+album+")," \
                       "       (SELECT `id` FROM `years` WHERE `year`="+s_year+")," \
                       "       (SELECT `id` FROM `genres` WHERE `genre`="+genre+")," \
+                      "       ?," \
                       "       ?);");
         query.addBindValue(fname);
         query.addBindValue(title);
         query.addBindValue(trackNo);
         query.addBindValue(length);
         query.addBindValue(mtime);
+        query.addBindValue(bitrate);
         query.exec();
     }
 

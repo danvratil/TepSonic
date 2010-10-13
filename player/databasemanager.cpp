@@ -158,6 +158,7 @@ void DatabaseManager::initDb()
                    "   `album` int(11) NOT NULL," \
                    "   `genre` int(11) NOT NULL," \
                    "   `year` int(11) NOT NULL," \
+                   "   `bitrate` int(11)  NOT NULL," \
                    "   `mtime` int(11) unsigned NOT NULL," \
                    "   PRIMARY KEY (`id`)," \
                    "   KEY `interpret` (`interpret`,`album`,`year`,`genre`)" \
@@ -185,6 +186,7 @@ void DatabaseManager::initDb()
                    "          `tracks`.`album` AS `albumID`," \
                    "          `tracks`.`interpret` AS `interpretID`," \
                    "          `interprets`.`interpret` AS `interpret`," \
+                   "          `tracks`.`bitrate` AS `bitrate`," \
                    "          `genres`.`genre` AS `genre`," \
                    "          `albums`.`album` AS `album`," \
                    "          `years`.`year` AS `year`" \
@@ -242,6 +244,7 @@ void DatabaseManager::initDb()
                    "    `album` INTEGER," \
                    "    `genre` INTEGER," \
                    "    `year` INTEGER, "\
+                   "    `bitrate` INTEGER, " \
                    "    `mtime` INTEGER);");
 
         query.exec("CREATE TABLE `years` (" \
@@ -263,6 +266,7 @@ void DatabaseManager::initDb()
                    "           `tracks`.`album` AS `albumID`," \
                    "           `tracks`.`interpret` AS `interpretID`," \
                    "           `interprets`.`interpret`," \
+                   "           `tracks`.`bitrate`, "\
                    "           `genres`.`genre`," \
                    "           `albums`.`album`," \
                    "           `years`.`year`" \

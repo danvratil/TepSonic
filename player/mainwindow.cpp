@@ -100,7 +100,8 @@ MainWindow::MainWindow(Player *player)
                           << tr("Album")
                           << tr("Genre")
                           << tr("Year")
-                          << tr("Length");
+                          << tr("Length")
+                          << tr("Bitrate");
 
     _playlistProxyModel = new PlaylistProxyModel(this);
     _playlistModel = new PlaylistModel(this, headers, _playlistProxyModel);
@@ -128,6 +129,19 @@ MainWindow::MainWindow(Player *player)
     _ui->playlistBrowser->hideColumn(0);
     _selectionModel = _ui->playlistBrowser->selectionModel();
 
+    _fileSystemModel = new QFileSystemModel(this);
+    _fileSystemModel->setRootPath(QDir::rootPath());
+    _fileSystemModel->setNameFilters(SupportedFormats::getExtensionList());
+    _ui->filesystemBrowser->setModel(_fileSystemModel);
+    // Hide Size, Type and Created/Modified columns
+    _ui->filesystemBrowser->hideColumn(1);
+    _ui->filesystemBrowser->hideColumn(2);
+    _ui->filesystemBrowser->hideColumn(3);
+    // Automatically expand home dir
+    _ui->filesystemBrowser->expand(_fileSystemModel->index(QDir::homePath()));
+    int depth = QDir::homePath().split("/",QString::KeepEmptyParts).size();
+    _ui->filesystemBrowser->expandToDepth(depth);
+
     _taskManager = new TaskManager(&_playlistModel,&_collectionModel);
     connect(_ui->playlistBrowser,SIGNAL(addedFiles(QStringList,int)),_taskManager,SLOT(addFilesToPlaylist(QStringList,int)));
     connect(_taskManager,SIGNAL(collectionsPopulated()),this,SLOT(fixCollectionProxyModel()));
@@ -152,7 +166,7 @@ MainWindow::MainWindow(Player *player)
             _taskManager->rebuildCollections();
         }
     } else {
-        _ui->collectionWidget->hide();
+        _ui->collectionTab->hide();
     }
 
     _player = player;
@@ -222,6 +236,8 @@ MainWindow::MainWindow(Player *player)
     connect(_ui->actionLength,SIGNAL(toggled(bool)),_playlistVisibleColumnContextMenuMapper,SLOT(map()));
     _playlistVisibleColumnContextMenuMapper->setMapping(_ui->actionLength,7);
     connect(_playlistVisibleColumnContextMenuMapper,SIGNAL(mapped(int)),this,SLOT(togglePlaylistColumnVisible(int)));
+    _playlistVisibleColumnContextMenuMapper->setMapping(_ui->actionLength,8);
+    connect(_playlistVisibleColumnContextMenuMapper,SIGNAL(mapped(int)),this,SLOT(togglePlaylistColumnVisible(int)));
 
 }
 
@@ -233,7 +249,7 @@ MainWindow::~MainWindow()
     _settings->setValue("Window/ViewsSplit",_ui->viewsSplitter->saveState());
     QList<QVariant> playlistColumnsStates;
     QList<QVariant> playlistColumnsWidths;
-    for (int i = 0; i < _ui->playlistBrowser->model()->columnCount(QModelIndex())-1; i++) {
+    for (int i = 0; i < _ui->playlistBrowser->model()->columnCount(QModelIndex()); i++) {
         // Don't store "isColumnHidden" but "isColumnVisible"
         playlistColumnsStates.append(!_ui->playlistBrowser->isColumnHidden(i));
         playlistColumnsWidths.append(_ui->playlistBrowser->columnWidth(i));
@@ -299,7 +315,7 @@ void MainWindow::bindShortcuts()
 {
     _settings->beginGroup("Shortcuts");
     QxtGlobalShortcut *sc1 = new QxtGlobalShortcut(this);
-    sc1->setShortcut(QKeySequence::fromString(_settings->value("PlayPause","Meta+P").toString()));
+    sc1->setShortcut(QKeySequence::fromString(_settings->value("PlayPause","Meta+Space").toString()));
     connect(sc1,SIGNAL(activated()),this,SLOT(on_actionPlay_pause_triggered()));
     QxtGlobalShortcut *sc2 = new QxtGlobalShortcut(this);
     sc2->setShortcut(QKeySequence::fromString(_settings->value("Stop","Meta+S").toString()));
@@ -748,18 +764,13 @@ void MainWindow::setupCollections()
     _ui->collectionBrowser->header()->setHidden(true);
 
     connect(_ui->collectionBrowser,SIGNAL(customContextMenuRequested(QPoint)),this,SLOT(showCollectionsContextMenu(QPoint)));
-    // Workaround for QTBUG 7585 (http://bugreports.qt.nokia.com/browse/QTBUG-7585)
-    // Calling invalidate() before changing filter solves problem with expand icons being displayed incorrectly
-    // Affects Qt 4.6.0 to 4.6.3
-    connect(_ui->colectionSearchEdit,SIGNAL(textChanged(QString)),_collectionProxyModel,SLOT(invalidate()));
-    connect(_ui->colectionSearchEdit,SIGNAL(textChanged(QString)),_collectionProxyModel,SLOT(setFilterRegExp(QString)));
 
     // Since we disabled the Proxy model, no search inputs are needed
     _ui->label_2->hide();
     _ui->colectionSearchEdit->hide();
     _ui->clearCollectionSearch->hide();
 
-    _ui->collectionWidget->show();
+    _ui->viewsTab->setTabEnabled(0,true);
 }
 
 void MainWindow::destroyCollections()
@@ -770,7 +781,7 @@ void MainWindow::destroyCollections()
     delete _collectionModel;
     _collectionModel = NULL;
 
-    _ui->collectionWidget->hide();
+    _ui->viewsTab->setTabEnabled(0,false);
 }
 
 void MainWindow::setTrack(int row)

@@ -30,6 +30,7 @@
 #include <QItemSelectionModel>
 #include <QLabel>
 #include <QSystemTrayIcon>
+#include <QFileSystemModel>
 
 
 // These classes are used in inline methods
@@ -116,6 +117,9 @@ private:
 
     //! Pointer to CollectionItemDelegate
     CollectionItemDelegate *_collectionItemDelegate;
+
+    //! Pointer to QFileSystemModel
+    QFileSystemModel *_fileSystemModel;
 
     //! Pointer to Player
     Player *_player;

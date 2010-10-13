@@ -149,7 +149,8 @@ Player::MetaData PlaylistPopulator::getFileMetaData(QString file)
                             "       `interpret`," \
                             "       `genre`," \
                             "       `album`," \
-                            "       `year`" \
+                            "       `year`," \
+                            "       `bitrate`" \
                             "FROM `view_tracks` "\
                             "WHERE `filename`="+fname+ \
                             "LIMIT 1;",
@@ -163,6 +164,7 @@ Player::MetaData PlaylistPopulator::getFileMetaData(QString file)
                 metadata.genre = query.value(5).toString();
                 metadata.album = query.value(6).toString();
                 metadata.year = query.value(7).toUInt();
+                metadata.bitrate = query.value(8).toInt();
             }
         } else {
             qDebug() << "PlaylistPopulator: Disabling connection to DB for this session";
@@ -180,6 +182,7 @@ Player::MetaData PlaylistPopulator::getFileMetaData(QString file)
         metadata.album = f.tag()->album().toCString(true);
         metadata.genre = f.tag()->genre().toCString(true);
         metadata.year = f.tag()->year();
+        metadata.bitrate = f.audioProperties()->bitrate();
 
         if (metadata.title.isEmpty())
             metadata.title = finfo.fileName();
