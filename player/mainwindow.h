@@ -328,9 +328,6 @@ private slots:
     */
     void on_playlistBrowser_doubleClicked(QModelIndex index);
 
-    //! Opens dialog for folder selection and then calls PlaylistManager to populate the playlist
-    void on_actionAdd_folder_triggered();
-
     //! Removes all items from playlist
     void on_actionClear_playlist_triggered() {
         _playlistModel->removeRows(0,_playlistModel->rowCount(QModelIndex()),QModelIndex());
@@ -338,9 +335,6 @@ private slots:
 
     //! Opens settings dialog
     void on_actionSettings_triggered();
-
-    //! Opens dialog for files and then calls PlaylistManager to populate the playlist
-    void on_actionAdd_file_triggered();
 
     //! toggle visibility of main window
     void on_actionShow_Hide_triggered() {

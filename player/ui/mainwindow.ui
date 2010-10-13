@@ -166,40 +166,6 @@
        </spacer>
       </item>
       <item>
-       <widget class="QPushButton" name="loadFileButton">
-        <property name="text">
-         <string>Load file</string>
-        </property>
-        <property name="icon">
-         <iconset resource="../icons.qrc">
-          <normaloff>:/icons/openFile</normaloff>:/icons/openFile</iconset>
-        </property>
-        <property name="iconSize">
-         <size>
-          <width>24</width>
-          <height>24</height>
-         </size>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="loadFolderButton">
-        <property name="text">
-         <string>Load folder</string>
-        </property>
-        <property name="icon">
-         <iconset resource="../icons.qrc">
-          <normaloff>:/icons/openFolder</normaloff>:/icons/openFolder</iconset>
-        </property>
-        <property name="iconSize">
-         <size>
-          <width>24</width>
-          <height>24</height>
-         </size>
-        </property>
-       </widget>
-      </item>
-      <item>
        <widget class="QPushButton" name="clearPlaylistButton">
         <property name="text">
          <string>Clear playlist</string>
@@ -507,8 +473,6 @@
      <addaction name="actionLength"/>
      <addaction name="actionBitrate"/>
     </widget>
-    <addaction name="actionAdd_file"/>
-    <addaction name="actionAdd_folder"/>
     <addaction name="separator"/>
     <addaction name="actionClear_playlist"/>
     <addaction name="separator"/>
@@ -908,8 +872,6 @@
   <tabstop>playPauseButton</tabstop>
   <tabstop>stopButton</tabstop>
   <tabstop>nextTrackButton</tabstop>
-  <tabstop>loadFileButton</tabstop>
-  <tabstop>loadFolderButton</tabstop>
   <tabstop>clearPlaylistButton</tabstop>
  </tabstops>
  <resources>

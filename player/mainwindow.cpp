@@ -162,11 +162,13 @@ MainWindow::MainWindow(Player *player)
     if (_settings->value("Collections/EnableCollections",true).toBool()==true) {
         setupCollections();
         _taskManager->populateCollections();
+        // Set collections as default tab
+        _ui->viewsTab->setCurrentIndex(0);
         if (_settings->value("Collections/AutoRebuildAfterStart",false).toBool()==true) {
             _taskManager->rebuildCollections();
         }
     } else {
-        _ui->collectionTab->hide();
+        _ui->viewsTab->setTabEnabled(0,false);
     }
 
     _player = player;
@@ -204,10 +206,6 @@ MainWindow::MainWindow(Player *player)
         }
     }
 
-
-
-    connect(_ui->loadFileButton,SIGNAL(clicked()),_ui->actionAdd_file,SLOT(trigger()));
-    connect(_ui->loadFolderButton,SIGNAL(clicked()),_ui->actionAdd_folder,SLOT(trigger()));
     connect(_ui->clearPlaylistButton,SIGNAL(clicked()),_ui->actionClear_playlist,SLOT(trigger()));
     connect(_ui->previousTrackButton,SIGNAL(clicked()),_ui->actionPrevious_track,SLOT(trigger()));
     connect(_ui->playPauseButton,SIGNAL(clicked()),_ui->actionPlay_pause,SLOT(trigger()));
@@ -387,17 +385,6 @@ void MainWindow::closeEvent(QCloseEvent* event)
     }
 }
 
-void MainWindow::on_actionAdd_file_triggered()
-{
-    QStringList fileNames = QFileDialog::getOpenFileNames(this,
-                            tr("Select file"),
-			    QDir::homePath(),
-			    tr("Supported files") + " (" + SupportedFormats::getExtensionList().join(" ") +
-				");;" + tr("Playlists") + " (*.m3u);;" + tr("All files") + " (*.*)");
-    _taskManager->addFilesToPlaylist(fileNames);
-}
-
-
 void MainWindow::on_actionSettings_triggered()
 {
     // Show preferences dialog
@@ -407,16 +394,6 @@ void MainWindow::on_actionSettings_triggered()
     connect(prefDlg,SIGNAL(accepted()),this,SLOT(preferencesAccepted()));
     prefDlg->exec();
 
-}
-
-void MainWindow::on_actionAdd_folder_triggered()
-{
-    //open folder dialog
-    QString dirName = QFileDialog::getExistingDirectory(this,
-                      tr("Add directory"),
-                      QString(),
-                      QFileDialog::ShowDirsOnly);
-    _taskManager->addFileToPlaylist(dirName);
 }
 
 void MainWindow::updatePlayerTrack()
