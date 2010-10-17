@@ -85,12 +85,6 @@ void PreferencesPages::Collections::on_removeAllPathsButton_clicked()
     _collectionsSourceChanged = true;
 }
 
-void PreferencesPages::Collections::on_pushButton_clicked()
-{
-    emit collectionsSourceChanged();
-}
-
-
 PreferencesPages::Shortcuts::Shortcuts(QWidget *parent)
 {
     ui = new Ui::Shortcuts();

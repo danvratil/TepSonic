@@ -55,7 +55,6 @@ private:
     bool _collectionsSourceChanged;
 
 private slots:
-    void on_pushButton_clicked();
     void on_removeAllPathsButton_clicked();
     void on_removePathButton_clicked();
     void on_addPathButton_clicked();

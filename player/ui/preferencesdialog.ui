@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Dialog</string>
+   <string>Preferences</string>
   </property>
   <property name="modal">
    <bool>false</bool>
@@ -126,5 +126,22 @@
  <resources>
   <include location="../icons.qrc"/>
  </resources>
- <connections/>
+ <connections>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>rejected()</signal>
+   <receiver>PreferencesDialog</receiver>
+   <slot>reject()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>463</x>
+     <y>336</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>469</x>
+     <y>398</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
 </ui>

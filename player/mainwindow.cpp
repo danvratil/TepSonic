@@ -152,7 +152,8 @@ MainWindow::MainWindow(Player *player)
             _playlistProxyModel, SLOT(invalidate()));
     connect(_taskManager,SIGNAL(insertItemToPlaylist(Player::MetaData,int)),
             _playlistModel,SLOT(insertItem(Player::MetaData, int)));
-    connect(_taskManager, SIGNAL(clearCollectionModel()), _collectionModel, SLOT(clear()));
+    if(_collectionModel)
+        connect(_taskManager, SIGNAL(clearCollectionModel()), _collectionModel, SLOT(clear()));
     connect(_taskManager, SIGNAL(collectionsRebuilt()), _taskManager, SLOT(populateCollections()));
 
     restoreGeometry(_settings->value("Window/Geometry", saveGeometry()).toByteArray());
