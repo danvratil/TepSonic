@@ -164,6 +164,12 @@ void CollectionBuilder::insertTrack(QString filename, QSqlDatabase *sqlDB)
     uint mtime = fileInfo.lastModified().toTime_t();
 
     TagLib::FileRef f(fname.toLocal8Bit().constData());
+    // FileRef::isNull() is not enough sometimes. Let's check the tag() too...
+    if (f.isNull() || !f.tag()) {
+      qDebug() << filename << "cannot be registered in the collection. TagLib.";
+      // to prevent crash calling f.tag() if it's NULL
+      return;
+    }
 
     uint trackNo      = f.tag()->track();
     QString interpret = f.tag()->artist().toCString(true);
