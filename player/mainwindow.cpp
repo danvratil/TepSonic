@@ -234,8 +234,8 @@ MainWindow::MainWindow(Player *player)
     _playlistVisibleColumnContextMenuMapper->setMapping(_ui->actionYear,6);
     connect(_ui->actionLength,SIGNAL(toggled(bool)),_playlistVisibleColumnContextMenuMapper,SLOT(map()));
     _playlistVisibleColumnContextMenuMapper->setMapping(_ui->actionLength,7);
-    connect(_playlistVisibleColumnContextMenuMapper,SIGNAL(mapped(int)),this,SLOT(togglePlaylistColumnVisible(int)));
-    _playlistVisibleColumnContextMenuMapper->setMapping(_ui->actionLength,8);
+    connect(_ui->actionBitrate,SIGNAL(toggled(bool)),_playlistVisibleColumnContextMenuMapper,SLOT(map()));
+    _playlistVisibleColumnContextMenuMapper->setMapping(_ui->actionBitrate,8);
     connect(_playlistVisibleColumnContextMenuMapper,SIGNAL(mapped(int)),this,SLOT(togglePlaylistColumnVisible(int)));
 
 }
