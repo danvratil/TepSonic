@@ -56,6 +56,10 @@ public:
     //! Installs plugin's UI on given parentWidget.
     virtual void settingsWidget(QWidget *parentWidget) = 0;
 
+    //! Retrurns name of the plugin
+    virtual QString pluginName() = 0;
+
+
 };
 
 Q_DECLARE_INTERFACE(PluginInterface,"TepSonic.PluginInterface/1.0");

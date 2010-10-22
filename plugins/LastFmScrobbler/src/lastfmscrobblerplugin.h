@@ -69,12 +69,6 @@ class LastFmScrobblerPlugin : public AbstractPlugin
         */
         void settingsWidget(QWidget *parentWidget);
 
-        //! Returns name of the plugin
-        /*!
-          \return Returns name of the plugin
-        */
-        QString pluginName();
-
     public slots:
         //! Notification that configuration dialog was accepted
         /*!

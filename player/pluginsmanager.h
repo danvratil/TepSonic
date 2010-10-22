@@ -29,6 +29,8 @@
 
 class AbstractPlugin;
 
+typedef QString (*PluginNameFcn)(void);
+
 //! PluginsManager is a class for loading and providing access to plugins
 /*!
   PluginsManager is a object that provides API for rest of the application to communicate
@@ -43,6 +45,7 @@ class PluginsManager : public QObject
             QPluginLoader *pluginLoader;
             uint pluginID;
             bool enabled;
+            QString filename;
         };
 
         //! Constructor
@@ -101,6 +104,8 @@ class PluginsManager : public QObject
 
         //! List of Plugins containing loaded plugins
         QList<Plugin*> _pluginsList;
+
+        void loadPlugin(QString filename, QString pluginName);
 
         int _lastPluginID;
 

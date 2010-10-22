@@ -82,20 +82,23 @@ PreferencesDialog::PreferencesDialog(MainWindow *parent):
         // Get plugin name
         QString pluginName = pluginsManager->pluginAt(i)->pluginName;
 
-        AbstractPlugin *plugin = reinterpret_cast<AbstractPlugin*>(pluginsManager->pluginAt(i)->pluginLoader->instance());
-        // If the plugin has a config UI then add a tab with the UI to Plugins page
-        if (plugin->hasConfigUI()) {
-            QWidget *pluginWidget = new QWidget();
-            _plugins->ui->tabs->addTab(pluginWidget,pluginName);
-            plugin->settingsWidget(pluginWidget);
+        // If the plugin has valid pluginLoader (means the plugin is loaded then get it's UI (if it has it)
+        if (pluginsManager->pluginAt(i)->pluginLoader != NULL) {
+            AbstractPlugin *plugin = reinterpret_cast<AbstractPlugin*>(pluginsManager->pluginAt(i)->pluginLoader->instance());
+            // If the plugin has a config UI then add a tab with the UI to Plugins page
+            if (plugin->hasConfigUI()) {
+                QWidget *pluginWidget = new QWidget();
+                _plugins->ui->tabs->addTab(pluginWidget,pluginName);
+                plugin->settingsWidget(pluginWidget);
+            }
         }
 
         bool enabled;
-        // If the plugin is not yet listed in the settings then set it enabled by default
+        // If the plugin is not yet listed in the QSettings then set it as disabled by default
         if (plugins.contains(pluginName)) {
-            enabled = plugins[pluginName].toBool();
+            enabled = (plugins[pluginName]==true);
         } else {
-            enabled = true;
+            enabled = false;
         }
 
         // Add new item to plugins list on Plugins page
@@ -177,10 +180,13 @@ void PreferencesDialog::dialogAccepted()
     settings.endGroup(); // Preferences group
     settings.beginGroup("Plugins");
     QMap<QString,QVariant> plugins;
+    // Go through all plugins in the UI list
     for (int i = 0; i < _plugins->ui->pluginsList->count(); i++) {
         QListWidgetItem *item = _plugins->ui->pluginsList->item(i);
-        plugins.insert(item->text(),QVariant(item->checkState()));
-        if (item->checkState()) {
+        // insert into the map value pluginname - checked(bool)
+        plugins.insert(item->text(),QVariant((item->checkState()==2)));
+        // If checked then enable the plugin in pluginsManager
+        if (item->checkState()==2) {
             pluginsManager->enablePlugin(pluginsManager->pluginAt(i));
         } else {
             pluginsManager->disablePlugin(pluginsManager->pluginAt(i));

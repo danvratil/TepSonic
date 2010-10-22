@@ -48,9 +48,6 @@ class AbstractPlugin : public QObject, public PluginInterface
     Q_PROPERTY(bool hasConfigUI
                READ hasConfigUI
                WRITE setHasConfigUI);
-    Q_PROPERTY(QString pluginName
-               READ pluginName
-               WRITE setPluginName);
     public:
 
         //! Initializes the plugin
@@ -88,15 +85,6 @@ class AbstractPlugin : public QObject, public PluginInterface
           \param state new state of the property
         */
         void setHasConfigUI(const bool &state) { _hasConfigUI = state; }
-
-        //! Returns state of pluginName property
-        QString pluginName() const { return _pluginName; }
-
-        //! Changes sate of pluginName property
-        /*!
-          \param name new name of the plugin
-        */
-        void setPluginName(const QString &name) { _pluginName = name; }
 
     public slots:
         //! Called when Settings dialog is accepted
@@ -159,9 +147,6 @@ class AbstractPlugin : public QObject, public PluginInterface
     private:
         //! Has config UI?
         bool _hasConfigUI;
-
-        //! The plugin name
-        QString _pluginName;
 
         //! Is the plugin initialized?
         bool _initialized;

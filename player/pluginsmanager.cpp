@@ -68,7 +68,9 @@ void PluginsManager::loadPlugins()
        for example in /home/me/tepsonic/ and plugins in /home/me/tepsonic/plugins.
        Putting this folder first will also result in preferring these plugins before
        same-called plugins installed somewhere in system */
-    pluginsDirs << qApp->applicationDirPath()+QDir::separator()+"plugins";
+#ifdef Q_WS_WIN
+    pluginsDir << qApp->applicationDirPath()+QDir::separator()+"plugins";
+#endif
 #ifdef Q_WS_MAC
     #ifdef APPLEBUNDLE
     pluginsDirs << QCoreApplication::applicationDirPath() + "/../plugins/";
@@ -78,6 +80,9 @@ void PluginsManager::loadPlugins()
     qDebug() << "Searching in " << pluginsDirs;
 #endif
 #ifdef Q_WS_X11
+    QDir appDir(qApp->applicationDirPath());
+    appDir.cdUp();
+    pluginsDirs << appDir.path()+QDir::separator()+"lib";
     // LIBDIR is defined in player/CMakeLists.txt and it is a location where all project's libs are installed
     pluginsDirs << LIBDIR;
     qDebug() << "Searching in " << pluginsDirs;
@@ -86,33 +91,40 @@ void PluginsManager::loadPlugins()
     QDir pluginsDir;
     pluginsDir.setNameFilters(QStringList() << "libtepsonic_*");
     pluginsDir.setFilter(QDir::Files | QDir::NoSymLinks);
-    qDebug() << pluginsDir.entryList();
     foreach(QString folder, pluginsDirs) {
+        // Use each of the pluginsDirs
         pluginsDir.setPath(folder);
+        // Now go through all the plugins found in the current folder
         foreach(QString filename, pluginsDir.entryList()) {
-            if (QLibrary::isLibrary(filename)) {
-                qDebug() << "Loading plugin " << pluginsDir.absoluteFilePath(filename);
+            // Get complete path+filename
+            QString pluginFile = folder+QDir::separator()+filename;
+            // If the file is a library...
+            if (QLibrary::isLibrary(pluginFile)) {
 
-                QPluginLoader *pluginLoader = new QPluginLoader(pluginsDir.absoluteFilePath(filename));
-                if (! pluginLoader->load()) {
-                    qDebug() << filename << "load error:" << pluginLoader->errorString();
+                // Load the library and resolve "pluginName" symbol
+                QLibrary *lib = new QLibrary(pluginFile);
+                PluginNameFcn pluginName = (PluginNameFcn)lib->resolve("pluginName");
+                if (pluginName == 0) {
+                    qDebug() << lib->errorString() << "...skipping!";
                     continue;
                 }
-                Plugin *plugin = new PluginsManager::Plugin;
-                plugin->pluginLoader = pluginLoader;
-                plugin->pluginID = (_lastPluginID+1);
-//                qDebug() << pluginLoader << pluginLoader->instance() <<  pluginLoader->instance()->inherits("AbstractPlugin");
-                AbstractPlugin *aplg = reinterpret_cast<AbstractPlugin*>(pluginLoader->instance());
-                plugin->pluginName = aplg->pluginName();
-                if ((pluginsEnabled.contains(plugin->pluginName)) || (pluginsEnabled[plugin->pluginName]==true)) {
-                    enablePlugin(plugin);
-                } else {
+
+                // PluginName() symbol resolved, plugin accessible
+                qDebug() << "Found plugin " << pluginName();
+
+                // If the plugin is set enabled in the config, then load it
+                if ((pluginsEnabled[pluginName()]==true)) {
+                    qDebug() << "Loading plugin " << pluginName();
+                    loadPlugin(pluginFile, pluginName());
+                } else { // otherwise just set some meta infos, but don't load the library itself
+                    Plugin *plugin = new PluginsManager::Plugin;
+                    plugin->pluginLoader = NULL;
                     plugin->enabled = false;
+                    plugin->pluginName = pluginName();
+                    plugin->filename = pluginFile;
+                    _pluginsList.append(plugin);
+                    qDebug() << "Plugin " << pluginName() << " disabled. Skipping...";
                 }
-
-                _pluginsList.append(plugin);
-
-                _lastPluginID++;
             }
         }
     }
@@ -146,10 +158,26 @@ void PluginsManager::disablePlugin(Plugin *plugin)
 
 void PluginsManager::enablePlugin(Plugin *plugin)
 {
+    // There's nothing to do when plugin is enabled
     if (plugin->enabled) return;
+
+    // If the pluginLoader is not available then load it
+    if (plugin->pluginLoader == NULL) {
+        QPluginLoader *pluginLoader = new QPluginLoader(plugin->filename);
+        if (! pluginLoader->load()) {
+            qDebug() << plugin->pluginName << " load error:" << pluginLoader->errorString();
+            return;
+        }
+        plugin->pluginLoader = pluginLoader;
+    }
+
 
     AbstractPlugin *aplg = reinterpret_cast<AbstractPlugin*>(plugin->pluginLoader->instance());
 
+    // Initialize the plugin!
+    aplg->init();
+
+    // Now we can connect all the signals/slots to the plugin
     connect(this,SIGNAL(trackChanged(Player::MetaData)),aplg,SLOT(trackChanged(Player::MetaData)));
     connect(this,SIGNAL(trackFinished(Player::MetaData)),aplg,SLOT(trackFinished(Player::MetaData)));
     connect(this,SIGNAL(playerStatusChanged(Phonon::State,Phonon::State)),aplg,SLOT(playerStatusChanged(Phonon::State,Phonon::State)));
@@ -158,7 +186,31 @@ void PluginsManager::enablePlugin(Plugin *plugin)
     connect(this,SIGNAL(settingsAccepted()),aplg,SLOT(settingsAccepted()));
     connect(aplg,SIGNAL(error(QString)),this,SIGNAL(error(QString)));
 
-    aplg->init();
+
     aplg->_initialized = true;
     plugin->enabled = true;
+}
+
+void PluginsManager::loadPlugin(QString filename, QString pluginName)
+{
+    // Create plugin loader
+    QPluginLoader *pluginLoader = new QPluginLoader(filename);
+    if (! pluginLoader->load()) {
+        qDebug() << filename << " load error:" << pluginLoader->errorString();
+        return;
+    }
+
+    // Create new Plugin structure
+    Plugin *plugin = new PluginsManager::Plugin;
+    plugin->pluginLoader = pluginLoader;
+    plugin->enabled = false;
+    plugin->pluginName = pluginName;
+    plugin->filename = filename;
+    // Enable the plugin
+    enablePlugin(plugin);
+
+    // Add it to the list of plugins
+    _pluginsList.append(plugin);
+
+    _lastPluginID++;
 }
