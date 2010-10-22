@@ -84,7 +84,9 @@ void PluginsManager::loadPlugins()
     appDir.cdUp();
     pluginsDirs << appDir.path()+QDir::separator()+"lib";
     // LIBDIR is defined in player/CMakeLists.txt and it is a location where all project's libs are installed
-    pluginsDirs << LIBDIR;
+    if (LIBDIR != appDir.path()+QDir::separator()+"lib") {
+        pluginsDirs << LIBDIR;
+    }
     qDebug() << "Searching in " << pluginsDirs;
 #endif
 
