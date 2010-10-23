@@ -47,7 +47,7 @@ extern "C" NAME_EXPORT QString pluginName()
 
 extern "C" ID_EXPORT QString pluginID()
 {
-    return "lasfm";
+    return "lastfm";
 }
 
 
