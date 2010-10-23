@@ -314,13 +314,13 @@ void MainWindow::bindShortcuts()
 {
     _settings->beginGroup("Shortcuts");
     QxtGlobalShortcut *sc1 = new QxtGlobalShortcut(this);
-    sc1->setShortcut(QKeySequence::fromString(_settings->value("PlayPause","Meta+Space").toString()));
+    sc1->setShortcut(QKeySequence::fromString(_settings->value("PlayPause","Meta+P").toString()));
     connect(sc1,SIGNAL(activated()),this,SLOT(on_actionPlay_pause_triggered()));
     QxtGlobalShortcut *sc2 = new QxtGlobalShortcut(this);
     sc2->setShortcut(QKeySequence::fromString(_settings->value("Stop","Meta+S").toString()));
     connect(sc2,SIGNAL(activated()),this,SLOT(on_actionStop_triggered()));
     QxtGlobalShortcut *sc3 = new QxtGlobalShortcut(this);
-    sc3->setShortcut(QKeySequence::fromString(_settings->value("PrevTrack","Meta+P").toString()));
+    sc3->setShortcut(QKeySequence::fromString(_settings->value("PrevTrack","Meta+B").toString()));
     connect(sc3,SIGNAL(activated()),this,SLOT(on_actionPrevious_track_triggered()));
     QxtGlobalShortcut *sc4 = new QxtGlobalShortcut(this);
     sc4->setShortcut(QKeySequence::fromString(_settings->value("NextTrack","Meta+N").toString()));
