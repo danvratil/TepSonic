@@ -40,7 +40,7 @@
 
 PluginsManager::PluginsManager()
 {
-    _lastPluginID = 0;
+
 }
 
 PluginsManager::~PluginsManager()
@@ -57,7 +57,7 @@ void PluginsManager::loadPlugins()
 {
     QSettings settings(QString(_CONFIGDIR).append("/main.conf"),QSettings::IniFormat,this);
     settings.beginGroup("Plugins");
-    QMap<QString,QVariant> pluginsEnabled = settings.value("pluginsEnabled").toMap();
+    QMap<QString,QVariant> pluginsEnabledList = settings.value("pluginsEnabled").toMap();
     settings.endGroup();
 
     QStringList pluginsDirs;
@@ -104,28 +104,18 @@ void PluginsManager::loadPlugins()
             if (QLibrary::isLibrary(pluginFile)) {
 
                 // Load the library and resolve "pluginName" symbol
-                QLibrary *lib = new QLibrary(pluginFile);
-                PluginNameFcn pluginName = (PluginNameFcn)lib->resolve("pluginName");
-                if (pluginName == 0) {
-                    qDebug() << lib->errorString() << "...skipping!";
+                QLibrary lib(pluginFile);
+                PluginIDFcn pluginID = (PluginIDFcn)lib.resolve("pluginID");
+                if (pluginID == 0) {
+                    qDebug() << lib.errorString() << "...skipping!";
                     continue;
                 }
 
-                // PluginName() symbol resolved, plugin accessible
-                qDebug() << "Found plugin " << pluginName();
-
-                // If the plugin is set enabled in the config, then load it
-                if ((pluginsEnabled[pluginName()]==true)) {
-                    qDebug() << "Loading plugin " << pluginName();
-                    loadPlugin(pluginFile, pluginName());
-                } else { // otherwise just set some meta infos, but don't load the library itself
-                    Plugin *plugin = new PluginsManager::Plugin;
-                    plugin->pluginLoader = NULL;
-                    plugin->enabled = false;
-                    plugin->pluginName = pluginName();
-                    plugin->filename = pluginFile;
-                    _pluginsList.append(plugin);
-                    qDebug() << "Plugin " << pluginName() << " disabled. Skipping...";
+                QString pluginid = pluginID();
+                qDebug() << "Found plugin " << pluginid;
+                Plugin *plugin = loadPlugin(pluginFile);
+                if (pluginsEnabledList[pluginid]==true) {
+                    enablePlugin(plugin);
                 }
             }
         }
@@ -155,7 +145,12 @@ void PluginsManager::disablePlugin(Plugin *plugin)
     disconnect(aplg,SLOT(trackPositionChanged(qint64)));
     disconnect(aplg,SLOT(trackPaused(bool)));
     aplg->quit();
-    plugin->enabled=false;
+
+    plugin->pluginLoader->unload();
+    delete plugin->pluginLoader;
+
+    plugin->hasUI = false;
+    plugin->enabled = false;
 }
 
 void PluginsManager::enablePlugin(Plugin *plugin)
@@ -163,21 +158,19 @@ void PluginsManager::enablePlugin(Plugin *plugin)
     // There's nothing to do when plugin is enabled
     if (plugin->enabled) return;
 
-    // If the pluginLoader is not available then load it
-    if (plugin->pluginLoader == NULL) {
-        QPluginLoader *pluginLoader = new QPluginLoader(plugin->filename);
-        if (! pluginLoader->load()) {
-            qDebug() << plugin->pluginName << " load error:" << pluginLoader->errorString();
-            return;
-        }
-        plugin->pluginLoader = pluginLoader;
+    QPluginLoader *pluginLoader = new QPluginLoader(plugin->filename);
+    if (! pluginLoader->load()) {
+        qDebug() << plugin->pluginName << " load error:" << pluginLoader->errorString();
+        return;
     }
+    plugin->pluginLoader = pluginLoader;
 
 
     AbstractPlugin *aplg = reinterpret_cast<AbstractPlugin*>(plugin->pluginLoader->instance());
 
     // Initialize the plugin!
     aplg->init();
+    aplg->_initialized = true;
 
     // Now we can connect all the signals/slots to the plugin
     connect(this,SIGNAL(trackChanged(Player::MetaData)),aplg,SLOT(trackChanged(Player::MetaData)));
@@ -188,31 +181,35 @@ void PluginsManager::enablePlugin(Plugin *plugin)
     connect(this,SIGNAL(settingsAccepted()),aplg,SLOT(settingsAccepted()));
     connect(aplg,SIGNAL(error(QString)),this,SIGNAL(error(QString)));
 
-
-    aplg->_initialized = true;
+    plugin->hasUI = aplg->hasConfigUI();
     plugin->enabled = true;
 }
 
-void PluginsManager::loadPlugin(QString filename, QString pluginName)
+PluginsManager::Plugin* PluginsManager::loadPlugin(QString filename)
 {
-    // Create plugin loader
-    QPluginLoader *pluginLoader = new QPluginLoader(filename);
-    if (! pluginLoader->load()) {
-        qDebug() << filename << " load error:" << pluginLoader->errorString();
-        return;
+    // Check if the plugin isn't already loaded
+    QLibrary lib(filename);
+    PluginIDFcn pluginID = (PluginIDFcn)lib.resolve("pluginID");
+    QString pluginid = pluginID();
+
+    for (int i = 0; i < _pluginsList.count(); i++) {
+        if (_pluginsList.at(i)->pluginID == pluginid)
+            return _pluginsList.at(i);
     }
+
+    PluginNameFcn pluginName = (PluginNameFcn)lib.resolve("pluginName");
 
     // Create new Plugin structure
     Plugin *plugin = new PluginsManager::Plugin;
-    plugin->pluginLoader = pluginLoader;
+    plugin->pluginLoader = NULL;
     plugin->enabled = false;
-    plugin->pluginName = pluginName;
+    plugin->pluginName = pluginName();
+    plugin->pluginID = pluginid;
     plugin->filename = filename;
-    // Enable the plugin
-    enablePlugin(plugin);
+    plugin->hasUI = false;
 
     // Add it to the list of plugins
     _pluginsList.append(plugin);
 
-    _lastPluginID++;
+    return plugin;
 }

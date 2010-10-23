@@ -70,6 +70,11 @@ class Plugins: public QWidget
 public:
     Plugins(QWidget *parent = 0);
     Ui::Plugins *ui;
+private slots:
+    void pluginsListItemClicked(QListWidgetItem*);
+signals:
+    void pluginEnabled(int);
+    void pluginDisabled(int);
 };
 
 class Shortcuts: public QWidget

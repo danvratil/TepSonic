@@ -48,7 +48,19 @@ PreferencesPages::Plugins::Plugins(QWidget *parent):
     ui = new Ui::Plugins();
     ui->setupUi(this);
     ui->tabs->setCurrentIndex(0);
+    connect(ui->pluginsList, SIGNAL(itemClicked(QListWidgetItem*)),
+            this, SLOT(pluginsListItemClicked(QListWidgetItem*)));
 }
+
+void PreferencesPages::Plugins::pluginsListItemClicked(QListWidgetItem *item)
+{
+    if (item->checkState()==2) {
+        emit pluginEnabled(ui->pluginsList->row(item));
+    } else {
+        emit pluginDisabled(ui->pluginsList->row(item));
+    }
+}
+
 
 void PreferencesPages::Collections::on_dbEngineCombo_currentIndexChanged(QString currEngine)
 {

@@ -105,6 +105,10 @@ class PreferencesDialog : public QDialog {
 
         //! Saves current confugration and then emits signal rebuildCollections()
         void emitRebuildCollections();
+
+        void enablePlugin(int);
+
+        void disablePlugin(int);
 };
 
 #endif // PREFERENCESDIALOG_H
