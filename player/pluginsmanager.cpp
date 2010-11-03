@@ -38,15 +38,12 @@
 #include <QSettings>
 #include <phonon/mediaobject.h>
 
-PluginsManager::PluginsManager()
-{
-
-}
+PluginsManager::PluginsManager(){}
 
 PluginsManager::~PluginsManager()
 {
     // Unload all plugins
-    foreach (Plugin *plugin, _pluginsList) {
+    foreach (Plugin *plugin, m_pluginsList) {
         disablePlugin(plugin);
         plugin->pluginLoader->unload();
     }
@@ -55,7 +52,8 @@ PluginsManager::~PluginsManager()
 
 void PluginsManager::loadPlugins()
 {
-    QSettings settings(QString(_CONFIGDIR).append("/main.conf"),QSettings::IniFormat,this);
+    QSettings settings(QString(_CONFIGDIR).append("/main.conf"),
+                       QSettings::IniFormat);
     settings.beginGroup("Plugins");
     QMap<QString,QVariant> pluginsEnabledList = settings.value("pluginsEnabled").toMap();
     settings.endGroup();
@@ -124,12 +122,12 @@ void PluginsManager::loadPlugins()
 
 int PluginsManager::pluginsCount()
 {
-    return _pluginsList.count();
+    return m_pluginsList.count();
 }
 
 struct PluginsManager::Plugin* PluginsManager::pluginAt(int index)
 {
-    return _pluginsList.at(index);
+    return m_pluginsList.at(index);
 }
 
 void PluginsManager::disablePlugin(Plugin *plugin)
@@ -192,9 +190,9 @@ PluginsManager::Plugin* PluginsManager::loadPlugin(QString filename)
     PluginIDFcn pluginID = (PluginIDFcn)lib.resolve("pluginID");
     QString pluginid = pluginID();
 
-    for (int i = 0; i < _pluginsList.count(); i++) {
-        if (_pluginsList.at(i)->pluginID == pluginid)
-            return _pluginsList.at(i);
+    for (int i = 0; i < m_pluginsList.count(); i++) {
+        if (m_pluginsList.at(i)->pluginID == pluginid)
+            return m_pluginsList.at(i);
     }
 
     PluginNameFcn pluginName = (PluginNameFcn)lib.resolve("pluginName");
@@ -209,7 +207,7 @@ PluginsManager::Plugin* PluginsManager::loadPlugin(QString filename)
     plugin->hasUI = false;
 
     // Add it to the list of plugins
-    _pluginsList.append(plugin);
+    m_pluginsList.append(plugin);
 
     return plugin;
 }

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>620</width>
-    <height>393</height>
+    <width>616</width>
+    <height>389</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -266,7 +266,7 @@
            <enum>QTabWidget::Rounded</enum>
           </property>
           <property name="currentIndex">
-           <number>1</number>
+           <number>0</number>
           </property>
           <property name="tabsClosable">
            <bool>false</bool>
@@ -441,8 +441,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>620</width>
-     <height>20</height>
+     <width>616</width>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu_TepSonic">

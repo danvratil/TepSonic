@@ -103,7 +103,7 @@ class PluginsManager : public QObject
         void initPlugin(Plugin *plugin);
 
         //! List of Plugins containing loaded plugins
-        QList<Plugin*> _pluginsList;
+        QList<Plugin*> m_pluginsList;
 
         PluginsManager::Plugin* loadPlugin(QString filename);
 

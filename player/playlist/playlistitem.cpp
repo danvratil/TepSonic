@@ -25,59 +25,59 @@
 PlaylistItem::PlaylistItem(const QVector<QVariant> &data, PlaylistItem *parent)
 {
     if (data.isEmpty()) {
-        itemData.fill(QString(),8);
+        m_itemData.fill(QString(),8);
     } else {
-        itemData = data;
+        m_itemData = data;
     }
-    parentItem = parent;
-    _selected = false;
+    m_parentItem = parent;
+    m_selected = false;
 }
 
 PlaylistItem::~PlaylistItem()
 {
-    qDeleteAll(childItems);
+    qDeleteAll(m_childItems);
 }
 
 PlaylistItem *PlaylistItem::child(int number)
 {
-    if (number > childItems.size())
+    if (number > m_childItems.size())
         return 0;
 
-    return childItems.value(number);
+    return m_childItems.value(number);
 }
 
 int PlaylistItem::childCount() const
 {
-    return childItems.size();
+    return m_childItems.size();
 }
 
 int PlaylistItem::childNumber() const
 {
-    if (parentItem)
-        return parentItem->childItems.indexOf(const_cast<PlaylistItem*>(this));
+    if (m_parentItem)
+        return m_parentItem->m_childItems.indexOf(const_cast<PlaylistItem*>(this));
 
     return 0;
 }
 
 int PlaylistItem::columnCount() const
 {
-    return itemData.count();
+    return m_itemData.count();
 }
 
 QVariant PlaylistItem::data(int column) const
 {
-    return itemData.value(column);
+    return m_itemData.value(column);
 }
 
 bool PlaylistItem::insertChildren(int position, int count, int columns)
 {
-    if (position < 0 || position > childItems.size())
+    if (position < 0 || position > m_childItems.size())
         return false;
 
     for (int row = 0; row < count; ++row) {
         QVector<QVariant> data(columns);
         PlaylistItem *item = new PlaylistItem(data, this);
-        childItems.insert(position, item);
+        m_childItems.insert(position, item);
     }
 
     return true;
@@ -85,40 +85,40 @@ bool PlaylistItem::insertChildren(int position, int count, int columns)
 
 void PlaylistItem::appendChild(PlaylistItem *item)
 {
-    childItems.append(item);
+    m_childItems.append(item);
 }
 
 PlaylistItem *PlaylistItem::parent()
 {
-    return parentItem;
+    return m_parentItem;
 }
 
 bool PlaylistItem::removeChildren(int position, int count)
 {
-    if (position < 0 || position + count > childItems.size())
+    if (position < 0 || position + count > m_childItems.size())
         return false;
 
     for (int row = 0; row < count; ++row)
-        delete childItems.takeAt(position);
+        delete m_childItems.takeAt(position);
 
     return true;
 }
 
 bool PlaylistItem::setData(int column, const QVariant &value)
 {
-    if (column < 0 || column >= itemData.size())
+    if (column < 0 || column >= m_itemData.size())
         return false;
 
-    itemData[column] = value;
+    m_itemData[column] = value;
     return true;
 }
 
 void PlaylistItem::setSelected(bool selected)
 {
-    _selected = selected;
+    m_selected = selected;
 }
 
 bool PlaylistItem::selected()
 {
-    return _selected;
+    return m_selected;
 }

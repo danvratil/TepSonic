@@ -208,7 +208,7 @@
      CollectionItem *getItem(const QModelIndex &index) const;
 
      //! Pointer to root CollectionItem
-     CollectionItem *_rootItem;
+     CollectionItem *m_rootItem;
 
    public slots:
 

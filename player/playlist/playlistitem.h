@@ -134,15 +134,15 @@ class PlaylistItem: public QStandardItem
 
  private:
      //! List of item's child PlaylistItems
-     QList<PlaylistItem*> childItems;
+     QList<PlaylistItem*> m_childItems;
 
      //! Vector with data for single columns
-     QVector<QVariant> itemData;
+     QVector<QVariant> m_itemData;
 
      //! Pointer to parent PlaylistItem
-     PlaylistItem *parentItem;
+     PlaylistItem *m_parentItem;
 
      //! Holds current state of the item
-     bool _selected;
+     bool m_selected;
  };
 #endif // PLAYLISTITEM_H

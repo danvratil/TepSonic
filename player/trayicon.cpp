@@ -38,6 +38,7 @@ bool TrayIcon::event(QEvent *event)
     if (event->type() == QEvent::Wheel) {
         QWheelEvent* wheelEvent = static_cast<QWheelEvent*>(event);
         emit mouseWheelScrolled(wheelEvent->delta());
+        event->accept();
         return true;
     }
     if (event->type() == QEvent::ToolTip) {

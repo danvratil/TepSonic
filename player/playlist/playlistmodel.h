@@ -222,18 +222,18 @@ class PlaylistModel : public QAbstractItemModel
 
 
      //! Root item. It's parent for all rows
-     PlaylistItem *rootItem;
+     PlaylistItem *m_rootItem;
 
      //! Total length of playlist in seconds
-     int _totalLength;
+     int m_totalLength;
 
-     QMutex _mutex;
+     QMutex m_mutex;
 
-     bool _dbConnectionAvailable;
+     bool m_dbConnectionAvailable;
 
-     QModelIndex _currentItem;
+     QModelIndex m_currentItem;
 
-     PlaylistProxyModel *_proxyModel;
+     PlaylistProxyModel *m_proxyModel;
 
  signals:
      //! This signal is emmited when length of playlist is changed

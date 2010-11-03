@@ -43,11 +43,11 @@ protected:
     void keyReleaseEvent(QKeyEvent *e);
 
 private:
-    Ui::ChangeShortcutDialog *ui;
-    QModelIndex _index;
-    QKeySequence _shortcut;
+    Ui::ChangeShortcutDialog *m_ui;
+    QModelIndex m_index;
+    QKeySequence m_shortcut;
 
-    QList<Qt::KeyboardModifiers> _modifiers;
+    QList<Qt::KeyboardModifiers> m_modifiers;
 
 private slots:
     void accept();

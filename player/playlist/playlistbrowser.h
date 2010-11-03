@@ -24,8 +24,6 @@
 #include <QTreeView>
 #include <QStringList>
 
-class PlaylistManager;
-
 //! PlaylistBrowser class is a QTreeView subclass with support for drop events
 /*!
   PlaylistBrowser class i subclasses from QTreeView and provides support for ending
@@ -35,6 +33,7 @@ class PlaylistManager;
 class PlaylistBrowser : public QTreeView
 {
     Q_OBJECT
+    Q_ENUMS(Columns)
 
     public:
         //! Constructor
@@ -45,6 +44,18 @@ class PlaylistBrowser : public QTreeView
 
         //! Destructor
         ~PlaylistBrowser();
+
+        enum Columns {
+            FilenameColumn = 0,
+            TrackColumn = 1,
+            InterpretColumn = 2,
+            TracknameColumn = 3,
+            AlbumColumn = 4,
+            GenreColumn = 5,
+            YearColumn = 6,
+            LengthColumn = 7,
+            BitrateColumn = 8
+        };
 
     protected:
         //! Called when items are dropped on the browser
@@ -76,17 +87,12 @@ class PlaylistBrowser : public QTreeView
         */
         void keyPressEvent(QKeyEvent *keyEvent);
 
-        //! PlaylistManager
-        PlaylistManager *_playlistManager;
-
     signals:
         /** Passes list of dropped files
          * \param files list of files to insert
          * \param row where files should be inserted
          */
         void addedFiles(QStringList files, int row);
-
-
 
 };
 

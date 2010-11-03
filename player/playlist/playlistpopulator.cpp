@@ -37,7 +37,7 @@
 
 PlaylistPopulator::PlaylistPopulator()
 {
-    _files.clear();
+    m_files.clear();
 
 }
 
@@ -45,24 +45,24 @@ void PlaylistPopulator::run()
 {
     do {
 
-        if (_files.size() > 0) {
-            if (QFileInfo(_files.first()).isDir()) {
-                expandDir(_files.takeFirst());
+        if (m_files.size() > 0) {
+            if (QFileInfo(m_files.first()).isDir()) {
+                expandDir(m_files.takeFirst());
             }
-            if (_files.size()>0) {
-                if (QFileInfo(_files.first()).suffix().toLower()=="m3u") {
-                    expandPlaylist(_files.takeFirst());
+            if (m_files.size()>0) {
+                if (QFileInfo(m_files.first()).suffix().toLower()=="m3u") {
+                    expandPlaylist(m_files.takeFirst());
                 }
             }
-            if (_files.size() > 0) {
+            if (m_files.size() > 0) {
 
-                Player::MetaData metadata = getFileMetaData(_files.takeFirst());
-                emit insertItemToPlaylist(metadata, _row);
-                _row++; // Next item will be inserted AFTER the recently inserted
+                Player::MetaData metadata = getFileMetaData(m_files.takeFirst());
+                emit insertItemToPlaylist(metadata, m_row);
+                m_row++; // Next item will be inserted AFTER the recently inserted
             }
         }
 
-    } while (!_files.isEmpty());
+    } while (!m_files.isEmpty());
 
     emit playlistPopulated();
 }
@@ -87,10 +87,10 @@ void PlaylistPopulator::expandDir(QString dir)
         }
     }
 
-    files.append(_files);
+    files.append(m_files);
 
     // We don't need to lock the mutex here since we are already in locked mutex
-    _files = files;
+    m_files = files;
 }
 
 void PlaylistPopulator::expandPlaylist(QString filename)
@@ -118,8 +118,8 @@ void PlaylistPopulator::expandPlaylist(QString filename)
 
     file.close();
 
-    files.append(_files);
-    _files = files;
+    files.append(m_files);
+    m_files = files;
 }
 
 Player::MetaData PlaylistPopulator::getFileMetaData(QString file)
@@ -196,12 +196,12 @@ Player::MetaData PlaylistPopulator::getFileMetaData(QString file)
 
 void PlaylistPopulator::addFile(const QString &file, int row)
 {
-    _files.append(file);
-    _row = row;
+    m_files.append(file);
+    m_row = row;
 }
 
 void PlaylistPopulator::addFiles(const QStringList &files, int firstRow)
 {
-    _files.append(files);
-    _row = firstRow;
+    m_files.append(files);
+    m_row = firstRow;
 }

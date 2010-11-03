@@ -53,7 +53,7 @@ signals:
 
 private:
     //! Pointer to pointer to CollectionModel
-    CollectionModel **_collectionModel;
+    CollectionModel **m_collectionModel;
 
 };
 

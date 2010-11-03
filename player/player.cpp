@@ -33,20 +33,24 @@
 
 Player::Player()
 {
-    _phononPlayer = new Phonon::MediaObject();
-    _audioOutput = new Phonon::AudioOutput(Phonon::MusicCategory);
-    Phonon::createPath(_phononPlayer,_audioOutput);
+    m_phononPlayer = new Phonon::MediaObject();
+    m_audioOutput = new Phonon::AudioOutput(Phonon::MusicCategory);
+    Phonon::createPath(m_phononPlayer,
+                       m_audioOutput);
 
     // By default tick every 1 second
-    _phononPlayer->setTickInterval(1000);
+    m_phononPlayer->setTickInterval(1000);
 
-    connect(_phononPlayer,SIGNAL(finished()),this,SLOT(emitFinished()));
-    connect(_phononPlayer,SIGNAL(stateChanged(Phonon::State,Phonon::State)),this,SIGNAL(stateChanged(Phonon::State,Phonon::State)));
-    connect(_phononPlayer,SIGNAL(tick(qint64)),this,SIGNAL(trackPositionChanged(qint64)));
-    //connect(_phononPlayer,SIGNAL(currentSourceChanged(Phonon::MediaSource)),this,SLOT(emitTrackChanged()));
+    connect(m_phononPlayer, SIGNAL(finished()),
+            this, SLOT(emitFinished()));
+    connect(m_phononPlayer, SIGNAL(stateChanged(Phonon::State,Phonon::State)),
+            this, SIGNAL(stateChanged(Phonon::State,Phonon::State)));
+    connect(m_phononPlayer, SIGNAL(tick(qint64)),
+            this, SIGNAL(trackPositionChanged(qint64)));
+    //connect(m_phononPlayer,SIGNAL(currentSourceChanged(Phonon::MediaSource)),this,SLOT(emitTrackChanged()));
 
-    _randomMode = false;
-    _repeatMode = RepeatOff;
+    m_randomMode = false;
+    m_repeatMode = RepeatOff;
 }
 
 Player::~Player()
@@ -56,7 +60,7 @@ Player::~Player()
 void Player::setTrack(const QString fileName, bool autoPlay)
 {
     if (QFileInfo(fileName).isFile()) {
-        _phononPlayer->setCurrentSource(Phonon::MediaSource(fileName));
+        m_phononPlayer->setCurrentSource(Phonon::MediaSource(fileName));
     }
 
     emit trackChanged(currentMetaData());
@@ -67,34 +71,34 @@ void Player::setTrack(const QString fileName, bool autoPlay)
 
 void Player::setRandomMode(bool randomMode)
 {
-    if (_randomMode != randomMode) {
-        _randomMode = randomMode;
+    if (m_randomMode != randomMode) {
+        m_randomMode = randomMode;
         emit randomModeChanged(randomMode);
     }
 }
 
 void Player::setRepeatMode(RepeatMode repeatMode)
 {
-    if (_repeatMode != repeatMode) {
-        _repeatMode = repeatMode;
+    if (m_repeatMode != repeatMode) {
+        m_repeatMode = repeatMode;
         emit repeatModeChanged(repeatMode);
     }
 }
 
 void Player::pause()
 {
-    _phononPlayer->pause();
-    emit trackPaused((_phononPlayer->state() == Phonon::PausedState));
+    m_phononPlayer->pause();
+    emit trackPaused((m_phononPlayer->state() == Phonon::PausedState));
 }
 
 Player::MetaData Player::currentMetaData()
 {
     Player::MetaData data;
 
-    QString filename = _phononPlayer->currentSource().fileName();
+    QString filename = m_phononPlayer->currentSource().fileName();
 
     if ((!QFileInfo(filename).exists()) ||
-            (_phononPlayer->currentSource().type()==Phonon::MediaSource::Invalid)) {
+        (m_phononPlayer->currentSource().type()==Phonon::MediaSource::Invalid)) {
         return data;
     }
 
@@ -112,9 +116,9 @@ Player::MetaData Player::currentMetaData()
 
 void Player::stop()
 {
-    _phononPlayer->stop();
+    m_phononPlayer->stop();
     // Empty the source
-    _phononPlayer->setCurrentSource(Phonon::MediaSource());
+    m_phononPlayer->setCurrentSource(Phonon::MediaSource());
     emit trackChanged(MetaData());
 }
 

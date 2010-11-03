@@ -31,18 +31,18 @@ CollectionModel::CollectionModel(const QStringList &headers, QObject *parent)
     foreach (QString header, headers)
     rootData << header;
 
-    _rootItem = new CollectionItem(rootData);
+    m_rootItem = new CollectionItem(rootData);
     setSupportedDragActions(Qt::CopyAction);
 }
 
 CollectionModel::~CollectionModel()
 {
-    delete _rootItem;
+    delete m_rootItem;
 }
 
 int CollectionModel::columnCount(const QModelIndex & /* parent */) const
 {
-    return _rootItem->columnCount();
+    return m_rootItem->columnCount();
 }
 
 QVariant CollectionModel::data(const QModelIndex &index, int role) const
@@ -71,14 +71,14 @@ CollectionItem *CollectionModel::getItem(const QModelIndex &index) const
         CollectionItem *item = static_cast<CollectionItem*>(index.internalPointer());
         if (item) return item;
     }
-    return _rootItem;
+    return m_rootItem;
 }
 
 QVariant CollectionModel::headerData(int section, Qt::Orientation orientation,
                                      int role) const
 {
     if (orientation == Qt::Horizontal && role == Qt::DisplayRole)
-        return _rootItem->data(section);
+        return m_rootItem->data(section);
 
     return QVariant();
 }
@@ -103,7 +103,7 @@ bool CollectionModel::insertRows(int position, int rows, const QModelIndex &pare
     bool success;
 
     beginInsertRows(parent, position, position + rows - 1);
-    success = parentItem->insertChildren(position, rows, _rootItem->columnCount());
+    success = parentItem->insertChildren(position, rows, m_rootItem->columnCount());
     endInsertRows();
 
     return success;
@@ -117,7 +117,7 @@ QModelIndex CollectionModel::parent(const QModelIndex &index) const
     CollectionItem *childItem = getItem(index);
     CollectionItem *parentItem = childItem->parent();
 
-    if (parentItem == _rootItem)
+    if (parentItem == m_rootItem)
         return QModelIndex();
 
     return createIndex(parentItem->childNumber(), 0, parentItem);
@@ -162,7 +162,7 @@ bool CollectionModel::setHeaderData(int section, Qt::Orientation orientation, co
     if (role != Qt::EditRole || orientation != Qt::Horizontal)
         return false;
 
-    bool result = _rootItem->setData(section, value);
+    bool result = m_rootItem->setData(section, value);
 
     if (result)
         emit headerDataChanged(orientation, section, section);

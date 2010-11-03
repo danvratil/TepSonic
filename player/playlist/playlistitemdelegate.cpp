@@ -30,9 +30,9 @@ PlaylistItemDelegate::PlaylistItemDelegate(QObject *parent, PlaylistModel *playl
                                            PlaylistBrowser *playlistBrowser, PlaylistProxyModel *playlistProxyModel):
         QStyledItemDelegate(parent)
 {
-    _playlistModel = playlistModel;
-    _playlistBrowser = playlistBrowser;
-    _playlistProxyModel = playlistProxyModel;
+    m_playlistModel = playlistModel;
+    m_playlistBrowser = playlistBrowser;
+    m_playlistProxyModel = playlistProxyModel;
 
 
 }
@@ -45,10 +45,10 @@ void PlaylistItemDelegate::paint(QPainter *painter, const QStyleOptionViewItem &
     painter->setFont(option.font);
     painter->setPen(option.palette.text().color());
 
-    QModelIndex mappedIndex = _playlistProxyModel->mapToSource(index);
+    QModelIndex mappedIndex = m_playlistProxyModel->mapToSource(index);
 
-    if (mappedIndex.row() == _playlistModel->currentItem().row()) {
-        painter->fillRect(rect,option.palette.link());
+    if (mappedIndex.row() == m_playlistModel->currentItem().row()) {
+        painter->fillRect(rect, option.palette.link());
         painter->setPen(option.palette.highlightedText().color());
     } else if (option.state & QStyle::State_Selected) {
         painter->fillRect(rect,option.palette.highlight());
@@ -56,11 +56,11 @@ void PlaylistItemDelegate::paint(QPainter *painter, const QStyleOptionViewItem &
 
     painter->drawText(QRect(option.rect.left(),
                             option.rect.top(),
-                            _playlistBrowser->columnWidth(index.column()),
+                            m_playlistBrowser->columnWidth(index.column()),
                             option.rect.bottom()),
                       option.fontMetrics.elidedText(mappedIndex.data().toString(),
                                                     Qt::ElideRight,
-                                                    _playlistBrowser->columnWidth(mappedIndex.column()))
+                                                    m_playlistBrowser->columnWidth(mappedIndex.column()))
                       );
 
 }

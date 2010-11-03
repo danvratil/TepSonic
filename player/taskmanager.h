@@ -140,12 +140,12 @@ class TaskManager : public QObject
 
     private:
         //! Pointer to pointer to PlaylistModel
-        PlaylistModel **_playlistModel;
+        PlaylistModel **m_playlistModel;
 
         //! Pointer to pointer to CollectionModel
-        CollectionModel **_collectionModel;
+        CollectionModel **m_collectionModel;
 
-        QThreadPool *_threadPool;
+        QThreadPool *m_threadPool;
 };
 
 #endif // TASKMANAGER_H

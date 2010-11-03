@@ -24,6 +24,7 @@
 #include "playlistitem.h"
 #include "playlistproxymodel.h"
 #include "player.h"
+#include "playlistbrowser.h"
 
 #include <QDebug>
 
@@ -35,22 +36,22 @@ PlaylistModel::PlaylistModel(QObject *parent, const QStringList &headers, Playli
     foreach (QString header, headers)
         rootData << header;
 
-    _totalLength = 0;
-    _dbConnectionAvailable = true;
-    _currentItem = QModelIndex();
-    _proxyModel = playlistProxyModel;
+    m_totalLength = 0;
+    m_dbConnectionAvailable = true;
+    m_currentItem = QModelIndex();
+    m_proxyModel = playlistProxyModel;
 
-    rootItem = new PlaylistItem(rootData);
+    m_rootItem = new PlaylistItem(rootData);
 }
 
 PlaylistModel::~PlaylistModel()
 {
-    delete rootItem;
+    delete m_rootItem;
 }
 
 int PlaylistModel::columnCount(const QModelIndex & /* parent */) const
 {
-    return rootItem->columnCount();
+    return m_rootItem->columnCount();
 }
 
 QVariant PlaylistModel::data(const QModelIndex &index, int role) const
@@ -80,14 +81,14 @@ PlaylistItem *PlaylistModel::getItem(const QModelIndex &index) const
         PlaylistItem *item = static_cast<PlaylistItem*>(index.internalPointer());
         if (item) return item;
     }
-    return rootItem;
+    return m_rootItem;
 }
 
 QVariant PlaylistModel::headerData(int section, Qt::Orientation orientation,
                                    int role) const
 {
     if (orientation == Qt::Horizontal && role == Qt::DisplayRole)
-        return rootItem->data(section);
+        return m_rootItem->data(section);
 
     return QVariant();
 }
@@ -111,13 +112,13 @@ bool PlaylistModel::insertRows(int position, int rows, const QModelIndex &parent
     PlaylistItem *parentItem = getItem(parent);
     bool success;
 
-     _mutex.lock();
+     m_mutex.lock();
 
     beginInsertRows(parent, position, position + rows - 1);
-    success = parentItem->insertChildren(position, rows, rootItem->columnCount());
+    success = parentItem->insertChildren(position, rows, m_rootItem->columnCount());
     endInsertRows();
 
-     _mutex.unlock();
+     m_mutex.unlock();
 
     return success;
 }
@@ -130,7 +131,7 @@ QModelIndex PlaylistModel::parent(const QModelIndex &index) const
     PlaylistItem *childItem = getItem(index);
     PlaylistItem *parentItem = childItem->parent();
 
-    if (parentItem == rootItem)
+    if (parentItem == m_rootItem)
         return QModelIndex();
 
     return createIndex(parentItem->childNumber(), 0, parentItem);
@@ -145,34 +146,34 @@ bool PlaylistModel::removeRows(int position, int rows, const QModelIndex &parent
 
     int totalRemoveTime = 0;
     for (int i=position;i<position+rows;i++) {
-        QString trackLength = index(i,7,QModelIndex()).data().toString();
+        QString trackLength = index(i, 7, QModelIndex()).data().toString();
         if (trackLength.length()==5) {
             trackLength.prepend("00:");
         }
         QTime tl(0,0,0,0);
         totalRemoveTime += tl.secsTo(QTime::fromString(trackLength,"hh:mm:ss"));
 
-        if (i == _currentItem.row()) {
+        if (i == m_currentItem.row()) {
             renewCurrentItem = true;
         }
     }
 
-     _mutex.lock();
+     m_mutex.lock();
 
     beginRemoveRows(parent, position, position + rows - 1);
-    success = rootItem->removeChildren(position, rows);
+    success = m_rootItem->removeChildren(position, rows);
     endRemoveRows();
 
     if (renewCurrentItem) {
         setCurrentItem(index(position,0,QModelIndex()));
     }
 
-     _mutex.unlock();
+     m_mutex.unlock();
 
     if (success) {
         // Decrease total length of the playlist by total length of removed tracks
-        _totalLength -= totalRemoveTime;
-        emit playlistLengthChanged(_totalLength,rowCount(QModelIndex()));
+        m_totalLength -= totalRemoveTime;
+        emit playlistLengthChanged(m_totalLength,rowCount(QModelIndex()));
     }
 
     return success;
@@ -193,11 +194,11 @@ bool PlaylistModel::setData(const QModelIndex &index, const QVariant &value,
 
     PlaylistItem *item = getItem(index);
 
-     _mutex.lock();
+     m_mutex.lock();
 
     bool result = item->setData(index.column(), value);
 
-     _mutex.unlock();
+     m_mutex.unlock();
 
     if (result)
         emit dataChanged(index, index);
@@ -211,11 +212,11 @@ bool PlaylistModel::setHeaderData(int section, Qt::Orientation orientation,
     if (role != Qt::EditRole || orientation != Qt::Horizontal)
         return false;
 
-     _mutex.lock();
+     m_mutex.lock();
 
-    bool result = rootItem->setData(section, value);
+    bool result = m_rootItem->setData(section, value);
 
-     _mutex.unlock();
+     m_mutex.unlock();
 
     if (result)
         emit headerDataChanged(orientation, section, section);
@@ -231,26 +232,26 @@ bool PlaylistModel::insertItem(Player::MetaData metadata, int row)
     if (!insertRow(row, QModelIndex()))
         return false;
 
-    rootItem->child(row)->setData(0,QVariant(metadata.filename));
-    rootItem->child(row)->setData(1,QVariant(metadata.trackNumber));
-    rootItem->child(row)->setData(2,QVariant(metadata.artist));
-    rootItem->child(row)->setData(3,QVariant(metadata.title));
-    rootItem->child(row)->setData(4,QVariant(metadata.album));
-    rootItem->child(row)->setData(5,QVariant(metadata.genre));
-    rootItem->child(row)->setData(6,QVariant(metadata.year));
-    rootItem->child(row)->setData(7,QVariant(metadata.formattedLength));
-    rootItem->child(row)->setData(8,QVariant(QString::number(metadata.bitrate)+" kbps"));
+    m_rootItem->child(row)->setData(PlaylistBrowser::FilenameColumn,QVariant(metadata.filename));
+    m_rootItem->child(row)->setData(PlaylistBrowser::TrackColumn,QVariant(metadata.trackNumber));
+    m_rootItem->child(row)->setData(PlaylistBrowser::InterpretColumn,QVariant(metadata.artist));
+    m_rootItem->child(row)->setData(PlaylistBrowser::TracknameColumn,QVariant(metadata.title));
+    m_rootItem->child(row)->setData(PlaylistBrowser::AlbumColumn,QVariant(metadata.album));
+    m_rootItem->child(row)->setData(PlaylistBrowser::GenreColumn,QVariant(metadata.genre));
+    m_rootItem->child(row)->setData(PlaylistBrowser::YearColumn,QVariant(metadata.year));
+    m_rootItem->child(row)->setData(PlaylistBrowser::LengthColumn,QVariant(metadata.formattedLength));
+    m_rootItem->child(row)->setData(PlaylistBrowser::BitrateColumn,QVariant(QString::number(metadata.bitrate)+" kbps"));
 
-    _totalLength += (metadata.length/1000);
-    emit playlistLengthChanged(_totalLength, rowCount(QModelIndex()));
+    m_totalLength += (metadata.length/1000);
+    emit playlistLengthChanged(m_totalLength, rowCount(QModelIndex()));
 
     return true;
 }
 
 QModelIndex PlaylistModel::currentItem()
 {
-    if (_currentItem.isValid()) {
-        return _currentItem;
+    if (m_currentItem.isValid()) {
+        return m_currentItem;
     } else {
         return index(0,0,QModelIndex());
     }
@@ -262,9 +263,9 @@ void PlaylistModel::setCurrentItem(QModelIndex currentIndex)
         return;
 
     emit layoutAboutToBeChanged();
-    _currentItem = currentIndex;
+    m_currentItem = currentIndex;
 
-    rootItem->child(_currentItem.row())->setSelected(true);
+    m_rootItem->child(m_currentItem.row())->setSelected(true);
     emit layoutChanged();
 
 }
@@ -279,7 +280,7 @@ QModelIndex PlaylistModel::nextItem(QModelIndex index)
     }
 
     // remap the given index from PlaylistModel to PlaylistProxyModel (if possible)
-    QModelIndex mappedIndex = _proxyModel->mapFromSource(index);
+    QModelIndex mappedIndex = m_proxyModel->mapFromSource(index);
     if (!mappedIndex.isValid()) mappedIndex = index;
 
     if (index.row() >= rowCount()) {
@@ -287,9 +288,9 @@ QModelIndex PlaylistModel::nextItem(QModelIndex index)
     }
 
     // Get ModelIndex of the next item in the PlaylistProxyModel
-    QModelIndex prevItem =  _proxyModel->index(mappedIndex.row()+1,0,QModelIndex());
+    QModelIndex prevItem =  m_proxyModel->index(mappedIndex.row()+1, 0, QModelIndex());
     // Remap the result to PlaylistModel
-    return _proxyModel->mapToSource(prevItem);
+    return m_proxyModel->mapToSource(prevItem);
 }
 
 QModelIndex PlaylistModel::previousItem(QModelIndex index)
@@ -301,7 +302,7 @@ QModelIndex PlaylistModel::previousItem(QModelIndex index)
     }
 
     // remap the given index from PlaylistModel to PlaylistProxyModel (if possible)
-    QModelIndex mappedIndex = _proxyModel->mapFromSource(index);
+    QModelIndex mappedIndex = m_proxyModel->mapFromSource(index);
     if (!mappedIndex.isValid()) mappedIndex = index;
 
     if (index.row() == 0) {
@@ -309,8 +310,8 @@ QModelIndex PlaylistModel::previousItem(QModelIndex index)
     }
 
     // Get index of the previous item in PlaylistProxyModel
-    QModelIndex prevItem =  _proxyModel->index(mappedIndex.row()-1,0,QModelIndex());
+    QModelIndex prevItem =  m_proxyModel->index(mappedIndex.row()-1, 0, QModelIndex());
     // And remap the result to PlaylistModel
-    return _proxyModel->mapToSource(prevItem);
+    return m_proxyModel->mapToSource(prevItem);
 
  }

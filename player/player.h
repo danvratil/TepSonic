@@ -84,59 +84,59 @@ class Player: public QObject
       \return Returns current player repeat mode
       \sa setRepeatMode(), repeatModeChanged()
     */
-    RepeatMode repeatMode() { return _repeatMode; }
+    RepeatMode repeatMode() { return m_repeatMode; }
 
     //! Returns current random mode state
     /*!
       \return Returns true when random mode is enabled, false when it's disabled
       \sa setRandomMode(), randomModeChanged()
     */
-    bool randomMode() { return _randomMode; }
+    bool randomMode() { return m_randomMode; }
 
     //! Returns current media source
     /*!
       \return Returns current player media source
       \sa setTrack()
     */
-    Phonon::MediaSource currentSource() { return _phononPlayer->currentSource(); }
+    Phonon::MediaSource currentSource() { return m_phononPlayer->currentSource(); }
 
     //! Returns current player state
     /*!
       \return Returns current player state
       \sa stateChanged()
     */
-    Phonon::State playerState() { return _phononPlayer->state(); }
+    Phonon::State playerState() { return m_phononPlayer->state(); }
 
     //! Returns players error string
     /*!
       \return Returns description of a player failure
     */
-    QString errorString() { return _phononPlayer->errorString(); }
+    QString errorString() { return m_phononPlayer->errorString(); }
 
     //! Returns pointer to media object
     /*!
       \return Returns pointer to player Phonon MediaObject object
     */
-    Phonon::MediaObject* mediaObject() { return _phononPlayer; }
+    Phonon::MediaObject* mediaObject() { return m_phononPlayer; }
 
     //! Returns pointer to audio object
     /*!
       \return Returns pointer to player Phonon AudioOutput object
     */
-    Phonon::AudioOutput* audioOutput() { return _audioOutput; }
+    Phonon::AudioOutput* audioOutput() { return m_audioOutput; }
 
   private:
     //! Current repeat mode
-    RepeatMode _repeatMode;
+    RepeatMode m_repeatMode;
 
     //! Current random mode
-    bool _randomMode;
+    bool m_randomMode;
 
     //! Phonon MediaObject
-    Phonon::MediaObject *_phononPlayer;
+    Phonon::MediaObject *m_phononPlayer;
 
     //! Phonon AudioOutput
-    Phonon::AudioOutput *_audioOutput;
+    Phonon::AudioOutput *m_audioOutput;
 
  private slots:
     //! When a track is finished calls currentSource() and then emits trackFinished(MetaData) and trackFinished() signals
@@ -162,7 +162,7 @@ class Player: public QObject
     /*!
       \sa stateChanged()
     */
-    void play() { _phononPlayer->play(); }
+    void play() { m_phononPlayer->play(); }
 
     //! Pauses playback
     /*!

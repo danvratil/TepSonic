@@ -128,12 +128,12 @@ class CollectionItem: public QStandardItem
 
  private:
      //! List of children
-     QList<CollectionItem*> _childItems;
+     QList<CollectionItem*> m_childItems;
 
      //! List of values in columns
-     QVector<QVariant> _itemData;
+     QVector<QVariant> m_itemData;
 
      //! Pointer to parent item
-     CollectionItem *_parentItem;
+     CollectionItem *m_parentItem;
 };
 #endif // COLLECTIONITEM_H
