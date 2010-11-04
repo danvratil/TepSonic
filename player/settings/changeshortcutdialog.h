@@ -30,31 +30,34 @@ namespace Ui {
     class ChangeShortcutDialog;
 }
 
-class ChangeShortcutDialog : public QDialog
-{
-    Q_OBJECT
+namespace SettingsPages {
 
-public:
-    explicit ChangeShortcutDialog(QModelIndex index, QWidget *parent = 0);
-    ~ChangeShortcutDialog();
+    class ChangeShortcutDialog : public QDialog
+    {
+        Q_OBJECT
 
-protected:
-    void changeEvent(QEvent *e);
-    void keyReleaseEvent(QKeyEvent *e);
+        public:
+            explicit ChangeShortcutDialog(QModelIndex index, QWidget *parent = 0);
+            ~ChangeShortcutDialog();
 
-private:
-    Ui::ChangeShortcutDialog *m_ui;
-    QModelIndex m_index;
-    QKeySequence m_shortcut;
+        protected:
+            void changeEvent(QEvent *e);
+            void keyReleaseEvent(QKeyEvent *e);
 
-    QList<Qt::KeyboardModifiers> m_modifiers;
+        private:
+            ::Ui::ChangeShortcutDialog *m_ui;
+            QModelIndex m_index;
+            QKeySequence m_shortcut;
 
-private slots:
-    void accept();
+            QList<Qt::KeyboardModifiers> m_modifiers;
 
-signals:
-    void shortcutChanged(QModelIndex index, QKeySequence newshortcut);
+        private slots:
+            void accept();
 
-};
+        signals:
+            void shortcutChanged(QModelIndex index, QKeySequence newshortcut);
+
+    };
+}
 
 #endif // CHANGESHORTCUTDIALOG_H

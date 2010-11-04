@@ -19,34 +19,46 @@
  * Contributors: Petr Vaněk 
  */
 
-#include "preferencesdialog.h"
-#include "ui_preferencesdialog.h"
-#include "preferencespages.h"
+#include "settingsdialog.h"
+#include "ui_settingsdialog.h"
 #include "pluginsmanager.h"
 #include "mainwindow.h"
 #include "constants.h"
+
+#include "playerpage.h"
+#include "collectionspage.h"
+#include "pluginspage.h"
+#include "shortcutspage.h"
+#include "ui_playerpage.h"
+#include "ui_collectionspage.h"
+#include "ui_pluginspage.h"
+#include "ui_shortcutspage.h"
 
 #include "abstractplugin.h"
 
 #include <QFileDialog>
 #include <QDebug>
 
-PreferencesDialog::PreferencesDialog(MainWindow *parent):
-        _ui(new Ui::PreferencesDialog)
+SettingsDialog::SettingsDialog(MainWindow *parent):
+        _ui(new Ui::SettingsDialog),
+        _parent(parent)
 {
     extern PluginsManager *pluginsManager;
 
     _ui->setupUi(this);
+    _ui->pagesButtons->item(0)->setSelected(true);
+
+    connect(_ui->pagesButtons, SIGNAL(currentItemChanged(QListWidgetItem*, QListWidgetItem*)),
+            this, SLOT(changePage(QListWidgetItem*,QListWidgetItem*)));
 
 
-    _parent = parent;
+    _player = new SettingsPages::PlayerPage();
+    _collections = new SettingsPages::CollectionsPage();
+    _plugins = new SettingsPages::PluginsPage();
+    _shortcuts = new SettingsPages::ShortcutsPage();
 
-    _player = new PreferencesPages::Player;
-    _collections = new PreferencesPages::Collections;
-    _plugins = new PreferencesPages::Plugins;
-    _shortcuts = new PreferencesPages::Shortcuts;
-    connect(_collections,SIGNAL(rebuildCollections()),
-            this,SLOT(emitRebuildCollections()));
+    connect(_collections, SIGNAL(rebuildCollections()),
+            this, SLOT(emitRebuildCollections()));
     connect(_ui->buttonBox, SIGNAL(accepted()),
             this, SLOT(dialogAccepted()));
     connect(_plugins, SIGNAL(pluginDisabled(int)),
@@ -130,12 +142,12 @@ PreferencesDialog::PreferencesDialog(MainWindow *parent):
 
 }
 
-PreferencesDialog::~PreferencesDialog()
+SettingsDialog::~SettingsDialog()
 {
     delete _ui;
 }
 
-void PreferencesDialog::changeEvent(QEvent *e)
+void SettingsDialog::changeEvent(QEvent *e)
 {
     switch (e->type()) {
     case QEvent::LanguageChange:
@@ -146,7 +158,7 @@ void PreferencesDialog::changeEvent(QEvent *e)
     }
 }
 
-void PreferencesDialog::dialogAccepted()
+void SettingsDialog::dialogAccepted()
 {
 
     extern PluginsManager *pluginsManager;
@@ -200,13 +212,13 @@ void PreferencesDialog::dialogAccepted()
     this->close();
 }
 
-void PreferencesDialog::on_pagesButtons_currentItemChanged(QListWidgetItem* current, QListWidgetItem* previous)
+void SettingsDialog::changePage(QListWidgetItem* current, QListWidgetItem* previous)
 {
     Q_UNUSED(previous);
     _ui->pages->setCurrentIndex(_ui->pagesButtons->row(current));
 }
 
-void PreferencesDialog::emitRebuildCollections()
+void SettingsDialog::emitRebuildCollections()
 {
     // Save current state of collections configurations and emit rebuilding
 
@@ -229,7 +241,7 @@ void PreferencesDialog::emitRebuildCollections()
     emit rebuildCollections();
 }
 
-void PreferencesDialog::enablePlugin(int pluginIndex)
+void SettingsDialog::enablePlugin(int pluginIndex)
 {
     extern PluginsManager *pluginsManager;
 
@@ -243,7 +255,7 @@ void PreferencesDialog::enablePlugin(int pluginIndex)
     }
 }
 
-void PreferencesDialog::disablePlugin(int pluginIndex)
+void SettingsDialog::disablePlugin(int pluginIndex)
 {
     extern PluginsManager *pluginsManager;
 

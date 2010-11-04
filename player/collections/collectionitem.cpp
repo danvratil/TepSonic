@@ -22,35 +22,40 @@
 
 #include <QDebug>
 
-CollectionItem::CollectionItem(const QVector<QVariant> &data, CollectionItem *parent)
+CollectionItem::CollectionItem(const QVector<QVariant> &data, CollectionItem *parent):
+        m_itemData(data),
+        m_parentItem(parent)
 {
-    m_parentItem = parent;
-    m_itemData = data;
+    m_childItems = new QList<CollectionItem*>();
 }
 
 CollectionItem::~CollectionItem()
 {
-    qDeleteAll(m_childItems.begin(),m_childItems.end());
-    m_childItems.clear();
+    qDeleteAll(m_childItems->begin(),m_childItems->end());
+    m_childItems->clear();
+    delete m_childItems;
+    m_childItems = 0;
 }
 
 CollectionItem *CollectionItem::child(int index)
 {
-    if (index > m_childItems.count())
+    if (index > m_childItems->count())
         return NULL;
 
-    return m_childItems.value(index);
+    return m_childItems->value(index);
 }
 
 int CollectionItem::childCount() const
 {
-    return m_childItems.count();
+    if (m_childItems == 0) return 0;
+
+    return m_childItems->count();
 }
 
 int CollectionItem::childNumber() const
 {
     if (m_parentItem)
-        return m_parentItem->m_childItems.indexOf(const_cast<CollectionItem*>(this));
+        return m_parentItem->m_childItems->indexOf(const_cast<CollectionItem*>(this));
 
     return 0;
 }
@@ -70,13 +75,13 @@ QVariant CollectionItem::data(int column) const
 
 bool CollectionItem::insertChildren(int position, int count, int columns)
 {
-    if (position < 0 || position > m_childItems.size())
+    if (position < 0 || position > m_childItems->size())
         return false;
 
     for (int row = 0; row < count; ++row) {
         QVector<QVariant> data(columns);
         CollectionItem *item = new CollectionItem(data, this);
-        m_childItems.insert(position, item);
+        m_childItems->insert(position, item);
     }
 
     return true;
@@ -89,11 +94,11 @@ CollectionItem *CollectionItem::parent()
 
 bool CollectionItem::removeChildren(int position, int count)
 {
-    if (position < 0 || position + count > m_childItems.size())
+    if (position < 0 || position + count > m_childItems->size())
         return false;
 
     for (int row = 0; row < count; ++row)
-        delete m_childItems.takeAt(position);
+        delete m_childItems->takeAt(position);
 
     return true;
 }

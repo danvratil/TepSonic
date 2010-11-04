@@ -17,8 +17,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Cambridge, MA 02110-1301, USA.
  */
 
-#ifndef PREFERENCESDIALOG_H
-#define PREFERENCESDIALOG_H
+#ifndef SETTINGSDIALOG_H
+#define SETTINGSDIALOG_H
 
 #include <QtGui/QDialog>
 #include <QAbstractButton>
@@ -29,29 +29,27 @@
 #include <QListWidgetItem>
 
 namespace Ui {
-    class PreferencesDialog;
+    class SettingsDialog;
 }
 
-namespace PreferencesPages {
-    class Player;
-    class Plugins;
-    class Collections;
-    class Shortcuts;
+namespace SettingsPages {
+    class PlayerPage;
+    class PluginsPage;
+    class CollectionsPage;
+    class ShortcutsPage;
 }
 
 class MainWindow;
 
 
-//! PreferencesDialog is a dialog window with application settings
+//! SettingsDialog is a dialog window with application settings
 /*!
-  PreferencesDialog is subclassed from QDialog (is modal) and provides
+  SettingsDialog is subclassed from QDialog (is modal) and provides
   window with TepSonic configuration.
-  Before the dialog is opened main window calls method addPlugin() and so configuration interface
-  for plugins is added.
 */
-class PreferencesDialog : public QDialog {
+class SettingsDialog : public QDialog {
     Q_OBJECT
-    Q_DISABLE_COPY(PreferencesDialog)
+    Q_DISABLE_COPY(SettingsDialog)
 
     public:
         //! Constructor
@@ -59,10 +57,10 @@ class PreferencesDialog : public QDialog {
           In constructor UI is prepared and current preferences are loaded from settings file.
           \param parent pointer to main window
         */
-        PreferencesDialog(MainWindow *parent = 0);
+        SettingsDialog(MainWindow *parent = 0);
 
         //! Destructor
-        ~PreferencesDialog();
+        ~SettingsDialog();
 
     signals:
         //! Informs main window that rebuilding collections was requested
@@ -74,19 +72,19 @@ class PreferencesDialog : public QDialog {
 
     private:
         //! Dialog interface
-        Ui::PreferencesDialog *_ui;
+        Ui::SettingsDialog *_ui;
 
         //! Player page
-        PreferencesPages::Player *_player;
+        SettingsPages::PlayerPage *_player;
 
         //! Collections page
-        PreferencesPages::Collections *_collections;
+        SettingsPages::CollectionsPage *_collections;
 
         //! Plugins page
-        PreferencesPages::Plugins *_plugins;
+        SettingsPages::PluginsPage *_plugins;
 
         //! Shorcuts settings page
-        PreferencesPages::Shortcuts *_shortcuts;
+        SettingsPages::ShortcutsPage *_shortcuts;
 
         //! Main window
         MainWindow *_parent;
@@ -94,7 +92,7 @@ class PreferencesDialog : public QDialog {
     private slots:
 
         //! Called when button in the left list is clicked
-        void on_pagesButtons_currentItemChanged(QListWidgetItem* current, QListWidgetItem* previous);
+        void changePage(QListWidgetItem* current, QListWidgetItem* previous);
 
         //! Called when the dialog is closed via "OK" button
         /*!

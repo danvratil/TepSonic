@@ -38,6 +38,7 @@
 #include "player.h"
 #include "trayicon.h"
 
+
 class PlaylistItemDelegate;
 class PlaylistProxyModel;
 class CollectionModel;
@@ -232,6 +233,7 @@ public slots:
       \param filename name of file to be added
     */
     void addPlaylistItem(const QString &filename);
+
 
 private slots:
 

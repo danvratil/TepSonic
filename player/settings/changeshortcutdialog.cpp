@@ -21,6 +21,8 @@
 #include "changeshortcutdialog.h"
 #include "ui_changeshortcutdialog.h"
 
+using namespace SettingsPages;
+
 ChangeShortcutDialog::ChangeShortcutDialog(QModelIndex index, QWidget *parent) :
     QDialog(parent),
     m_ui(new Ui::ChangeShortcutDialog)

@@ -25,7 +25,7 @@
 
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-#include "preferencesdialog.h"
+#include "settings/settingsdialog.h"
 #include "playlist/playlistitemdelegate.h"
 #include "playlist/playlistproxymodel.h"
 #include "playlist/playlistmodel.h"
@@ -58,10 +58,10 @@
 #include <QDebug>
 
 MainWindow::MainWindow(Player *player):
-        m_canClose(false),
-        m_collectionProxyModel(NULL),
         m_collectionModel(NULL),
-        m_player(player)
+        m_collectionProxyModel(NULL),
+        m_player(player),
+        m_canClose(false)
 {
 
     m_settings = new QSettings(_CONFIGDIR + QDir::separator() + "main.conf",QSettings::IniFormat,this);
@@ -81,16 +81,14 @@ MainWindow::MainWindow(Player *player):
     QApplication::setWindowIcon(*m_appIcon);
 
 
+    // Create menus
+    createMenus();
+
     // Create tray
     m_trayIcon = new TrayIcon(*m_appIcon, this);
     m_trayIcon->setVisible(true);
     m_trayIcon->setContextMenu(m_trayIconMenu);
     m_trayIcon->setToolTip(tr("Player is stopped"));
-
-
-    // Create menu and bind global shortcutss
-    createMenus();
-    bindShortcuts();
 
 
     // Create label for displaying playlist length
@@ -111,10 +109,11 @@ MainWindow::MainWindow(Player *player):
                           << tr("Bitrate");
 
     m_playlistProxyModel = new PlaylistProxyModel(this);
+    m_playlistModel = new PlaylistModel(this, headers, m_playlistProxyModel);
+
     m_playlistProxyModel->setSourceModel(m_playlistModel);
     m_playlistProxyModel->setDynamicSortFilter(false);
 
-    m_playlistModel = new PlaylistModel(this, headers, m_playlistProxyModel);
     connect(m_playlistModel,SIGNAL(playlistLengthChanged(int,int)),
             this,SLOT(playlistLengthChanged(int,int)));
 
@@ -148,6 +147,19 @@ MainWindow::MainWindow(Player *player):
     }
 
 
+    // Set up task manager
+    m_taskManager = new TaskManager(&m_playlistModel,&m_collectionModel);
+
+
+    // Enable or disable collections
+    if (m_settings->value("Collections/EnableCollections",true).toBool()==true) {
+        setupCollections();
+        if (m_settings->value("Collections/AutoRebuildAfterStart",false).toBool()==true) {
+            m_taskManager->rebuildCollections();
+        }
+    } else {
+        m_ui->viewsTab->setTabEnabled(0,false);
+    }
 
     // Set up filesystem browser
     m_fileSystemModel = new QFileSystemModel(this);
@@ -164,28 +176,11 @@ MainWindow::MainWindow(Player *player):
     m_ui->filesystemBrowser->expandToDepth(depth);
 
 
-    // Set up task manager
-    m_taskManager = new TaskManager(&m_playlistModel,&m_collectionModel);
-
-
     // Restore main window geometry
     restoreGeometry(m_settings->value("Window/Geometry", saveGeometry()).toByteArray());
     restoreState(m_settings->value("Window/State", saveState()).toByteArray());
     m_ui->viewsSplitter->restoreState(m_settings->value("Window/ViewsSplit").toByteArray());
 
-
-    // Enable or disable collections
-    if (m_settings->value("Collections/EnableCollections",true).toBool()==true) {
-        setupCollections();
-        m_taskManager->populateCollections();
-        // Set collections as default tab
-        m_ui->viewsTab->setCurrentIndex(0);
-        if (m_settings->value("Collections/AutoRebuildAfterStart",false).toBool()==true) {
-            m_taskManager->rebuildCollections();
-        }
-    } else {
-        m_ui->viewsTab->setTabEnabled(0,false);
-    }
 
 
     // Create seek slider and volume slider
@@ -204,8 +199,8 @@ MainWindow::MainWindow(Player *player):
 
     // At the very end bind all signals and slots
     bindSignals();
-
-
+    // Bind global shortcuts
+    bindShortcuts();
 }
 
 
@@ -365,7 +360,7 @@ void MainWindow::bindSignals()
 
     // Menu 'TepSonic'
     connect(m_ui->actionSettings, SIGNAL(triggered(bool)),
-            this, SLOT(openSettings()));
+            this, SLOT(openSettingsDialog()));
     connect(m_ui->actionShow_Hide, SIGNAL(triggered(bool)),
             this, SLOT(showHideWindow()));
     connect(m_ui->actionQuit_TepSonic, SIGNAL(triggered(bool)),
@@ -529,11 +524,11 @@ void MainWindow::closeEvent(QCloseEvent* event)
 void MainWindow::openSettingsDialog()
 {
     // Show preferences dialog
-    PreferencesDialog *prefDlg = new PreferencesDialog(this);
-    connect(prefDlg,SIGNAL(rebuildCollections()),m_taskManager,SLOT(rebuildCollections()));
-    connect(prefDlg,SIGNAL(accepted()),this,SIGNAL(settingsAccepted()));
-    connect(prefDlg,SIGNAL(accepted()),this,SLOT(preferencesAccepted()));
-    prefDlg->exec();
+    SettingsDialog *settingsDlg= new SettingsDialog(this);
+    connect(settingsDlg,SIGNAL(rebuildCollections()),m_taskManager,SLOT(rebuildCollections()));
+    connect(settingsDlg,SIGNAL(accepted()),this,SIGNAL(settingsAccepted()));
+    connect(settingsDlg,SIGNAL(accepted()),this,SLOT(settingsDialogAccepted()));
+    settingsDlg->exec();
 
 }
 
@@ -545,7 +540,6 @@ void MainWindow::settingsDialogAccepted()
            working so no action is needed */
         if (m_collectionModel == NULL) {
           setupCollections();
-          m_taskManager->populateCollections();
         }
     } else {
         destroyCollections();
@@ -900,13 +894,15 @@ void MainWindow::setupCollections()
             m_collectionModel, SLOT(clear()));
 
 
-
     // Since we disabled the Proxy model, no search inputs are needed
     m_ui->label_2->hide();
     m_ui->colectionSearchEdit->hide();
     m_ui->clearCollectionSearch->hide();
 
     m_ui->viewsTab->setTabEnabled(0,true);
+
+    m_taskManager->populateCollections();
+
 }
 
 

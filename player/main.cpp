@@ -87,7 +87,6 @@ int main(int argc, char *argv[])
 
     mainWindow.show();
 
-
     for (int i=1; i<tepsonic.arguments().count(); i++) {
         qDebug() << tepsonic.arguments().at(i);
         QFileInfo param(tepsonic.arguments().at(i));

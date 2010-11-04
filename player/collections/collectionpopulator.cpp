@@ -28,6 +28,8 @@
 #include <QSqlDriver>
 #include <QVariant>
 
+#include <QDebug>
+
 CollectionPopulator::CollectionPopulator(CollectionModel **collectionModel)
 {
 
@@ -39,7 +41,6 @@ void CollectionPopulator::run()
 {
 
     if ((*m_collectionModel) == NULL) return;
-
 
     (*m_collectionModel)->clear();
 

@@ -99,6 +99,8 @@ QModelIndex CollectionModel::index(int row, int column, const QModelIndex &paren
 
 bool CollectionModel::insertRows(int position, int rows, const QModelIndex &parent)
 {
+    if (position < 0) return false;
+
     CollectionItem *parentItem = getItem(parent);
     bool success;
 
