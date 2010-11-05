@@ -139,6 +139,7 @@ bool CollectionModel::removeRows(int position, int rows, const QModelIndex &pare
 
 int CollectionModel::rowCount(const QModelIndex &parent) const
 {
+
     CollectionItem *parentItem = getItem(parent);
 
     return parentItem->childCount();
@@ -218,4 +219,15 @@ QStringList CollectionModel::getItemChildrenTracks(const QModelIndex &parent)
 
     return result;
 
+}
+
+void CollectionModel::addItem(QModelIndex parent, QString title, QString filename, QString data1, QString data2, QModelIndex *item)
+{
+    QModelIndex newItem = addChild(parent,
+                                   title,
+                                   filename,
+                                   data1,
+                                   data2);
+    if (item != 0)
+        *item = newItem;
 }

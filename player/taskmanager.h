@@ -22,6 +22,7 @@
 
 #include <QObject>
 #include <QThreadPool>
+#include <QModelIndex>
 
 #include "player.h"
 
@@ -66,6 +67,13 @@ class TaskManager : public QObject
 
         //! Emitted when data from PlaylistPopulator are send
         void insertItemToPlaylist(Player::MetaData metadata, int row);
+
+        void insertItemToCollections(QModelIndex parent,
+                                     QString title,
+                                     QString data1,
+                                     QString data2,
+                                     QString length,
+                                     QModelIndex *item);
 
         //! Emitted when the playlist is sucessfully saved
         void playlistSaved();

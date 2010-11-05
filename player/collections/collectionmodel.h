@@ -218,6 +218,13 @@
      */
      void clear();
 
+     void addItem(QModelIndex parent,
+                  QString title,
+                  QString filename,
+                  QString data1,
+                  QString data2,
+                  QModelIndex *item);
+
  };
 
 

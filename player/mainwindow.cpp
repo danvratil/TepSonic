@@ -58,8 +58,8 @@
 #include <QDebug>
 
 MainWindow::MainWindow(Player *player):
-        m_collectionModel(NULL),
-        m_collectionProxyModel(NULL),
+        m_collectionModel(0),
+        m_collectionProxyModel(0),
         m_player(player),
         m_canClose(false)
 {
@@ -69,7 +69,6 @@ MainWindow::MainWindow(Player *player):
 
     // Initialize pseudo-random numbers generator
     srand(time(NULL));
-
 
     // Create default UI
     m_ui = new Ui::MainWindow();
@@ -147,6 +146,14 @@ MainWindow::MainWindow(Player *player):
     }
 
 
+
+    // Restore main window geometry
+    restoreGeometry(m_settings->value("Window/Geometry", saveGeometry()).toByteArray());
+    restoreState(m_settings->value("Window/State", saveState()).toByteArray());
+    m_ui->viewsSplitter->restoreState(m_settings->value("Window/ViewsSplit").toByteArray());
+
+
+
     // Set up task manager
     m_taskManager = new TaskManager(&m_playlistModel,&m_collectionModel);
 
@@ -174,13 +181,6 @@ MainWindow::MainWindow(Player *player):
     m_ui->filesystemBrowser->expand(m_fileSystemModel->index(QDir::homePath()));
     int depth = QDir::homePath().split("/",QString::KeepEmptyParts).size();
     m_ui->filesystemBrowser->expandToDepth(depth);
-
-
-    // Restore main window geometry
-    restoreGeometry(m_settings->value("Window/Geometry", saveGeometry()).toByteArray());
-    restoreState(m_settings->value("Window/State", saveState()).toByteArray());
-    m_ui->viewsSplitter->restoreState(m_settings->value("Window/ViewsSplit").toByteArray());
-
 
 
     // Create seek slider and volume slider
@@ -892,6 +892,8 @@ void MainWindow::setupCollections()
             this, SLOT(collectionBrowserDoubleClick(QModelIndex)));
     connect(m_taskManager, SIGNAL(clearCollectionModel()),
             m_collectionModel, SLOT(clear()));
+    connect(m_taskManager, SIGNAL(insertItemToCollections(QModelIndex,QString,QString,QString,QString,QModelIndex*)),
+            m_collectionModel, SLOT(addItem(QModelIndex,QString,QString,QString,QString,QModelIndex*)));
 
 
     // Since we disabled the Proxy model, no search inputs are needed

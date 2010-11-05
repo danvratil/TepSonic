@@ -24,7 +24,8 @@
 
 QStringList SupportedFormats::getExtensionList()
 {
-	QString mimes = Phonon::BackendCapabilities::availableMimeTypes().join(" ");
+        QStringList availableMimeTypes = Phonon::BackendCapabilities::availableMimeTypes();
+        QString mimes = availableMimeTypes.join(" ");
 
 	QStringList checkList;
 	checkList << "ac3" << "flac" << "mp3" << "mp4" << "ogg" << "wav" << "wma";

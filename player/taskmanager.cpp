@@ -51,7 +51,8 @@ void TaskManager::addFilesToPlaylist(const QStringList &files, int row)
     PlaylistPopulator *playlistPopulator = new PlaylistPopulator();
     playlistPopulator->addFiles(files, row);
     connect(playlistPopulator, SIGNAL(insertItemToPlaylist(Player::MetaData,int)),
-            this, SIGNAL(insertItemToPlaylist(Player::MetaData,int)));
+            this, SIGNAL(insertItemToPlaylist(Player::MetaData,int)),
+            Qt::QueuedConnection);
     connect(playlistPopulator, SIGNAL(playlistPopulated()),
             this, SIGNAL(playlistPopulated()));
 
@@ -87,6 +88,9 @@ void TaskManager::populateCollections()
             this, SIGNAL(collectionsPopulated()));
     connect(collectionPopulator, SIGNAL(clearCollectionModel()),
             this, SIGNAL(clearCollectionModel()));
+    connect(collectionPopulator, SIGNAL(addChild(QModelIndex,QString,QString,QString,QString,QModelIndex*)),
+            this, SIGNAL(insertItemToCollections(QModelIndex,QString,QString,QString,QString,QModelIndex*)),
+            Qt::BlockingQueuedConnection);
 
     m_threadPool->start(collectionPopulator);
 }
