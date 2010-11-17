@@ -57,6 +57,11 @@ class PlaylistBrowser : public QTreeView
             BitrateColumn = 8
         };
 
+
+    public slots:
+        //! Set "stop-on-this" flag to selected items
+        void setStopTrack();
+
     protected:
         //! Called when items are dropped on the browser
         /*!

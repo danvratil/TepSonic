@@ -31,6 +31,7 @@ PlaylistItem::PlaylistItem(const QVector<QVariant> &data, PlaylistItem *parent)
     }
     m_parentItem = parent;
     m_selected = false;
+    m_stopOnThis = false;
 }
 
 PlaylistItem::~PlaylistItem()
@@ -121,4 +122,14 @@ void PlaylistItem::setSelected(bool selected)
 bool PlaylistItem::selected()
 {
     return m_selected;
+}
+
+void PlaylistItem::setStopOnThis(bool stop)
+{
+    m_stopOnThis = stop;
+}
+
+bool PlaylistItem::getStopOnThis()
+{
+    return m_stopOnThis;
 }

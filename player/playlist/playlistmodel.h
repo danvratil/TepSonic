@@ -202,6 +202,15 @@ class PlaylistModel : public QAbstractItemModel
      */
      QModelIndex previousItem(QModelIndex index = QModelIndex());
 
+     //! Set the track to stop at
+     /*!
+       \param track The index is mapped to the proxymodel!!
+     */
+     void setStopTrack(QModelIndex track);
+
+     //! Returns unmapped index of track to stop on
+     QModelIndex getStopTrack();
+
  public slots:
     //! Insert new item to the playlist
     /*!
@@ -234,6 +243,9 @@ class PlaylistModel : public QAbstractItemModel
      QModelIndex m_currentItem;
 
      PlaylistProxyModel *m_proxyModel;
+
+     //! unmapped index (index of original item in this model) of track to stop on
+     QModelIndex m_stopTrack;
 
  signals:
      //! This signal is emmited when length of playlist is changed

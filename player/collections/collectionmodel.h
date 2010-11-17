@@ -191,6 +191,7 @@
      */
      void redraw() { emit layoutChanged(); }
 
+
  protected:
      //! Returns list of accepted drop acctions.
      /*!

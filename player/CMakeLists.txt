@@ -199,7 +199,9 @@ target_link_libraries(tepsonic
 		      ${PHONON_LIBS}
               ${TAGLIB_LIBRARIES}
               ${QXT_LIBRARY}
+#	      /usr/lib64/libX11.so.6
 )
+
 if (APPLE)
     target_link_libraries(tepsonic ${CARBON_LIBRARY})
 endif (APPLE)

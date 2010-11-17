@@ -97,6 +97,7 @@ void CollectionPopulator::run()
                       "    WHERE album IN(SELECT album FROM view_various_artists)) "\
                       "ORDER BY interpret ASC");
     while (artistsQuery.next()) {
+        qDebug() << artistsQuery.value(1).toString();
         emit addChild(QModelIndex(),
                       artistsQuery.value(1).toString(),
                       QString(),

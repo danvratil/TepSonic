@@ -132,6 +132,18 @@ class PlaylistItem: public QStandardItem
      */
      bool selected();
 
+     //! Set "stop-on-this" flag
+     /*!
+       \param stop Set true to stop on this
+     */
+     void setStopOnThis(bool stop);
+
+     //! Get "stop-on-this" flag
+     /*!
+       \return Returns state of "stop-on-this" flag
+     */
+     bool getStopOnThis();
+
  private:
      //! List of item's child PlaylistItems
      QList<PlaylistItem*> m_childItems;
@@ -144,5 +156,8 @@ class PlaylistItem: public QStandardItem
 
      //! Holds current state of the item
      bool m_selected;
+
+     //! Stop on this track?
+     bool m_stopOnThis;
  };
 #endif // PLAYLISTITEM_H

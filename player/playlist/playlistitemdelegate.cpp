@@ -22,6 +22,7 @@
 #include "playlistmodel.h"
 #include "playlistbrowser.h"
 #include "playlistproxymodel.h"
+#include "playlistitem.h"
 
 #include <QRect>
 
@@ -47,7 +48,11 @@ void PlaylistItemDelegate::paint(QPainter *painter, const QStyleOptionViewItem &
 
     QModelIndex mappedIndex = m_playlistProxyModel->mapToSource(index);
 
-    if (mappedIndex.row() == m_playlistModel->currentItem().row()) {
+    if (static_cast<PlaylistItem*>(mappedIndex.internalPointer())->getStopOnThis()) {
+        // Find some bloody color for this!
+        //painter->fillRect(rect, option.palette.);
+        painter->setPen(option.palette.highlightedText().color());
+    } else if (mappedIndex.row() == m_playlistModel->currentItem().row()) {
         painter->fillRect(rect, option.palette.link());
         painter->setPen(option.palette.highlightedText().color());
     } else if (option.state & QStyle::State_Selected) {

@@ -274,6 +274,11 @@ void MainWindow::createMenus()
     m_collectionsPopupMenu->addAction(tr("Delete file from disk"),this,SLOT(removeFileFromDisk()));
     m_ui->collectionBrowser->setContextMenuPolicy(Qt::CustomContextMenu);
 
+    // Create playlist popup menu
+    m_playlistPopupMenu = new QMenu(this);
+    m_playlistPopupMenu->addAction(tr("Stop on this track"), m_ui->playlistBrowser, SLOT(setStopTrack()));
+    m_ui->playlistBrowser->setContextMenuPolicy(Qt::CustomContextMenu);
+
 }
 
 void MainWindow::bindShortcuts()
@@ -327,6 +332,9 @@ void MainWindow::bindSignals()
             this,SLOT(showPlaylistContextMenu(QPoint)));
     connect(m_ui->playlistSearchEdit, SIGNAL(textChanged(QString)),
             m_playlistProxyModel, SLOT(setFilterRegExp(QString)));
+    connect(m_ui->playlistBrowser, SIGNAL(customContextMenuRequested(QPoint)),
+            this, SLOT(showPlaylistContextMenu(QPoint)));
+
 
     // Menu 'Player'
     connect(m_ui->actionNext_track, SIGNAL(triggered(bool)),
@@ -655,7 +663,17 @@ void MainWindow::playPause()
 
 void MainWindow::nextTrack()
 {
+    // unmapped!!! index
     QModelIndex currentItem = m_playlistModel->currentItem();
+
+    // If the track we just played was "stop-on-this" track then stop playback
+    qDebug() << m_playlistModel->getStopTrack();
+    qDebug() << currentItem;
+
+    if (m_playlistModel->getStopTrack().row() == currentItem.row()) {
+        stopPlayer();
+        return;
+    }
 
     // 1) Random playback?
     if (m_player->randomMode()) {
@@ -682,7 +700,7 @@ void MainWindow::addPlaylistItem(const QString &filename)
 }
 
 
-void MainWindow::showPlaylistContextMenu(QPoint pos)
+void MainWindow::showPlaylistHeaderContextMenu(QPoint pos)
 {
     m_ui->menuVisible_columns->popup(m_ui->playlistBrowser->header()->mapToGlobal(pos));
 }
@@ -808,6 +826,16 @@ void MainWindow::trayIconMouseWheelScrolled(int delta)
 void MainWindow::showCollectionsContextMenu(QPoint pos)
 {
     m_collectionsPopupMenu->popup(m_ui->collectionBrowser->mapToGlobal(pos));
+}
+
+void MainWindow::showPlaylistContextMenu(QPoint pos)
+{
+    // When didn't click on item but on an empty area then disable all the items
+    bool itemSelected = m_ui->playlistBrowser->indexAt(pos).isValid();
+    for (int i = 0; i < m_playlistPopupMenu->actions().count(); i++)
+        m_playlistPopupMenu->actions().at(i)->setEnabled(itemSelected);
+
+    m_playlistPopupMenu->popup(m_ui->playlistBrowser->mapToGlobal(pos));
 }
 
 

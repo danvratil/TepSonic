@@ -21,6 +21,7 @@
 #include "playlistbrowser.h"
 #include "playlistmodel.h"
 #include "playlistproxymodel.h"
+#include "playlistitem.h"
 
 #include <QDir>
 #include <QDropEvent>
@@ -94,3 +95,8 @@ void PlaylistBrowser::keyPressEvent(QKeyEvent* event)
     }
 }
 
+void PlaylistBrowser::setStopTrack()
+{
+    // Ugh!
+    static_cast<PlaylistModel*>(static_cast<PlaylistProxyModel*>(model())->sourceModel())->setStopTrack(selectedIndexes().first());
+}

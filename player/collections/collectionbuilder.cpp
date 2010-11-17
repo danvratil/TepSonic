@@ -68,7 +68,7 @@ void CollectionBuilder::run()
                 QHash<QString,uint> dbFiles;
                 QStringList filters = SupportedFormats::getExtensionList();
 
-                {   // Populate dbFiles map by m_ALLm_ tracks from db
+                {   // Populate dbFiles map by ALL tracks from db
                     QSqlQuery query("SELECT filename, mtime FROM tracks;",*dbManager.sqlDb());
                     while (query.next()) {
                         dbFiles.insert(query.value(0).toString(),query.value(1).toUInt());
@@ -159,6 +159,8 @@ void CollectionBuilder::rebuildFolder(QStringList folder)
 
 void CollectionBuilder::insertTrack(QString filename, QSqlDatabase *sqlDB)
 {
+    qDebug() << filename;
+
     QFileInfo fileInfo(filename);
     QString fname = fileInfo.filePath().toUtf8();
     uint mtime = fileInfo.lastModified().toTime_t();

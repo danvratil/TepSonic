@@ -40,6 +40,7 @@ PlaylistModel::PlaylistModel(QObject *parent, const QStringList &headers, Playli
     m_dbConnectionAvailable = true;
     m_currentItem = QModelIndex();
     m_proxyModel = playlistProxyModel;
+    m_stopTrack = QModelIndex();
 
     m_rootItem = new PlaylistItem(rootData);
 }
@@ -315,3 +316,19 @@ QModelIndex PlaylistModel::previousItem(QModelIndex index)
     return m_proxyModel->mapToSource(prevItem);
 
  }
+
+void PlaylistModel::setStopTrack(QModelIndex track)
+{
+    QModelIndex mappedTrack = m_proxyModel->mapToSource(track);
+
+    if (m_stopTrack.isValid())
+        static_cast<PlaylistItem*>(m_stopTrack.internalPointer())->setStopOnThis(false);
+
+    static_cast<PlaylistItem*>(mappedTrack.internalPointer())->setStopOnThis(true);
+    m_stopTrack = mappedTrack;
+}
+
+QModelIndex PlaylistModel::getStopTrack()
+{
+    return m_stopTrack;
+}

@@ -149,6 +149,9 @@ private:
     //! Collections popup menu
     QMenu *m_collectionsPopupMenu;
 
+    //! Playlist popup menu
+    QMenu *m_playlistPopupMenu;
+
     //! Signal mapper that maps items in _ui->playlistVisibleColumn menu to togglePlaylistColumnVisible()
     /*!
       \sa togglePlaylistColumnVisible()
@@ -258,7 +261,7 @@ private slots:
     /*!
       \param pos XY coordinates of cursor (relatively to MainWindow top-left corner) where the context menu will popup
     */
-    void showPlaylistContextMenu(QPoint pos);
+    void showPlaylistHeaderContextMenu(QPoint pos);
 
     //! Toggles visibility of given playlist column
     /*!
@@ -396,6 +399,9 @@ private slots:
 
     //! Open the popup
     void showCollectionsContextMenu(QPoint pos);
+
+    //! Open the playlist popup menu
+    void showPlaylistContextMenu(QPoint pos);
 
     //! Deletes file locally on hardisk and calls for collections rebuild
     void removeFileFromDisk();

@@ -99,7 +99,3 @@ void CollectionBrowser::keyPressEvent(QKeyEvent* event)
     }
 
 }
-
-
-
-
