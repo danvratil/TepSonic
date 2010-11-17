@@ -321,26 +321,11 @@ void PlaylistModel::setStopTrack(QModelIndex track)
 {
     QModelIndex mappedTrack = m_proxyModel->mapToSource(track);
 
-    // if there was another stop-on-this track, then unmark it
-    PlaylistItem* oldItem = static_cast<PlaylistItem*>(m_stopTrack.internalPointer());
-    if(m_stopTrack.isValid() && oldItem)
-        oldItem->setStopOnThis(false);
-
-    // if the selected track is the same as the current then just unmark it (done above) and leave
-    if (mappedTrack.row() == m_stopTrack.row()) return;
+    if (m_stopTrack.isValid())
+        static_cast<PlaylistItem*>(m_stopTrack.internalPointer())->setStopOnThis(false);
 
     static_cast<PlaylistItem*>(mappedTrack.internalPointer())->setStopOnThis(true);
     m_stopTrack = mappedTrack;
-    // this was unselect-only event, we're done here
-    if(mappedTrack == m_stopTrack || !mappedTrack.isValid())
-        return;
-
-    PlaylistItem* item = static_cast<PlaylistItem*>(mappedTrack.internalPointer());
-
-    if (item) {
-        item->setStopOnThis(true);
-        m_stopTrack = mappedTrack;
-    }
 }
 
 QModelIndex PlaylistModel::getStopTrack()

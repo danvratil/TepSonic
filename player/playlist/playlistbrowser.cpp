@@ -97,15 +97,6 @@ void PlaylistBrowser::keyPressEvent(QKeyEvent* event)
 
 void PlaylistBrowser::setStopTrack()
 {
-    PlaylistProxyModel* ppmodel = qobject_cast<PlaylistProxyModel*>(model());
-
-    if(!ppmodel)
-        return;
-
-    PlaylistModel* pmodel = qobject_cast<PlaylistModel*>(ppmodel->sourceModel());
-
-    if(!pmodel)
-        return;
-
-    pmodel->setStopTrack(selectedIndexes().first());
+    // Ugh!
+    static_cast<PlaylistModel*>(static_cast<PlaylistProxyModel*>(model())->sourceModel())->setStopTrack(selectedIndexes().first());
 }
