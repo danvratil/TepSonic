@@ -339,7 +339,7 @@ private slots:
 
     //! Removes all items from playlist
     void clearPlaylist() {
-        m_playlistModel->removeRows(0, m_playlistModel->rowCount(QModelIndex()), QModelIndex());
+        m_playlistModel->clear();
     }
 
     //! Opens settings dialog

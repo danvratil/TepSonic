@@ -227,6 +227,9 @@ class PlaylistModel : public QAbstractItemModel
     */
     PlaylistItem *getItem(const QModelIndex &index) const;
 
+    //! Clear the playlist
+    void clear();
+
  private:
 
 

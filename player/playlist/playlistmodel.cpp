@@ -333,3 +333,9 @@ QModelIndex PlaylistModel::getStopTrack()
 {
     return m_stopTrack;
 }
+
+void PlaylistModel::clear()
+{
+    removeRows(0, rowCount(QModelIndex()), QModelIndex());
+    m_stopTrack = QModelIndex();
+}
