@@ -276,7 +276,7 @@ void MainWindow::createMenus()
 
     // Create playlist popup menu
     m_playlistPopupMenu = new QMenu(this);
-    m_playlistPopupMenu->addAction(tr("Stop on this track"), m_ui->playlistBrowser, SLOT(setStopTrack()));
+    m_playlistPopupMenu->addAction(tr("Stop after this track"), m_ui->playlistBrowser, SLOT(setStopTrack()));
     m_ui->playlistBrowser->setContextMenuPolicy(Qt::CustomContextMenu);
 
 }
@@ -334,6 +334,8 @@ void MainWindow::bindSignals()
             m_playlistProxyModel, SLOT(setFilterRegExp(QString)));
     connect(m_ui->playlistBrowser, SIGNAL(customContextMenuRequested(QPoint)),
             this, SLOT(showPlaylistContextMenu(QPoint)));
+    connect(m_ui->playlistBrowser, SIGNAL(setTrack(int)),
+            this, SLOT(setTrack(int)));
 
 
     // Menu 'Player'

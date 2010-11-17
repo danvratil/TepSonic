@@ -31,6 +31,7 @@
 #include <QLabel>
 #include <QSystemTrayIcon>
 #include <QFileSystemModel>
+#include <QKeyEvent>
 
 
 // These classes are used in inline methods
@@ -203,12 +204,6 @@ private:
     */
     void destroyCollections();
 
-    //! Set as current track the track on given row in playlist
-    /*!
-      \param row location of the new track in playlist
-    */
-    void setTrack(int row);
-
 
 protected:
     //! Close event handler
@@ -236,6 +231,12 @@ public slots:
       \param filename name of file to be added
     */
     void addPlaylistItem(const QString &filename);
+
+    //! Set as current track the track on given row in playlist
+    /*!
+      \param row location of the new track in playlist
+    */
+    void setTrack(int row);
 
 
 private slots:

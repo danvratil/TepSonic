@@ -99,6 +99,12 @@ class PlaylistBrowser : public QTreeView
          */
         void addedFiles(QStringList files, int row);
 
+        /**
+         * Passes number of row that was selected
+         * \param row selected row
+         */
+        void setTrack(int row);
+
 };
 
 #endif // PLAYLISTBROWSER_H
