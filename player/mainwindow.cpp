@@ -173,7 +173,9 @@ MainWindow::MainWindow(Player *player):
     m_fileSystemModel->setRootPath(QDir::rootPath());
     m_fileSystemModel->setNameFilters(SupportedFormats::getExtensionList());
     m_ui->filesystemBrowser->setModel(m_fileSystemModel);
-    m_ui->filesystemBrowser->setRootIndex(m_fileSystemModel->index(QDir::rootPath()));
+    QString fsbpath = m_settings->value("LastSession/LastFSBPath", QDir::homePath()).toString();
+    m_ui->filesystemBrowser->setRootIndex(m_fileSystemModel->index(fsbpath));
+    m_ui->fsbPath->setText(fsbpath);
 
 
 
@@ -183,7 +185,7 @@ MainWindow::MainWindow(Player *player):
 
 
     // Load last playlist
-    if (m_settings->value("Preferences/RestoreSession").toBool()) {
+    if (m_settings->value("Preferences/RestoreSession", true).toBool()) {
         m_taskManager->addFileToPlaylist(QString(_CONFIGDIR).append("/last.m3u"));
         m_player->setRandomMode(m_settings->value("LastSession/RandomMode",false).toBool());
         m_player->setRepeatMode(Player::RepeatMode(m_settings->value("LastSession/RepeatMode",0).toInt()));
@@ -213,8 +215,11 @@ MainWindow::~MainWindow()
     m_settings->setValue("Window/PlaylistColumnsStates", playlistColumnsStates);
     m_settings->setValue("Window/PlaylistColumnsWidths", playlistColumnsWidths);
 
-    m_settings->setValue("LastSession/RepeatMode", int(m_player->repeatMode()));
-    m_settings->setValue("LastSession/RandomMode", m_player->randomMode());
+    m_settings->setValue("LastSession/LastFSBPath", m_fileSystemModel->filePath(m_ui->filesystemBrowser->rootIndex()));
+    if (m_settings->value("Preferences/RestoreSession", true).toBool()) {
+        m_settings->setValue("LastSession/RepeatMode", int(m_player->repeatMode()));
+        m_settings->setValue("LastSession/RandomMode", m_player->randomMode());
+    }
 
     // Save current playlist to file
     m_taskManager->savePlaylistToFile(QString(_CONFIGDIR).append("/last.m3u"));

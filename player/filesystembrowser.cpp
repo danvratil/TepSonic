@@ -65,11 +65,14 @@ void FileSystemBrowser::setRootDir(QModelIndex dir)
     if (!fsmodel) return;
 
     QString path = fsmodel->filePath(dir);
+
+    // If the selected item is a file then add it to playlist
     if (fsmodel->fileInfo(dir).isFile()) {
         emit addTrackToPlaylist(fsmodel->filePath(dir));
         return;
     }
 
+    // Prevent from having two same items in backDirs in row
     if ((m_backDirs.isEmpty()) || (m_backDirs.first() != fsmodel->filePath(rootIndex())))
         m_backDirs.prepend(fsmodel->filePath(rootIndex()));
 
