@@ -48,8 +48,7 @@ void PlaylistItemDelegate::paint(QPainter *painter, const QStyleOptionViewItem &
 
     QModelIndex mappedIndex = m_playlistProxyModel->mapToSource(index);
 
-    if (static_cast<PlaylistItem*>(mappedIndex.internalPointer())->getStopOnThis()) {
-        // Find some bloody color for this!
+    if (m_playlistModel->getStopTrack().row() == mappedIndex.row()) {
         painter->fillRect(rect, option.palette.dark().color());
         painter->setPen(option.palette.light().color());
     } else if (mappedIndex.row() == m_playlistModel->currentItem().row()) {

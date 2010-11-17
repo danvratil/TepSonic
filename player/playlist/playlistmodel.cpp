@@ -266,7 +266,6 @@ void PlaylistModel::setCurrentItem(QModelIndex currentIndex)
     emit layoutAboutToBeChanged();
     m_currentItem = currentIndex;
 
-    m_rootItem->child(m_currentItem.row())->setSelected(true);
     emit layoutChanged();
 
 }
@@ -321,24 +320,13 @@ void PlaylistModel::setStopTrack(QModelIndex track)
 {
     QModelIndex mappedTrack = m_proxyModel->mapToSource(track);
 
-    // if there was another stop-on-this track, then unmark it
-    PlaylistItem* oldItem = static_cast<PlaylistItem*>(m_stopTrack.internalPointer());
-
-    if (oldItem) {
-        // if the old stop-on-this track is the same as the new one, toggle it
-        if (mappedTrack == m_stopTrack) {
-            oldItem->setStopOnThis(!oldItem->getStopOnThis());
-            return;
-        } else // if not, just turn it off
-            oldItem->setStopOnThis(false);
+    // if the current stop-on-this track is the same as the new one, toggle it
+    if (mappedTrack == m_stopTrack) {
+        m_stopTrack = QModelIndex();
+        return;
     }
 
-    PlaylistItem* item = static_cast<PlaylistItem*>(mappedTrack.internalPointer());
-
-    if (item) {
-        item->setStopOnThis(true);
-        m_stopTrack = mappedTrack;
-    }
+    m_stopTrack = mappedTrack;
 }
 
 QModelIndex PlaylistModel::getStopTrack()
