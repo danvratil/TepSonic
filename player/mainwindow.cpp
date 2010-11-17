@@ -328,7 +328,7 @@ void MainWindow::bindSignals()
     connect(m_ui->clearPlaylistSearch, SIGNAL(clicked()),
             this, SLOT(clearPlaylistSearch()));
     connect(m_ui->playlistBrowser->header(),SIGNAL(customContextMenuRequested(QPoint)),
-            this,SLOT(showPlaylistContextMenu(QPoint)));
+            this,SLOT(showPlaylistHeaderContextMenu(QPoint)));
     connect(m_ui->playlistSearchEdit, SIGNAL(textChanged(QString)),
             m_playlistProxyModel, SLOT(setFilterRegExp(QString)));
     connect(m_ui->playlistBrowser, SIGNAL(customContextMenuRequested(QPoint)),
@@ -731,7 +731,7 @@ void MainWindow::showPlaylistHeaderContextMenu(QPoint pos)
 
 void MainWindow::togglePlaylistColumnVisibility(int column)
 {
-    m_ui->playlistBrowser->setColumnHidden(column,m_ui->playlistBrowser->isColumnHidden(column));
+    m_ui->playlistBrowser->setColumnHidden(column,(! m_ui->playlistBrowser->isColumnHidden(column)));
 }
 
 
