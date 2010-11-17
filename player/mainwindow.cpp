@@ -173,14 +173,8 @@ MainWindow::MainWindow(Player *player):
     m_fileSystemModel->setRootPath(QDir::rootPath());
     m_fileSystemModel->setNameFilters(SupportedFormats::getExtensionList());
     m_ui->filesystemBrowser->setModel(m_fileSystemModel);
-    // Hide Size, Type and Created/Modified columns
-    m_ui->filesystemBrowser->hideColumn(1);
-    m_ui->filesystemBrowser->hideColumn(2);
-    m_ui->filesystemBrowser->hideColumn(3);
-    // Automatically expand home dir
-    m_ui->filesystemBrowser->expand(m_fileSystemModel->index(QDir::homePath()));
-    int depth = QDir::homePath().split("/",QString::KeepEmptyParts).size();
-    m_ui->filesystemBrowser->expandToDepth(depth);
+    m_ui->filesystemBrowser->setRootIndex(m_fileSystemModel->index(QDir::rootPath()));
+
 
 
     // Create seek slider and volume slider
@@ -336,6 +330,28 @@ void MainWindow::bindSignals()
             this, SLOT(showPlaylistContextMenu(QPoint)));
     connect(m_ui->playlistBrowser, SIGNAL(setTrack(int)),
             this, SLOT(setTrack(int)));
+
+    // Filesystem browser
+    connect(m_ui->fsbBackBtn, SIGNAL(clicked()),
+            m_ui->filesystemBrowser, SLOT(goBack()));
+    connect(m_ui->fsbFwBtn, SIGNAL(clicked()),
+            m_ui->filesystemBrowser, SLOT(goForward()));
+    connect(m_ui->fsbGoHomeBtn, SIGNAL(clicked()),
+            m_ui->filesystemBrowser, SLOT(goHome()));
+    connect(m_ui->fsbCdUpBtn, SIGNAL(clicked()),
+            m_ui->filesystemBrowser, SLOT(cdUp()));
+    connect(m_ui->fsbPath, SIGNAL(textChanged(QString)),
+            m_ui->filesystemBrowser, SLOT(goToDir(QString)));
+    connect(m_ui->filesystemBrowser, SIGNAL(pathChanged(QString)),
+            m_ui->fsbPath, SLOT(setText(QString)));
+    connect(m_ui->filesystemBrowser, SIGNAL(addTrackToPlaylist(QString)),
+            m_taskManager, SLOT(addFileToPlaylist(QString)));
+    connect(m_ui->filesystemBrowser, SIGNAL(disableBack(bool)),
+            m_ui->fsbBackBtn, SLOT(setDisabled(bool)));
+    connect(m_ui->filesystemBrowser, SIGNAL(disableForward(bool)),
+            m_ui->fsbFwBtn, SLOT(setDisabled(bool)));
+    connect(m_ui->filesystemBrowser, SIGNAL(disableCdUp(bool)),
+            m_ui->fsbCdUpBtn, SLOT(setDisabled(bool)));
 
 
     // Menu 'Player'
