@@ -197,17 +197,20 @@ void FileSystemBrowser::keyPressEvent(QKeyEvent *event)
         goBack();
         event->accept();
     }
+
     // Qt will translate this to platform-native shortcut for "Forward"
     else if (event->matches(QKeySequence::Forward)) {
         goForward();
         event->accept();
     }
+
     // Backspace or Alt+Up for "Up". There is no predefined key sequence in Qt for this
     else if ((event->key() == Qt::Key_Backspace) ||
         ((event->modifiers() == Qt::AltModifier) && (event->key() == Qt::Key_Up))) {
         cdUp();
         event->accept();
     }
+
     // Alt+Home or Homepage button (this must be tested because I don't have such button) to
     // navigate to home dir
     else if (((event->modifiers() == Qt::AltModifier) && (event->key() == Qt::Key_Home))
@@ -215,6 +218,7 @@ void FileSystemBrowser::keyPressEvent(QKeyEvent *event)
         goHome();
         event->accept();
     }
+
     // Arrow up to select an item above current item (or last item when non is selected)
     else if (event->key() == Qt::Key_Up) {
         QFileSystemModel *fsmodel = qobject_cast<QFileSystemModel*>(model());
@@ -222,10 +226,13 @@ void FileSystemBrowser::keyPressEvent(QKeyEvent *event)
         QModelIndex newIndex = fsmodel->index(currentIndex().row()-1,0, rootIndex());
         if (newIndex.isValid())
             setCurrentIndex(newIndex);
-        else
-            setCurrentIndex(fsmodel->index(0, 0, rootIndex()));
+        else {
+            int row = fsmodel->rowCount(rootIndex())-1;
+            setCurrentIndex(fsmodel->index(row,0, rootIndex()));
+        }
         event->accept();
     }
+
     // Arrow down to select an item below current item (or first item when non is selected)
     else if (event->key() == Qt::Key_Down) {
         QFileSystemModel *fsmodel = qobject_cast<QFileSystemModel*>(model());
@@ -233,10 +240,12 @@ void FileSystemBrowser::keyPressEvent(QKeyEvent *event)
         QModelIndex newIndex = fsmodel->index(currentIndex().row()+1,0, rootIndex());
         if (newIndex.isValid())
             setCurrentIndex(newIndex);
-        else
-            setCurrentIndex(fsmodel->index(fsmodel->rowCount(rootIndex()),0, rootIndex()));
+        else {
+            setCurrentIndex(fsmodel->index(0, 0, rootIndex()));
+        }
         event->accept();
     }
+
     // Enter key to enter selected folder or add selected track to playlist
     else if ((event->key() == Qt::Key_Enter) ||
         (event->key() == Qt::Key_Return)) {

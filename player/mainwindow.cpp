@@ -172,6 +172,7 @@ MainWindow::MainWindow(Player *player):
     m_fileSystemModel = new QFileSystemModel(this);
     m_fileSystemModel->setRootPath(QDir::rootPath());
     m_fileSystemModel->setNameFilters(SupportedFormats::getExtensionList());
+    m_fileSystemModel->setNameFilterDisables(false);
     m_ui->filesystemBrowser->setModel(m_fileSystemModel);
     QString fsbpath = m_settings->value("LastSession/LastFSBPath", QDir::homePath()).toString();
     m_ui->filesystemBrowser->setRootIndex(m_fileSystemModel->index(fsbpath));
