@@ -50,8 +50,8 @@ void PlaylistItemDelegate::paint(QPainter *painter, const QStyleOptionViewItem &
 
     if (static_cast<PlaylistItem*>(mappedIndex.internalPointer())->getStopOnThis()) {
         // Find some bloody color for this!
-        //painter->fillRect(rect, option.palette.);
-        painter->setPen(option.palette.highlightedText().color());
+        painter->fillRect(rect, option.palette.dark().color());
+        painter->setPen(option.palette.light().color());
     } else if (mappedIndex.row() == m_playlistModel->currentItem().row()) {
         painter->fillRect(rect, option.palette.link());
         painter->setPen(option.palette.highlightedText().color());
