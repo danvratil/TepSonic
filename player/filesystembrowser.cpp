@@ -74,6 +74,7 @@ void FileSystemBrowser::setRootDir(QModelIndex dir)
         m_backDirs.prepend(fsmodel->filePath(rootIndex()));
 
     setRootIndex(fsmodel->index(path));
+    setCurrentIndex(QModelIndex());
 
     emit pathChanged(path);
 
@@ -93,6 +94,7 @@ void FileSystemBrowser::goBack()
 
     QString newpath = m_backDirs.takeFirst();
     setRootIndex(fsmodel->index(newpath));
+    setCurrentIndex(QModelIndex());
 
     emit pathChanged(newpath);
 
@@ -113,6 +115,7 @@ void FileSystemBrowser::goForward()
 
     QString newpath = m_forwardDirs.takeFirst();
     setRootIndex(fsmodel->index(newpath));
+    setCurrentIndex(QModelIndex());
 
     emit pathChanged(newpath);
 
@@ -127,11 +130,16 @@ void FileSystemBrowser::cdUp()
     QFileSystemModel *fsmodel = qobject_cast<QFileSystemModel*>(model());
     if (!fsmodel) return;
 
-    m_backDirs.prepend(fsmodel->filePath(rootIndex()));
-
     QModelIndex previousItem = rootIndex().parent();
 
+    if (fsmodel->filePath(rootIndex().parent()).isEmpty())
+        return;
+
+    m_backDirs.prepend(fsmodel->filePath(rootIndex()));
+
+
     setRootIndex(previousItem);
+    setCurrentIndex(QModelIndex());
 
     emit disableCdUp(fsmodel->filePath(previousItem) == QDir::rootPath());
     emit pathChanged(fsmodel->filePath(previousItem));
@@ -146,6 +154,7 @@ void FileSystemBrowser::goHome()
     m_backDirs.prepend(fsmodel->filePath(rootIndex()));
 
     setRootIndex(fsmodel->index(QDir::homePath()));
+    setCurrentIndex(QModelIndex());
 
     emit pathChanged(QDir::homePath());
 
@@ -169,6 +178,7 @@ void FileSystemBrowser::goToDir(QString newPath)
     m_backDirs.prepend(fsmodel->filePath(rootIndex()));
 
     setRootIndex(fsmodel->index(newPath));
+    setCurrentIndex(QModelIndex());
 
     emit pathChanged(newPath);
 
@@ -179,23 +189,55 @@ void FileSystemBrowser::goToDir(QString newPath)
 
 void FileSystemBrowser::keyPressEvent(QKeyEvent *event)
 {
-    // Qt will translate these sequences to OS' native shortcut
+    // Qt will translate this to platform-native shortcut for "Back"
     if (event->matches(QKeySequence::Back)) {
         goBack();
+        event->accept();
     }
-    if (event->matches(QKeySequence::Forward)) {
+    // Qt will translate this to platform-native shortcut for "Forward"
+    else if (event->matches(QKeySequence::Forward)) {
         goForward();
+        event->accept();
     }
-
-    // Qt does not have translation for 'cd up' so we are using the intuitive backspace
-    if (event->key() == Qt::Key_Backspace) {
+    // Backspace or Alt+Up for "Up". There is no predefined key sequence in Qt for this
+    else if ((event->key() == Qt::Key_Backspace) ||
+        ((event->modifiers() == Qt::AltModifier) && (event->key() == Qt::Key_Up))) {
         cdUp();
+        event->accept();
     }
-
-    // Qt also does not have translation for 'go home', so we are using Alt+Home or
-    // Homepage button (this should be tested somewhere because I don't have this button)
-    if (((event->modifiers() == Qt::AltModifier) && (event->key() == Qt::Key_Home))
+    // Alt+Home or Homepage button (this must be tested because I don't have such button) to
+    // navigate to home dir
+    else if (((event->modifiers() == Qt::AltModifier) && (event->key() == Qt::Key_Home))
         || (event->key() == Qt::Key_HomePage)) {
         goHome();
+        event->accept();
+    }
+    // Arrow up to select an item above current item (or last item when non is selected)
+    else if (event->key() == Qt::Key_Up) {
+        QFileSystemModel *fsmodel = qobject_cast<QFileSystemModel*>(model());
+        if (!fsmodel) return;
+        QModelIndex newIndex = fsmodel->index(currentIndex().row()-1,0, rootIndex());
+        if (newIndex.isValid())
+            setCurrentIndex(newIndex);
+        else
+            setCurrentIndex(fsmodel->index(0, 0, rootIndex()));
+        event->accept();
+    }
+    // Arrow down to select an item below current item (or first item when non is selected)
+    else if (event->key() == Qt::Key_Down) {
+        QFileSystemModel *fsmodel = qobject_cast<QFileSystemModel*>(model());
+        if (!fsmodel) return;
+        QModelIndex newIndex = fsmodel->index(currentIndex().row()+1,0, rootIndex());
+        if (newIndex.isValid())
+            setCurrentIndex(newIndex);
+        else
+            setCurrentIndex(fsmodel->index(fsmodel->rowCount(rootIndex()),0, rootIndex()));
+        event->accept();
+    }
+    // Enter key to enter selected folder or add selected track to playlist
+    else if ((event->key() == Qt::Key_Enter) ||
+        (event->key() == Qt::Key_Return)) {
+        setRootDir(currentIndex());
+        event->accept();
     }
 }
