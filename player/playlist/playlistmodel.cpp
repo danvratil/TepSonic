@@ -157,6 +157,9 @@ bool PlaylistModel::removeRows(int position, int rows, const QModelIndex &parent
         if (i == m_currentItem.row()) {
             renewCurrentItem = true;
         }
+        if (i == m_stopTrack.row()) {
+            m_stopTrack = QModelIndex();
+        }
     }
 
      m_mutex.lock();
