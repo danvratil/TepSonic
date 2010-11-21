@@ -67,7 +67,7 @@ void PluginsManager::loadPlugins()
        Putting this folder first will also result in preferring these plugins before
        same-called plugins installed somewhere in system */
 #ifdef Q_WS_WIN
-    pluginsDir << qApp->applicationDirPath()+QDir::separator()+"plugins";
+    pluginsDirs << qApp->applicationDirPath()+QDir::separator()+"plugins";
 #endif
 #ifdef Q_WS_MAC
     #ifdef APPLEBUNDLE
