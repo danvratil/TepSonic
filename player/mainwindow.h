@@ -380,6 +380,9 @@ private slots:
         QMessageBox::aboutQt(this,tr("About Qt"));
     }
 
+    //! Shows dialog with list of currently supported audio formats
+    void showSupportedFormats();
+
     //! Called when new track is set in Player.
     void updatePlayerTrack();
 

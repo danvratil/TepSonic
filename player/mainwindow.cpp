@@ -416,6 +416,8 @@ void MainWindow::bindSignals()
             this, SLOT(aboutTepSonic()));
     connect(m_ui->actionAbout_Qt, SIGNAL(triggered(bool)),
             this, SLOT(aboutQt()));
+    connect(m_ui->actionSupported_formats, SIGNAL(triggered(bool)),
+            this, SLOT(showSupportedFormats()));
 
     // Player object
     connect(m_player, SIGNAL(trackFinished()),
@@ -533,6 +535,17 @@ void MainWindow::aboutTepSonic()
     aboutDlg.about(this,tr("About TepSonic"),str.toAscii());
 }
 
+
+
+void MainWindow::showSupportedFormats()
+{
+    QMessageBox msBox(tr("Supported formats"),
+                      tr("On this computer TepSonic can play following audio files:")+"\n\n"+SupportedFormats::getExtensionList().join(", "),
+                      QMessageBox::Information,
+                      QMessageBox::Ok,
+                      0,0);
+    msBox.exec();
+}
 
 
 void MainWindow::reportBug()

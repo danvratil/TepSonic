@@ -757,6 +757,8 @@
     <addaction name="actionAbout_TepSonic"/>
     <addaction name="actionAbout_Qt"/>
     <addaction name="separator"/>
+    <addaction name="actionSupported_formats"/>
+    <addaction name="separator"/>
     <addaction name="actionReport_a_bug"/>
    </widget>
    <addaction name="menu_TepSonic"/>
@@ -1072,6 +1074,11 @@
    </property>
    <property name="text">
     <string>Bitrate</string>
+   </property>
+  </action>
+  <action name="actionSupported_formats">
+   <property name="text">
+    <string>&amp;Supported formats</string>
    </property>
   </action>
  </widget>
