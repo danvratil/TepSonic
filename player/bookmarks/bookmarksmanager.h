@@ -44,6 +44,8 @@ class BookmarksManager: public QObject
         BookmarksManager(Ui::MainWindow *ui);
         ~BookmarksManager();
 
+        QString getBookmarkPath(int row);
+
     public slots:
         void toggleBookmarks();
         void showAddBookmarkDialog(QString path);

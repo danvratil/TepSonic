@@ -26,12 +26,15 @@
 #include <QStandardItemModel>
 #include <QSortFilterProxyModel>
 
+class BookmarksManager;
 
 class BookmarksBrowser : public QListView
 {
     Q_OBJECT
     public:
-        explicit BookmarksBrowser(QWidget *parent = 0);
+        explicit BookmarksBrowser(BookmarksManager *bookmarksManager, QWidget *parent = 0);
+
+        void startDrag(Qt::DropActions supportedActions);
 
     signals:
 
@@ -44,6 +47,7 @@ class BookmarksBrowser : public QListView
         QModelIndex mapFromSource(QModelIndex);
 
     private:
+        BookmarksManager *m_booksmarkManager;
         QStandardItemModel *m_model;
         QSortFilterProxyModel *m_proxyModel;
 

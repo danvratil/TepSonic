@@ -30,7 +30,6 @@
 #include <QMessageBox>
 #include <QListWidgetItem>
 
-#include <QDebug>
 
 BookmarksManager::BookmarksManager(Ui::MainWindow *ui):
         m_bookmarksBrowser(0),
@@ -96,7 +95,7 @@ void BookmarksManager::toggleBookmarks()
         m_bookmarksFilterEdit = new QLineEdit();
         m_mwui->fsbTab->layout()->addWidget(m_bookmarksFilterEdit);
 
-        m_bookmarksBrowser = new BookmarksBrowser();
+        m_bookmarksBrowser = new BookmarksBrowser(this);
         m_bookmarksBrowser->setContextMenuPolicy(Qt::CustomContextMenu);
         m_mwui->fsbTab->layout()->addWidget(m_bookmarksBrowser);
 
@@ -135,7 +134,6 @@ void BookmarksManager::showAddBookmarkDialog(QString path)
 
 void BookmarksManager::removeBookmark()
 {
-    qDebug() << "Removing bookmark...";
 
     QMessageBox msgbox(tr("Remove bookmark?"),
                        tr("Do you really want to remove this bookmark?"),
@@ -152,7 +150,6 @@ void BookmarksManager::removeBookmark()
     m_bookmarksBrowser->removeAt(bmark.row());
     QSettings settings(_CONFIGDIR + QDir::separator() + "bookmarks",QSettings::IniFormat,this);
     settings.remove(QString::number(bmark.row()));
-    qDebug() << "Row " << bmark.row() << " removed from bookmarks";
 }
 
 
@@ -165,10 +162,14 @@ void BookmarksManager::showBookmarksContextMenu(QPoint pos)
     m_contextMenu->popup(ppos);
 }
 
+
+
 void BookmarksManager::addBookmark(QString title, QString path)
 {
     m_bookmarks.append(QPair<QString,QString>(title,path));
 }
+
+
 
 void BookmarksManager::openBookmarkInFSB(QModelIndex bookmark)
 {
@@ -193,4 +194,11 @@ void BookmarksManager::openBookmarkInFSB(QModelIndex bookmark)
 
     // Delete the bookmarksBrowser now
     delete m_bookmarksBrowser;
+}
+
+
+
+QString BookmarksManager::getBookmarkPath(int row)
+{
+    return m_bookmarks.at(row).second;
 }

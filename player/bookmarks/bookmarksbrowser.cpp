@@ -19,11 +19,20 @@
 
 
 #include "bookmarksbrowser.h"
-#include <QStandardItem>
+#include "bookmarksmanager.h"
 
-BookmarksBrowser::BookmarksBrowser(QWidget *parent) :
-    QListView(parent)
+#include <QStandardItem>
+#include <QMimeData>
+#include <QDrag>
+
+
+BookmarksBrowser::BookmarksBrowser(BookmarksManager *manager, QWidget *parent) :
+    QListView(parent),
+    m_booksmarkManager(manager)
 {
+    setAcceptDrops(false);
+    setDragDropMode(DragOnly);
+
     m_model = new QStandardItemModel(this);
 
     m_proxyModel = new QSortFilterProxyModel(this);
@@ -33,16 +42,45 @@ BookmarksBrowser::BookmarksBrowser(QWidget *parent) :
     setModel(m_proxyModel);
 }
 
+
+
+void BookmarksBrowser::startDrag(Qt::DropActions supportedActions)
+{
+    if (!m_booksmarkManager) return;
+
+    QModelIndexList indexes = selectedIndexes();
+
+    QMimeData *mimeData = new QMimeData;
+    QByteArray encodedData;
+    QDataStream stream(&encodedData, QIODevice::WriteOnly);;
+
+    for (int i = 0; i < indexes.count(); i++) {
+        int row = m_proxyModel->mapToSource(indexes.at(i)).row();
+        stream << m_booksmarkManager->getBookmarkPath(row);
+    }
+
+    mimeData->setData("data/tepsonic-tracks", encodedData);
+    QDrag *drag = new QDrag(this);
+    drag->setMimeData(mimeData);
+    drag->exec(Qt::CopyAction);
+}
+
+
+
 void BookmarksBrowser::setFilter(QString filter)
 {
     m_proxyModel->setFilterFixedString(filter);
 }
+
+
 
 void BookmarksBrowser::addItem(QString title)
 {
     QStandardItem *item = new QStandardItem(title);
     m_model->appendRow(item);
 }
+
+
 
 void BookmarksBrowser::removeAt(int row)
 {
@@ -54,10 +92,14 @@ void BookmarksBrowser::removeAt(int row)
     m_model->removeRow(mapped.row());
 }
 
+
+
 QModelIndex BookmarksBrowser::mapToSource(QModelIndex index)
 {
     return m_proxyModel->mapToSource(index);
 }
+
+
 
 QModelIndex BookmarksBrowser::mapFromSource(QModelIndex index)
 {
