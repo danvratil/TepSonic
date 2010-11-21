@@ -71,6 +71,7 @@ set(player_HDRS
     bookmarks/bookmarksbrowser.h
     bookmarks/bookmarksmanager.h
     bookmarks/addbookmarkdlg.h
+    ../3rdparty/qxt/qxtglobalshortcut.h
 )
 
 set(player_SRCS
