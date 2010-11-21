@@ -33,6 +33,7 @@
 #include "collections/collectionmodel.h"
 #include "collections/collectionitem.h"
 #include "collections/collectionitemdelegate.h"
+#include "bookmarks/bookmarksmanager.h"
 #include "abstractplugin.h"
 #include "taskmanager.h"
 #include "pluginsmanager.h"
@@ -174,6 +175,7 @@ MainWindow::MainWindow(Player *player):
     m_fileSystemModel->setNameFilters(SupportedFormats::getExtensionList());
     m_fileSystemModel->setNameFilterDisables(false);
     m_ui->filesystemBrowser->setModel(m_fileSystemModel);
+    m_ui->filesystemBrowser->setContextMenuPolicy(Qt::CustomContextMenu);
     QString fsbpath = m_settings->value("LastSession/LastFSBPath", QDir::homePath()).toString();
     m_ui->filesystemBrowser->setRootIndex(m_fileSystemModel->index(fsbpath));
     m_ui->fsbPath->setText(fsbpath);
@@ -192,6 +194,9 @@ MainWindow::MainWindow(Player *player):
         m_player->setRepeatMode(Player::RepeatMode(m_settings->value("LastSession/RepeatMode",0).toInt()));
     }
 
+
+    // Create bookmarks manager
+    m_bookmarksManager = new BookmarksManager(m_ui);
 
 
     // At the very end bind all signals and slots
@@ -224,6 +229,8 @@ MainWindow::~MainWindow()
 
     // Save current playlist to file
     m_taskManager->savePlaylistToFile(QString(_CONFIGDIR).append("/last.m3u"));
+
+    delete m_bookmarksManager;
 
     qDebug() << "Waiting for taskManager to finish...";
     delete m_taskManager;
@@ -358,6 +365,10 @@ void MainWindow::bindSignals()
             m_ui->fsbFwBtn, SLOT(setDisabled(bool)));
     connect(m_ui->filesystemBrowser, SIGNAL(disableCdUp(bool)),
             m_ui->fsbCdUpBtn, SLOT(setDisabled(bool)));
+    connect(m_ui->fsbBookmarksBtn, SIGNAL(toggled(bool)),
+            m_bookmarksManager, SLOT(toggleBookmarks()));
+    connect(m_ui->filesystemBrowser, SIGNAL(addBookmark(QString)),
+            m_bookmarksManager, SLOT(showAddBookmarkDialog(QString)));
 
 
     // Menu 'Player'

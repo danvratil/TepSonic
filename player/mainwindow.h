@@ -48,6 +48,7 @@ class CollectionItemDelegate;
 class DatabaseManager;
 class PluginsManager;
 class TaskManager;
+class BookmarksManager;
 
 namespace Ui
 {
@@ -122,6 +123,9 @@ private:
 
     //! Pointer to QFileSystemModel
     QFileSystemModel *m_fileSystemModel;
+
+    //! Pointer to BookmarksBrowser
+    BookmarksManager *m_bookmarksManager;
 
     //! Pointer to Player
     Player *m_player;

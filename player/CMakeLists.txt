@@ -36,6 +36,7 @@ include_directories(
 	"collections"
 	"playlist"
 	"settings"
+        "bookmarks"
 )
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/constants.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/constants.h)
@@ -67,7 +68,9 @@ set(player_HDRS
     playlist/playlistproxymodel.h
     playlist/playlistpopulator.h
     playlist/playlistwriter.h
-
+    bookmarks/bookmarksbrowser.h
+    bookmarks/bookmarksmanager.h
+    bookmarks/addbookmarkdlg.h
 )
 
 set(player_SRCS
@@ -103,6 +106,10 @@ set(player_SRCS
     playlist/playlistproxymodel.cpp
     playlist/playlistpopulator.cpp
     playlist/playlistwriter.cpp
+    bookmarks/bookmarksbrowser.cpp
+    bookmarks/bookmarksitem.cpp
+    bookmarks/bookmarksmanager.cpp
+    bookmarks/addbookmarkdlg.cpp
     ../3rdparty/qxt/qxtglobalshortcut.cpp
 )
 
@@ -114,6 +121,7 @@ set(player_QUIS
     settings/pluginspage.ui
     settings/shortcutspage.ui
     settings/changeshortcutdialog.ui
+    bookmarks/addbookmarkdlg.ui
 )
 
 set(player_RCCS  

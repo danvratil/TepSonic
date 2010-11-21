@@ -584,6 +584,15 @@
                   <height>24</height>
                  </size>
                 </property>
+                <property name="checkable">
+                 <bool>true</bool>
+                </property>
+                <property name="checked">
+                 <bool>false</bool>
+                </property>
+                <property name="autoDefault">
+                 <bool>false</bool>
+                </property>
                 <property name="flat">
                  <bool>true</bool>
                 </property>

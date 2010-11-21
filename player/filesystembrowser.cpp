@@ -33,9 +33,15 @@ FileSystemBrowser::FileSystemBrowser(QWidget *parent):
 {
     setAcceptDrops(false);
     setDragDropMode(DragOnly);
+    setContextMenuPolicy(Qt::CustomContextMenu);
+
+    m_contextMenu = new QMenu(this);
+    m_contextMenu->addAction(tr("Add to bookmarks"), this, SLOT(emitAddBookmark()));
 
     connect(this, SIGNAL(doubleClicked(QModelIndex)),
             this, SLOT(setRootDir(QModelIndex)));
+    connect(this, SIGNAL(customContextMenuRequested(QPoint)),
+            this, SLOT(showContextMenu(QPoint)));
 
 }
 
@@ -252,4 +258,23 @@ void FileSystemBrowser::keyPressEvent(QKeyEvent *event)
         setRootDir(currentIndex());
         event->accept();
     }
+}
+
+
+void FileSystemBrowser::emitAddBookmark()
+{
+    QFileSystemModel *fsmodel = qobject_cast<QFileSystemModel*>(model());
+    if (!fsmodel) return;
+
+    emit addBookmark(fsmodel->filePath(currentIndex()));
+}
+
+
+void FileSystemBrowser::showContextMenu(QPoint pos)
+{
+    if (!indexAt(pos).isValid()) {
+        m_contextMenu->actions().at(0)->setDisabled(true);
+    }
+
+    m_contextMenu->popup(mapToGlobal(pos));
 }

@@ -23,6 +23,8 @@
 #include <QListView>
 #include <QStringList>
 #include <QKeyEvent>
+#include <QMenu>
+#include <QModelIndex>
 
 class FileSystemBrowser : public QListView
 {
@@ -38,6 +40,8 @@ class FileSystemBrowser : public QListView
 
     private slots:
         void setRootDir(QModelIndex dir);
+        void emitAddBookmark();
+
 
     public slots:
         void goBack();
@@ -45,10 +49,12 @@ class FileSystemBrowser : public QListView
         void goHome();
         void cdUp();
         void goToDir(QString newPath);
+        void showContextMenu(QPoint pos);
 
     private:
         QStringList m_forwardDirs;
         QStringList m_backDirs;
+        QMenu *m_contextMenu;
 
     signals:
         void pathChanged(QString newPath);
@@ -56,6 +62,7 @@ class FileSystemBrowser : public QListView
         void disableForward(bool);
         void disableBack(bool);
         void disableCdUp(bool);
+        void addBookmark(QString path);
 
 
 };

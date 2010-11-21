@@ -48,6 +48,9 @@ TaskManager::~TaskManager()
 
 void TaskManager::addFilesToPlaylist(const QStringList &files, int row)
 {
+    if ((row == 0) && (*m_playlistModel))
+        row = (*m_playlistModel)->rowCount(QModelIndex());
+
     PlaylistPopulator *playlistPopulator = new PlaylistPopulator();
     playlistPopulator->addFiles(files, row);
     connect(playlistPopulator, SIGNAL(insertItemToPlaylist(Player::MetaData,int)),
@@ -61,6 +64,9 @@ void TaskManager::addFilesToPlaylist(const QStringList &files, int row)
 
 void TaskManager::addFileToPlaylist(const QString &filename, int row)
 {
+    if ((row == 0) && (*m_playlistModel))
+        row = (*m_playlistModel)->rowCount(QModelIndex());
+
     PlaylistPopulator *playlistPopulator = new PlaylistPopulator();
     playlistPopulator->addFile(filename, row);
     connect(playlistPopulator, SIGNAL(insertItemToPlaylist(Player::MetaData,int)),
