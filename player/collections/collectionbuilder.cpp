@@ -46,14 +46,14 @@
 CollectionBuilder::CollectionBuilder(CollectionModel **collectionModel)
 {
 
-    _collectionModel = collectionModel;
+    m_collectionModel = collectionModel;
 
 }
 
 void CollectionBuilder::run()
 {
 
-        if (!_folders.isEmpty()) {
+        if (!m_folders.isEmpty()) {
             emit buildingStarted();
 
             bool collectionsChanged = false;
@@ -68,7 +68,7 @@ void CollectionBuilder::run()
                 QHash<QString,uint> dbFiles;
                 QStringList filters = SupportedFormats::getExtensionList();
 
-                {   // Populate dbFiles map by _ALL_ tracks from db
+                {   // Populate dbFiles map by ALL tracks from db
                     QSqlQuery query("SELECT filename, mtime FROM tracks;",*dbManager.sqlDb());
                     while (query.next()) {
                         dbFiles.insert(query.value(0).toString(),query.value(1).toUInt());
@@ -86,7 +86,7 @@ void CollectionBuilder::run()
                 }
 
                 do {
-                    QDir dirlist(_folders.takeFirst());
+                    QDir dirlist(m_folders.takeFirst());
                     dirlist.setNameFilters(filters);
 
                     QDirIterator dirIterator(dirlist,QDirIterator::Subdirectories);
@@ -119,7 +119,7 @@ void CollectionBuilder::run()
                         }
 
                     }
-                } while (_folders.size()>0);
+                } while (m_folders.size()>0);
 
                 // Get files that are in DB but not on harddrive
                 QHashIterator<QString, uint> i(dbFiles);
@@ -154,16 +154,24 @@ void CollectionBuilder::run()
 
 void CollectionBuilder::rebuildFolder(QStringList folder)
 {
-    _folders.append(folder);
+    m_folders.append(folder);
 }
 
 void CollectionBuilder::insertTrack(QString filename, QSqlDatabase *sqlDB)
 {
+    qDebug() << filename;
+
     QFileInfo fileInfo(filename);
     QString fname = fileInfo.filePath().toUtf8();
     uint mtime = fileInfo.lastModified().toTime_t();
 
     TagLib::FileRef f(fname.toLocal8Bit().constData());
+    // FileRef::isNull() is not enough sometimes. Let's check the tag() too...
+    if (f.isNull() || !f.tag()) {
+      qDebug() << filename << "cannot be registered in the collection. TagLib.";
+      // to prevent crash calling f.tag() if it's NULL
+      return;
+    }
 
     uint trackNo      = f.tag()->track();
     QString interpret = f.tag()->artist().toCString(true);

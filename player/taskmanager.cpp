@@ -33,58 +33,72 @@
 
 TaskManager::TaskManager(PlaylistModel **playlistModel, CollectionModel **collectionModel)
 {
-    _playlistModel = playlistModel;
-    _collectionModel = collectionModel;
+    m_playlistModel = playlistModel;
+    m_collectionModel = collectionModel;
 
-    _threadPool = new QThreadPool(this);
+    m_threadPool = new QThreadPool(this);
 
 }
 
 TaskManager::~TaskManager()
 {
-    _threadPool->waitForDone();
-    delete _threadPool;
+    m_threadPool->waitForDone();
+    delete m_threadPool;
 }
 
 void TaskManager::addFilesToPlaylist(const QStringList &files, int row)
 {
+    if ((row == 0) && (*m_playlistModel))
+        row = (*m_playlistModel)->rowCount(QModelIndex());
+
     PlaylistPopulator *playlistPopulator = new PlaylistPopulator();
     playlistPopulator->addFiles(files, row);
     connect(playlistPopulator, SIGNAL(insertItemToPlaylist(Player::MetaData,int)),
-            this, SIGNAL(insertItemToPlaylist(Player::MetaData,int)));
+            this, SIGNAL(insertItemToPlaylist(Player::MetaData,int)),
+            Qt::QueuedConnection);
     connect(playlistPopulator, SIGNAL(playlistPopulated()),
             this, SIGNAL(playlistPopulated()));
-    _threadPool->start(playlistPopulator);
+
+    m_threadPool->start(playlistPopulator);
 }
 
 void TaskManager::addFileToPlaylist(const QString &filename, int row)
 {
+    if ((row == 0) && (*m_playlistModel))
+        row = (*m_playlistModel)->rowCount(QModelIndex());
+
     PlaylistPopulator *playlistPopulator = new PlaylistPopulator();
     playlistPopulator->addFile(filename, row);
     connect(playlistPopulator, SIGNAL(insertItemToPlaylist(Player::MetaData,int)),
             this, SIGNAL(insertItemToPlaylist(Player::MetaData,int)));
     connect(playlistPopulator, SIGNAL(playlistPopulated()),
             this, SIGNAL(playlistPopulated()));
-    _threadPool->start(playlistPopulator);
+
+    m_threadPool->start(playlistPopulator);
 }
 
 void TaskManager::savePlaylistToFile(const QString &filename)
 {
-    PlaylistWriter *playlistWriter = new PlaylistWriter(*_playlistModel);
+    PlaylistWriter *playlistWriter = new PlaylistWriter(*m_playlistModel);
     playlistWriter->saveToFile(filename);
     connect(playlistWriter, SIGNAL(playlistSaved()),
             this, SIGNAL(playlistSaved()));
-    _threadPool->start(playlistWriter);
+
+    m_threadPool->start(playlistWriter);
 }
 
 void TaskManager::populateCollections()
 {
-    CollectionPopulator *collectionPopulator = new CollectionPopulator(_collectionModel);
+    CollectionPopulator *collectionPopulator = new CollectionPopulator(m_collectionModel);
     connect(collectionPopulator, SIGNAL(collectionsPopulated()),
             this, SIGNAL(collectionsPopulated()));
     connect(collectionPopulator, SIGNAL(clearCollectionModel()),
             this, SIGNAL(clearCollectionModel()));
-    _threadPool->start(collectionPopulator);
+    connect(collectionPopulator, SIGNAL(addChild(QModelIndex,QString,QString,QString,QString,QModelIndex*)),
+            this, SIGNAL(insertItemToCollections(QModelIndex,QString,QString,QString,QString,QModelIndex*)),
+            Qt::BlockingQueuedConnection);
+
+    m_threadPool->start(collectionPopulator);
 }
 
 void TaskManager::rebuildCollections(const QString &folder)
@@ -99,7 +113,7 @@ void TaskManager::rebuildCollections(const QString &folder)
 
     if (!dirs.isEmpty()) {
 
-        CollectionBuilder *collectionBuilder = new CollectionBuilder(_collectionModel);
+        CollectionBuilder *collectionBuilder = new CollectionBuilder(m_collectionModel);
         collectionBuilder->rebuildFolder(dirs);
         connect(collectionBuilder,SIGNAL(buildingStarted()),
                 this,SLOT(collectionsRebuildingStarted()));
@@ -107,7 +121,8 @@ void TaskManager::rebuildCollections(const QString &folder)
                 this,SIGNAL(collectionsRebuilt()));
         connect(collectionBuilder,SIGNAL(buildingFinished()),
                 this,SIGNAL(taskDone()));
-        _threadPool->start(collectionBuilder);
+
+        m_threadPool->start(collectionBuilder);
 
     }
 }

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>620</width>
-    <height>393</height>
+    <width>616</width>
+    <height>389</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -166,40 +166,6 @@
        </spacer>
       </item>
       <item>
-       <widget class="QPushButton" name="loadFileButton">
-        <property name="text">
-         <string>Load file</string>
-        </property>
-        <property name="icon">
-         <iconset resource="../icons.qrc">
-          <normaloff>:/icons/openFile</normaloff>:/icons/openFile</iconset>
-        </property>
-        <property name="iconSize">
-         <size>
-          <width>24</width>
-          <height>24</height>
-         </size>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="loadFolderButton">
-        <property name="text">
-         <string>Load folder</string>
-        </property>
-        <property name="icon">
-         <iconset resource="../icons.qrc">
-          <normaloff>:/icons/openFolder</normaloff>:/icons/openFolder</iconset>
-        </property>
-        <property name="iconSize">
-         <size>
-          <width>24</width>
-          <height>24</height>
-         </size>
-        </property>
-       </widget>
-      </item>
-      <item>
        <widget class="QPushButton" name="clearPlaylistButton">
         <property name="text">
          <string>Clear playlist</string>
@@ -255,10 +221,10 @@
        </widget>
       </item>
       <item>
-       <widget class="Phonon::SeekSlider" name="seekSlider" native="true"/>
+       <widget class="Phonon::SeekSlider" name="seekSlider"/>
       </item>
       <item>
-       <widget class="Phonon::VolumeSlider" name="volumeSlider" native="true">
+       <widget class="Phonon::VolumeSlider" name="volumeSlider">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
           <horstretch>0</horstretch>
@@ -268,6 +234,9 @@
        </widget>
       </item>
      </layout>
+    </item>
+    <item>
+     <layout class="QGridLayout" name="gridLayout_5"/>
     </item>
     <item>
      <widget class="QWidget" name="viewsWidget" native="true">
@@ -287,9 +256,15 @@
           <enum>Qt::Horizontal</enum>
          </property>
          <widget class="QTabWidget" name="viewsTab">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
           <property name="minimumSize">
            <size>
-            <width>250</width>
+            <width>0</width>
             <height>0</height>
            </size>
           </property>
@@ -377,7 +352,7 @@
             </item>
            </layout>
           </widget>
-          <widget class="QWidget" name="fsTab">
+          <widget class="QWidget" name="fsbTab">
            <attribute name="title">
             <string>Filesystem</string>
            </attribute>
@@ -394,7 +369,7 @@
             <property name="bottomMargin">
              <number>0</number>
             </property>
-            <item row="0" column="0">
+            <item row="10" column="0">
              <widget class="FileSystemBrowser" name="filesystemBrowser">
               <property name="frameShape">
                <enum>QFrame::StyledPanel</enum>
@@ -408,8 +383,240 @@
               <property name="selectionMode">
                <enum>QAbstractItemView::ExtendedSelection</enum>
               </property>
-              <property name="rootIsDecorated">
-               <bool>false</bool>
+             </widget>
+            </item>
+            <item row="7" column="0">
+             <layout class="QHBoxLayout" name="fsbActionsLayout" stretch="0,0,0,0,0,0">
+              <property name="sizeConstraint">
+               <enum>QLayout::SetMinAndMaxSize</enum>
+              </property>
+              <property name="topMargin">
+               <number>0</number>
+              </property>
+              <item>
+               <widget class="QPushButton" name="fsbBackBtn">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>32</width>
+                  <height>32</height>
+                 </size>
+                </property>
+                <property name="toolTip">
+                 <string>Back</string>
+                </property>
+                <property name="whatsThis">
+                 <string/>
+                </property>
+                <property name="text">
+                 <string/>
+                </property>
+                <property name="icon">
+                 <iconset resource="../icons.qrc">
+                  <normaloff>:/icons/goPrev</normaloff>:/icons/goPrev</iconset>
+                </property>
+                <property name="iconSize">
+                 <size>
+                  <width>24</width>
+                  <height>24</height>
+                 </size>
+                </property>
+                <property name="flat">
+                 <bool>true</bool>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="fsbCdUpBtn">
+                <property name="enabled">
+                 <bool>true</bool>
+                </property>
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>32</width>
+                  <height>32</height>
+                 </size>
+                </property>
+                <property name="toolTip">
+                 <string>Up</string>
+                </property>
+                <property name="whatsThis">
+                 <string/>
+                </property>
+                <property name="text">
+                 <string/>
+                </property>
+                <property name="icon">
+                 <iconset resource="../icons.qrc">
+                  <normaloff>:/icons/goUp</normaloff>:/icons/goUp</iconset>
+                </property>
+                <property name="iconSize">
+                 <size>
+                  <width>24</width>
+                  <height>24</height>
+                 </size>
+                </property>
+                <property name="flat">
+                 <bool>true</bool>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="fsbFwBtn">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>32</width>
+                  <height>32</height>
+                 </size>
+                </property>
+                <property name="toolTip">
+                 <string>Forward</string>
+                </property>
+                <property name="whatsThis">
+                 <string/>
+                </property>
+                <property name="text">
+                 <string/>
+                </property>
+                <property name="icon">
+                 <iconset resource="../icons.qrc">
+                  <normaloff>:/icons/goNext</normaloff>:/icons/goNext</iconset>
+                </property>
+                <property name="iconSize">
+                 <size>
+                  <width>24</width>
+                  <height>24</height>
+                 </size>
+                </property>
+                <property name="flat">
+                 <bool>true</bool>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="fsbGoHomeBtn">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>32</width>
+                  <height>32</height>
+                 </size>
+                </property>
+                <property name="toolTip">
+                 <string>Home</string>
+                </property>
+                <property name="whatsThis">
+                 <string/>
+                </property>
+                <property name="text">
+                 <string/>
+                </property>
+                <property name="icon">
+                 <iconset resource="../icons.qrc">
+                  <normaloff>:/icons/goHome</normaloff>:/icons/goHome</iconset>
+                </property>
+                <property name="iconSize">
+                 <size>
+                  <width>24</width>
+                  <height>24</height>
+                 </size>
+                </property>
+                <property name="flat">
+                 <bool>true</bool>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="fsbBookmarksBtn">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>32</width>
+                  <height>32</height>
+                 </size>
+                </property>
+                <property name="toolTip">
+                 <string>Bookmarks</string>
+                </property>
+                <property name="text">
+                 <string/>
+                </property>
+                <property name="icon">
+                 <iconset resource="../icons.qrc">
+                  <normaloff>:/icons/bookmarks</normaloff>:/icons/bookmarks</iconset>
+                </property>
+                <property name="iconSize">
+                 <size>
+                  <width>24</width>
+                  <height>24</height>
+                 </size>
+                </property>
+                <property name="checkable">
+                 <bool>true</bool>
+                </property>
+                <property name="checked">
+                 <bool>false</bool>
+                </property>
+                <property name="autoDefault">
+                 <bool>false</bool>
+                </property>
+                <property name="flat">
+                 <bool>true</bool>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <spacer name="fsbActionsSpacer">
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>40</width>
+                  <height>20</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+             </layout>
+            </item>
+            <item row="8" column="0">
+             <widget class="QLineEdit" name="fsbPath">
+              <property name="text">
+               <string>/</string>
               </property>
              </widget>
             </item>
@@ -475,8 +682,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>620</width>
-     <height>20</height>
+     <width>616</width>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu_TepSonic">
@@ -507,8 +714,6 @@
      <addaction name="actionLength"/>
      <addaction name="actionBitrate"/>
     </widget>
-    <addaction name="actionAdd_file"/>
-    <addaction name="actionAdd_folder"/>
     <addaction name="separator"/>
     <addaction name="actionClear_playlist"/>
     <addaction name="separator"/>
@@ -551,6 +756,8 @@
     <addaction name="separator"/>
     <addaction name="actionAbout_TepSonic"/>
     <addaction name="actionAbout_Qt"/>
+    <addaction name="separator"/>
+    <addaction name="actionSupported_formats"/>
     <addaction name="separator"/>
     <addaction name="actionReport_a_bug"/>
    </widget>
@@ -869,6 +1076,11 @@
     <string>Bitrate</string>
    </property>
   </action>
+  <action name="actionSupported_formats">
+   <property name="text">
+    <string>&amp;Supported formats</string>
+   </property>
+  </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <customwidgets>
@@ -908,8 +1120,6 @@
   <tabstop>playPauseButton</tabstop>
   <tabstop>stopButton</tabstop>
   <tabstop>nextTrackButton</tabstop>
-  <tabstop>loadFileButton</tabstop>
-  <tabstop>loadFolderButton</tabstop>
   <tabstop>clearPlaylistButton</tabstop>
  </tabstops>
  <resources>

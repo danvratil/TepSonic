@@ -29,22 +29,23 @@
 #include <QtSql/QSqlQuery>
 
 
-bool DatabaseManager::_static_connectionAvailable;
+bool DatabaseManager::m_static_connectionAvailable;
 
 DatabaseManager::DatabaseManager(QString connectionName)
 {
-    _connectionName = connectionName;
-    _sqlDb = NULL;
-    _static_connectionAvailable = false;
+    m_connectionName = connectionName;
+    m_sqlDb = NULL;
+    m_static_connectionAvailable = false;
 
-    QSettings settings(QString(_CONFIGDIR).append("/main.conf"),QSettings::IniFormat,this);
-    _driverType = (DriverTypes)settings.value("Collections/StorageEngine",0).toInt();
+    QSettings settings(QString(_CONFIGDIR).append("/main.conf"),
+                       QSettings::IniFormat);
+    m_driverType = (DriverTypes)settings.value("Collections/StorageEngine",0).toInt();
     settings.beginGroup("Collections");
     settings.beginGroup("MySQL");
-    _server = settings.value("Server","127.0.0.1").toString();
-    _username = settings.value("Username",QString()).toString();
-    _password = settings.value("Password",QString()).toString();
-    _db = settings.value("Database","tepsonic").toString();
+    m_server = settings.value("Server","127.0.0.1").toString();
+    m_username = settings.value("Username",QString()).toString();
+    m_password = settings.value("Password",QString()).toString();
+    m_db = settings.value("Database","tepsonic").toString();
     settings.endGroup();
     settings.endGroup();;
 
@@ -52,46 +53,46 @@ DatabaseManager::DatabaseManager(QString connectionName)
 
 DatabaseManager::~DatabaseManager()
 {
-    delete _sqlDb;
-    QSqlDatabase::removeDatabase(_connectionName);
+    delete m_sqlDb;
+    QSqlDatabase::removeDatabase(m_connectionName);
 }
 
 bool DatabaseManager::connectToDB()
 {
-    if (QSqlDatabase::contains(_connectionName)) {
-        qDebug() << "Connection with name " << _connectionName << " exists.";
-        _static_connectionAvailable = true;
+    if (QSqlDatabase::contains(m_connectionName)) {
+        qDebug() << "Connection with name " << m_connectionName << " exists.";
+        m_static_connectionAvailable = true;
         return true;
     }
 
-    switch (_driverType) {
+    switch (m_driverType) {
     case MySQL: {
-        _sqlDb = new QSqlDatabase(QSqlDatabase::addDatabase("QMYSQL",_connectionName));
-        _sqlDb->setHostName(_server);
-        _sqlDb->setUserName(_username);
-        _sqlDb->setPassword(_password);
-        _sqlDb->setDatabaseName(_db);
+        m_sqlDb = new QSqlDatabase(QSqlDatabase::addDatabase("QMYSQL", m_connectionName));
+        m_sqlDb->setHostName(m_server);
+        m_sqlDb->setUserName(m_username);
+        m_sqlDb->setPassword(m_password);
+        m_sqlDb->setDatabaseName(m_db);
     } break;
     case SQLite: {
-        _sqlDb = new QSqlDatabase(QSqlDatabase::addDatabase("QSQLITE",_connectionName));
-        _sqlDb->setDatabaseName(QString(_CONFIGDIR).append("/collection.db"));
+        m_sqlDb = new QSqlDatabase(QSqlDatabase::addDatabase("QSQLITE", m_connectionName));
+        m_sqlDb->setDatabaseName(QString(_CONFIGDIR).append("/collection.db"));
     } break;
     }
 
-    if (!_sqlDb->open()) {
-        qDebug() << "Failed to establish '" << _sqlDb->connectionName() <<"' connection to database!";
-        qDebug() << "Reason: " << _sqlDb->lastError().text();
-        _sqlDb = NULL;
-        _static_connectionAvailable = false;
+    if (!m_sqlDb->open()) {
+        qDebug() << "Failed to establish '" << m_sqlDb->connectionName() <<"' connection to database!";
+        qDebug() << "Reason: " << m_sqlDb->lastError().text();
+        m_sqlDb = NULL;
+        m_static_connectionAvailable = false;
         return false;
     }
 
     // We want to use UTF8!!!
-    if (_driverType == MySQL ) {
-        QSqlQuery query("SET CHARACTER SET utf8;",*_sqlDb);
+    if (m_driverType == MySQL ) {
+        QSqlQuery query("SET CHARACTER SET utf8;", *m_sqlDb);
     }
 
-    QStringList tables = _sqlDb->tables(QSql::AllTables);
+    QStringList tables = m_sqlDb->tables(QSql::AllTables);
     if (!(tables.contains("albums") &&
           tables.contains("genres") &&
           tables.contains("interprets") &&
@@ -103,7 +104,7 @@ bool DatabaseManager::connectToDB()
     }
 
     // Now check if DB revision match
-    QSqlQuery query("SELECT `revision` FROM `db_rev` LIMIT 1;",*_sqlDb);
+    QSqlQuery query("SELECT `revision` FROM `db_rev` LIMIT 1;", *m_sqlDb);
     query.next();
     QString rev = _DBREVISION;
     if (query.value(0).toString() != rev) {
@@ -112,16 +113,16 @@ bool DatabaseManager::connectToDB()
         initDb();
     }
 
-    _static_connectionAvailable = true;
+    m_static_connectionAvailable = true;
     return true;
 }
 
 void DatabaseManager::initDb()
 {
     qDebug() << "Initializing database structure";
-    switch (_driverType) {
+    switch (m_driverType) {
     case MySQL: {
-        QSqlQuery query(*_sqlDb);
+        QSqlQuery query(*m_sqlDb);
 
         query.exec("DROP TABLE IF EXISTS `albums`,`genres`,`interprets`,`tracks`,`years`,`db_rev`;");
         query.exec("DROP VIEW `view_tracks`,`view_various_artists`;");
@@ -207,7 +208,7 @@ void DatabaseManager::initDb()
 
     } break;
     case SQLite: {
-        QSqlQuery query(*_sqlDb);
+        QSqlQuery query(*m_sqlDb);
 
         query.exec("DROP TABLE IF EXISTS `albums`;");
         query.exec("DROP TABLE IF EXISTS `genres`;");

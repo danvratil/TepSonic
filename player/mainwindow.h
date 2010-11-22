@@ -31,12 +31,14 @@
 #include <QLabel>
 #include <QSystemTrayIcon>
 #include <QFileSystemModel>
+#include <QKeyEvent>
 
 
 // These classes are used in inline methods
 #include "playlist/playlistmodel.h"
 #include "player.h"
 #include "trayicon.h"
+
 
 class PlaylistItemDelegate;
 class PlaylistProxyModel;
@@ -46,6 +48,7 @@ class CollectionItemDelegate;
 class DatabaseManager;
 class PluginsManager;
 class TaskManager;
+class BookmarksManager;
 
 namespace Ui
 {
@@ -84,7 +87,7 @@ public:
       \sa pluginsManager()
     */
     inline void setPluginsManager(PluginsManager *pluginsManager) {
-        _pluginsManager = pluginsManager;
+        m_pluginsManager = pluginsManager;
     }
 
     //! Returns pointer to PluginsManager
@@ -93,75 +96,81 @@ public:
       \sa setPluginsManager()
     */
     PluginsManager* pluginsManager() {
-        return _pluginsManager;
+        return m_pluginsManager;
     }
 
 private:
     //! Pointer to main window's UI (generated from mainwindow.ui)
-    Ui::MainWindow *_ui;
+    Ui::MainWindow *m_ui;
 
     //! Pointer to PlaylistModel
-    PlaylistModel *_playlistModel;
+    PlaylistModel *m_playlistModel;
 
     //! Pointer to PlaylistProxyModel
-    PlaylistProxyModel *_playlistProxyModel;
+    PlaylistProxyModel *m_playlistProxyModel;
 
     //! Pointer to PlaylistItemDelegate
-    PlaylistItemDelegate *_playlistItemDelegate;
+    PlaylistItemDelegate *m_playlistItemDelegate;
 
     //! Pointer to CollectionModel
-    CollectionModel *_collectionModel;
+    CollectionModel *m_collectionModel;
 
     //! Pointer to CollectionProxyModel
-    CollectionProxyModel *_collectionProxyModel;
+    CollectionProxyModel *m_collectionProxyModel;
 
     //! Pointer to CollectionItemDelegate
-    CollectionItemDelegate *_collectionItemDelegate;
+    CollectionItemDelegate *m_collectionItemDelegate;
 
     //! Pointer to QFileSystemModel
-    QFileSystemModel *_fileSystemModel;
+    QFileSystemModel *m_fileSystemModel;
+
+    //! Pointer to BookmarksBrowser
+    BookmarksManager *m_bookmarksManager;
 
     //! Pointer to Player
-    Player *_player;
+    Player *m_player;
 
     //! Pointer to PluginsManager
-    PluginsManager *_pluginsManager;
+    PluginsManager *m_pluginsManager;
 
     //! Pointer to TaskManager
-    TaskManager *_taskManager;
+    TaskManager *m_taskManager;
 
     //! Group of QActions that contains Random ON and Random OFF actions
-    QActionGroup *_randomPlaybackGroup;
+    QActionGroup *m_randomPlaybackGroup;
 
     //! Group of QActions that contains Repeat Track, Repeat All and Repeat Off actions
-    QActionGroup *_repeatPlaybackGroup;
+    QActionGroup *m_repeatPlaybackGroup;
 
     //! PlaylistBrowser selection model
-    QItemSelectionModel *_selectionModel;
+    QItemSelectionModel *m_selectionModel;
 
     //! Application system tray icon
-    TrayIcon *_trayIcon;
+    TrayIcon *m_trayIcon;
 
     //! Tray icon menu
-    QMenu *_trayIconMenu;
+    QMenu *m_trayIconMenu;
 
     //! Collections popup menu
-    QMenu *_collectionsPopupMenu;
+    QMenu *m_collectionsPopupMenu;
+
+    //! Playlist popup menu
+    QMenu *m_playlistPopupMenu;
 
     //! Signal mapper that maps items in _ui->playlistVisibleColumn menu to togglePlaylistColumnVisible()
     /*!
       \sa togglePlaylistColumnVisible()
     */
-    QSignalMapper *_playlistVisibleColumnContextMenuMapper;
+    QSignalMapper *m_playlistVisibleColumnContextMenuMapper;
 
     //! Application icon
-    QIcon *_appIcon;
+    QIcon *m_appIcon;
 
     //! Label with length of current playlist (hh:mm:ss format)
-    QLabel *_playlistLengthLabel;
+    QLabel *m_playlistLengthLabel;
 
     //! Settings
-    QSettings *_settings;
+    QSettings *m_settings;
 
     //! Decides if the main window will be closed or hidden on closeEvent
     /*!
@@ -170,7 +179,7 @@ private:
       will be terminated.
       \sa closeEvent()
     */
-    bool _canClose;
+    bool m_canClose;
 
     //! Creates additional popupmenus
     /*!
@@ -184,6 +193,9 @@ private:
     */
     void bindShortcuts();
 
+    //! Binds signals to slots
+    void bindSignals();
+
     //! Create CollectionModel and CollectionProxyModel
     /*!
       This method is called only when collections are enabled in configuration
@@ -195,12 +207,6 @@ private:
       This method is called when preferences dialog is closed and collections were disabled in it
     */
     void destroyCollections();
-
-    //! Set as current track the track on given row in playlist
-    /*!
-      \param row location of the new track in playlist
-    */
-    void setTrack(int row);
 
 
 protected:
@@ -230,10 +236,17 @@ public slots:
     */
     void addPlaylistItem(const QString &filename);
 
+    //! Set as current track the track on given row in playlist
+    /*!
+      \param row location of the new track in playlist
+    */
+    void setTrack(int row);
+
+
 private slots:
 
     //! When doubleclicked item is a track, move it to the playlist
-    void on_collectionBrowser_doubleClicked(QModelIndex index);
+    void collectionBrowserDoubleClick(QModelIndex index);
 
     //! Workaround for QTBUG  7585
     /*!
@@ -244,28 +257,28 @@ private slots:
     void fixCollectionProxyModel();
 
     //! Clears collectionSearchEdit field and resets collections filter
-    void on_clearCollectionSearch_clicked();
+    void clearCollectionSearch();
 
     //! Clears playlistSearchEdit field and resets playlist filter
-    void on_clearPlaylistSearch_clicked();
+    void clearPlaylistSearch();
 
     //! Popups playlist header context menu
     /*!
       \param pos XY coordinates of cursor (relatively to MainWindow top-left corner) where the context menu will popup
     */
-    void showPlaylistContextMenu(QPoint pos);
+    void showPlaylistHeaderContextMenu(QPoint pos);
 
     //! Toggles visibility of given playlist column
     /*!
       \param column number of column that will be hidden or shown
     */
-    void togglePlaylistColumnVisible(int column);
+    void togglePlaylistColumnVisibility(int column);
 
     //! Opens the dialog to select a destination where to save the playlist and then calls PlaylistManager::savePlaylist()
     /*!
       \sa PlaylistManager::savePlaylist()
     */
-    void on_actionSave_playlist_triggered();
+    void savePlaylist();
 
     //! Play next track in playlist
     /*!
@@ -273,45 +286,45 @@ private slots:
       is stopped. When Player::repeatMode is repeatAll then first track is played. When Player::randomMode() is on
       then a random track from playlist is selected.
     */
-    void on_actionNext_track_triggered();
+    void nextTrack();
 
     //! Play or pause playback
-    void on_actionPlay_pause_triggered();
+    void playPause();
 
     //! Go to previous track.
     /*!
       When there is no track above, nothing happens.
     */
-    void on_actionPrevious_track_triggered();
+    void previousTrack();
 
     //! Stop the playback and reset the Player::CurrentSource
-    void on_actionStop_triggered() {
-        _player->stop();
+    void stopPlayer() {
+        m_player->stop();
     }
 
     //! Set player repeat mode to \p RepeatAll
-    void on_actionRepeat_playlist_triggered() {
-        _player->setRepeatMode(Player::RepeatAll);
+    void setRepeatModeAll() {
+        m_player->setRepeatMode(Player::RepeatAll);
     }
 
     //! Set player repeat mode to \p RepeatOff (disable repeat)
-    void on_actionRepeat_OFF_triggered() {
-        _player->setRepeatMode(Player::RepeatOff);
+    void setRepeatModeOff() {
+        m_player->setRepeatMode(Player::RepeatOff);
     }
 
     //! Set player repeat mode to \p RepeatTrack
-    void on_actionRepeat_track_triggered() {
-        _player->setRepeatMode(Player::RepeatTrack);
+    void setRepeatModeTrack() {
+        m_player->setRepeatMode(Player::RepeatTrack);
     }
 
     //! Disable player random mode
-    void on_actionRandom_OFF_triggered() {
-        _player->setRandomMode(false);
+    void setRandomModeOff() {
+        m_player->setRandomMode(false);
     }
 
     //! Enable player random mode
-    void on_actionRandom_ON_triggered() {
-        _player->setRandomMode(true);
+    void setRandomModeOn() {
+        m_player->setRandomMode(true);
     }
 
     //! Called when player status is changed
@@ -326,30 +339,27 @@ private slots:
       Passed index points to clicked item. This item is set as current player source and playback is started.
       \sa on_actionPlay_pause_triggered()
     */
-    void on_playlistBrowser_doubleClicked(QModelIndex index);
-
-    //! Opens dialog for folder selection and then calls PlaylistManager to populate the playlist
-    void on_actionAdd_folder_triggered();
+    void playlistBrowserDoubleClick(QModelIndex index);
 
     //! Removes all items from playlist
-    void on_actionClear_playlist_triggered() {
-        _playlistModel->removeRows(0,_playlistModel->rowCount(QModelIndex()),QModelIndex());
+    void clearPlaylist() {
+        m_playlistModel->clear();
     }
 
     //! Opens settings dialog
-    void on_actionSettings_triggered();
+    void openSettingsDialog();
 
-    //! Opens dialog for files and then calls PlaylistManager to populate the playlist
-    void on_actionAdd_file_triggered();
+    //! Called when preferences dialog is accepted, applies possible changes
+    void settingsDialogAccepted();
 
     //! toggle visibility of main window
-    void on_actionShow_Hide_triggered() {
+    void showHideWindow() {
         trayClicked(QSystemTrayIcon::Trigger);
     }
 
     //! Quit TepSonic
-    void on_actionQuit_TepSonic_triggered() {
-        _canClose = true;
+    void quitApp() {
+        m_canClose = true;
         this->close();
     }
 
@@ -360,15 +370,18 @@ private slots:
     void trayClicked(QSystemTrayIcon::ActivationReason);
 
     //! Opens external default browser and navigates to TepSonic bugzilla
-    void on_actionReport_a_bug_triggered();
+    void reportBug();
 
     //! Shows 'About' dialog
-    void on_actionAbout_TepSonic_triggered();
+    void aboutTepSonic();
 
     //! Shows 'About Qt' dialog
-    void on_actionAbout_Qt_triggered() {
+    void aboutQt() {
         QMessageBox::aboutQt(this,tr("About Qt"));
     }
+
+    //! Shows dialog with list of currently supported audio formats
+    void showSupportedFormats();
 
     //! Called when new track is set in Player.
     void updatePlayerTrack();
@@ -392,11 +405,11 @@ private slots:
     //! Event that updates volume when scrolling on trayicon
     void trayIconMouseWheelScrolled(int delta);
 
-    //! Called when preferences dialog is accepted, applies possible changes
-    void preferencesAccepted();
-
     //! Open the popup
     void showCollectionsContextMenu(QPoint pos);
+
+    //! Open the playlist popup menu
+    void showPlaylistContextMenu(QPoint pos);
 
     //! Deletes file locally on hardisk and calls for collections rebuild
     void removeFileFromDisk();

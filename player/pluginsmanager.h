@@ -29,6 +29,9 @@
 
 class AbstractPlugin;
 
+typedef QString (*PluginNameFcn)(void);
+typedef QString (*PluginIDFcn)(void);
+
 //! PluginsManager is a class for loading and providing access to plugins
 /*!
   PluginsManager is a object that provides API for rest of the application to communicate
@@ -40,9 +43,11 @@ class PluginsManager : public QObject
     public:
         struct Plugin {
             QString pluginName;
+            QString pluginID;
             QPluginLoader *pluginLoader;
-            uint pluginID;
             bool enabled;
+            QString filename;
+            bool hasUI;
         };
 
         //! Constructor
@@ -85,10 +90,8 @@ class PluginsManager : public QObject
 
         //! Loads all available plugins
         /*!
-          Loads all available plugin libraries. By default it searches in following directories: \n
-          ./ (on Linux and Windows) \n
-          ./plugins (on Linux and Windows) \n
-          All plugins must be prefixed libtepsonic_ and must have .so (Linux) or .dll (Windows) extension.
+          Loads all available plugin libraries.
+          All plugins must be prefixed libtepsonic_.
         */
         void loadPlugins();
 
@@ -100,9 +103,9 @@ class PluginsManager : public QObject
         void initPlugin(Plugin *plugin);
 
         //! List of Plugins containing loaded plugins
-        QList<Plugin*> _pluginsList;
+        QList<Plugin*> m_pluginsList;
 
-        int _lastPluginID;
+        PluginsManager::Plugin* loadPlugin(QString filename);
 
     signals:
          void settingsAccepted();

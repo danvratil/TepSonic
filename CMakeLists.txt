@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.6)
 
 OPTION(APPLEBUNDLE "Enable Mac OS X bundle build" OFF)
-OPTION(APPLEBUNDLE_STANDALONE "Do not copy required libs and tools into bundle (APPLEBUNDLE)" ON)
+OPTION(APPLEBUNDLE_STANDALONE "Do not copy required libs and tools into bundle (APPLEBUNDLE)" OFF)
 
 if (NOT APPLE)
     # those vars are valid for macosx only
@@ -80,7 +80,6 @@ add_subdirectory(3rdparty)
 add_subdirectory(player)
 add_subdirectory(plugins)
 if (APPLEBUNDLE_STANDALONE)
-    # this *must* go last
     add_subdirectory(macosx)
 endif (APPLEBUNDLE_STANDALONE)
 

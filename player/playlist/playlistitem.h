@@ -120,29 +120,14 @@ class PlaylistItem: public QStandardItem
       */
      bool setData(int column, const QVariant &value);
 
-     //! Sets new item state
-     /*!
-       \param newState new state
-     */
-     void setSelected(bool selected);
-
-     //! Returns current state of item selection
-     /*!
-       \return Returns current state of item selection
-     */
-     bool selected();
-
  private:
      //! List of item's child PlaylistItems
-     QList<PlaylistItem*> childItems;
+     QList<PlaylistItem*> m_childItems;
 
      //! Vector with data for single columns
-     QVector<QVariant> itemData;
+     QVector<QVariant> m_itemData;
 
      //! Pointer to parent PlaylistItem
-     PlaylistItem *parentItem;
-
-     //! Holds current state of the item
-     bool _selected;
+     PlaylistItem *m_parentItem;
  };
 #endif // PLAYLISTITEM_H

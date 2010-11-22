@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>Collections</class>
- <widget class="QWidget" name="Collections">
+ <class>CollectionsPage</class>
+ <widget class="QWidget" name="CollectionsPage">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>441</width>
-    <height>323</height>
+    <width>439</width>
+    <height>321</height>
    </rect>
   </property>
   <property name="windowTitle">

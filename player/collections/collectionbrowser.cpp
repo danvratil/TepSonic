@@ -51,29 +51,29 @@ void CollectionBrowser::startDrag(Qt::DropActions)
 
     QModelIndex index;
     for (int i = 0; i < indexes.count(); i++) {
-        index = indexes.at(i).sibling(indexes.at(i).row(),1);
+        index = indexes.at(i).sibling(indexes.at(i).row(), 1);
         if (index.data().toString().isEmpty()) {
             // Artist(s) is being dragged (child of the dragged item is empty)
-            if (index.sibling(index.row(),0).child(0,1).data().toString().isEmpty()) {
+            if (index.sibling(index.row(), 0).child(0, 1).data().toString().isEmpty()) {
                 int album = 0;
-                QModelIndex artistIndex = index.sibling(index.row(),0);
-                QModelIndex albumIndex = artistIndex.child(album,0);
-                while (albumIndex.sibling(album,0).isValid()) {
-                    QModelIndex trackIndex = albumIndex.sibling(album,0).child(0,0);
+                QModelIndex artistIndex = index.sibling(index.row(), 0);
+                QModelIndex albumIndex = artistIndex.child(album, 0);
+                while (albumIndex.sibling(album, 0).isValid()) {
+                    QModelIndex trackIndex = albumIndex.sibling(album, 0).child(0, 0);
                     int row = 0;
-                    while (trackIndex.sibling(row,0).isValid()) {
-                        stream << trackIndex.sibling(row,1).data().toString();
+                    while (trackIndex.sibling(row, 0).isValid()) {
+                        stream << trackIndex.sibling(row, 1).data().toString();
                         row++;
                     }
                     album++;
                 }
                 // Album(s) is being dragged
             } else {
-                QModelIndex albumIndex = index.sibling(index.row(),0);
-                QModelIndex trackIndex = albumIndex.child(0,0);
+                QModelIndex albumIndex = index.sibling(index.row(), 0);
+                QModelIndex trackIndex = albumIndex.child(0, 0);
                 int row = 0;
-                while (trackIndex.sibling(row,0).isValid()) {
-                    stream << trackIndex.sibling(row,1).data().toString();
+                while (trackIndex.sibling(row, 0).isValid()) {
+                    stream << trackIndex.sibling(row, 1).data().toString();
                     row++;
                 }
             }
@@ -99,7 +99,3 @@ void CollectionBrowser::keyPressEvent(QKeyEvent* event)
     }
 
 }
-
-
-
-

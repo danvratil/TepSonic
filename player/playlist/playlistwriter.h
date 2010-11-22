@@ -57,10 +57,10 @@ class PlaylistWriter : public QObject, public QRunnable
 
     private:
         //! Pointer to PlaylistModel
-        PlaylistModel *_playlistModel;
+        PlaylistModel *m_playlistModel;
 
         //! File to output the playlist into
-        QString _outputFile;
+        QString m_outputFile;
 
     signals:
         //! Emitted when playlist is succesfully written to a file

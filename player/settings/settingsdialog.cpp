@@ -19,36 +19,52 @@
  * Contributors: Petr Vaněk 
  */
 
-#include "preferencesdialog.h"
-#include "ui_preferencesdialog.h"
-#include "preferencespages.h"
+#include "settingsdialog.h"
+#include "ui_settingsdialog.h"
 #include "pluginsmanager.h"
 #include "mainwindow.h"
 #include "constants.h"
+
+#include "playerpage.h"
+#include "collectionspage.h"
+#include "pluginspage.h"
+#include "shortcutspage.h"
+#include "ui_playerpage.h"
+#include "ui_collectionspage.h"
+#include "ui_pluginspage.h"
+#include "ui_shortcutspage.h"
 
 #include "abstractplugin.h"
 
 #include <QFileDialog>
 #include <QDebug>
 
-PreferencesDialog::PreferencesDialog(MainWindow *parent):
-        _ui(new Ui::PreferencesDialog)
+SettingsDialog::SettingsDialog(MainWindow *parent):
+        _ui(new Ui::SettingsDialog),
+        _parent(parent)
 {
     extern PluginsManager *pluginsManager;
 
     _ui->setupUi(this);
+    _ui->pagesButtons->item(0)->setSelected(true);
+
+    connect(_ui->pagesButtons, SIGNAL(currentItemChanged(QListWidgetItem*, QListWidgetItem*)),
+            this, SLOT(changePage(QListWidgetItem*,QListWidgetItem*)));
 
 
-    _parent = parent;
+    _player = new SettingsPages::PlayerPage();
+    _collections = new SettingsPages::CollectionsPage();
+    _plugins = new SettingsPages::PluginsPage();
+    _shortcuts = new SettingsPages::ShortcutsPage();
 
-    _player = new PreferencesPages::Player;
-    _collections = new PreferencesPages::Collections;
-    _plugins = new PreferencesPages::Plugins;
-    _shortcuts = new PreferencesPages::Shortcuts;
-    connect(_collections,SIGNAL(rebuildCollections()),
-            this,SLOT(emitRebuildCollections()));
+    connect(_collections, SIGNAL(rebuildCollections()),
+            this, SLOT(emitRebuildCollections()));
     connect(_ui->buttonBox, SIGNAL(accepted()),
             this, SLOT(dialogAccepted()));
+    connect(_plugins, SIGNAL(pluginDisabled(int)),
+            this, SLOT(disablePlugin(int)));
+    connect(_plugins, SIGNAL(pluginEnabled(int)),
+            this, SLOT(enablePlugin(int)));
 
     _ui->pages->addWidget(_player);
     _ui->pages->addWidget(_collections);
@@ -79,33 +95,25 @@ PreferencesDialog::PreferencesDialog(MainWindow *parent):
     // Iterate through all plugins
     for (int i=0; i < pluginsManager->pluginsCount(); i++) {
 
-        // Get plugin name
-        QString pluginName = pluginsManager->pluginAt(i)->pluginName;
-
-        AbstractPlugin *plugin = reinterpret_cast<AbstractPlugin*>(pluginsManager->pluginAt(i)->pluginLoader->instance());
-        // If the plugin has a config UI then add a tab with the UI to Plugins page
-        if (plugin->hasConfigUI()) {
-            QWidget *pluginWidget = new QWidget();
-            _plugins->ui->tabs->addTab(pluginWidget,pluginName);
-            plugin->settingsWidget(pluginWidget);
+        if (pluginsManager->pluginAt(i)->enabled) {
+            // If the plugin has a config UI then add a tab with the UI to Plugins page
+            if (pluginsManager->pluginAt(i)->hasUI) {
+                QWidget *pluginWidget = new QWidget();
+                _plugins->ui->tabs->addTab(pluginWidget, pluginsManager->pluginAt(i)->pluginName);
+                AbstractPlugin *plugin = reinterpret_cast<AbstractPlugin*>(pluginsManager->pluginAt(i)->pluginLoader->instance());
+                plugin->settingsWidget(pluginWidget);
+            }
         }
 
-        bool enabled;
-        // If the plugin is not yet listed in the settings then set it enabled by default
-        if (plugins.contains(pluginName)) {
-            enabled = plugins[pluginName].toBool();
-        } else {
-            enabled = true;
-        }
-
-        // Add new item to plugins list on Plugins page
-        QListWidgetItem *item = new QListWidgetItem(pluginName);
-        if (enabled) {
+        QListWidgetItem *item = new QListWidgetItem(pluginsManager->pluginAt(i)->pluginName);
+        // If the plugin is not yet listed in the QSettings then set it as disabled by default
+        if (pluginsManager->pluginAt(i)->enabled) {
             item->setCheckState(Qt::Checked);
         } else {
             item->setCheckState(Qt::Unchecked);
         }
         _plugins->ui->pluginsList->addItem(item);
+
     }
 
 
@@ -134,12 +142,12 @@ PreferencesDialog::PreferencesDialog(MainWindow *parent):
 
 }
 
-PreferencesDialog::~PreferencesDialog()
+SettingsDialog::~SettingsDialog()
 {
     delete _ui;
 }
 
-void PreferencesDialog::changeEvent(QEvent *e)
+void SettingsDialog::changeEvent(QEvent *e)
 {
     switch (e->type()) {
     case QEvent::LanguageChange:
@@ -150,8 +158,9 @@ void PreferencesDialog::changeEvent(QEvent *e)
     }
 }
 
-void PreferencesDialog::dialogAccepted()
+void SettingsDialog::dialogAccepted()
 {
+
     extern PluginsManager *pluginsManager;
 
     QSettings settings(QString(_CONFIGDIR).append("/main.conf"),QSettings::IniFormat,this);
@@ -177,14 +186,12 @@ void PreferencesDialog::dialogAccepted()
     settings.endGroup(); // Preferences group
     settings.beginGroup("Plugins");
     QMap<QString,QVariant> plugins;
+    // Go through all plugins in the UI list
     for (int i = 0; i < _plugins->ui->pluginsList->count(); i++) {
+
         QListWidgetItem *item = _plugins->ui->pluginsList->item(i);
-        plugins.insert(item->text(),QVariant(item->checkState()));
-        if (item->checkState()) {
-            pluginsManager->enablePlugin(pluginsManager->pluginAt(i));
-        } else {
-            pluginsManager->disablePlugin(pluginsManager->pluginAt(i));
-        }
+        // insert into the map value pluginid - checked(bool)
+        plugins.insert(pluginsManager->pluginAt(i)->pluginID,QVariant((item->checkState()==2)));
     }
     settings.setValue("pluginsEnabled",QVariant(plugins));
     settings.endGroup();
@@ -205,13 +212,13 @@ void PreferencesDialog::dialogAccepted()
     this->close();
 }
 
-void PreferencesDialog::on_pagesButtons_currentItemChanged(QListWidgetItem* current, QListWidgetItem* previous)
+void SettingsDialog::changePage(QListWidgetItem* current, QListWidgetItem* previous)
 {
     Q_UNUSED(previous);
     _ui->pages->setCurrentIndex(_ui->pagesButtons->row(current));
 }
 
-void PreferencesDialog::emitRebuildCollections()
+void SettingsDialog::emitRebuildCollections()
 {
     // Save current state of collections configurations and emit rebuilding
 
@@ -232,4 +239,26 @@ void PreferencesDialog::emitRebuildCollections()
     settings.endGroup(); // MySQL group
     settings.endGroup(); // Collections group
     emit rebuildCollections();
+}
+
+void SettingsDialog::enablePlugin(int pluginIndex)
+{
+    extern PluginsManager *pluginsManager;
+
+    pluginsManager->enablePlugin(pluginsManager->pluginAt(pluginIndex));
+    AbstractPlugin *plugin = reinterpret_cast<AbstractPlugin*>(pluginsManager->pluginAt(pluginIndex)->pluginLoader->instance());
+    // If the plugin has a config UI then add a tab with the UI to Plugins page
+    if (plugin->hasConfigUI()) {
+        QWidget *pluginWidget = new QWidget();
+        _plugins->ui->tabs->insertTab(pluginIndex+1, pluginWidget, pluginsManager->pluginAt(pluginIndex)->pluginName);
+        plugin->settingsWidget(pluginWidget);
+    }
+}
+
+void SettingsDialog::disablePlugin(int pluginIndex)
+{
+    extern PluginsManager *pluginsManager;
+
+    pluginsManager->disablePlugin(pluginsManager->pluginAt(pluginIndex));
+    _plugins->ui->tabs->removeTab(pluginIndex+1);
 }

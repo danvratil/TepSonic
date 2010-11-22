@@ -6,7 +6,7 @@ cmake_minimum_required(VERSION 2.6)
 
 set(TEPSONIC_VERSION_MAJOR 0)
 set(TEPSONIC_VERSION_MINOR 98)
-set(TEPSONIC_VERSION_PATCH 0)
+set(TEPSONIC_VERSION_PATCH 1)
 set(TEPSONIC_VERSION ${TEPSONIC_VERSION_MAJOR}.${TEPSONIC_VERSION_MINOR}.${TEPSONIC_VERSION_PATCH})
 
 find_package(PkgConfig REQUIRED)
@@ -35,6 +35,8 @@ include_directories(
         ${QXT_INCLUDE_DIR}
 	"collections"
 	"playlist"
+	"settings"
+        "bookmarks"
 )
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/constants.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/constants.h)
@@ -47,26 +49,29 @@ set(player_HDRS
     pluginsmanager.h
     taskmanager.h
     databasemanager.h
-    preferencesdialog.h
-    preferencespages.h
     trayicon.h
-    changeshortcutdialog.h
     filesystembrowser.h
+    settings/settingsdialog.h
+    settings/playerpage.h
+    settings/collectionspage.h
+    settings/pluginspage.h
+    settings/shortcutspage.h
+    settings/changeshortcutdialog.h
     collections/collectionpopulator.h
-#    collections/collectionbrowser.h
     collections/collectionmodel.h
-#    collections/collectionitem.h
     collections/collectionbuilder.h
     collections/collectionproxymodel.h
     collections/collectionitemdelegate.h
     playlist/playlistbrowser.h
-#    playlist/playlistitem.h
     playlist/playlistitemdelegate.h
     playlist/playlistmodel.h
     playlist/playlistproxymodel.h
     playlist/playlistpopulator.h
     playlist/playlistwriter.h
-
+    bookmarks/bookmarksbrowser.h
+    bookmarks/bookmarksmanager.h
+    bookmarks/addbookmarkdlg.h
+    ../3rdparty/qxt/qxtglobalshortcut.h
 )
 
 set(player_SRCS
@@ -78,13 +83,16 @@ set(player_SRCS
     pluginsmanager.cpp
     taskmanager.cpp
     databasemanager.cpp
-    preferencesdialog.cpp
-    preferencespages.cpp
     tools.cpp
     trayicon.cpp
     supportedformats.cpp
-    changeshortcutdialog.cpp
     filesystembrowser.cpp
+    settings/settingsdialog.cpp
+    settings/playerpage.cpp
+    settings/collectionspage.cpp
+    settings/pluginspage.cpp
+    settings/shortcutspage.cpp
+    settings/changeshortcutdialog.cpp
     collections/collectionpopulator.cpp
     collections/collectionbrowser.cpp
     collections/collectionmodel.cpp
@@ -99,17 +107,22 @@ set(player_SRCS
     playlist/playlistproxymodel.cpp
     playlist/playlistpopulator.cpp
     playlist/playlistwriter.cpp
+    bookmarks/bookmarksbrowser.cpp
+    bookmarks/bookmarksitem.cpp
+    bookmarks/bookmarksmanager.cpp
+    bookmarks/addbookmarkdlg.cpp
     ../3rdparty/qxt/qxtglobalshortcut.cpp
 )
 
 set(player_QUIS
     ui/mainwindow.ui
-    ui/player.ui
-    ui/preferencesdialog.ui
-    ui/collections.ui
-    ui/plugins.ui
-    ui/shortcuts.ui
-    ui/changeshortcutdialog.ui
+    settings/playerpage.ui
+    settings/settingsdialog.ui
+    settings/collectionspage.ui
+    settings/pluginspage.ui
+    settings/shortcutspage.ui
+    settings/changeshortcutdialog.ui
+    bookmarks/addbookmarkdlg.ui
 )
 
 set(player_RCCS  
@@ -196,6 +209,7 @@ target_link_libraries(tepsonic
               ${TAGLIB_LIBRARIES}
               ${QXT_LIBRARY}
 )
+
 if (APPLE)
     target_link_libraries(tepsonic ${CARBON_LIBRARY})
 endif (APPLE)

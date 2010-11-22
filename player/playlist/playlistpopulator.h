@@ -109,10 +109,10 @@ class PlaylistPopulator : public QObject, public QRunnable
         Player::MetaData getFileMetaData(QString file);
 
         //! List of files that are loaded
-        QStringList _files;
+        QStringList m_files;
 
         //! Row where to insert the first item
-        int _row;
+        int m_row;
 
 };
 

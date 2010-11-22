@@ -39,9 +39,9 @@ class PlaylistItemDelegate : public QStyledItemDelegate
         void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const;
 
     private:
-        PlaylistModel *_playlistModel;
-        PlaylistBrowser *_playlistBrowser;
-        PlaylistProxyModel *_playlistProxyModel;
+        PlaylistModel *m_playlistModel;
+        PlaylistBrowser *m_playlistBrowser;
+        PlaylistProxyModel *m_playlistProxyModel;
 
 
 };

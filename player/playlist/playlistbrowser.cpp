@@ -21,6 +21,7 @@
 #include "playlistbrowser.h"
 #include "playlistmodel.h"
 #include "playlistproxymodel.h"
+#include "playlistitem.h"
 
 #include <QDir>
 #include <QDropEvent>
@@ -30,6 +31,7 @@
 #include <QUrl>
 #include <QFile>
 #include <QFileInfo>
+#include <QModelIndex>
 
 
 PlaylistBrowser::PlaylistBrowser(QWidget* parent):
@@ -86,11 +88,47 @@ void PlaylistBrowser::dropEvent(QDropEvent* event)
 
 void PlaylistBrowser::keyPressEvent(QKeyEvent* event)
 {
-    // When 'delete' pressed, remove selected rows from playlist
-    if (event->matches(QKeySequence::Delete)) {
-        for (int i = 0; i < selectedIndexes().size(); i++) {
-            model()->removeRow(selectedIndexes().at(i).row());
-        }
+    switch (event->key()) {
+        case Qt::Key_Delete: // Key DELETE
+            for (int i = 0; i < selectedIndexes().size(); i++) {
+                model()->removeRow(selectedIndexes().at(i).row());
+            }
+            break;
+        case Qt::Key_Down: { // Key DOWN
+            QModelIndex nextItem = indexBelow(currentIndex());
+            if (nextItem.isValid())
+                setCurrentIndex(nextItem);
+            } break;
+        case Qt::Key_Up: { // Key UP
+            QModelIndex prevItem = indexAbove(currentIndex());
+            if (prevItem.isValid())
+                setCurrentIndex(prevItem);
+            } break;
+        case Qt::Key_Enter:  // key ENTER (on numeric keypad)
+        case Qt::Key_Return: { // Key ENTER
+            PlaylistProxyModel *ppmodel = qobject_cast<PlaylistProxyModel*>(model());
+            if (!ppmodel) return;
+            PlaylistModel *pmodel = qobject_cast<PlaylistModel*>(ppmodel->sourceModel());
+            if (!pmodel) return;
+            pmodel->setCurrentItem(currentIndex());
+            emit setTrack(currentIndex().row());
+            } break;
     }
+    event->accept();
+
 }
 
+void PlaylistBrowser::setStopTrack()
+{
+    PlaylistProxyModel* ppmodel = qobject_cast<PlaylistProxyModel*>(model());
+
+    if(!ppmodel)
+        return;
+
+    PlaylistModel* pmodel = qobject_cast<PlaylistModel*>(ppmodel->sourceModel());
+
+    if(!pmodel)
+        return;
+
+    pmodel->setStopTrack(selectedIndexes().first());
+}

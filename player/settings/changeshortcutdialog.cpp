@@ -21,29 +21,31 @@
 #include "changeshortcutdialog.h"
 #include "ui_changeshortcutdialog.h"
 
+using namespace SettingsPages;
+
 ChangeShortcutDialog::ChangeShortcutDialog(QModelIndex index, QWidget *parent) :
     QDialog(parent),
-    ui(new Ui::ChangeShortcutDialog)
+    m_ui(new Ui::ChangeShortcutDialog)
 {
-    _index = index;
+    m_index = index;
 
 
-    ui->setupUi(this);
-    connect(ui->buttonBox, SIGNAL(rejected()),
+    m_ui->setupUi(this);
+    connect(m_ui->buttonBox, SIGNAL(rejected()),
             this, SLOT(close()));
-    connect(ui->buttonBox, SIGNAL(accepted()),
+    connect(m_ui->buttonBox, SIGNAL(accepted()),
             this, SLOT(accept()));
 
-    ui->currentShortcut->setText(index.sibling(index.row(),1).data().toString());
+    m_ui->currentShortcut->setText(index.sibling(index.row(), 1).data().toString());
 
     // List legal modifiers
-    _modifiers << Qt::ControlModifier << Qt::AltModifier << Qt::MetaModifier << Qt::ShiftModifier;
+    m_modifiers << Qt::ControlModifier << Qt::AltModifier << Qt::MetaModifier << Qt::ShiftModifier;
 
 }
 
 ChangeShortcutDialog::~ChangeShortcutDialog()
 {
-    delete ui;
+    delete m_ui;
 }
 
 void ChangeShortcutDialog::changeEvent(QEvent *e)
@@ -51,7 +53,7 @@ void ChangeShortcutDialog::changeEvent(QEvent *e)
     QDialog::changeEvent(e);
     switch (e->type()) {
     case QEvent::LanguageChange:
-        ui->retranslateUi(this);
+        m_ui->retranslateUi(this);
         break;
     default:
         break;
@@ -60,14 +62,14 @@ void ChangeShortcutDialog::changeEvent(QEvent *e)
 
 void ChangeShortcutDialog::keyReleaseEvent(QKeyEvent *e)
 {
-    if (_modifiers.contains(e->modifiers())) {
-        _shortcut = QKeySequence(e->modifiers() + e->key());
-        ui->currentShortcut->setText(_shortcut.toString(QKeySequence::NativeText));
+    if (m_modifiers.contains(e->modifiers())) {
+        m_shortcut = QKeySequence(e->modifiers() + e->key());
+        m_ui->currentShortcut->setText(m_shortcut.toString(QKeySequence::NativeText));
     }
 }
 
 void ChangeShortcutDialog::accept()
 {
-    emit shortcutChanged(_index, _shortcut);
+    emit shortcutChanged(m_index, m_shortcut);
     close();
 }

@@ -22,53 +22,55 @@
 StatusBar::StatusBar(QWidget *parent) :
         QStatusBar(parent)
 {
-    _actionLabel = 0;
-    _progressBar = 0;
+    m_actionLabel = 0;
+    m_progressBar = 0;
 }
 
 
 void StatusBar::setProgressBar(QString action, int position, int maxPosition)
 {
-    if (_actionLabel==0) {
-        _actionLabel = new QLabel(action,this);
-        _actionLabel->setSizePolicy(QSizePolicy::Minimum,QSizePolicy::Fixed);
-        insertWidget(0,_actionLabel,1);
+    if (m_actionLabel == 0) {
+        m_actionLabel = new QLabel(action,this);
+        m_actionLabel->setSizePolicy(QSizePolicy::Minimum,
+                                     QSizePolicy::Fixed);
+        insertWidget(0, m_actionLabel, 1);
     }
-    _actionLabel->setText(action);
+    m_actionLabel->setText(action);
 
-    if (_progressBar==0) {
-        _progressBar = new QProgressBar(this);
-        _progressBar->setMinimumWidth(100);
-        _progressBar->setMaximumWidth(100);
-        _progressBar->setSizePolicy(QSizePolicy::Minimum,QSizePolicy::Fixed);
-        insertWidget(0,_progressBar,1);
-        _progressBar->setMinimum(0);
-        _progressBar->setMaximum(maxPosition);
+    if (m_progressBar == 0) {
+        m_progressBar = new QProgressBar(this);
+        m_progressBar->setMinimumWidth(100);
+        m_progressBar->setMaximumWidth(100);
+        m_progressBar->setSizePolicy(QSizePolicy::Minimum,
+                                     QSizePolicy::Fixed);
+        insertWidget(0, m_progressBar, 1);
+        m_progressBar->setMinimum(0);
+        m_progressBar->setMaximum(maxPosition);
     }
-    _progressBar->setMaximum(maxPosition);
-    _progressBar->setValue(position);
+    m_progressBar->setMaximum(maxPosition);
+    m_progressBar->setValue(position);
 
     if (position == maxPosition) {
-        removeWidget(_actionLabel);
-        removeWidget(_progressBar);
-        delete _actionLabel;
-        delete _progressBar;
-        _actionLabel = 0;
-        _progressBar = 0;
+        removeWidget(m_actionLabel);
+        removeWidget(m_progressBar);
+        delete m_actionLabel;
+        delete m_progressBar;
+        m_actionLabel = 0;
+        m_progressBar = 0;
     }
 }
 
 void StatusBar::cancelAction()
 {
-    removeWidget(_actionLabel);
-    removeWidget(_progressBar);
-    delete _actionLabel;
-    delete _progressBar;
-    _actionLabel = 0;
-    _progressBar = 0;
+    removeWidget(m_actionLabel);
+    removeWidget(m_progressBar);
+    delete m_actionLabel;
+    delete m_progressBar;
+    m_actionLabel = 0;
+    m_progressBar = 0;
 }
 
 void StatusBar::showWorkingBar(QString action)
 {
-    setProgressBar(action,1,0);
+    setProgressBar(action, 1, 0);
 }

@@ -20,15 +20,50 @@
 #ifndef FILESYSTEMBROWSER_H
 #define FILESYSTEMBROWSER_H
 
-#include <QTreeView>
+#include <QListView>
+#include <QStringList>
+#include <QKeyEvent>
+#include <QMenu>
+#include <QModelIndex>
 
-class FileSystemBrowser : public QTreeView
+class FileSystemBrowser : public QListView
 {
     Q_OBJECT
-public:
-    FileSystemBrowser(QWidget *parent = 0);
+    public:
+        FileSystemBrowser(QWidget *parent = 0);
 
-    void startDrag(Qt::DropActions supportedActions);
+        void startDrag(Qt::DropActions supportedActions);
+
+    protected:
+        void keyPressEvent(QKeyEvent *event);
+
+
+    private slots:
+        void setRootDir(QModelIndex dir);
+        void emitAddBookmark();
+
+
+    public slots:
+        void goBack();
+        void goForward();
+        void goHome();
+        void cdUp();
+        void goToDir(QString newPath);
+        void showContextMenu(QPoint pos);
+
+    private:
+        QStringList m_forwardDirs;
+        QStringList m_backDirs;
+        QMenu *m_contextMenu;
+
+    signals:
+        void pathChanged(QString newPath);
+        void addTrackToPlaylist(QString filename);
+        void disableForward(bool);
+        void disableBack(bool);
+        void disableCdUp(bool);
+        void addBookmark(QString path);
+
 
 };
 

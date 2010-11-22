@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>Shortcuts</class>
- <widget class="QWidget" name="Shortcuts">
+ <class>ShortcutsPage</class>
+ <widget class="QWidget" name="ShortcutsPage">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>392</width>
-    <height>292</height>
+    <width>390</width>
+    <height>290</height>
    </rect>
   </property>
   <property name="windowTitle">

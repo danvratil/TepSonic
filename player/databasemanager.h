@@ -76,16 +76,16 @@ class DatabaseManager : public QObject
           in various databases (SQLite vs MySQL...)
           \return Returns type of database storage backend that is used.
         */
-        DriverTypes driverType()  { return _driverType; };
+        DriverTypes driverType()  { return m_driverType; };
 
         //! Returns QSqlDatabase connection object
-        QSqlDatabase* sqlDb() { return _sqlDb; }
+        QSqlDatabase* sqlDb() { return m_sqlDb; }
 
         //! Returns wheter connection is now available or not
-        static bool connectionAvailable() { return _static_connectionAvailable; }
+        static bool connectionAvailable() { return m_static_connectionAvailable; }
 
         //! Force new state of connection availability
-        static void forceConnectionAvailable(bool forceState = true) { _static_connectionAvailable = forceState; }
+        static void forceConnectionAvailable(bool forceState = true) { m_static_connectionAvailable = forceState; }
 
     private:
         //! Check if the database contains all required tables and if not creates them
@@ -95,33 +95,33 @@ class DatabaseManager : public QObject
         void initDb();
 
         //! Unique identification of the connection
-        QString _connectionName;
+        QString m_connectionName;
 
         //! Driver type that is used in this session
         /*!
           \sa driverType()
         */
-        DriverTypes _driverType;
+        DriverTypes m_driverType;
 
         //! Database server hostname or IP
-        QString _server;
+        QString m_server;
 
         //! Database server username
-        QString _username;
+        QString m_username;
 
         //! Database server password
-        QString _password;
+        QString m_password;
 
         //! Database
-        QString _db;
+        QString m_db;
 
         //! SQL database
-        QSqlDatabase *_sqlDb;
+        QSqlDatabase *m_sqlDb;
 
         //! Is connection available?
-        static bool _static_connectionAvailable;
+        static bool m_static_connectionAvailable;
 
-        bool _connectionAvailable;
+        bool m_connectionAvailable;
 
 
 };

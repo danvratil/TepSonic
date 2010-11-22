@@ -43,10 +43,10 @@ public:
 
 private:
     //! Label that describes the action
-    QLabel *_actionLabel;
+    QLabel *m_actionLabel;
 
     //! Progress bar that shows progress of the action
-    QProgressBar *_progressBar;
+    QProgressBar *m_progressBar;
 
 public slots:
     //! Updates action description and position of progressbar

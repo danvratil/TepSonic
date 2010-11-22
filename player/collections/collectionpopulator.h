@@ -23,6 +23,7 @@
 
 #include <QRunnable>
 #include <QObject>
+#include <QModelIndex>
 
 class CollectionModel;
 
@@ -51,9 +52,11 @@ signals:
 
     void clearCollectionModel();
 
+    void addChild(QModelIndex parent, QString title, QString filename, QString data1, QString data2, QModelIndex *item);
+
 private:
     //! Pointer to pointer to CollectionModel
-    CollectionModel **_collectionModel;
+    CollectionModel **m_collectionModel;
 
 };
 

@@ -31,9 +31,28 @@
 #include <QWidget>
 #include <QTranslator>
 
+// Exports pluginName method
+#ifdef Q_WS_WIN
+#define NAME_EXPORT __declspec(dllexport)
+#define ID_EXPORT __declspec(dllexport)
+#else
+#define NAME_EXPORT
+#define ID_EXPORT
+#endif
+
+extern "C" NAME_EXPORT QString pluginName()
+{
+    return "Last.fm plugin";
+}
+
+extern "C" ID_EXPORT QString pluginID()
+{
+    return "lastfm";
+}
+
+
 LastFmScrobblerPlugin::LastFmScrobblerPlugin()
 {
-    setPluginName("Last.fm plugin");
     setHasConfigUI(true);
 
     QString locale = QLocale::system().name();

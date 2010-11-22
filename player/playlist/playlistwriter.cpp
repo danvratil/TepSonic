@@ -27,8 +27,8 @@
 PlaylistWriter::PlaylistWriter(PlaylistModel *playlistModel)
 {
 
-    _outputFile = QString();
-    _playlistModel = playlistModel;
+    m_outputFile = QString();
+    m_playlistModel = playlistModel;
 
 }
 
@@ -36,16 +36,16 @@ PlaylistWriter::PlaylistWriter(PlaylistModel *playlistModel)
 void PlaylistWriter::run()
 {
 
-        if (!_outputFile.isEmpty())
+        if (!m_outputFile.isEmpty())
         {
-            QDir playlistDir(QFileInfo(_outputFile).path());
+            QDir playlistDir(QFileInfo(m_outputFile).path());
 
-            QFile file(_outputFile);
+            QFile file(m_outputFile);
             if (file.open(QFile::WriteOnly)) {
 
                 file.flush();
-                for (int i = 0; i < _playlistModel->rowCount(QModelIndex()); i++) {
-                    QString trackfname = playlistDir.relativeFilePath(_playlistModel->index(i,0,QModelIndex()).data().toString());
+                for (int i = 0; i < m_playlistModel->rowCount(QModelIndex()); i++) {
+                    QString trackfname = playlistDir.relativeFilePath(m_playlistModel->index(i, 0, QModelIndex()).data().toString());
                     file.write(QByteArray().append(trackfname).append("\n"));
                 }
             }
@@ -57,5 +57,5 @@ void PlaylistWriter::run()
 
 void PlaylistWriter::saveToFile(QString filename)
 {
-    _outputFile = filename;
+    m_outputFile = filename;
 }

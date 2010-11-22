@@ -70,10 +70,10 @@ signals:
 
 private:
     //! Pointer to pointer to CollectionModel that is populated
-    CollectionModel **_collectionModel;
+    CollectionModel **m_collectionModel;
 
     //! List of folder to go through
-    QStringList _folders;
+    QStringList m_folders;
 
     //! Load informations about given file and store it in database
     /*!

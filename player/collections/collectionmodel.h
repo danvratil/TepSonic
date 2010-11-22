@@ -191,6 +191,7 @@
      */
      void redraw() { emit layoutChanged(); }
 
+
  protected:
      //! Returns list of accepted drop acctions.
      /*!
@@ -208,7 +209,7 @@
      CollectionItem *getItem(const QModelIndex &index) const;
 
      //! Pointer to root CollectionItem
-     CollectionItem *_rootItem;
+     CollectionItem *m_rootItem;
 
    public slots:
 
@@ -217,6 +218,13 @@
        This is the best method how to remove all items from collections
      */
      void clear();
+
+     void addItem(QModelIndex parent,
+                  QString title,
+                  QString filename,
+                  QString data1,
+                  QString data2,
+                  QModelIndex *item);
 
  };
 
