@@ -14,6 +14,10 @@ find_package(Qt4 4.5 REQUIRED)
 find_package(Taglib REQUIRED)
 find_package(Phonon REQUIRED)
 
+if (NOT DEFINED CMAKE_BUILD_TYPE)
+   set(CMAKE_BUILD_TYPE "Debug")
+endif (NOT DEFINED CMAKE_BUILD_TYPE)
+
 add_definitions(${TAGLIB_CFLAGS})
 
 add_definitions(-DQXT_STATIC -DBUILD_QXT_GUI -DBUILD_QXT_CORE)
@@ -25,6 +29,8 @@ set(QT_USE_QTMAIN 1)
 set(QT_USE_QTSQL 1)
 
 include(${QT_USE_FILE})
+# this is mandatory for Apple builds to load plugin correctly
+add_definitions(-DQT_NO_DEBUG)
 
 include_directories(
         ${CMAKE_CURRENT_BINARY_DIR}
