@@ -154,6 +154,10 @@ class TaskManager : public QObject
         CollectionModel **m_collectionModel;
 
         QThreadPool *m_threadPool;
+
+        //! This pool is specially for collections where having two tasks running simultaneously is
+        // not very safe.
+        QThreadPool *m_collectionsThreadPool;
 };
 
 #endif // TASKMANAGER_H

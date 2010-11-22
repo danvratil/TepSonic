@@ -37,13 +37,18 @@ TaskManager::TaskManager(PlaylistModel **playlistModel, CollectionModel **collec
     m_collectionModel = collectionModel;
 
     m_threadPool = new QThreadPool(this);
+    m_collectionsThreadPool = new QThreadPool(this);
+    // Only one collections thread at once. Another thread will be queued until the running thread is done
+    m_collectionsThreadPool->setMaxThreadCount(1);
 
 }
 
 TaskManager::~TaskManager()
 {
     m_threadPool->waitForDone();
+    m_collectionsThreadPool->waitForDone();
     delete m_threadPool;
+    delete m_collectionsThreadPool;
 }
 
 void TaskManager::addFilesToPlaylist(const QStringList &files, int row)
@@ -98,7 +103,7 @@ void TaskManager::populateCollections()
             this, SIGNAL(insertItemToCollections(QModelIndex,QString,QString,QString,QString,QModelIndex*)),
             Qt::BlockingQueuedConnection);
 
-    m_threadPool->start(collectionPopulator);
+    m_collectionsThreadPool->start(collectionPopulator);
 }
 
 void TaskManager::rebuildCollections(const QString &folder)
@@ -122,7 +127,7 @@ void TaskManager::rebuildCollections(const QString &folder)
         connect(collectionBuilder,SIGNAL(buildingFinished()),
                 this,SIGNAL(taskDone()));
 
-        m_threadPool->start(collectionBuilder);
+        m_collectionsThreadPool->start(collectionBuilder);
 
     }
 }

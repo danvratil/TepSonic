@@ -159,7 +159,6 @@ void CollectionBuilder::rebuildFolder(QStringList folder)
 
 void CollectionBuilder::insertTrack(QString filename, QSqlDatabase *sqlDB)
 {
-    qDebug() << filename;
 
     QFileInfo fileInfo(filename);
     QString fname = fileInfo.filePath().toUtf8();
@@ -287,7 +286,6 @@ void CollectionBuilder::updateTrack(QString filename, QSqlDatabase *sqlDb)
 
 void CollectionBuilder::removeTrack(QString filename, QSqlDatabase *sqlDb)
 {
-    qDebug() << "Deleting " << filename;
     QFileInfo fileInfo(filename);
     QString fname = fileInfo.filePath().toUtf8();
 
