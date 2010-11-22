@@ -5,7 +5,9 @@ cmake_minimum_required(VERSION 2.6)
 # Add custom cmake modules
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/../../cmake/modules ${CMAKE_MODULE_PATH})
 
-set(CMAKE_BUILD_TYPE "Debug")
+if (NOT DEFINED CMAKE_BUILD_TYPE)
+   set(CMAKE_BUILD_TYPE "Debug")
+endif (NOT DEFINED CMAKE_BUILD_TYPE)
 
 find_package(PkgConfig REQUIRED)
 find_package(Qt4 REQUIRED)

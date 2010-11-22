@@ -13,8 +13,13 @@
 SET(DIRS @QT_LIBRARY_DIRS@;@QT_PLUGINS_DIR@;@CMAKE_INSTALL_PREFIX@/Contents/plugins/)
 
 # qt_menu.nib is mandatory for mac
-file(COPY @QT_LIBRARY_DIR@/QtGui.framework/Resources/qt_menu.nib
-     DESTINATION @CMAKE_INSTALL_PREFIX@/tepsonic.app/Contents/Resources)
+if (@QT_USE_FRAMEWORKS@)
+    file(COPY @QT_LIBRARY_DIR@/QtGui.framework/Resources/qt_menu.nib
+         DESTINATION @CMAKE_INSTALL_PREFIX@/@JUFFED@.app/Contents/Resources)
+else ()
+    file(COPY @QT_LIBRARY_DIR@/Resources/qt_menu.nib
+         DESTINATION @CMAKE_INSTALL_PREFIX@/@JUFFED@.app/Contents/Resources)
+endif ()
 
 # the qt.conf is mandatory too
 file(WRITE @CMAKE_INSTALL_PREFIX@/tepsonic.app/Contents/Resources/qt.conf "[Paths]

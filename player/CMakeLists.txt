@@ -14,6 +14,10 @@ find_package(Qt4 4.5 REQUIRED)
 find_package(Taglib REQUIRED)
 find_package(Phonon REQUIRED)
 
+if (NOT DEFINED CMAKE_BUILD_TYPE)
+   set(CMAKE_BUILD_TYPE "Debug")
+endif (NOT DEFINED CMAKE_BUILD_TYPE)
+
 add_definitions(${TAGLIB_CFLAGS})
 
 add_definitions(-DQXT_STATIC -DBUILD_QXT_GUI -DBUILD_QXT_CORE)
