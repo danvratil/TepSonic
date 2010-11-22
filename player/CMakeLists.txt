@@ -29,6 +29,8 @@ set(QT_USE_QTMAIN 1)
 set(QT_USE_QTSQL 1)
 
 include(${QT_USE_FILE})
+# this is mandatory for Apple builds to load plugin correctly
+add_definitions(-DQT_NO_DEBUG)
 
 include_directories(
         ${CMAKE_CURRENT_BINARY_DIR}

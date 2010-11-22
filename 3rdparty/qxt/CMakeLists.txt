@@ -6,6 +6,8 @@ include_directories(
         ${QT_INCLUDE_DIR}
 )
 include(${QT_USE_FILE})
+# this is mandatory for Apple builds to load plugin correctly
+add_definitions(-DQT_NO_DEBUG)
 
 set(QXT-SOURCES
   qxtglobal.cpp
