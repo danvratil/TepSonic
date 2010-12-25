@@ -174,6 +174,13 @@ Player::MetaData PlaylistPopulator::getFileMetaData(QString file)
     if (metadata.filename.isEmpty()) {
         TagLib::FileRef f(file.toLocal8Bit().constData());
 
+        if (f.isNull() || !f.tag()) {
+            qDebug() << file << " failed to be loaded by TagLib.";
+            metadata.filename = file.toUtf8().constData();
+            metadata.title = QFileInfo(file).fileName();
+            return metadata;
+        }
+
         metadata.filename = file.toUtf8().constData();
         metadata.title = f.tag()->title().toCString(true);
         metadata.trackNumber = f.tag()->track();
