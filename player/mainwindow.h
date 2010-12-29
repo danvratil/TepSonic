@@ -30,8 +30,8 @@
 #include <QItemSelectionModel>
 #include <QLabel>
 #include <QSystemTrayIcon>
-#include <QFileSystemModel>
 #include <QKeyEvent>
+#include <QFileSystemModel>
 
 
 // These classes are used in inline methods
@@ -49,6 +49,7 @@ class DatabaseManager;
 class PluginsManager;
 class TaskManager;
 class BookmarksManager;
+class FileSystemModel;
 
 namespace Ui
 {

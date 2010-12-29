@@ -19,14 +19,13 @@
 
 #include "filesystembrowser.h"
 
-#include <QFileSystemModel>
 #include <QMimeData>
 #include <QByteArray>
 #include <QDataStream>
 #include <QDrag>
 #include <QDir>
+#include <QFileSystemModel>
 
-#include <QDebug>
 
 FileSystemBrowser::FileSystemBrowser(QWidget *parent):
         QListView(parent)
@@ -87,7 +86,7 @@ void FileSystemBrowser::setRootDir(QModelIndex dir)
 
     emit pathChanged(path);
 
-    emit disableCdUp(path == QDir::rootPath());
+    emit disableCdUp(path == QDir::rootPath() || path.isEmpty());
     emit disableBack(m_backDirs.isEmpty());
 }
 
@@ -107,7 +106,7 @@ void FileSystemBrowser::goBack()
 
     emit pathChanged(newpath);
 
-    emit disableCdUp(newpath == QDir::rootPath());
+    emit disableCdUp(newpath == QDir::rootPath() || newpath.isEmpty());
     emit disableBack(m_backDirs.isEmpty());
     emit disableForward(false);
 }
@@ -130,7 +129,7 @@ void FileSystemBrowser::goForward()
 
     emit disableBack(m_backDirs.isEmpty());
     emit disableForward(m_forwardDirs.isEmpty());
-    emit disableCdUp(newpath == QDir::rootPath());
+    emit disableCdUp(newpath == QDir::rootPath() || newpath.isEmpty());
 }
 
 
@@ -141,8 +140,14 @@ void FileSystemBrowser::cdUp()
 
     QModelIndex previousItem = rootIndex().parent();
 
-    if (fsmodel->filePath(rootIndex().parent()).isEmpty())
-        return;
+    // When the top-level directory ("C:\" or "/") is reached
+    if (fsmodel->filePath(rootIndex().parent()).isEmpty()) {
+        // On Windows set root path to "My Computer" (so that user see list of drives) which is above top-level dir.
+        // This has no effect on Linux/Mac, where it returns "/"
+        fsmodel->setRootPath(fsmodel->myComputer().toString());
+        // Redefine the Previous item to point to the "My Computer" (or just "/" on Linux/Mac)
+        previousItem = fsmodel->index(fsmodel->rootPath());
+    }
 
     m_backDirs.prepend(fsmodel->filePath(rootIndex()));
 
@@ -150,8 +155,10 @@ void FileSystemBrowser::cdUp()
     setRootIndex(previousItem);
     setCurrentIndex(QModelIndex());
 
-    emit disableCdUp(fsmodel->filePath(previousItem) == QDir::rootPath());
-    emit pathChanged(fsmodel->filePath(previousItem));
+    QString newpath = fsmodel->filePath(previousItem);
+
+    emit disableCdUp(newpath == QDir::rootPath() || newpath.isEmpty());
+    emit pathChanged(newpath);
 }
 
 
@@ -167,8 +174,10 @@ void FileSystemBrowser::goHome()
 
     emit pathChanged(QDir::homePath());
 
+    QString newpath = fsmodel->fileName(rootIndex());
+
     emit disableBack(m_backDirs.isEmpty());
-    emit disableCdUp(fsmodel->fileName(rootIndex()) == QDir::rootPath());
+    emit disableCdUp(newpath == QDir::rootPath() || newpath.isEmpty());
 }
 
 
@@ -191,7 +200,7 @@ void FileSystemBrowser::goToDir(QString newPath)
 
     emit pathChanged(newPath);
 
-    emit disableCdUp(newPath == QDir::rootPath());
+    emit disableCdUp(newPath == QDir::rootPath() || newPath.isEmpty());
     emit disableBack(m_backDirs.isEmpty());
 }
 

@@ -179,6 +179,9 @@ MainWindow::MainWindow(Player *player):
     QString fsbpath = m_settings->value("LastSession/LastFSBPath", QDir::homePath()).toString();
     m_ui->filesystemBrowser->setRootIndex(m_fileSystemModel->index(fsbpath));
     m_ui->fsbPath->setText(fsbpath);
+    // If the default path is "My Computer" or "/" then disable the "cd up" button
+    if (fsbpath.isEmpty() || fsbpath == QDir::rootPath())
+        m_ui->fsbCdUpBtn->setDisabled(true);
 
 
 
@@ -190,7 +193,7 @@ MainWindow::MainWindow(Player *player):
     // Load last playlist
     if (m_settings->value("Preferences/RestoreSession", true).toBool()) {
         m_taskManager->addFileToPlaylist(QString(_CONFIGDIR).append("/last.m3u"));
-	randomModeChanged(m_settings->value("LastSession/RandomMode",false).toBool());
+        randomModeChanged(m_settings->value("LastSession/RandomMode",false).toBool());
         repeatModeChanged(Player::RepeatMode(m_settings->value("LastSession/RepeatMode",0).toInt()));
     }
 
