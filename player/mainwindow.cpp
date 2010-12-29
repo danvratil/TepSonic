@@ -190,8 +190,8 @@ MainWindow::MainWindow(Player *player):
     // Load last playlist
     if (m_settings->value("Preferences/RestoreSession", true).toBool()) {
         m_taskManager->addFileToPlaylist(QString(_CONFIGDIR).append("/last.m3u"));
-        m_player->setRandomMode(m_settings->value("LastSession/RandomMode",false).toBool());
-        m_player->setRepeatMode(Player::RepeatMode(m_settings->value("LastSession/RepeatMode",0).toInt()));
+	randomModeChanged(m_settings->value("LastSession/RandomMode",false).toBool());
+        repeatModeChanged(Player::RepeatMode(m_settings->value("LastSession/RepeatMode",0).toInt()));
     }
 
 
@@ -250,7 +250,6 @@ void MainWindow::createMenus()
     m_randomPlaybackGroup = new QActionGroup(this);
     m_randomPlaybackGroup->addAction(m_ui->actionRandom_ON);
     m_randomPlaybackGroup->addAction(m_ui->actionRandom_OFF);
-    m_ui->actionRandom_OFF->setChecked(true);
 
     // Create 'Repeat mode' submenu
     m_repeatPlaybackGroup = new QActionGroup(this);
