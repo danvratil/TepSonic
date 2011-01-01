@@ -10,6 +10,7 @@ set(TEPSONIC_VERSION_PATCH 1)
 set(TEPSONIC_VERSION ${TEPSONIC_VERSION_MAJOR}.${TEPSONIC_VERSION_MINOR}.${TEPSONIC_VERSION_PATCH})
 
 find_package(PkgConfig REQUIRED)
+find_package(X11 REQUIRED)
 find_package(Qt4 4.5 REQUIRED)
 find_package(Taglib REQUIRED)
 find_package(Phonon REQUIRED)
@@ -212,8 +213,9 @@ target_link_libraries(tepsonic
 		      ${QT_LIBRARIES}
 		      ${QT_QTSQL_LIBRARIES}
 		      ${PHONON_LIBS}
-              ${TAGLIB_LIBRARIES}
-              ${QXT_LIBRARY}
+	              ${TAGLIB_LIBRARIES}
+        	      ${QXT_LIBRARY}
+		      ${X11_LIBRARIES}
 )
 
 if (APPLE)
