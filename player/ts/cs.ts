@@ -2,6 +2,47 @@
 <!DOCTYPE TS>
 <TS version="2.0" language="cs_CZ" sourcelanguage="en">
 <context>
+    <name>AddBookmarkDlg</name>
+    <message>
+        <source>Dialog</source>
+        <translation>Dialog</translation>
+    </message>
+    <message>
+        <source>Title:</source>
+        <translation>Název:</translation>
+    </message>
+    <message>
+        <source>Path:</source>
+        <translation>Cesta:</translation>
+    </message>
+</context>
+<context>
+    <name>BookmarksManager</name>
+    <message>
+        <source>Remove bookmark</source>
+        <translation>Odstranit záložku</translation>
+    </message>
+    <message>
+        <source>Remove bookmark?</source>
+        <translation>Odstranit záložku?</translation>
+    </message>
+    <message>
+        <source>Do you really want to remove this bookmark?</source>
+        <translation>Opravdu chcete odstranit tuto záložku?</translation>
+    </message>
+</context>
+<context>
+    <name>ChangeShortcutDialog</name>
+    <message>
+        <source>Dialog</source>
+        <translation>Dialog</translation>
+    </message>
+    <message>
+        <source>Press a keys that you want to set as a shortcut</source>
+        <translation>Stiskněte klávesu, kterou chcete nastavit jako zkratku</translation>
+    </message>
+</context>
+<context>
     <name>CollectionBuilder</name>
     <message>
         <source>Unkown artist</source>
@@ -14,6 +55,10 @@
 </context>
 <context>
     <name>CollectionPopulator</name>
+    <message>
+        <source>Various Artists</source>
+        <translation>Různí umělci</translation>
+    </message>
     <message numerus="yes">
         <source>%n album(s)</source>
         <translation>
@@ -23,16 +68,24 @@
         </translation>
     </message>
     <message numerus="yes">
+        <source>%n tracks(s)</source>
+        <translation>
+            <numerusform>%n stopa</numerusform>
+            <numerusform>%n stopy</numerusform>
+            <numerusform>%n stop</numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
         <source>%n track(s)</source>
         <translation>
-            <numerusform>%n skladba</numerusform>
-            <numerusform>%n skladby</numerusform>
-            <numerusform>%n skladeb</numerusform>
+            <numerusform>%n stopa</numerusform>
+            <numerusform>%n stopy</numerusform>
+            <numerusform>%n stop</numerusform>
         </translation>
     </message>
 </context>
 <context>
-    <name>Collections</name>
+    <name>CollectionsPage</name>
     <message>
         <source>Form</source>
         <translation>Formulář</translation>
@@ -43,15 +96,15 @@
     </message>
     <message>
         <source>Enable collections</source>
-        <translation>Zapnout kolekce</translation>
+        <translation>Povolit kolekce</translation>
     </message>
     <message>
         <source>Update collections automatically after start</source>
-        <translation>Automaticky aktualizovat kolekce po spuštění</translation>
+        <translation>Automaticky aktualizovat kolekce po startu</translation>
     </message>
     <message>
         <source>Rebuild collections now</source>
-        <translation>Aktualizovat kolekce nyní</translation>
+        <translation>Aktualizovat kolekce</translation>
     </message>
     <message>
         <source>Database engine</source>
@@ -67,7 +120,7 @@
     </message>
     <message>
         <source>MySQL settings</source>
-        <translation>Konfigurace MySQL</translation>
+        <translation>Nastavení MySQL</translation>
     </message>
     <message>
         <source>Server</source>
@@ -87,7 +140,7 @@
     </message>
     <message>
         <source>Collections paths</source>
-        <translation>Cesty kolekcí</translation>
+        <translation>Zdroje kolekcí</translation>
     </message>
     <message>
         <source>Add...</source>
@@ -95,42 +148,18 @@
     </message>
     <message>
         <source>Remove</source>
-        <translation>Odstranit</translation>
+        <translation>Odebrat</translation>
     </message>
     <message>
         <source>Remove all</source>
-        <translation>Odtranit vše</translation>
+        <translation>Odebrat vše</translation>
     </message>
 </context>
 <context>
-    <name>LastFmScrobblerConfig</name>
+    <name>FileSystemBrowser</name>
     <message>
-        <source>Form</source>
-        <translation>Formulář</translation>
-    </message>
-    <message>
-        <source>Username</source>
-        <translation>Uživ. jméno</translation>
-    </message>
-    <message>
-        <source>Password</source>
-        <translation>Heslo</translation>
-    </message>
-    <message>
-        <source>Proxy settings</source>
-        <translation>Nastavení proxy</translation>
-    </message>
-    <message>
-        <source>Server</source>
-        <translation>Server</translation>
-    </message>
-    <message>
-        <source>Port</source>
-        <translation>Port</translation>
-    </message>
-    <message>
-        <source>Use proxy</source>
-        <translation>Použít proxy</translation>
+        <source>Add to bookmarks</source>
+        <translation>Přidat do záložek</translation>
     </message>
 </context>
 <context>
@@ -140,28 +169,52 @@
         <translation>TepSonic</translation>
     </message>
     <message>
-        <source>Load file</source>
-        <translation>Otevřít soubor</translation>
-    </message>
-    <message>
-        <source>Load folder</source>
-        <translation>Načíst adresář</translation>
-    </message>
-    <message>
         <source>Clear playlist</source>
-        <translation>Vyprázdnit playlist</translation>
+        <translation>Vymazat playlist</translation>
     </message>
     <message>
         <source>Player is stopped</source>
-        <translation>Přehrávač je zastavený</translation>
+        <translation>Přehrávaní je zastavené</translation>
     </message>
     <message>
         <source>Stopped</source>
         <translation>Zastaveno</translation>
     </message>
     <message>
+        <source>Collections</source>
+        <translation>Kolekce</translation>
+    </message>
+    <message>
         <source>Search</source>
         <translation>Hledat</translation>
+    </message>
+    <message>
+        <source>Filesystem</source>
+        <translation>Disk</translation>
+    </message>
+    <message>
+        <source>Back</source>
+        <translation>Zpět</translation>
+    </message>
+    <message>
+        <source>Up</source>
+        <translation>O úroveň výše</translation>
+    </message>
+    <message>
+        <source>Forward</source>
+        <translation>Vpřed</translation>
+    </message>
+    <message>
+        <source>Home</source>
+        <translation>Domů</translation>
+    </message>
+    <message>
+        <source>Bookmarks</source>
+        <translation>Záložky</translation>
+    </message>
+    <message>
+        <source>/</source>
+        <translation>/</translation>
     </message>
     <message>
         <source>&amp;TepSonic</source>
@@ -173,7 +226,7 @@
     </message>
     <message>
         <source>Visible columns</source>
-        <translation>Viditelné sloupce</translation>
+        <translation>Zobrazené sloupce</translation>
     </message>
     <message>
         <source>Pla&amp;yer</source>
@@ -193,11 +246,15 @@
     </message>
     <message>
         <source>&amp;Show/Hide</source>
-        <translation>&amp;Zobrazit/Skrýt</translation>
+        <translation>&amp;Zobrazit/skrýt</translation>
     </message>
     <message>
         <source>Ctrl+H</source>
         <translation>Ctrl+H</translation>
+    </message>
+    <message>
+        <source>Load folder</source>
+        <translation>Načíst adresář</translation>
     </message>
     <message>
         <source>Ctrl+L</source>
@@ -213,7 +270,7 @@
     </message>
     <message>
         <source>Add &amp;file</source>
-        <translation>Přida&amp;t soubor</translation>
+        <translation>Přidat &amp;soubor</translation>
     </message>
     <message>
         <source>Ctrl+A</source>
@@ -221,11 +278,11 @@
     </message>
     <message>
         <source>&amp;Add folder</source>
-        <translation>&amp;Načíst adresář</translation>
+        <translation>Přidat &amp;adresář</translation>
     </message>
     <message>
         <source>&amp;Clear playlist</source>
-        <translation>&amp;Vyprázdnit playlist</translation>
+        <translation>&amp;Vymazat playlist</translation>
     </message>
     <message>
         <source>Ctrl+C</source>
@@ -241,7 +298,7 @@
     </message>
     <message>
         <source>P&amp;revious track</source>
-        <translation>&amp;Předchozí skladba</translation>
+        <translation>Pře&amp;dchozí skladba</translation>
     </message>
     <message>
         <source>Ctrl+P</source>
@@ -249,7 +306,7 @@
     </message>
     <message>
         <source>&amp;Play/pause</source>
-        <translation>&amp;Hrát/pauza</translation>
+        <translation>&amp;Play/pauza</translation>
     </message>
     <message>
         <source>Space</source>
@@ -273,27 +330,27 @@
     </message>
     <message>
         <source>Random O&amp;N</source>
-        <translation>&amp;Zapnout</translation>
+        <translation>&amp;Zapnuto</translation>
     </message>
     <message>
         <source>Random O&amp;FF</source>
-        <translation>&amp;Vypnout</translation>
+        <translation>&amp;Vypnuto</translation>
     </message>
     <message>
         <source>Repeat &amp;OFF</source>
-        <translation>&amp;Vypnout</translation>
+        <translation>&amp;Vypnuto</translation>
     </message>
     <message>
         <source>Repeat &amp;track</source>
-        <translation>&amp;Skladbu</translation>
+        <translation>Opakovat &amp;skladbu</translation>
     </message>
     <message>
         <source>Repeat &amp;playlist</source>
-        <translation>&amp;Celý playlist</translation>
+        <translation>Opakovat &amp;vše</translation>
     </message>
     <message>
         <source>&amp;Options</source>
-        <translation>&amp;Možnosti</translation>
+        <translation>&amp;Nastavení</translation>
     </message>
     <message>
         <source>Ctrl+O</source>
@@ -301,7 +358,7 @@
     </message>
     <message>
         <source>About &amp;TepSonic</source>
-        <translation>&amp;O TepSonicu</translation>
+        <translation>O &amp;TepSonicu</translation>
     </message>
     <message>
         <source>About &amp;Qt</source>
@@ -317,7 +374,7 @@
     </message>
     <message>
         <source>Track</source>
-        <translation>Stopa</translation>
+        <translation>Číslo skladby</translation>
     </message>
     <message>
         <source>Interpret</source>
@@ -345,7 +402,27 @@
     </message>
     <message>
         <source>Filename</source>
-        <translation>Název souboru</translation>
+        <translation>Soubor</translation>
+    </message>
+    <message>
+        <source>Se&amp;ttings</source>
+        <translation>&amp;Nastavení</translation>
+    </message>
+    <message>
+        <source>Configure TepSonic</source>
+        <translation>Nastavit TepSonic</translation>
+    </message>
+    <message>
+        <source>Bitrate</source>
+        <translation>Datový tok</translation>
+    </message>
+    <message>
+        <source>&amp;Supported formats</source>
+        <translation>&amp;Podporované formáty</translation>
+    </message>
+    <message>
+        <source>About Qt</source>
+        <translation>O Qt</translation>
     </message>
     <message numerus="yes">
         <source>%n track(s)</source>
@@ -361,11 +438,15 @@
     </message>
     <message>
         <source>Collapse all</source>
-        <translation>Zabalit vše</translation>
+        <translation>Sbalit vše</translation>
     </message>
     <message>
         <source>Delete file from disk</source>
-        <translation>Odstranit z disku</translation>
+        <translation>Odstranit soubor z disku</translation>
+    </message>
+    <message>
+        <source>Stop after this track</source>
+        <translation>Zastavit po této skladbě</translation>
     </message>
     <message>
         <source>Version %1</source>
@@ -384,16 +465,16 @@
         <translation>O TepSonicu</translation>
     </message>
     <message>
-        <source>Select file</source>
-        <translation>Vyberte soubor</translation>
+        <source>Supported formats</source>
+        <translation>Podporované formáty</translation>
     </message>
     <message>
-        <source>Add directory</source>
-        <translation>Přidat adresář</translation>
+        <source>On this computer TepSonic can play following audio files:</source>
+        <translation>Na tomto počítači dokáze TepSonic přehrát tyto audio soubory:</translation>
     </message>
     <message>
         <source>Playing: </source>
-        <translation>Přehrává se: </translation>
+        <translation>Přehrávám:</translation>
     </message>
     <message>
         <source>%1 [paused]</source>
@@ -401,7 +482,7 @@
     </message>
     <message>
         <source>Save playlist to...</source>
-        <translation>Uložit playlist jako...</translation>
+        <translation>Uložit playlist do...</translation>
     </message>
     <message>
         <source>M3U Playlist (*.m3u)</source>
@@ -409,7 +490,7 @@
     </message>
     <message>
         <source>Are you sure you want to remove all content of %1 from hard disk?</source>
-        <translation>Opravdu chcete odstranit všechen obsah %1 z disku?</translation>
+        <translation>Opvradu chcete odstranit všechny soubory v %1 z disku?</translation>
     </message>
     <message>
         <source>Are you sure you want to remove track %1 (%2) from hard disk?</source>
@@ -417,46 +498,22 @@
     </message>
     <message>
         <source>Confirm removal</source>
-        <translation>Potvrzení odstranění</translation>
-    </message>
-    <message>
-        <source>Configure TepSonic</source>
-        <translation>Nastavit TepSonic</translation>
-    </message>
-    <message>
-        <source>Se&amp;ttings</source>
-        <translation>N&amp;astavení</translation>
-    </message>
-    <message>
-        <source>Supported files</source>
-        <translation>Podporované soubory</translation>
-    </message>
-    <message>
-        <source>Playlists</source>
-        <translation>Playlisty</translation>
-    </message>
-    <message>
-        <source>All files</source>
-        <translation>Všechny soubory</translation>
-    </message>
-    <message>
-        <source>About Qt</source>
-        <translation>O Qt</translation>
+        <translation>Potvrďte odstranění</translation>
     </message>
 </context>
 <context>
-    <name>Player</name>
+    <name>PlayerPage</name>
     <message>
         <source>Form</source>
         <translation>Formulář</translation>
     </message>
     <message>
         <source>Restore previous session</source>
-        <translation>Obnovit přechozí sezení</translation>
+        <translation>Obnovit předchozí relaci</translation>
     </message>
 </context>
 <context>
-    <name>Plugins</name>
+    <name>PluginsPage</name>
     <message>
         <source>Form</source>
         <translation>Formulář</translation>
@@ -464,32 +521,6 @@
     <message>
         <source>General</source>
         <translation>Hlavní</translation>
-    </message>
-</context>
-<context>
-    <name>PreferencesDialog</name>
-    <message>
-        <source>Dialog</source>
-        <translation>Dialog</translation>
-    </message>
-    <message>
-        <source>Player</source>
-        <translation>Přehrávač</translation>
-    </message>
-    <message>
-        <source>Collections</source>
-        <translation>Kolekce</translation>
-    </message>
-    <message>
-        <source>Plugins</source>
-        <translation>Pluginy</translation>
-    </message>
-</context>
-<context>
-    <name>PreferencesPages::Collections</name>
-    <message>
-        <source>Add directory</source>
-        <translation>Přidat adresář</translation>
     </message>
 </context>
 <context>
@@ -509,6 +540,71 @@
             <numerusform>%n dny</numerusform>
             <numerusform>%n dní</numerusform>
         </translation>
+    </message>
+</context>
+<context>
+    <name>SettingsDialog</name>
+    <message>
+        <source>Settings</source>
+        <translation>Nastavení</translation>
+    </message>
+    <message>
+        <source>Player</source>
+        <translation>Přehrávač</translation>
+    </message>
+    <message>
+        <source>Collections</source>
+        <translation>Kolekce</translation>
+    </message>
+    <message>
+        <source>Plugins</source>
+        <translation>Pluginy</translation>
+    </message>
+    <message>
+        <source>Shortcuts</source>
+        <translation>Zkratky</translation>
+    </message>
+    <message>
+        <source>Play/pause</source>
+        <translation>Play/Pauza</translation>
+    </message>
+    <message>
+        <source>Stop</source>
+        <translation>Zastavit</translation>
+    </message>
+    <message>
+        <source>Previous track</source>
+        <translation>Předchozí skladba</translation>
+    </message>
+    <message>
+        <source>Next track</source>
+        <translation>Následující skladba</translation>
+    </message>
+    <message>
+        <source>Show/Hide window</source>
+        <translation>Zobrazit/skrýt okno</translation>
+    </message>
+</context>
+<context>
+    <name>SettingsPages::CollectionsPage</name>
+    <message>
+        <source>Add directory</source>
+        <translation>Přidat adresář</translation>
+    </message>
+</context>
+<context>
+    <name>ShortcutsPage</name>
+    <message>
+        <source>Form</source>
+        <translation>Formulář</translation>
+    </message>
+    <message>
+        <source>Function</source>
+        <translation>Funkce</translation>
+    </message>
+    <message>
+        <source>Shortcut</source>
+        <translation>Zkratka</translation>
     </message>
 </context>
 <context>
