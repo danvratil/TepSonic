@@ -15,15 +15,28 @@ find_package(Qt4 4.5 REQUIRED)
 find_package(Taglib REQUIRED)
 find_package(Phonon REQUIRED)
 
+# Use native libqxt on Linux and patched sources in /3rdparty/qxt on Mac an Win.
+if (UNIX AND NOT APPLE)
+	set(QXT_USE_QXTCORE TRUE)
+	set(QXT_USE_QXTGUI TRUE)
+	find_package(Qxt REQUIRED)
+	set(QXT_HEADERS "")
+	set(QXT_SOURCES "")
+else (UNIX AND NOT APPLE)
+	add_definitions(-DQXT_STATIC -DBUILD_QXT_GUI -DBUILD_QXT_CORE)
+	set(QXT_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/../3rdparty/qxt)
+	set(QXT_LIBRARIES qxt)
+        set(QXT_HEADERS "../3rdparty/qxt/qxtglobalshortcuts.h")
+	set(QXT_SOURCES "../3rdparty/qxt/qxtglobalshortcuts.cpp")
+endif (UNIX AND NOT APPLE)
+
+  
+
 if (NOT DEFINED CMAKE_BUILD_TYPE)
    set(CMAKE_BUILD_TYPE "Debug")
 endif (NOT DEFINED CMAKE_BUILD_TYPE)
 
 add_definitions(${TAGLIB_CFLAGS})
-
-add_definitions(-DQXT_STATIC -DBUILD_QXT_GUI -DBUILD_QXT_CORE)
-set(QXT_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../3rdparty/qxt)
-set(QXT_LIBRARY qxt)
 
 # Make sure all Qt parts will be available
 set(QT_USE_QTMAIN 1)
@@ -39,7 +52,7 @@ include_directories(
         ${PHONON_INCLUDES}
 	${CMAKE_CURRENT_SOURCE_DIR}
 	${TAGLIB_INCLUDES}
-        ${QXT_INCLUDE_DIR}
+        ${QXT_INCLUDE_DIRS}
 	"collections"
 	"playlist"
 	"settings"
@@ -78,7 +91,7 @@ set(player_HDRS
     bookmarks/bookmarksbrowser.h
     bookmarks/bookmarksmanager.h
     bookmarks/addbookmarkdlg.h
-    ../3rdparty/qxt/qxtglobalshortcut.h
+    ${QXT_HEADERS}
 )
 
 set(player_SRCS
@@ -118,7 +131,7 @@ set(player_SRCS
     bookmarks/bookmarksitem.cpp
     bookmarks/bookmarksmanager.cpp
     bookmarks/addbookmarkdlg.cpp
-    ../3rdparty/qxt/qxtglobalshortcut.cpp
+    ${QXT_SOURCES}
 )
 
 set(player_QUIS
@@ -206,7 +219,7 @@ add_executable(tepsonic
 	       ${player_QMOC_SRCS}
 	       ${player_SRCS}
 	       ${TRANSLATIONS_BINARY}
-           ${APPLE_BUNDLE_SOURCES}
+               ${APPLE_BUNDLE_SOURCES}
 )
 
 target_link_libraries(tepsonic
@@ -214,7 +227,7 @@ target_link_libraries(tepsonic
 		      ${QT_QTSQL_LIBRARIES}
 		      ${PHONON_LIBS}
 	              ${TAGLIB_LIBRARIES}
-        	      ${QXT_LIBRARY}
+        	      ${QXT_LIBRARIES}
 		      ${X11_LIBRARIES}
 )
 
