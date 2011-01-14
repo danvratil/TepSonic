@@ -162,31 +162,24 @@ else (NOT DEFINED LANGS)
   endif (NOT LANGS)
 endif (NOT DEFINED LANGS)
 
-message("Translations to build: ${LANGUAGES}")
+message(STATUS "Translations to build: ${LANGUAGES}")
 
 qt4_wrap_ui(player_QUIS_HDRS ${player_QUIS})
 qt4_wrap_cpp(player_QMOC_SRCS ${player_HDRS})
 qt4_add_resources(player_RCCS_SRCS ${player_RCCS})
 #Create translations
+set(TRANSLATIONS)
 foreach (LANGUAGE ${LANGUAGES})
         set (TS ${CMAKE_CURRENT_SOURCE_DIR}/ts/${LANGUAGE}.ts)
-        set (QM ${CMAKE_CURRENT_SOURCE_DIR}/ts/${LANGUAGE}.qm)
-        set (TRANSLATIONS ${TRANSLATIONS} ${TS})
-        set (TRANSLATIONS_BINARY ${TRANSLATIONS_BINARY} ${QM})
-        add_custom_command (
-                OUTPUT ${QM}
-                COMMAND ${QT_LRELEASE_EXECUTABLE} ${TS}
-                MAIN_DEPENDENCY ${TS})
+        set (QM ${CMAKE_CURRENT_SOURCE_DIR}/ts/tepsonic_${LANGUAGE}.qm)
+	set (TRANSLATIONS_BINARY ${TRANSLATIONS_BINARY} ${QM})
+	add_custom_command(OUTPUT ${QM}
+			   PRE_BUILD
+			   COMMAND ${QT_LRELEASE_EXECUTABLE}
+			   ARGS ${TS} -qm ${QM})			   
+	add_custom_target(transl_${LANGUAGE} DEPENDS ${QM})
+	set (TRANSLATIONS ${TRANSLATIONS} transl_${LANGUAGE})
 endforeach()
-
-add_custom_target (
-        translations_qt
-        COMMAND ${QT_LUPDATE_EXECUTABLE} ${HEADERS} ${SOURCES} -ts ${TRANSLATIONS})
-add_custom_command (
-        TARGET translations_qt
-        COMMAND ${QT_LRELEASE_EXECUTABLE} ${TRANSLATIONS})
-
-
 
 if (WIN32)
   set(GUI_TYPE WIN32)
@@ -221,6 +214,8 @@ add_executable(tepsonic
 	       ${TRANSLATIONS_BINARY}
                ${APPLE_BUNDLE_SOURCES}
 )
+
+add_dependencies(tepsonic ${TRANSLATIONS})
 
 target_link_libraries(tepsonic
 		      ${QT_LIBRARIES}
@@ -258,7 +253,7 @@ endif (APPLEBUNDLE)
 
 if (UNIX AND NOT APPLEBUNDLE)
 	install(FILES ${TRANSLATIONS_BINARY}
-		DESTINATION ${INSTALL_DATA_DIR}/tepsonic/locale/tepsonic
+		DESTINATION ${INSTALL_DATA_DIR}/tepsonic/locale/
 	)
 
 	install(FILES ../tepsonic.desktop

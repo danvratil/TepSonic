@@ -66,7 +66,7 @@ int main(int argc, char *argv[])
     // mac's bundle. Special stuff again.
     QString localeDir = QCoreApplication::applicationDirPath() + "/../Resources/";
 #endif
-    translator.load(locale,localeDir);
+    translator.load("tepsonic_"+locale,localeDir);
     tepsonic.installTranslator(&translator);
 
     QTextCodec::setCodecForTr(QTextCodec::codecForName("utf8"));

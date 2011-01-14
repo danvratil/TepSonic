@@ -66,7 +66,7 @@ LastFmScrobblerPlugin::LastFmScrobblerPlugin()
     QString localeDir = QCoreApplication::applicationDirPath() + "/../Resources/lastfmscrobbler";
 #endif
 
-    _translator->load(locale,localeDir);
+    _translator->load("lastfmscrobbler_"+locale,localeDir);
     qApp->installTranslator(_translator);
 
     _scrobbler = NULL;

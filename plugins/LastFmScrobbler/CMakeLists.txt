@@ -71,15 +71,17 @@ endif (NOT DEFINED LANGS)
 qt4_wrap_ui(lastfmscrobbler_QUIS_HDRS ${lastfmscrobbler_QUIS})
 qt4_wrap_cpp(lastfmscrobbler_QMOC_SRCS ${lastfmscrobbler_HDRS})
 #Create translations
+set(TRANSLATIONS)
 foreach (LANGUAGE ${LANGUAGES})
         set (TS ${CMAKE_CURRENT_SOURCE_DIR}/ts/${LANGUAGE}.ts)
-        set (QM ${CMAKE_CURRENT_SOURCE_DIR}/ts/${LANGUAGE}.qm)
-        set (TRANSLATIONS ${TRANSLATIONS} ${TS})
-        set (TRANSLATIONS_BINARY ${TRANSLATIONS_BINARY} ${QM})
-        add_custom_command (
-                OUTPUT ${QM}
-                COMMAND ${QT_LRELEASE_EXECUTABLE} ${TS}
-                MAIN_DEPENDENCY ${TS})
+        set (QM ${CMAKE_CURRENT_SOURCE_DIR}/ts/lastfmscrobbler_${LANGUAGE}.qm)
+	set (TRANSLATIONS_BINARY ${TRANSLATIONS_BINARY} ${QM})
+        add_custom_command (OUTPUT ${QM}
+			    PRE_BUILD
+	                    COMMAND ${QT_LRELEASE_EXECUTABLE}
+		            ARGS ${TS} -qm ${QM})
+	add_custom_target(lf_transl_${LANGUAGE} DEPENDS ${QM})
+	set (TRANSLATIONS ${TRANSLATIONS} lf_transl_${LANGUAGE})
 endforeach()
 
 
@@ -89,6 +91,8 @@ add_library(tepsonic_lastfmscrobbler SHARED
 	       ${lastfmscrobbler_QMOC_SRCS}
 	       ${TRANSLATIONS_BINARY}
 )
+
+add_dependencies(tepsonic_lastfmscrobbler ${TRANSLATIONS})
 
 target_link_libraries(tepsonic_lastfmscrobbler
 	       ${QT_LIBRARIES}
@@ -107,7 +111,7 @@ if (NOT APPLEBUNDLE)
 	    DESTINATION ${INSTALL_LIBRARY_DIR}/
     )
     install(FILES ${TRANSLATIONS_BINARY}
-	    DESTINATION ${INSTALL_DATA_DIR}/tepsonic/locale/lastfmscrobbler
+	    DESTINATION ${INSTALL_DATA_DIR}/tepsonic/locale/
     )
 else (NOT APPLEBUNDLE)
     # no symlinks for apple bundle
@@ -116,7 +120,7 @@ else (NOT APPLEBUNDLE)
             DESTINATION ${CMAKE_INSTALL_PREFIX}/tepsonic.app/Contents/plugins
     )
     install(FILES ${TRANSLATIONS_BINARY}
-            DESTINATION ${CMAKE_INSTALL_PREFIX}/tepsonic.app/Contents/Resources/lastfmscrobbler
+            DESTINATION ${CMAKE_INSTALL_PREFIX}/tepsonic.app/Contents/Resources/
     )
 endif (NOT APPLEBUNDLE)
 
