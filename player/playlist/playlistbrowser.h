@@ -92,6 +92,10 @@ class PlaylistBrowser : public QTreeView
         */
         void keyPressEvent(QKeyEvent *keyEvent);
 
+        void mousePressEvent(QMouseEvent *event);
+
+        void mouseMoveEvent(QMouseEvent *event);
+
     signals:
         /** Passes list of dropped files
          * \param files list of files to insert
@@ -104,6 +108,9 @@ class PlaylistBrowser : public QTreeView
          * \param row selected row
          */
         void setTrack(int row);
+
+    private:
+        QPoint m_dragStartPosition;
 
 };
 

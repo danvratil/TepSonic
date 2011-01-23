@@ -244,7 +244,8 @@ bool PlaylistModel::insertItem(Player::MetaData metadata, int row)
     m_rootItem->child(row)->setData(PlaylistBrowser::GenreColumn,QVariant(metadata.genre));
     m_rootItem->child(row)->setData(PlaylistBrowser::YearColumn,QVariant(metadata.year));
     m_rootItem->child(row)->setData(PlaylistBrowser::LengthColumn,QVariant(metadata.formattedLength));
-    m_rootItem->child(row)->setData(PlaylistBrowser::BitrateColumn,QVariant(QString::number(metadata.bitrate)+" kbps"));
+    // the "kbps" string is appended in PlaylistItemDelegate while drawing
+    m_rootItem->child(row)->setData(PlaylistBrowser::BitrateColumn,QVariant(QString::number(metadata.bitrate)));
 
     m_totalLength += (metadata.length/1000);
     emit playlistLengthChanged(m_totalLength, rowCount(QModelIndex()));

@@ -41,4 +41,12 @@ QString formatTimestamp(qint64 time);
 QString formatMilliseconds(qint64 msecs, bool forceHours = false);
 
 
+//! Converts formated length ([hh:]mm:ss) to integer
+/*!
+  \param formattedLength string in format [hh:]mm:ss
+  \return Returns length in seconds
+*/
+int formattedLengthToSeconds(QString formattedLength);
+
+
 #endif // TOOLS_H

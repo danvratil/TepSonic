@@ -121,16 +121,13 @@ MainWindow::MainWindow(Player *player):
 
     m_ui->playlistBrowser->setModel(m_playlistProxyModel);
     m_ui->playlistBrowser->setItemDelegate(m_playlistItemDelegate);
-    m_ui->playlistBrowser->setDragEnabled(true);
     m_ui->playlistBrowser->setDropIndicatorShown(true);
     m_ui->playlistBrowser->setSortingEnabled(true);
-    m_ui->playlistBrowser->viewport()->setAcceptDrops(true);
     m_ui->playlistBrowser->header()->setContextMenuPolicy(Qt::CustomContextMenu);
     m_ui->playlistBrowser->setAlternatingRowColors(true);
     m_ui->playlistBrowser->sortByColumn(-1);
     // Hide the first column (with filename)
     m_ui->playlistBrowser->hideColumn(0);
-    m_selectionModel = m_ui->playlistBrowser->selectionModel();
 
     // Set playlist browser columns widths and visibility
     QList<QVariant> playlistColumnsStates(m_settings->value("Window/PlaylistColumnsStates", QList<QVariant>()).toList());

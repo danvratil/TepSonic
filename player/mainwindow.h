@@ -143,9 +143,6 @@ private:
     //! Group of QActions that contains Repeat Track, Repeat All and Repeat Off actions
     QActionGroup *m_repeatPlaybackGroup;
 
-    //! PlaylistBrowser selection model
-    QItemSelectionModel *m_selectionModel;
-
     //! Application system tray icon
     TrayIcon *m_trayIcon;
 

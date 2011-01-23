@@ -22,7 +22,9 @@
 #include "playlistmodel.h"
 #include "playlistproxymodel.h"
 #include "playlistitem.h"
+#include "tools.h"
 
+#include <QApplication>
 #include <QDir>
 #include <QDropEvent>
 #include <QDebug>
@@ -32,15 +34,23 @@
 #include <QFile>
 #include <QFileInfo>
 #include <QModelIndex>
+#include <QItemSelectionRange>
+
+#include <QDrag>
 
 
 PlaylistBrowser::PlaylistBrowser(QWidget* parent):
         QTreeView(parent)
 {
     setAcceptDrops(true);
+    viewport()->setAcceptDrops(true);
+    setDragEnabled(true);
+    setDragDropMode(QAbstractItemView::DragDrop);
+    setDefaultDropAction(Qt::MoveAction);
     setWordWrap(false);
     setTextElideMode(Qt::ElideRight);
     setSelectionMode(QAbstractItemView::ExtendedSelection);
+    setSelectionBehavior(QAbstractItemView::SelectRows);
 }
 
 PlaylistBrowser::~PlaylistBrowser()
@@ -61,27 +71,130 @@ void PlaylistBrowser::dragMoveEvent(QDragMoveEvent* event)
     event->acceptProposedAction();
 }
 
+void PlaylistBrowser::mousePressEvent(QMouseEvent *event)
+{
+    // Remember the event position
+    if (event->button() == Qt::LeftButton) {
+        m_dragStartPosition = event->pos();
+    }
+
+    // Handle all the default actions
+    QAbstractItemView::mousePressEvent(event);
+}
+
+void PlaylistBrowser::mouseMoveEvent(QMouseEvent *event)
+{
+    // No left buttton? Run!
+    if (!(event->buttons() & Qt::LeftButton))
+        return;
+
+    // If the move distance is shorter then startDragDistance() then this is not drag event and let's go away
+    if ((event->pos()-m_dragStartPosition).manhattanLength() < QApplication::startDragDistance())
+        return;
+
+    // Initiate the drag!
+    QDrag *drag = new QDrag(this);
+    QMimeData *mimeData = new QMimeData;
+
+    QByteArray encodedData;
+    QDataStream stream(&encodedData, QIODevice::WriteOnly);;
+
+    // Selected indexes
+    QItemSelection selection = selectionModel()->selection();
+
+    PlaylistProxyModel *proxyModel = qobject_cast<PlaylistProxyModel*>(model());
+    if (!proxyModel) return;
+    selection = proxyModel->mapSelectionToSource(selection);
+    PlaylistModel *model = qobject_cast<PlaylistModel*>(proxyModel->sourceModel());
+    if (!model) return;
+
+    for (int i = 0; i < selection.indexes().size(); i ++)
+    {
+        PlaylistItem *item = model->getItem(selection.indexes().at(i));
+        for (int j = 0; j < item->columnCount(); j++) {
+            stream << item->data(j).toString();
+        }
+        // Remove the row from view
+        model->removeRow(selection.indexes().at(i).row());
+    }
+
+    mimeData->setData("data/tepsonic-playlist-items", encodedData);
+    drag->setMimeData(mimeData);
+
+    drag->exec(Qt::MoveAction);
+}
+
 // Drop event (item is dropped on the widget)
 void PlaylistBrowser::dropEvent(QDropEvent* event)
 {
     event->acceptProposedAction();
-    QByteArray encodedData = event->mimeData()->data("data/tepsonic-tracks");
-    QDataStream stream(&encodedData, QIODevice::ReadOnly);
-    QStringList newItems;
 
-    QStringList files;
+    // Drop from CollectionsBrowser
+    if (event->mimeData()->hasFormat("data/tepsonic-tracks")) {
+        QByteArray encodedData = event->mimeData()->data("data/tepsonic-tracks");
+        QDataStream stream(&encodedData, QIODevice::ReadOnly);
+        QStringList newItems;
 
-    while (!stream.atEnd()) {
-        QString text;
-        stream >> text;
-        files << text;
+        QStringList files;
+
+        while (!stream.atEnd()) {
+            QString text;
+            stream >> text;
+            files << text;
+        }
+
+        //row where the items were dropped
+        int row = indexAt(event->pos()).row();
+        if (row == -1) row = model()->rowCount(QModelIndex());
+
+        emit addedFiles(files, row);
     }
 
-    //row where the items were dropped
-    int row = indexAt(event->pos()).row();
-    if (row == -1) row = model()->rowCount(QModelIndex());
+    // Drop from internal move
+    if (event->mimeData()->hasFormat("data/tepsonic-playlist-items")) {
+        QByteArray encodedData = event->mimeData()->data("data/tepsonic-playlist-items");
+        QDataStream stream(&encodedData, QIODevice::ReadOnly);
 
-    emit addedFiles(files, row);
+        // We need the original PlaylistModel
+        PlaylistProxyModel *proxyModel = qobject_cast<PlaylistProxyModel*>(model());
+        if (!proxyModel) return;
+        PlaylistModel *model = qobject_cast<PlaylistModel*>(proxyModel->sourceModel());
+        if (!model) return;
+
+        // Some math about where to insert the item
+        int row = indexAt(event->pos()).row();
+        if (row == -1)
+            row = model->rowCount();
+        else if (row < model->rowCount())
+            row += 1;
+
+        Player::MetaData metadata;
+        QString s;
+        while (!stream.atEnd()) {
+            stream >> s;
+            metadata.filename = s;
+            stream >> s;
+            metadata.trackNumber = s.toInt();
+            stream >> s;
+            metadata.artist = s;
+            stream >> s;
+            metadata.title = s;
+            stream >> s;
+            metadata.album = s;
+            stream >> s;
+            metadata.genre = s;
+            stream >> s;
+            metadata.year = s.toInt();
+            stream >> s;
+            metadata.formattedLength = s;
+            stream >> s;
+            metadata.bitrate = s.toInt();
+            // length in milliseconds - to properly count total length of playlist
+            metadata.length = formattedLengthToSeconds(metadata.formattedLength)*1000;
+
+            model->insertItem(metadata, row);
+        }
+    }
 
     event->setAccepted(true);
 }

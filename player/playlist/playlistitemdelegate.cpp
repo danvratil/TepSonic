@@ -62,11 +62,19 @@ void PlaylistItemDelegate::paint(QPainter *painter, const QStyleOptionViewItem &
         painter->fillRect(rect,option.palette.highlight());
     }
 
+    QString str = mappedIndex.data().toString();
+    // Append units to the bitrate column; drawing the text here instead of having
+    // it in the stored in the item allows to import the value simply into Player::MetaData
+    // structure, which expects integer bitrate instead of string.
+    if (index.column() == PlaylistBrowser::BitrateColumn)
+        str.append(" kbps");
+
+
     painter->drawText(QRect(option.rect.left(),
                             option.rect.top(),
                             m_playlistBrowser->columnWidth(index.column()),
                             option.rect.bottom()),
-                      option.fontMetrics.elidedText(mappedIndex.data().toString(),
+                      option.fontMetrics.elidedText(str,
                                                     Qt::ElideRight,
                                                     m_playlistBrowser->columnWidth(mappedIndex.column()))
                       );

@@ -20,6 +20,7 @@
  */
 
 #include <QString>
+#include <QStringList>
 #include <QObject>
 
 #include "tools.h"
@@ -99,3 +100,15 @@ QString formatMilliseconds(qint64 msecs, bool forceHours)
     return sMins+":"+sSecs;
 }
 
+int formattedLengthToSeconds(QString formattedLength)
+{
+    int seconds;
+    QStringList time = formattedLength.split(":",QString::SkipEmptyParts);
+    if (time.size() == 3) {
+        seconds = time.at(0).toInt()*3600 + time.at(1).toInt()*60 + time.at(2).toInt();
+    } else {
+        seconds = time.at(0).toInt()*60 + time.at(1).toInt();
+    }
+
+    return seconds;
+}
