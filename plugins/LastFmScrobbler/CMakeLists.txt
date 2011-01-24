@@ -11,11 +11,11 @@ endif (NOT DEFINED CMAKE_BUILD_TYPE)
 
 find_package(PkgConfig REQUIRED)
 find_package(Qt4 REQUIRED)
-find_package(LastFmLib REQUIRED)
 
 # Make sure all Qt parts will be available
 set(QT_USE_QTMAIN 1)
 set(QT_USE_QTNETWORK 1)
+set(QT_USE_QTXML 1)
 
 include(${QT_USE_FILE})
 # this is mandatory for Apple builds to load plugin correctly
@@ -31,8 +31,7 @@ add_definitions(${QT_DEFINITIONS}
 include_directories(
 	${QT_INCLUDE_DIR}
 	${QT_QTNETWORK_INCLUDE_DIR}
-        ${LASTFMLIB_INCLUDES}
-        ${LASTFMLIB_INCLUDES}/../
+        ${QT_QTXML_INCLUDE_DIR}
 	${CMAKE_CURRENT_SOURCE_DIR}
 	${CMAKE_CURRENT_BINARY_DIR}
         ${CMAKE_CURRENT_SOURCE_DIR}/../../player
@@ -41,11 +40,13 @@ include_directories(
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/../../player/constants.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/constants.h)
 
 set(lastfmscrobbler_HDRS
+    src/lastfm.h
     src/lastfmscrobblerplugin.h
     ../../player/abstractplugin.h
 )
 
 set(lastfmscrobbler_SRCS
+    src/lastfm.cpp
     src/lastfmscrobblerplugin.cpp
     ../../player/constants.cpp
 )
@@ -97,7 +98,7 @@ add_dependencies(tepsonic_lastfmscrobbler ${TRANSLATIONS})
 target_link_libraries(tepsonic_lastfmscrobbler
 	       ${QT_LIBRARIES}
 	       ${QT_QTNETWORK_LIBRARIES}
-               ${LASTFMLIB_LIBS}
+               ${QT_QTXML_LIBRARIES}
 )
 
 if (NOT APPLEBUNDLE)

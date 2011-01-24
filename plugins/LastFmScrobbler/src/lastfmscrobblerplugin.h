@@ -22,6 +22,7 @@
 
 #include "abstractplugin.h"
 #include "player.h"
+#include "lastfm.h"
 
 #include "ui_lastfmscrobblerconfig.h"
 
@@ -29,10 +30,6 @@
 #include <QWidget>
 #include <QString>
 #include <QTranslator>
-
-#include "lastfmlib/lastfmscrobbler.h"
-
-
 
 //! LastFmScrobbler is a plugin for scrobbling recently played tracks to Last.fm
 /*!
@@ -70,12 +67,6 @@ class LastFmScrobblerPlugin : public AbstractPlugin
         void settingsWidget(QWidget *parentWidget);
 
     public slots:
-        //! Notification that configuration dialog was accepted
-        /*!
-          When settings is accepted, plugin will store the configuration
-          into it's own config file
-        */
-        void settingsAccepted();
 
         //! Notification about new track
         /*!
@@ -91,23 +82,23 @@ class LastFmScrobblerPlugin : public AbstractPlugin
         */
         void trackFinished(Player::MetaData trackData);
 
-        //! Notification about new position in the playback ticked every second
-        /*!
-          \param newPos position in the playback in milliseconds
-        */
-        void trackPositionChanged(qint64 newPos) {};
+    private slots:
+        void initScrobbler();
 
-        void stateChanged(Phonon::State, Phonon::State) {};
+        void authenticate();
 
-        void trackPaused(bool paused);
+        void gotToken(QString token);
 
     private:
+        LastFm::Scrobbler *m_scrobbler;
+        LastFm::Auth *m_auth;
+
         //! Configuration UI
         Ui::LastFmScrobblerConfig *_configWidget;
 
         QTranslator *_translator;
 
-        LastFmScrobbler *_scrobbler;
+        QString m_token;
 
     signals:
 

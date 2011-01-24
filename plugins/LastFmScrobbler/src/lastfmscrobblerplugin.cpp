@@ -19,17 +19,18 @@
 
 #include "lastfmscrobblerplugin.h"
 #include "constants.h"
-
-#include "lastfmlib/lastfmscrobbler.h"
-#include "lastfmlib/submissioninfo.h"
+#include "lastfm.h"
 
 #include <QObject>
 #include <QDir>
+#include <QDesktopServices>
 #include <QDebug>
 #include <QSettings>
 #include <QString>
 #include <QWidget>
 #include <QTranslator>
+#include <QTimer>
+#include <QDateTime>
 
 // Exports pluginName method
 #ifdef Q_WS_WIN
@@ -51,7 +52,9 @@ extern "C" ID_EXPORT QString pluginID()
 }
 
 
-LastFmScrobblerPlugin::LastFmScrobblerPlugin()
+LastFmScrobblerPlugin::LastFmScrobblerPlugin():
+        m_scrobbler(0),
+        m_auth(0)
 {
     setHasConfigUI(true);
 
@@ -69,38 +72,28 @@ LastFmScrobblerPlugin::LastFmScrobblerPlugin()
     _translator->load("lastfmscrobbler_"+locale,localeDir);
     qApp->installTranslator(_translator);
 
-    _scrobbler = NULL;
 }
 
 void LastFmScrobblerPlugin::init()
 {
     QSettings settings(QString(_CONFIGDIR) + QDir::separator() + "lastfmscrobbler.conf",QSettings::IniFormat,this);
+    QString token = settings.value("token", QString()).toString();
 
-    // Login
-    _scrobbler = new LastFmScrobbler(QString("tps").toStdString(),
-                                     QString("1.0").toStdString(),
-                                     settings.value("username","").toString().toStdString(),
-                                     settings.value("password","").toString().toStdString(),
-                                     false,
-                                     false);
+    LastFm::Global::api_key = "824f0af8fbc9ca2dd16091ad47817988";
+    LastFm::Global::secret_key = "15545c2b44b3e3108a73bb0ad4bc23ea";
+    LastFm::Global::token = token;
 
-    settings.beginGroup("Proxy");
-    if (settings.value("enabled",false).toBool()) {
-        _scrobbler->setProxy(settings.value("server",QString()).toString().toStdString(),
-                             settings.value("port",0).toUInt(),
-                             settings.value("username",QString()).toString().toStdString(),
-                             settings.value("password",QString()).toString().toStdString());
-    }
-    settings.endGroup();
+    if (!token.isEmpty())
+        initScrobbler();
 
-     _scrobbler->authenticate();
 }
 
 void LastFmScrobblerPlugin::quit()
 {
-    _scrobbler->finishedPlaying();
+    // Submit what's in cache
+    m_scrobbler->scrobble();
 
-    delete _scrobbler;
+    delete m_scrobbler;
 }
 
 void LastFmScrobblerPlugin::settingsWidget(QWidget *parentWidget)
@@ -108,73 +101,65 @@ void LastFmScrobblerPlugin::settingsWidget(QWidget *parentWidget)
     _configWidget = new Ui::LastFmScrobblerConfig();
     _configWidget->setupUi(parentWidget);
 
-    QSettings settings(QString(_CONFIGDIR) + QDir::separator() + "lastfmscrobbler.conf",QSettings::IniFormat,this);
-    _configWidget->usernameEdit->setText(settings.value("username",QString()).toString());
-    _configWidget->passwordEdit->setText(settings.value("password",QString()).toString());
-    settings.beginGroup("Proxy");
-    _configWidget->useProxyCheckBox->setChecked(settings.value("enabled",false).toBool());
-    _configWidget->proxyServerEdit->setText(settings.value("server",QString()).toString());
-    _configWidget->proxyPortEdit->setText(settings.value("port",0).toString());
-    _configWidget->proxyUsernameEdit->setText(settings.value("username",QString()).toString());
-    _configWidget->proxyPasswordEdit->setText(settings.value("password",QString()).toString());
-    settings.endGroup();
-
-    _configWidget->proxyGroup->setEnabled( _configWidget->useProxyCheckBox->isChecked() );
-    connect(_configWidget->useProxyCheckBox,SIGNAL(toggled(bool)),
-            _configWidget->proxyGroup,SLOT(setEnabled(bool)));
+    connect(_configWidget->authButton, SIGNAL(clicked()),
+            this, SLOT(authenticate()));
 }
 
 void LastFmScrobblerPlugin::trackFinished(Player::MetaData trackdata)
 {
-    _scrobbler->finishedPlaying();
+    // Submit what's in cache
+    m_scrobbler->scrobble();
 }
 
 void LastFmScrobblerPlugin::trackChanged(Player::MetaData trackData)
 {
-    SubmissionInfo info = SubmissionInfo(trackData.artist.toStdString(),
-                                         trackData.title.toStdString());
-    // The length is in milliseconds, lastfm accepts seconds!
-    info.setTrackLength(trackData.length/1000);
-    info.setTrackNr(trackData.trackNumber);
+    uint stamp = QDateTime::currentDateTime().toTime_t();
 
-    _scrobbler->startedPlaying(info);
+    LastFm::Track *track = new LastFm::Track(m_scrobbler,
+                                             trackData.artist,
+                                             trackData.title,
+                                             trackData.album,
+                                             trackData.length,
+                                             trackData.genre,
+                                             trackData.trackNumber,
+                                             stamp);
+    // Set "Now playing"
+    track->nowPlaying();
 }
 
-void LastFmScrobblerPlugin::trackPaused(bool paused)
+void LastFmScrobblerPlugin::initScrobbler()
 {
-    _scrobbler->pausePlaying(paused);
+
+    m_scrobbler = new LastFm::Scrobbler();
+    connect(m_scrobbler, SIGNAL(error(QString,int)),
+            this, SIGNAL(error(QString)));
+
 }
 
-void LastFmScrobblerPlugin::settingsAccepted()
+void LastFmScrobblerPlugin::authenticate()
 {
-    QSettings settings(_CONFIGDIR + QDir::separator() + "lastfmscrobbler.conf",QSettings::IniFormat,this);
-    settings.setValue("username",_configWidget->usernameEdit->text());
-    settings.setValue("password",_configWidget->passwordEdit->text());
-    settings.beginGroup("Proxy");
-    settings.setValue("enabled",_configWidget->useProxyCheckBox->isChecked());
-    settings.setValue("server",_configWidget->proxyServerEdit->text());
-    settings.setValue("port",_configWidget->proxyPortEdit->text().toUInt());
-    settings.setValue("username",_configWidget->proxyUsernameEdit->text());
-    settings.setValue("password",_configWidget->proxyPasswordEdit->text());
-    settings.endGroup();
+    m_auth = new LastFm::Auth(m_scrobbler);
+    connect(m_auth, SIGNAL(gotToken(QString)),
+            this, SLOT(gotToken(QString)));
+    m_auth->getToken();
+}
 
-
-    // Reinitialize the scrobbler with new credentials
-    delete _scrobbler;
-    _scrobbler = new LastFmScrobbler(_configWidget->usernameEdit->text().toStdString(),
-                                     _configWidget->passwordEdit->text().toStdString(),
-                                     false,
-                                     false);
-
-    if (_configWidget->useProxyCheckBox->isChecked()) {
-        _scrobbler->setProxy(_configWidget->proxyServerEdit->text().toStdString(),
-                             _configWidget->proxyPortEdit->text().toUInt(),
-                             _configWidget->proxyUsernameEdit->text().toStdString(),
-                             _configWidget->proxyPasswordEdit->text().toStdString());
+void LastFmScrobblerPlugin::gotToken(QString token)
+{
+    if (token.isEmpty()) {
+        qDebug() << "LastFmScrobbler: Got empty token!";
+        return;
     }
 
-    _scrobbler->authenticate();
+    LastFm::Global::token = token;
 
+    // Open browser with Last.fm auth web site so user can confirm the token
+    QDesktopServices::openUrl(QUrl("http://www.last.fm/api/auth/?api_key="+LastFm::Global::api_key+"&token="+token));
+
+    // Wait 60 seconds (that should be enough time for browser to start and load page and for
+    // user to click "Allow" button on the page), then re-initialize the scrobbler with
+    // new token
+    QTimer::singleShot(60000, this, SLOT(initScrobbler()));
 }
 
 Q_EXPORT_PLUGIN2(tepsonic_lastfmscrobbler, LastFmScrobblerPlugin)
