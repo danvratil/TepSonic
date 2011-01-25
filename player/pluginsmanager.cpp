@@ -88,6 +88,8 @@ void PluginsManager::loadPlugins()
     qDebug() << "Searching in " << pluginsDirs;
 #endif
 
+    // Temporary list to avoid duplicate loading of plugins
+    QStringList pluginsNames;
     QDir pluginsDir;
     pluginsDir.setNameFilters(QStringList() << "libtepsonic_*");
     pluginsDir.setFilter(QDir::Files | QDir::NoSymLinks);
@@ -110,10 +112,14 @@ void PluginsManager::loadPlugins()
                 }
 
                 QString pluginid = pluginID();
-                qDebug() << "Found plugin " << pluginid;
-                Plugin *plugin = loadPlugin(pluginFile);
-                if (pluginsEnabledList[pluginid]==true) {
-                    enablePlugin(plugin);
+
+                if (!pluginsNames.contains(pluginid)) {
+                    qDebug() << "Found plugin " << pluginid;
+                    Plugin *plugin = loadPlugin(pluginFile);
+                    if (pluginsEnabledList[pluginid]==true) {
+                        enablePlugin(plugin);
+                    }
+                    pluginsNames.append(pluginid);
                 }
             }
         }
