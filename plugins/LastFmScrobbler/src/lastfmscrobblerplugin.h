@@ -79,13 +79,6 @@ class LastFmScrobblerPlugin : public AbstractPlugin
         */
         void trackChanged(Player::MetaData trackData);
 
-        //! Notification that current track has finished playing
-        /*!
-          When track has finished playing it is submitted to the Last.fm.
-          \param trackData meta data of the recently finished track
-          \sa scrobble()
-        */
-        void trackFinished(Player::MetaData trackData);
 
         //! Notification that player state has changed (paused/unpuased etc)
         void playerStatusChanged(Phonon::State newState, Phonon::State oldState);

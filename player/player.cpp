@@ -59,6 +59,9 @@ Player::~Player()
 
 void Player::setTrack(const QString fileName, bool autoPlay)
 {
+    // Stop current track
+    m_phononPlayer->stop();
+
     if (QFileInfo(fileName).isFile()) {
         m_phononPlayer->setCurrentSource(Phonon::MediaSource(fileName));
     }

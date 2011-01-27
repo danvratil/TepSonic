@@ -128,18 +128,9 @@ void LastFmScrobblerPlugin::setupMenu(QMenu *menu, Plugins::MenuTypes menuType)
     }
 }
 
-
-void LastFmScrobblerPlugin::trackFinished(Player::MetaData trackdata)
-{
-    // And try to submit the cache, whatever's in it
-    if (m_scrobbler->currentTrack())
-        m_scrobbler->currentTrack()->scrobble();
-
-    m_scrobbler->setCurrentTrack(0);
-}
-
 void LastFmScrobblerPlugin::trackChanged(Player::MetaData trackData)
 {
+    // Submit the old track
     if (m_scrobbler->currentTrack())
         m_scrobbler->currentTrack()->scrobble();
 
@@ -168,6 +159,7 @@ void LastFmScrobblerPlugin::playerStatusChanged(Phonon::State newState, Phonon::
     if ((oldState == Phonon::PlayingState) && (newState == Phonon::PausedState))
         if (m_scrobbler->currentTrack())
             m_scrobbler->currentTrack()->pause(true);
+
 }
 
 void LastFmScrobblerPlugin::initScrobbler()
