@@ -20,6 +20,7 @@
 #include "lastfm.h"
 #include "constants.h"  /* /player/constants.h */
 
+#include <QAbstractNetworkCache>
 #include <QNetworkAccessManager>
 #include <QNetworkRequest>
 #include <QNetworkReply>
@@ -34,6 +35,15 @@
 #include <QTextStream>
 
 #include <QDebug>
+
+/**
+
+  @todo: Reauthenticate when API returned error 9 (session key expired)
+  @todo: Check for requirements for scrobble - at least 30 seconds and at lest 1/2 of track played
+  @todo: Convert tracks cache to requests cache
+  @todo: Unify requests location (LastFm::Scrobbler vs LastFm::Track)
+
+ */
 
 namespace LastFm {
 
@@ -92,11 +102,7 @@ void LastFm::Scrobbler::scrobble()
 
 void LastFm::Scrobbler::scrobble(LastFm::Track *track)
 {
-    qDebug() << "Adding track" << track->trackTitle()<< "to cache";
-    qDebug() << m_cache;
     m_cache->add(track);
-
-    qDebug() << "Submitting cache";
     m_cache->submit();
 }
 
@@ -218,17 +224,16 @@ void LastFm::Auth::getToken()
             this, SLOT(slotGotToken(QNetworkReply*)));
     nam->get(request);
 
-    qDebug() << "Requesting token on " << request.url();
+    qDebug() << "Requesting new token...";
 }
 
 
 void LastFm::Auth::slotGotToken(QNetworkReply *reply)
 {
-    qDebug() << "Recieved token, http code " << reply->attribute(QNetworkRequest::HttpStatusCodeAttribute);
-
     int status = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
     if (status != 200)
     {
+        qDebug() << "Token request failed, http error" << status;
         m_scrobbler->raiseError(-1);
         return;
     }
@@ -246,14 +251,16 @@ void LastFm::Auth::slotGotToken(QNetworkReply *reply)
         if (token.tagName() == "token")
             emit gotToken(token.childNodes().at(0).nodeValue());
 
+        qDebug() << "Successfully recieved new token";
+
     } else {
 
         // <error code="errCode">
         QDomElement error = lfm.childNodes().at(0).toElement();
         if (error.tagName() == "error")
             m_scrobbler->raiseError(error.attribute("code", 0).toInt());
-        return;
 
+        qDebug() << "Failed to obtain new token: " << error.nodeValue();
     }
 }
 
@@ -275,17 +282,17 @@ void LastFm::Auth::getSession()
             this, SLOT(slotGotSession(QNetworkReply*)));
     nam->get(request);
 
-    qDebug() << "Requesting session key on " << request.url();
+    qDebug() << "Requesting new session key...";
 }
 
 
 void LastFm::Auth::slotGotSession(QNetworkReply *reply)
 {
-    qDebug() << "Got session key; http " << reply->attribute(QNetworkRequest::HttpStatusCodeAttribute);
-
     int status = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
     if (status != 200)
     {
+        qDebug() << "Session key request failed, http error" << status;
+        qDebug() << reply->readAll();
         m_scrobbler->raiseError(-1);
         return;
     }
@@ -305,12 +312,15 @@ void LastFm::Auth::slotGotSession(QNetworkReply *reply)
                         name.childNodes().at(0).nodeValue());
         LastFm::Global::session_key = key.childNodes().at(0).nodeValue();
 
+        qDebug() << "Successfully recieved new session key";
+
     } else {
 
         // <error code="errCode">
         QDomElement error = lfm.elementsByTagName("error").at(0).toElement();
         m_scrobbler->raiseError(error.attribute("code").toInt());
-        return;
+
+        qDebug() << "Failed to obtain new session key:" << error.nodeValue();
 
     }
 }
@@ -331,11 +341,6 @@ LastFm::Track::Track(LastFm::Scrobbler *scrobbler, QString artist, QString track
 {
 }
 
-LastFm::Track::~Track()
-{
-    qDebug() << "Destroying track " << m_trackTitle << this;
-}
-
 
 void LastFm::Track::scrobble()
 {
@@ -351,7 +356,11 @@ void LastFm::Track::scrobble()
 void LastFm::Track::nowPlaying()
 {
     QNetworkRequest request;
-    request.setUrl(QUrl("http://ws.audioscrobbler.com/2.0/"));
+
+    QUrl requestUrl("http://ws.audioscrobbler.com/2.0/");
+    requestUrl.addQueryItem("method", "track.updateNowPlaying");
+    requestUrl.addQueryItem("track", m_trackTitle);
+    request.setUrl(requestUrl);
 
     QByteArray data;
     QUrl params;
@@ -380,7 +389,10 @@ void LastFm::Track::nowPlaying()
 void LastFm::Track::love()
 {
     QNetworkRequest request;
-    request.setUrl(QUrl("http://ws.audioscrobbler.com/2.0/"));
+    QUrl requestUrl("http://ws.audioscrobbler.com/2.0/");
+    requestUrl.addQueryItem("method", "track.love");
+    requestUrl.addQueryItem("track", m_trackTitle);
+    request.setUrl(requestUrl);
 
     QByteArray data;
     QUrl params;
@@ -402,7 +414,23 @@ void LastFm::Track::love()
 
 void LastFm::Track::scrobbled(QNetworkReply *reply)
 {
-    qDebug() << reply->readAll();
+    QDomDocument document;
+    document.setContent(reply->readAll());
+
+
+    QString method = reply->request().url().queryItemValue("method");
+
+    QDomElement lfm = document.documentElement();
+    if (lfm.attribute("status", "") == "ok") {
+        qDebug() << method << "for" << reply->request().url().queryItemValue("track") << "successfull";
+    } else {
+        qDebug() << method << "for" << reply->request().url().queryItemValue("track") << "failed:";
+        QDomElement err = lfm.childNodes().at(0).toElement();
+        qDebug() << err.childNodes().at(0).nodeValue();
+
+        if (err.attribute("code", 0).toInt() == 9)
+            qDebug() << "TODO: Request a new session key and send the request again.";
+    }
 }
 
 
@@ -467,8 +495,9 @@ void LastFm::Cache::add(LastFm::Track *track)
 void LastFm::Cache::submit()
 {
     QNetworkRequest request;
-    request.setUrl(QUrl("http://ws.audioscrobbler.com/2.0/"));
-
+    QUrl requestUrl("http://ws.audioscrobbler.com/2.0/");
+    requestUrl.addQueryItem("method", "track.scrobble");
+    request.setUrl(requestUrl);
     QByteArray data;
     QUrl params;
 
@@ -493,10 +522,7 @@ void LastFm::Cache::submit()
     params.addQueryItem("api_sig", LastFm::Scrobbler::getRequestSignature(params));
 
 
-
     data.append(params.toString().remove(0,1));
-
-    qDebug() << "Scrobbling tracks to " << request.url() << "with" << data;
 
     QNetworkAccessManager *nam = new QNetworkAccessManager();
     // When request is done, destroy the QNetworkAccessManager
@@ -511,18 +537,23 @@ void LastFm::Cache::submit()
 
 void LastFm::Cache::submitted(QNetworkReply *reply)
 {
-    QString content = reply->readAll();
-
     QDomDocument document;
-    document.setContent(content);
+    document.setContent(reply->readAll());
+
+    QString method = reply->request().url().queryItemValue("method");
 
     QDomElement lfm = document.documentElement();
     if (lfm.attribute("status", "") == "ok") {
-        // Don't just clear cache, but destroy all tracks contained
+        qDebug() << method << "for tracks in cache successfull, purging cache";
         qDeleteAll(m_cache);
-    }
+    } else {
+        qDebug() << method << "for  cache failed:";
+        QDomElement err = lfm.childNodes().at(0).toElement();
+        qDebug() << err.childNodes().at(0).nodeValue();
 
-    qDebug() << content;
+        if (err.attribute("code", 0).toInt() == 9)
+                qDebug() << "TODO: Request a new session key and submit the cache again";
+    }
 }
 
 

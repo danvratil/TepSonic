@@ -207,8 +207,6 @@ namespace LastFm {
                   int trackNumber = 0,
                   uint playbackStart = 0);
 
-            ~Track();
-
             void setArtist(QString artist) { m_artist = artist; }
             QString artist() { return m_artist; }
 
@@ -231,14 +229,6 @@ namespace LastFm {
             uint playbackStart() { return m_playbackStart; }
 
 
-            LastFm::Scrobbler *m_scrobbler;
-            QString m_artist;
-            QString m_trackTitle;
-            QString m_album;
-            int m_trackLength;
-            QString m_genre;
-            int m_trackNumber;
-            uint m_playbackStart;
 
         public slots:
 
@@ -269,6 +259,14 @@ namespace LastFm {
 
         private:
 
+            LastFm::Scrobbler *m_scrobbler;
+            QString m_artist;
+            QString m_trackTitle;
+            QString m_album;
+            int m_trackLength;
+            QString m_genre;
+            int m_trackNumber;
+            uint m_playbackStart;
 
         private slots:
 

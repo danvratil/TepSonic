@@ -125,9 +125,8 @@ void LastFmScrobblerPlugin::trackChanged(Player::MetaData trackData)
     track->setTrackNumber(trackData.trackNumber);
     track->setPlaybackStart(stamp);
 
-    qDebug() << "Created track " << track << track->trackTitle() << " in " << this;
     // Set "Now playing"
-    m_scrobbler->nowPlaying(track);
+    track->nowPlaying();
 }
 
 void LastFmScrobblerPlugin::initScrobbler()
