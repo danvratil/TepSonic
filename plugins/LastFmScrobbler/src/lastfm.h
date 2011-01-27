@@ -22,6 +22,7 @@
 
 #include <QObject>
 #include <QNetworkReply>
+#include <QTimer>
 
 /** Provides implementation of Last.fm Scrobbling API, version 2.0.
   * I haven't found any library that would support the 2.0 API, so I've
@@ -326,6 +327,8 @@ namespace LastFm {
 
             QList<LastFm::Track*> m_cache;
             LastFm::Scrobbler *m_scrobbler;
+
+            QTimer *m_resubmitTimer;
 
 
         // Let's have access to track's private items

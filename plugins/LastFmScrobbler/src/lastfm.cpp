@@ -37,12 +37,6 @@
 
 #include <QDebug>
 
-/**
-
-  @todo: Reauthenticate when API returned error 9 (session key expired)
-  @todo: Convert tracks cache to requests cache
-
- */
 
 namespace LastFm {
 
@@ -126,7 +120,7 @@ void LastFm::Scrobbler::raiseError(int code)
        indicate this scrobbler's internal failure should not never occur and therefor
        the messages don't need to be translated.
        Some errors do not inform user about an error, but just try to submit the track
-       again after 60 seconds.
+       again after 120 seconds.
     */
     switch (code)
     {
@@ -163,7 +157,7 @@ void LastFm::Scrobbler::raiseError(int code)
         break;
     case 11: // Service Offline - This service is temporarily offline. Try again later.
     case 16: // There was a temporary error processing your request. Please try again
-        QTimer::singleShot(60000, m_cache, SLOT(submit()));
+        QTimer::singleShot(1200000, m_cache, SLOT(submit()));
         return;
         break;
     case 13:
@@ -475,7 +469,8 @@ void LastFm::Track::scrobbled(QNetworkReply *reply)
 
 
 LastFm::Cache::Cache(LastFm::Scrobbler *scrobbler):
-        m_scrobbler(scrobbler)
+        m_scrobbler(scrobbler),
+        m_resubmitTimer(0)
 {
     loadCache();
 }
@@ -584,13 +579,24 @@ void LastFm::Cache::submitted(QNetworkReply *reply)
     if (lfm.attribute("status", "") == "ok") {
         qDebug() << method << "for tracks in cache successfull, purging cache";
         qDeleteAll(m_cache);
+
+        // If we were able to submit track BEFORE the timer or this is timer's event, then
+        // destroy the timer so that it won't tick anymore
+        if (m_resubmitTimer)
+            delete m_resubmitTimer;
+
     } else {
         qDebug() << method << "for  cache failed:";
         QDomElement err = lfm.childNodes().at(0).toElement();
         qDebug() << err.childNodes().at(0).nodeValue();
 
-        if (err.attribute("code", 0).toInt() == 9)
-                qDebug() << "TODO: Request a new session key and submit the cache again";
+        m_scrobbler->raiseError(err.attribute("code", 0).toInt());
+
+        m_resubmitTimer = new QTimer();
+        // let's try again in 2 minutes
+        m_resubmitTimer->setInterval(120000);
+        connect(m_resubmitTimer, SIGNAL(timeout()),
+                this, SLOT(submit()));
     }
 }
 
