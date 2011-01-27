@@ -87,6 +87,9 @@ class LastFmScrobblerPlugin : public AbstractPlugin
         */
         void trackFinished(Player::MetaData trackData);
 
+        //! Notification that player state has changed (paused/unpuased etc)
+        void playerStatusChanged(Phonon::State newState, Phonon::State oldState);
+
         //! Submit track as loved()
         void loveTrack();
 

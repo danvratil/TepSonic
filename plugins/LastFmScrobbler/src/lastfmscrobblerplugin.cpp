@@ -133,24 +133,41 @@ void LastFmScrobblerPlugin::trackFinished(Player::MetaData trackdata)
 {
     // And try to submit the cache, whatever's in it
     if (m_scrobbler->currentTrack())
-        m_scrobbler->scrobble(m_scrobbler->currentTrack());
+        m_scrobbler->currentTrack()->scrobble();
+
+    m_scrobbler->setCurrentTrack(0);
 }
 
 void LastFmScrobblerPlugin::trackChanged(Player::MetaData trackData)
 {
+    if (m_scrobbler->currentTrack())
+        m_scrobbler->currentTrack()->scrobble();
+
     uint stamp = QDateTime::currentDateTime().toTime_t();
 
     LastFm::Track *track = new LastFm::Track(m_scrobbler);
     track->setArtist(trackData.artist);
     track->setTrackTitle(trackData.title);
     track->setAlbum(trackData.album);
-    track->setTrackLength(trackData.length);
+    track->setTrackLength(int(trackData.length/1000));
     track->setGenre(trackData.genre);
     track->setTrackNumber(trackData.trackNumber);
     track->setPlaybackStart(stamp);
+    m_scrobbler->setCurrentTrack(track);
 
     // Set "Now playing"
     track->nowPlaying();
+}
+
+void LastFmScrobblerPlugin::playerStatusChanged(Phonon::State newState, Phonon::State oldState)
+{
+    if ((oldState == Phonon::PausedState) && (newState == Phonon::PlayingState))
+        if (m_scrobbler->currentTrack())
+            m_scrobbler->currentTrack()->pause(false);
+
+    if ((oldState == Phonon::PlayingState) && (newState == Phonon::PausedState))
+        if (m_scrobbler->currentTrack())
+            m_scrobbler->currentTrack()->pause(true);
 }
 
 void LastFmScrobblerPlugin::initScrobbler()

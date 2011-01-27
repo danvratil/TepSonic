@@ -254,6 +254,10 @@ namespace LastFm {
               */
             void love();
 
+            /** Pause (or unpause) the track
+              * This is used to count real time for which the track is playing
+              */
+            void pause(bool pause);
 
 
         signals:
@@ -266,6 +270,8 @@ namespace LastFm {
         private:
 
             LastFm::Scrobbler *m_scrobbler;
+
+            /** Track data **/
             QString m_artist;
             QString m_trackTitle;
             QString m_album;
@@ -273,6 +279,11 @@ namespace LastFm {
             QString m_genre;
             int m_trackNumber;
             uint m_playbackStart;
+
+            /** Helper time counter **/
+            int m_playbackLength;
+            uint m_unpauseTime;
+
 
         private slots:
 

@@ -33,15 +33,14 @@
 #include <QTimer>
 #include <QDir>
 #include <QTextStream>
+#include <QDateTime>
 
 #include <QDebug>
 
 /**
 
   @todo: Reauthenticate when API returned error 9 (session key expired)
-  @todo: Check for requirements for scrobble - at least 30 seconds and at lest 1/2 of track played
   @todo: Convert tracks cache to requests cache
-  @todo: Unify requests location (LastFm::Scrobbler vs LastFm::Track)
 
  */
 
@@ -96,14 +95,16 @@ void LastFm::Scrobbler::setSession(QString key, QString username)
 
 void LastFm::Scrobbler::scrobble()
 {
-    m_cache->submit();
+    if (m_currentTrack)
+        m_currentTrack->scrobble();
+    else
+        m_cache->submit();
 }
 
 
 void LastFm::Scrobbler::scrobble(LastFm::Track *track)
 {
-    m_cache->add(track);
-    m_cache->submit();
+    track->scrobble();
 }
 
 
@@ -344,12 +345,24 @@ LastFm::Track::Track(LastFm::Scrobbler *scrobbler, QString artist, QString track
 
 void LastFm::Track::scrobble()
 {
-    // Add itself to the cache
-    if (m_scrobbler->cache())
-        m_scrobbler->cache()->add(this);
+    m_playbackLength  += QDateTime::currentDateTime().toTime_t() - m_unpauseTime;
 
-    // Let the scrobbler do what's neccessary
-    m_scrobbler->scrobble();
+    // The track must be played for at least half of it's duration or at least 4 minutes, whatever
+    // occurs first and must be longer then 30 seconds to be scrobbled
+    if (((m_playbackLength < m_trackLength / 2) && (m_playbackLength < 240)) || (m_trackLength < 30)) {
+        qDebug() << "Track" << m_trackTitle << "was not played long enough or is too short, not scrobbling";
+        return;
+    }
+
+    // Unset the current track - when we are scrobbling, this track is no more current
+    m_scrobbler->setCurrentTrack(0);
+
+    // Add itself to the cache
+    if (!m_scrobbler->cache())
+        return;
+
+    m_scrobbler->cache()->add(this);
+    m_scrobbler->cache()->submit();
 }
 
 
@@ -367,7 +380,7 @@ void LastFm::Track::nowPlaying()
     params.addQueryItem("album", m_album);
     params.addQueryItem("api_key", LastFm::Global::api_key);
     params.addQueryItem("artist", m_artist);
-    params.addQueryItem("duration", QString::number(int(m_trackLength/1000)));
+    params.addQueryItem("duration", QString::number(m_trackLength));
     params.addQueryItem("method", "track.updateNowPlaying");
     params.addQueryItem("sk", LastFm::Global::session_key);
     params.addQueryItem("token", LastFm::Global::token);
@@ -385,6 +398,10 @@ void LastFm::Track::nowPlaying()
 
     // Set the track as current
     m_scrobbler->setCurrentTrack(this);
+
+    // We started playing
+    m_playbackLength = 0;
+    m_unpauseTime = m_playbackStart;
 }
 
 
@@ -415,6 +432,16 @@ void LastFm::Track::love()
     // Send the date
     nam->post(request, data);
 
+}
+
+
+void LastFm::Track::pause(bool pause)
+{
+    if (pause) {
+        m_playbackLength += QDateTime::currentDateTime().toTime_t() - m_unpauseTime;
+    } else {
+        m_unpauseTime = QDateTime::currentDateTime().toTime_t();
+    }
 }
 
 
