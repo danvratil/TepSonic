@@ -383,6 +383,8 @@ void LastFm::Track::nowPlaying()
     // Send the date
     nam->post(request, data);
 
+    // Set the track as current
+    m_scrobbler->setCurrentTrack(this);
 }
 
 
@@ -406,6 +408,10 @@ void LastFm::Track::love()
     data.append(params.toString().remove(0,1));
 
     QNetworkAccessManager *nam = new QNetworkAccessManager();
+    connect(nam, SIGNAL(finished(QNetworkReply*)),
+            this, SLOT(scrobbled(QNetworkReply*)));
+    connect(nam, SIGNAL(finished(QNetworkReply*)),
+            nam, SLOT(deleteLater()));
     // Send the date
     nam->post(request, data);
 
@@ -423,6 +429,11 @@ void LastFm::Track::scrobbled(QNetworkReply *reply)
     QDomElement lfm = document.documentElement();
     if (lfm.attribute("status", "") == "ok") {
         qDebug() << method << "for" << reply->request().url().queryItemValue("track") << "successfull";
+        if (method == "track.love")
+            emit loved();
+        else
+            emit scrobbled();
+
     } else {
         qDebug() << method << "for" << reply->request().url().queryItemValue("track") << "failed:";
         QDomElement err = lfm.childNodes().at(0).toElement();

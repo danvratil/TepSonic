@@ -119,6 +119,9 @@ namespace LastFm {
             /** Returns pointer to currently playing track **/
             LastFm::Track* currentTrack() { return m_currentTrack; }
 
+            /** Set new current track **/
+            void setCurrentTrack(LastFm::Track* track) { m_currentTrack = track; }
+
         private slots:
 
             /** Called when LastFm::Auth::gotSession() is emitted */
@@ -255,7 +258,10 @@ namespace LastFm {
 
         signals:
             /** This signal is emitted when the track is scrobbled */
-            void scrobbled(int status);
+            void scrobbled();
+
+            /** This signal is emitted when the track is loved */
+            void loved();
 
         private:
 
@@ -271,6 +277,7 @@ namespace LastFm {
         private slots:
 
             void scrobbled(QNetworkReply*);
+
     };
 
 
