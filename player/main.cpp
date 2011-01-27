@@ -85,6 +85,7 @@ int main(int argc, char *argv[])
     QObject::connect(&mainWindow,SIGNAL(settingsAccepted()),pluginsManager,SIGNAL(settingsAccepted()));
     pluginsManager->loadPlugins();
 
+    mainWindow.installPluginsMenus();
     mainWindow.show();
 
     for (int i=1; i<tepsonic.arguments().count(); i++) {

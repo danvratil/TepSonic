@@ -46,7 +46,6 @@ class CollectionModel;
 class CollectionProxyModel;
 class CollectionItemDelegate;
 class DatabaseManager;
-class PluginsManager;
 class TaskManager;
 class BookmarksManager;
 class FileSystemModel;
@@ -63,9 +62,9 @@ class MainWindow;
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
-    Q_PROPERTY(PluginsManager* pluginsManager
+    /*Q_PROPERTY(PluginsManager* pluginsManager
                READ pluginsManager
-               WRITE setPluginsManager)
+               WRITE setPluginsManager)*/
 
 public:
     //! Constructor
@@ -87,18 +86,22 @@ public:
       \param pluginsManager pointer to PluginsManager object
       \sa pluginsManager()
     */
-    inline void setPluginsManager(PluginsManager *pluginsManager) {
+    /*inline void setPluginsManager(PluginsManager *pluginsManager) {
         m_pluginsManager = pluginsManager;
-    }
+    }*/
 
     //! Returns pointer to PluginsManager
     /*!
       \return Returns pointer to plugins manager
       \sa setPluginsManager()
     */
-    PluginsManager* pluginsManager() {
+    /*PluginsManager* pluginsManager() {
         return m_pluginsManager;
-    }
+    }*/
+
+    //! Allow all plugins to install their menus into mainwindow
+    void installPluginsMenus();
+
 
 private:
     //! Pointer to main window's UI (generated from mainwindow.ui)
@@ -130,9 +133,6 @@ private:
 
     //! Pointer to Player
     Player *m_player;
-
-    //! Pointer to PluginsManager
-    PluginsManager *m_pluginsManager;
 
     //! Pointer to TaskManager
     TaskManager *m_taskManager;

@@ -30,6 +30,7 @@
 #include <QWidget>
 #include <QString>
 #include <QTranslator>
+#include <QMenu>
 
 //! LastFmScrobbler is a plugin for scrobbling recently played tracks to Last.fm
 /*!
@@ -66,6 +67,10 @@ class LastFmScrobblerPlugin : public AbstractPlugin
         */
         void settingsWidget(QWidget *parentWidget);
 
+
+        //! Add custom menu items to given menu. */
+        void setupMenu(QMenu *menu, Plugins::MenuTypes menuType);
+
     public slots:
 
         //! Notification about new track
@@ -81,6 +86,9 @@ class LastFmScrobblerPlugin : public AbstractPlugin
           \sa scrobble()
         */
         void trackFinished(Player::MetaData trackData);
+
+        //! Submit track as loved()
+        void loveTrack();
 
     private slots:
         void initScrobbler();

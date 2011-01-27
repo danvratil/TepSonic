@@ -22,8 +22,22 @@
 
 #include <QtPlugin>
 
+
 class QWidget;
 class QString;
+class QMenu;
+
+
+namespace Plugins {
+
+    enum MenuTypes {
+        MainMenu = 0,
+        TrayMenu = 1,
+        PlaylistPopup = 2,
+        CollectionsPopup = 3
+    };
+
+}
 
 //! Interface for plugins. Plugins should not be subclassed from this interface, use AbstractPlugin class instead
 /*!
@@ -34,33 +48,34 @@ class QString;
  */
 class PluginInterface
 {
-public:
-    //! Destructor
-    virtual ~PluginInterface() {}
+    public:
 
-    //! Initializes the plugin
-    /*!
-      The plugin should not be initiated in the constructor. The constructor is only for setting plugin's name
-      and hasConfigUI. The initialization itself (like loading settings, connection to network etc) should be done
-      here. This allows user to disable the plugin (init() is not called) but TepSonic still knows about the plugin
-      without initializing it.
-    */
-    virtual void init() = 0;
+        //! Destructor
+        virtual ~PluginInterface() {}
 
-    //! Uninitializes the plugin
-    /*!
-      The plugin should stop doing it's work but it won't be destroyed. The plugin will be formally disabled.
-    */
-    virtual void quit() = 0;
+        //! Initializes the plugin
+        /*!
+          The plugin should not be initiated in the constructor. The constructor is only for setting plugin's name
+          and hasConfigUI. The initialization itself (like loading settings, connection to network etc) should be done
+          here. This allows user to disable the plugin (init() is not called) but TepSonic still knows about the plugin
+          without initializing it.
+        */
+        virtual void init() = 0;
 
-    //! Installs plugin's UI on given parentWidget.
-    virtual void settingsWidget(QWidget *parentWidget) = 0;
+        //! Uninitializes the plugin
+        /*!
+          The plugin should stop doing it's work but it won't be destroyed. The plugin will be formally disabled.
+        */
+        virtual void quit() = 0;
 
-    //! Retrurns name of the plugin
-    virtual QString pluginName() = 0;
+        //! Installs plugin's UI on given parentWidget.
+        virtual void settingsWidget(QWidget *parentWidget) = 0;
 
+        //! Allows plugin to setup custom menu to givem menu. The type of menu is set in menuType.
+        virtual void setupMenu(QMenu *menu, Plugins::MenuTypes menuType) = 0;
 
 };
+
 
 Q_DECLARE_INTERFACE(PluginInterface,"TepSonic.PluginInterface/1.0");
 

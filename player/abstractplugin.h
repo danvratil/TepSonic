@@ -21,15 +21,17 @@
 #ifndef ABSTRACTPLUGIN_H
 #define ABSTRACTPLUGIN_H
 
-#include "plugininterface.h"
 #include "player.h"
+#include "plugininterface.h"
 
 #include <QObject>
 #include <phonon/mediaobject.h>
 
 class QString;
 class QWidget;
+class QMenu;
 class PluginsManager;
+
 
 //! The AbstractPlugin class provides interface to be implemented by plugins
 /*!
@@ -85,6 +87,9 @@ class AbstractPlugin : public QObject, public PluginInterface
           \param state new state of the property
         */
         void setHasConfigUI(const bool &state) { _hasConfigUI = state; }
+
+        //! Allows plugin to setup custom menu to given menu. The type of menu is set in menuType.
+        virtual void setupMenu(QMenu *menu, Plugins::MenuTypes menuType) = 0;
 
     public slots:
         //! Called when Settings dialog is accepted

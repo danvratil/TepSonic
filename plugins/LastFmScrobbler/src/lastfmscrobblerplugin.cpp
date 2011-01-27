@@ -20,6 +20,7 @@
 #include "lastfmscrobblerplugin.h"
 #include "constants.h"
 #include "lastfm.h"
+#include "../../../player/playlist/playlistbrowser.h"
 
 #include <QObject>
 #include <QDir>
@@ -105,6 +106,29 @@ void LastFmScrobblerPlugin::settingsWidget(QWidget *parentWidget)
             this, SLOT(authenticate()));
 }
 
+
+void LastFmScrobblerPlugin::setupMenu(QMenu *menu, Plugins::MenuTypes menuType)
+{
+    if (menuType == Plugins::PlaylistPopup) {
+        QMenu *pmenu = new QMenu(tr("Last.fm"), menu);
+        pmenu->addAction(tr("Love track"), this, SLOT(loveTrack()));
+        pmenu->setProperty("menuType", menuType);
+        menu->addSeparator();
+        menu->addMenu(pmenu);
+    }
+
+    if (menuType == Plugins::TrayMenu) {
+        QMenu *pmenu = new QMenu(tr("Last.fm"), menu);
+        pmenu->addAction(tr("Love current track"), this, SLOT(loveTrack()));
+        pmenu->setProperty("menuType", menuType);
+        QAction *quitAction = menu->actions().last();
+        menu->insertSeparator(quitAction);
+        menu->insertMenu(quitAction, pmenu);
+        menu->insertSeparator(quitAction);
+    }
+}
+
+
 void LastFmScrobblerPlugin::trackFinished(Player::MetaData trackdata)
 {
     // And try to submit the cache, whatever's in it
@@ -168,6 +192,54 @@ void LastFmScrobblerPlugin::gotToken(QString token)
     // user to click "Allow" button on the page), then re-initialize the scrobbler with
     // new token
     QTimer::singleShot(60000, this, SLOT(initScrobbler()));
+}
+
+
+void LastFmScrobblerPlugin::loveTrack()
+{
+    // The "Love" QAction
+    QAction *action = qobject_cast<QAction*>(sender());
+    if (!action) return;
+
+    // The "Last.fm" menu
+    QMenu *lastfmmenu = qobject_cast<QMenu*>(action->parent());
+    if (!lastfmmenu) return;
+
+
+    // Signal from playlist popup
+    if (lastfmmenu->property("menuType") == Plugins::PlaylistPopup) {
+
+        // The parent menu
+        QMenu *popupmenu = qobject_cast<QMenu*>(lastfmmenu->parent());
+        if (!popupmenu) return;
+
+        // Pointer to QModelIndex stored in menu property
+        QModelIndex itemIndex = *(QModelIndex*)popupmenu->property("playlistItem").value<void *>();
+
+        // From playlist, we can love any track, so we need to get more info about the track
+        QString trackname = itemIndex.sibling(itemIndex.row(), PlaylistBrowser::TracknameColumn).data().toString();
+        QString artist = itemIndex.sibling(itemIndex.row(), PlaylistBrowser::InterpretColumn).data().toString();
+
+        // Now we construct the track
+        LastFm::Track *track = new LastFm::Track(m_scrobbler);
+        track->setTrackTitle(trackname);
+        track->setArtist(artist);
+
+        track->love();
+        connect(track, SIGNAL(loved()),
+                track, SLOT(deleteLater()));
+    }
+
+    // Signal from tray menu item
+    if (lastfmmenu->property("menuType") == Plugins::TrayMenu) {
+
+        // From tray, we can love only current track
+        if (m_scrobbler->currentTrack())
+            m_scrobbler->currentTrack()->love();
+    }
+
+
+
 }
 
 Q_EXPORT_PLUGIN2(tepsonic_lastfmscrobbler, LastFmScrobblerPlugin)

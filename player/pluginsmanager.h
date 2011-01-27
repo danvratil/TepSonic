@@ -24,10 +24,11 @@
 #include <QObject>
 #include <QList>
 #include <QPluginLoader>
+#include <QMenu>
 
 #include "player.h"
+#include "plugininterface.h"
 
-class AbstractPlugin;
 
 typedef QString (*PluginNameFcn)(void);
 typedef QString (*PluginIDFcn)(void);
@@ -94,6 +95,9 @@ class PluginsManager : public QObject
           All plugins must be prefixed libtepsonic_.
         */
         void loadPlugins();
+
+        //! Call setupMenu() for all loaded plugins */
+        void installMenus(QMenu *menu, Plugins::MenuTypes menuType);
 
     private:
         //! Initializes given plugin

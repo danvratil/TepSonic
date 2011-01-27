@@ -22,7 +22,6 @@
 
 #include "constants.h"
 #include "pluginsmanager.h"
-#include "plugininterface.h"
 #include "abstractplugin.h"
 #include "mainwindow.h"
 #include "player.h"
@@ -216,4 +215,18 @@ PluginsManager::Plugin* PluginsManager::loadPlugin(QString filename)
     m_pluginsList.append(plugin);
 
     return plugin;
+}
+
+void PluginsManager::installMenus(QMenu *menu, Plugins::MenuTypes menuType)
+{
+    for (int i = 0; i < m_pluginsList.size(); i++)
+    {
+        Plugin *plugin = m_pluginsList.at(i);
+        if (!plugin) continue;
+
+        AbstractPlugin *aplg = reinterpret_cast<AbstractPlugin*>(plugin->pluginLoader->instance());
+        if (!aplg) continue;
+
+        aplg->setupMenu(menu, menuType);
+    }
 }

@@ -198,7 +198,6 @@ MainWindow::MainWindow(Player *player):
     // Create bookmarks manager
     m_bookmarksManager = new BookmarksManager(m_ui);
 
-
     // At the very end bind all signals and slots
     bindSignals();
     // Bind global shortcuts
@@ -496,6 +495,22 @@ void MainWindow::bindSignals()
             m_taskManager, SLOT(populateCollections()));
 
 }
+
+
+void MainWindow::installPluginsMenus()
+{
+    extern PluginsManager *pluginsManager;
+
+    if (!pluginsManager) return;
+
+    // Let plugins install their menus
+    pluginsManager->installMenus(m_trayIconMenu, Plugins::TrayMenu);
+    pluginsManager->installMenus(m_playlistPopupMenu, Plugins::PlaylistPopup);
+    if (m_collectionModel)
+        pluginsManager->installMenus(m_collectionsPopupMenu, Plugins::CollectionsPopup);
+}
+
+
 
 
 void MainWindow::changeEvent(QEvent *e)
@@ -881,6 +896,11 @@ void MainWindow::showPlaylistContextMenu(QPoint pos)
     bool itemSelected = m_ui->playlistBrowser->indexAt(pos).isValid();
     for (int i = 0; i < m_playlistPopupMenu->actions().count(); i++)
         m_playlistPopupMenu->actions().at(i)->setEnabled(itemSelected);
+
+    // Store pointer to playlist item's index
+    QModelIndex *index = new QModelIndex(m_ui->playlistBrowser->indexAt(pos));
+    QVariant pitem = qVariantFromValue((void *) index);
+    m_playlistPopupMenu->setProperty("playlistItem", pitem);
 
     m_playlistPopupMenu->popup(m_ui->playlistBrowser->mapToGlobal(pos));
 }
