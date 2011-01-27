@@ -107,29 +107,33 @@ void LastFmScrobblerPlugin::settingsWidget(QWidget *parentWidget)
 
 void LastFmScrobblerPlugin::trackFinished(Player::MetaData trackdata)
 {
-    // Submit what's in cache
-    m_scrobbler->scrobble();
+    // And try to submit the cache, whatever's in it
+    if (m_scrobbler->currentTrack())
+        m_scrobbler->scrobble(m_scrobbler->currentTrack());
 }
 
 void LastFmScrobblerPlugin::trackChanged(Player::MetaData trackData)
 {
     uint stamp = QDateTime::currentDateTime().toTime_t();
 
-    LastFm::Track *track = new LastFm::Track(m_scrobbler,
-                                             trackData.artist,
-                                             trackData.title,
-                                             trackData.album,
-                                             trackData.length,
-                                             trackData.genre,
-                                             trackData.trackNumber,
-                                             stamp);
+    LastFm::Track *track = new LastFm::Track(m_scrobbler);
+    track->setArtist(trackData.artist);
+    track->setTrackTitle(trackData.title);
+    track->setAlbum(trackData.album);
+    track->setTrackLength(trackData.length);
+    track->setGenre(trackData.genre);
+    track->setTrackNumber(trackData.trackNumber);
+    track->setPlaybackStart(stamp);
+
+    qDebug() << "Created track " << track << track->trackTitle() << " in " << this;
     // Set "Now playing"
-    track->nowPlaying();
+    m_scrobbler->nowPlaying(track);
 }
 
 void LastFmScrobblerPlugin::initScrobbler()
 {
 
+    qDebug() << "Initializing scrobbler";
     m_scrobbler = new LastFm::Scrobbler();
     connect(m_scrobbler, SIGNAL(error(QString,int)),
             this, SIGNAL(error(QString)));
@@ -152,9 +156,14 @@ void LastFmScrobblerPlugin::gotToken(QString token)
     }
 
     LastFm::Global::token = token;
+    QSettings settings(QString(_CONFIGDIR) + QDir::separator() + "lastfmscrobbler.conf",QSettings::IniFormat,this);
+    settings.setValue("token", token);
+
+    qDebug() << "Recieved token; waiting 60 seconds before initializing scrobbler";
 
     // Open browser with Last.fm auth web site so user can confirm the token
     QDesktopServices::openUrl(QUrl("http://www.last.fm/api/auth/?api_key="+LastFm::Global::api_key+"&token="+token));
+    _configWidget->label->setText(tr("Now click 'Allow' in your browser, then you can close the browser and this window too."));
 
     // Wait 60 seconds (that should be enough time for browser to start and load page and for
     // user to click "Allow" button on the page), then re-initialize the scrobbler with

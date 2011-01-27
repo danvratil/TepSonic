@@ -95,6 +95,10 @@ namespace LastFm {
               */
             void scrobble();
 
+            /** Add given track to cache and scrobble everything what's in cache */
+            void scrobble(LastFm::Track *track);
+
+
             /** Returns wheter the scrobbler is ready to scrobble or not.
               * The scrobbler is ready, when session key is successfully obtained and set.
               */
@@ -106,15 +110,25 @@ namespace LastFm {
             /** Returns signature of given request */
             static QString getRequestSignature(QUrl request);
 
+            /** Returns pointer to scrobbler's cache */
+            LastFm::Cache* cache() { return m_cache; }
+
+            /** Scrobble informations about now playing track */
+            void nowPlaying(LastFm::Track *track);
+
+            /** Returns pointer to currently playing track **/
+            LastFm::Track* currentTrack() { return m_currentTrack; }
+
         private slots:
 
             /** Called when LastFm::Auth::gotSession() is emitted */
             void setSession(QString key, QString username);
 
         private:
-            Cache *m_cache;
-            Auth *m_auth;
+            LastFm::Cache *m_cache;
+            LastFm::Auth *m_auth;
             bool m_ready;
+            LastFm::Track *m_currentTrack;
 
         signals:
 
@@ -137,7 +151,7 @@ namespace LastFm {
         public:
             Auth(LastFm::Scrobbler *scrobbler);
 
-            ~Auth();
+            ~Auth() {}
 
         public slots:
 
@@ -160,8 +174,6 @@ namespace LastFm {
 
         private:
             LastFm::Scrobbler *m_scrobbler;
-
-            QNetworkAccessManager *m_nam;
 
         signals:
 
@@ -195,6 +207,8 @@ namespace LastFm {
                   int trackNumber = 0,
                   uint playbackStart = 0);
 
+            ~Track();
+
             void setArtist(QString artist) { m_artist = artist; }
             QString artist() { return m_artist; }
 
@@ -215,6 +229,16 @@ namespace LastFm {
 
             void setPlaybackStart(uint playbackStart) { m_playbackStart = playbackStart; }
             uint playbackStart() { return m_playbackStart; }
+
+
+            LastFm::Scrobbler *m_scrobbler;
+            QString m_artist;
+            QString m_trackTitle;
+            QString m_album;
+            int m_trackLength;
+            QString m_genre;
+            int m_trackNumber;
+            uint m_playbackStart;
 
         public slots:
 
@@ -238,20 +262,17 @@ namespace LastFm {
             void love();
 
 
+
         signals:
             /** This signal is emitted when the track is scrobbled */
             void scrobbled(int status);
 
         private:
 
-            LastFm::Scrobbler *m_scrobbler;
-            QString m_artist;
-            QString m_trackTitle;
-            QString m_album;
-            int m_trackLength;
-            QString m_genre;
-            int m_trackNumber;
-            uint m_playbackStart;
+
+        private slots:
+
+            void scrobbled(QNetworkReply*);
     };
 
 
@@ -276,15 +297,18 @@ namespace LastFm {
         public slots:
 
             /** Add a track to the cache. */
-            void add(Track *track);
+            void add(LastFm::Track *track);
 
             /** Try to submit all tracks in cache. */
             void submit();
 
+            /** Called when track are submitted */
+            void submitted(QNetworkReply*);
+
         private:
             void loadCache();
 
-            QList<Track*> m_cache;
+            QList<LastFm::Track*> m_cache;
             LastFm::Scrobbler *m_scrobbler;
 
 

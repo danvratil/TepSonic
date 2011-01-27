@@ -100,6 +100,7 @@ class LastFmScrobblerPlugin : public AbstractPlugin
 
         QString m_token;
 
+
     signals:
 
         void error(QString);

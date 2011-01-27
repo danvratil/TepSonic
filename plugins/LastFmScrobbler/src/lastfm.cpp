@@ -33,10 +33,26 @@
 #include <QDir>
 #include <QTextStream>
 
+#include <QDebug>
+
+namespace LastFm {
+
+    namespace Global {
+
+        QString api_key;
+        QString session_key;
+        QString secret_key;
+        QString token;
+        QString username;
+
+    }
+}
+
 LastFm::Scrobbler::Scrobbler():
         m_cache(0),
         m_auth(0),
-        m_ready(false)
+        m_ready(false),
+        m_currentTrack(0)
 {
     m_cache = new LastFm::Cache(this);
     m_auth = new LastFm::Auth(this);
@@ -62,7 +78,7 @@ LastFm::Scrobbler::~Scrobbler()
 
 void LastFm::Scrobbler::setSession(QString key, QString username)
 {
-    LastFm::Global::secret_key = key;
+    LastFm::Global::session_key = key;
     LastFm::Global::username = username;
     m_ready = true;
 }
@@ -72,6 +88,27 @@ void LastFm::Scrobbler::scrobble()
 {
     m_cache->submit();
 }
+
+
+void LastFm::Scrobbler::scrobble(LastFm::Track *track)
+{
+    qDebug() << "Adding track" << track->trackTitle()<< "to cache";
+    qDebug() << m_cache;
+    m_cache->add(track);
+
+    qDebug() << "Submitting cache";
+    m_cache->submit();
+}
+
+
+
+void LastFm::Scrobbler::nowPlaying(LastFm::Track *track)
+{
+    m_currentTrack = track;
+    if (track)
+        track->nowPlaying();
+}
+
 
 
 void LastFm::Scrobbler::raiseError(int code)
@@ -147,11 +184,12 @@ QString LastFm::Scrobbler::getRequestSignature(QUrl request)
     QString str = url.toString();
     str.remove(url.queryPairDelimiter());
     str.remove(url.queryValueDelimiter());
+    str.remove(0,1); // remove trailing "?"
     str.append(LastFm::Global::secret_key);
     QByteArray ba;
     ba.append(str);
 
-    return QString(QCryptographicHash::hash(ba, QCryptographicHash::Md5));
+    return QString(QCryptographicHash::hash(ba, QCryptographicHash::Md5).toHex());
 
 }
 
@@ -160,13 +198,6 @@ QString LastFm::Scrobbler::getRequestSignature(QUrl request)
 LastFm::Auth::Auth(LastFm::Scrobbler *scrobbler):
         m_scrobbler(scrobbler)
 {
-    m_nam = new QNetworkAccessManager();
-}
-
-
-LastFm::Auth::~Auth()
-{
-    delete m_nam;
 }
 
 
@@ -174,21 +205,34 @@ LastFm::Auth::~Auth()
 void LastFm::Auth::getToken()
 {
     QNetworkRequest request;
-    request.setUrl("http://ws.audioscrobbler.com/2.0/?method=auth.gettoken&api_key="+LastFm::Global::api_key);
-    connect(m_nam, SIGNAL(finished(QNetworkReply*)),
+    QUrl url;
+
+    url.setUrl("http://ws.audioscrobbler.com/2.0/");
+    url.addQueryItem("api_key", LastFm::Global::api_key);
+    url.addQueryItem("method", "auth.getToken");
+    url.addQueryItem("api_sig", LastFm::Scrobbler::getRequestSignature(url));
+    request.setUrl(url.toString());
+
+    QNetworkAccessManager *nam = new QNetworkAccessManager();
+    connect(nam, SIGNAL(finished(QNetworkReply*)),
             this, SLOT(slotGotToken(QNetworkReply*)));
-    m_nam->get(request);
+    nam->get(request);
+
+    qDebug() << "Requesting token on " << request.url();
 }
 
 
 void LastFm::Auth::slotGotToken(QNetworkReply *reply)
 {
+    qDebug() << "Recieved token, http code " << reply->attribute(QNetworkRequest::HttpStatusCodeAttribute);
+
     int status = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
     if (status != 200)
     {
         m_scrobbler->raiseError(-1);
         return;
     }
+
 
     // Read the XML document
     QDomDocument document;
@@ -217,15 +261,28 @@ void LastFm::Auth::slotGotToken(QNetworkReply *reply)
 void LastFm::Auth::getSession()
 {
     QNetworkRequest request;
-    request.setUrl("http://ws.audioscrobbler.com/2.0/?method=auth.getsession&api_key="+LastFm::Global::api_key+"&token="+LastFm::Global::token);
-    connect(m_nam, SIGNAL(finished(QNetworkReply*)),
+    QUrl url;
+
+    url.setUrl("http://ws.audioscrobbler.com/2.0/");
+    url.addQueryItem("api_key", LastFm::Global::api_key);
+    url.addQueryItem("method", "auth.getSession");
+    url.addQueryItem("token", LastFm::Global::token);
+    url.addQueryItem("api_sig", LastFm::Scrobbler::getRequestSignature(url));
+    request.setUrl(url.toString());
+
+    QNetworkAccessManager *nam = new QNetworkAccessManager(this);
+    connect(nam, SIGNAL(finished(QNetworkReply*)),
             this, SLOT(slotGotSession(QNetworkReply*)));
-    m_nam->get(request);
+    nam->get(request);
+
+    qDebug() << "Requesting session key on " << request.url();
 }
 
 
 void LastFm::Auth::slotGotSession(QNetworkReply *reply)
 {
+    qDebug() << "Got session key; http " << reply->attribute(QNetworkRequest::HttpStatusCodeAttribute);
+
     int status = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
     if (status != 200)
     {
@@ -237,6 +294,7 @@ void LastFm::Auth::slotGotSession(QNetworkReply *reply)
     QDomDocument document;
     document.setContent(reply->readAll());
 
+
     // <lfm status="ok/failed">
     QDomElement lfm = document.documentElement();
     if (lfm.attribute("status","") == "ok") {
@@ -245,6 +303,7 @@ void LastFm::Auth::slotGotSession(QNetworkReply *reply)
         QDomElement name = lfm.elementsByTagName("name").at(0).toElement();
         emit gotSession(key.childNodes().at(0).nodeValue(),
                         name.childNodes().at(0).nodeValue());
+        LastFm::Global::session_key = key.childNodes().at(0).nodeValue();
 
     } else {
 
@@ -272,9 +331,18 @@ LastFm::Track::Track(LastFm::Scrobbler *scrobbler, QString artist, QString track
 {
 }
 
+LastFm::Track::~Track()
+{
+    qDebug() << "Destroying track " << m_trackTitle << this;
+}
+
 
 void LastFm::Track::scrobble()
 {
+    // Add itself to the cache
+    if (m_scrobbler->cache())
+        m_scrobbler->cache()->add(this);
+
     // Let the scrobbler do what's neccessary
     m_scrobbler->scrobble();
 }
@@ -290,22 +358,22 @@ void LastFm::Track::nowPlaying()
     params.addQueryItem("album", m_album);
     params.addQueryItem("api_key", LastFm::Global::api_key);
     params.addQueryItem("artist", m_artist);
-    params.addQueryItem("duration", QString::number(m_trackLength));
-    params.addQueryItem("method", "updateNowPlaying");
+    params.addQueryItem("duration", QString::number(int(m_trackLength/1000)));
+    params.addQueryItem("method", "track.updateNowPlaying");
     params.addQueryItem("sk", LastFm::Global::session_key);
     params.addQueryItem("token", LastFm::Global::token);
     params.addQueryItem("track", m_trackTitle);
     params.addQueryItem("trackNumber", QString::number(m_trackNumber));
     params.addQueryItem("api_sig", LastFm::Scrobbler::getRequestSignature(params));
-    data.append(params.toString());
+    // Remove the trailing "?" from the params, since we are doing POST
+    data.append(params.toString().remove(0,1));
 
     QNetworkAccessManager *nam = new QNetworkAccessManager();
-    // When request is done, destroy the QNetworkAccessManager
     connect(nam, SIGNAL(finished(QNetworkReply*)),
-            this, SLOT(deleteLater()));
-
+            this, SLOT(scrobbled(QNetworkReply*)));
     // Send the date
     nam->post(request, data);
+
 }
 
 
@@ -323,15 +391,18 @@ void LastFm::Track::love()
     params.addQueryItem("token", LastFm::Global::token);
     params.addQueryItem("track", m_trackTitle);
     params.addQueryItem("api_sig", LastFm::Scrobbler::getRequestSignature(params));
-    data.append(params.toString());
+    data.append(params.toString().remove(0,1));
 
     QNetworkAccessManager *nam = new QNetworkAccessManager();
-    // When request is done, destroy the QNetworkAccessManager
-    connect(nam, SIGNAL(finished(QNetworkReply*)),
-            this, SLOT(deleteLater()));
-
     // Send the date
     nam->post(request, data);
+
+}
+
+
+void LastFm::Track::scrobbled(QNetworkReply *reply)
+{
+    qDebug() << reply->readAll();
 }
 
 
@@ -384,10 +455,11 @@ LastFm::Cache::~Cache()
 }
 
 
-void LastFm::Cache::add(Track *track)
+void LastFm::Cache::add(LastFm::Track *track)
 {
-
-    m_cache.append(track);
+    qDebug() << "Adding track" << track->trackTitle() << "to cache";
+    if (track)
+        m_cache.append(track);
 
 }
 
@@ -401,32 +473,56 @@ void LastFm::Cache::submit()
     QUrl params;
 
 
+    qDebug() << "Scrobbling " << m_cache.size() << " tracks";
+
     params.addQueryItem("api_key", LastFm::Global::api_key);
-    params.addQueryItem("method", "updateNowPlaying");
+    params.addQueryItem("method", "track.scrobble");
     params.addQueryItem("sk", LastFm::Global::session_key);
     params.addQueryItem("token", LastFm::Global::token);
     for (int i = 0; i < m_cache.size(); i++)
     {
-        params.addQueryItem("album["+QString::number(i)+"]", m_cache.at(i)->album());
-        params.addQueryItem("artist["+QString::number(i)+"]", m_cache.at(i)->artist());
-        params.addQueryItem("duration["+QString::number(i)+"]", QString::number(m_cache.at(i)->trackLength()));
-        params.addQueryItem("timestamp["+QString::number(i)+"]", QString::number(m_cache.at(i)->playbackStart()));
-        params.addQueryItem("track["+QString::number(i)+"]", m_cache.at(i)->trackTitle());
-        params.addQueryItem("trackNumber["+QString::number(i)+"]", QString::number(m_cache.at(i)->trackNumber()));
+        if (m_cache.at(i)) {
+            params.addQueryItem("album["+QString::number(i)+"]", m_cache.at(i)->album());
+            params.addQueryItem("artist["+QString::number(i)+"]", m_cache.at(i)->artist());
+            params.addQueryItem("duration["+QString::number(i)+"]", QString::number(m_cache.at(i)->trackLength()));
+            params.addQueryItem("timestamp["+QString::number(i)+"]", QString::number(m_cache.at(i)->playbackStart()));
+            params.addQueryItem("track["+QString::number(i)+"]", m_cache.at(i)->trackTitle());
+            params.addQueryItem("trackNumber["+QString::number(i)+"]", QString::number(m_cache.at(i)->trackNumber()));
+        }
     }
     params.addQueryItem("api_sig", LastFm::Scrobbler::getRequestSignature(params));
 
 
-    data.append(params.toString());
+
+    data.append(params.toString().remove(0,1));
+
+    qDebug() << "Scrobbling tracks to " << request.url() << "with" << data;
 
     QNetworkAccessManager *nam = new QNetworkAccessManager();
     // When request is done, destroy the QNetworkAccessManager
     connect(nam, SIGNAL(finished(QNetworkReply*)),
-            this, SLOT(deleteLater()));
+            this, SLOT(submitted(QNetworkReply*)));
 
     // Send the date
     nam->post(request, data);
 
+}
+
+
+void LastFm::Cache::submitted(QNetworkReply *reply)
+{
+    QString content = reply->readAll();
+
+    QDomDocument document;
+    document.setContent(content);
+
+    QDomElement lfm = document.documentElement();
+    if (lfm.attribute("status", "") == "ok") {
+        // Don't just clear cache, but destroy all tracks contained
+        qDeleteAll(m_cache);
+    }
+
+    qDebug() << content;
 }
 
 
