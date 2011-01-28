@@ -78,14 +78,13 @@ LastFmScrobblerPlugin::LastFmScrobblerPlugin():
 void LastFmScrobblerPlugin::init()
 {
     QSettings settings(QString(_CONFIGDIR) + QDir::separator() + "lastfmscrobbler.conf",QSettings::IniFormat,this);
-    QString token = settings.value("token", QString()).toString();
+    QString key = settings.value("key", QString()).toString();
 
     LastFm::Global::api_key = "824f0af8fbc9ca2dd16091ad47817988";
     LastFm::Global::secret_key = "15545c2b44b3e3108a73bb0ad4bc23ea";
-    LastFm::Global::token = token;
+    LastFm::Global::session_key = key;
 
-    if (!token.isEmpty())
-        initScrobbler();
+    initScrobbler();
 
 }
 
@@ -169,6 +168,8 @@ void LastFmScrobblerPlugin::initScrobbler()
     m_scrobbler = new LastFm::Scrobbler();
     connect(m_scrobbler, SIGNAL(error(QString,int)),
             this, SIGNAL(error(QString)));
+    connect(m_scrobbler, SIGNAL(gotSessionKey(QString)),
+            this, SLOT(gotSessionKey(QString)));
 
 }
 
@@ -188,8 +189,6 @@ void LastFmScrobblerPlugin::gotToken(QString token)
     }
 
     LastFm::Global::token = token;
-    QSettings settings(QString(_CONFIGDIR) + QDir::separator() + "lastfmscrobbler.conf",QSettings::IniFormat,this);
-    settings.setValue("token", token);
 
     qDebug() << "Recieved token; waiting 60 seconds before initializing scrobbler";
 
@@ -201,6 +200,14 @@ void LastFmScrobblerPlugin::gotToken(QString token)
     // user to click "Allow" button on the page), then re-initialize the scrobbler with
     // new token
     QTimer::singleShot(60000, this, SLOT(initScrobbler()));
+}
+
+void LastFmScrobblerPlugin::gotSessionKey(QString session)
+{
+    QSettings settings(QString(_CONFIGDIR) + QDir::separator() + "lastfmscrobbler.conf",QSettings::IniFormat,this);
+    settings.setValue("key", session);
+
+    LastFm::Global::session_key = session;
 }
 
 

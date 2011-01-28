@@ -138,6 +138,8 @@ namespace LastFm {
 
             void error(QString message, int code);
 
+            void gotSessionKey(QString key);
+
     };
 
 

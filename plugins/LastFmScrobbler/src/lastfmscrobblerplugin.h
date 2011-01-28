@@ -93,6 +93,8 @@ class LastFmScrobblerPlugin : public AbstractPlugin
 
         void gotToken(QString token);
 
+        void gotSessionKey(QString session);
+
     private:
         LastFm::Scrobbler *m_scrobbler;
         LastFm::Auth *m_auth;

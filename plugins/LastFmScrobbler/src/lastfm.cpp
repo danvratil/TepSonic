@@ -59,14 +59,13 @@ LastFm::Scrobbler::Scrobbler():
 {
     m_cache = new LastFm::Cache(this);
     m_auth = new LastFm::Auth(this);
+    connect(m_auth, SIGNAL(gotSession(QString,QString)),
+            this, SLOT(setSession(QString,QString)));
+    connect(m_auth, SIGNAL(gotSession(QString,QString)),
+            this, SIGNAL(gotSessionKey(QString)));
 
-    if (LastFm::Global::session_key.isEmpty()) {
-
+    if (LastFm::Global::session_key.isEmpty())
         m_auth->getSession();
-        connect(m_auth, SIGNAL(gotSession(QString,QString)),
-                this, SLOT(setSession(QString,QString)));
-
-    }
 }
 
 
