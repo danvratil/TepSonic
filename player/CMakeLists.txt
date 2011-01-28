@@ -71,6 +71,7 @@ set(player_HDRS
     databasemanager.h
     trayicon.h
     filesystembrowser.h
+    metadataeditor.h
     settings/settingsdialog.h
     settings/playerpage.h
     settings/collectionspage.h
@@ -107,6 +108,7 @@ set(player_SRCS
     trayicon.cpp
     supportedformats.cpp
     filesystembrowser.cpp
+    metadataeditor.cpp
     settings/settingsdialog.cpp
     settings/playerpage.cpp
     settings/collectionspage.cpp
@@ -136,6 +138,7 @@ set(player_SRCS
 
 set(player_QUIS
     ui/mainwindow.ui
+    ui/metadataeditor.ui
     settings/playerpage.ui
     settings/settingsdialog.ui
     settings/collectionspage.ui

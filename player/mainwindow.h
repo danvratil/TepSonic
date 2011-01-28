@@ -32,6 +32,7 @@
 #include <QSystemTrayIcon>
 #include <QKeyEvent>
 #include <QFileSystemModel>
+#include <QPointer>
 
 
 // These classes are used in inline methods
@@ -49,6 +50,7 @@ class DatabaseManager;
 class TaskManager;
 class BookmarksManager;
 class FileSystemModel;
+class MetadataEditor;
 
 namespace Ui
 {
@@ -127,6 +129,8 @@ private:
 
     //! Pointer to QFileSystemModel
     QFileSystemModel *m_fileSystemModel;
+
+    QPointer<MetadataEditor> m_metadataEditor;
 
     //! Pointer to BookmarksBrowser
     BookmarksManager *m_bookmarksManager;
@@ -411,6 +415,12 @@ private slots:
 
     //! Deletes file locally on hardisk and calls for collections rebuild
     void removeFileFromDisk();
+
+    //! Display metadata editor
+    void showMetadataEditor();
+
+    //! Called when metadata editor is accepted
+    void metadataEditorAccepted();
 
 signals:
     void settingsAccepted();

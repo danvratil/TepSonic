@@ -29,6 +29,7 @@
 #include "playlist/playlistitemdelegate.h"
 #include "playlist/playlistproxymodel.h"
 #include "playlist/playlistmodel.h"
+#include "playlist/playlistitem.h"
 #include "collections/collectionproxymodel.h"
 #include "collections/collectionmodel.h"
 #include "collections/collectionitem.h"
@@ -39,6 +40,7 @@
 #include "pluginsmanager.h"
 #include "tools.h"
 #include "supportedformats.h"
+#include "metadataeditor.h"
 
 #include <QMessageBox>
 #include <QDir>
@@ -61,6 +63,7 @@
 MainWindow::MainWindow(Player *player):
         m_collectionModel(0),
         m_collectionProxyModel(0),
+        m_metadataEditor(0),
         m_player(player),
         m_canClose(false)
 {
@@ -282,6 +285,7 @@ void MainWindow::createMenus()
     // Create playlist popup menu
     m_playlistPopupMenu = new QMenu(this);
     m_playlistPopupMenu->addAction(tr("Stop after this track"), m_ui->playlistBrowser, SLOT(setStopTrack()));
+    m_playlistPopupMenu->addAction(tr("Edit metadata"), this, SLOT(showMetadataEditor()));
     m_ui->playlistBrowser->setContextMenuPolicy(Qt::CustomContextMenu);
 
 }
@@ -1021,4 +1025,51 @@ void MainWindow::setTrack(int row)
     QModelIndex index = m_playlistModel->index(currentItem.row(),0,QModelIndex());
     QString filename = m_playlistModel->data(index,0).toString();
     m_player->setTrack(filename,true);
+}
+
+
+void MainWindow::showMetadataEditor()
+{
+    if (!m_metadataEditor) {
+        m_metadataEditor = new MetadataEditor();
+        connect(m_metadataEditor, SIGNAL(accepted()),
+                this, SLOT(metadataEditorAccepted()));
+        connect(m_metadataEditor, SIGNAL(rejected()),
+                m_metadataEditor, SLOT(deleteLater()));
+    }
+
+
+    QModelIndex currentIndex = m_ui->playlistBrowser->currentIndex();
+    QModelIndex mappedIndex = m_playlistProxyModel->mapToSource(currentIndex);
+    PlaylistItem *item = m_playlistModel->getItem(mappedIndex);
+
+    m_metadataEditor->setFilename(item->data(PlaylistBrowser::FilenameColumn).toString());
+    m_metadataEditor->setTrackTitle(item->data(PlaylistBrowser::TracknameColumn).toString());
+    m_metadataEditor->setAlbum(item->data(PlaylistBrowser::AlbumColumn).toString());
+    m_metadataEditor->setArtist(item->data(PlaylistBrowser::InterpretColumn).toString());
+    m_metadataEditor->setGenre(item->data(PlaylistBrowser::GenreColumn).toString());
+    m_metadataEditor->setYear(item->data(PlaylistBrowser::YearColumn).toInt());
+    m_metadataEditor->setTrackNumber(item->data(PlaylistBrowser::TrackColumn).toInt());
+
+    m_metadataEditor->exec();
+}
+
+
+void MainWindow::metadataEditorAccepted()
+{
+    if (!m_metadataEditor)
+        return;
+
+    QModelIndex currentIndex = m_ui->playlistBrowser->currentIndex();
+    QModelIndex mappedIndex = m_playlistProxyModel->mapToSource(currentIndex);
+    PlaylistItem *item = m_playlistModel->getItem(mappedIndex);
+
+    item->setData(PlaylistBrowser::TracknameColumn, m_metadataEditor->trackTitle());
+    item->setData(PlaylistBrowser::AlbumColumn, m_metadataEditor->album());
+    item->setData(PlaylistBrowser::InterpretColumn, m_metadataEditor->artist());
+    item->setData(PlaylistBrowser::GenreColumn, m_metadataEditor->genre());
+    item->setData(PlaylistBrowser::YearColumn, m_metadataEditor->year());
+    item->setData(PlaylistBrowser::TrackColumn, m_metadataEditor->trackNumber());
+
+    delete m_metadataEditor;
 }
