@@ -460,8 +460,7 @@ void LastFm::Track::scrobbled(QNetworkReply *reply)
         QDomElement err = lfm.childNodes().at(0).toElement();
         qDebug() << err.childNodes().at(0).nodeValue();
 
-        if (err.attribute("code", 0).toInt() == 9)
-            qDebug() << "TODO: Request a new session key and send the request again.";
+        m_scrobbler->raiseError(err.attribute("code", 0).toInt());
     }
 }
 
