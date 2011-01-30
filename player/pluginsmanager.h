@@ -111,6 +111,9 @@ class PluginsManager : public QObject
 
         PluginsManager::Plugin* loadPlugin(QString filename);
 
+        //! List of QMenus that plugins can install their menus to
+        QMap<QMenu*,Plugins::MenuTypes> menus;
+
     signals:
          void settingsAccepted();
          void playerStatusChanged(Phonon::State,Phonon::State);

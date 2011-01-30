@@ -186,6 +186,11 @@ void PluginsManager::enablePlugin(Plugin *plugin)
 
     plugin->hasUI = aplg->hasConfigUI();
     plugin->enabled = true;
+
+    // Install menus for the plugins
+    for (int i = 0; i < menus.size(); i++)
+        installMenus(menus.keys().at(i), menus.values().at(i));
+
 }
 
 PluginsManager::Plugin* PluginsManager::loadPlugin(QString filename)
@@ -219,10 +224,15 @@ PluginsManager::Plugin* PluginsManager::loadPlugin(QString filename)
 
 void PluginsManager::installMenus(QMenu *menu, Plugins::MenuTypes menuType)
 {
+    if (!menus.contains(menu))
+        menus.insert(menu, menuType);
+
     for (int i = 0; i < m_pluginsList.size(); i++)
     {
         Plugin *plugin = m_pluginsList.at(i);
         if (!plugin) continue;
+
+        if (!plugin->enabled) continue;
 
         AbstractPlugin *aplg = reinterpret_cast<AbstractPlugin*>(plugin->pluginLoader->instance());
         if (!aplg) continue;
