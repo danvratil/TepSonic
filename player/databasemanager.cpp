@@ -22,6 +22,7 @@
 
 #include <QDebug>
 #include <QDir>
+#include <QFile>
 #include <QSettings>
 
 #include <QtSql/QSqlDatabase>
@@ -75,7 +76,20 @@ bool DatabaseManager::connectToDB()
     } break;
     case SQLite: {
         m_sqlDb = new QSqlDatabase(QSqlDatabase::addDatabase("QSQLITE", m_connectionName));
-        m_sqlDb->setDatabaseName(QString(_CONFIGDIR).append("/collection.db"));
+        // If the DB file does not exist, try to create it
+        if (!QFile::exists(QString(_CONFIGDIR)+QDir::separator()+"collection.db")) {
+            // First check, if ~/.config/tepsonic exists, eventually create it
+            QDir configdir;
+            if (!configdir.exists(QString(_CONFIGDIR)))
+                configdir.mkdir(QString(_CONFIGDIR));
+            // Now check if the DB file exist and try to create it
+            QFile file(QString(_CONFIGDIR)+QDir::separator()+"collection.db");
+            if (!file.open(QIODevice::WriteOnly)) {
+                qDebug() << "Failed to create new database file!";
+                return false;
+            }
+        }
+        m_sqlDb->setDatabaseName(QString(_CONFIGDIR)+QDir::separator()+"collection.db");
     } break;
     }
 
