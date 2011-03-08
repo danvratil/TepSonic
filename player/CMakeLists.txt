@@ -26,8 +26,8 @@ else (UNIX AND NOT APPLE)
 	add_definitions(-DQXT_STATIC -DBUILD_QXT_GUI -DBUILD_QXT_CORE)
 	set(QXT_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/../3rdparty/qxt)
 	set(QXT_LIBRARIES qxt)
-        set(QXT_HEADERS "../3rdparty/qxt/qxtglobalshortcuts.h")
-	set(QXT_SOURCES "../3rdparty/qxt/qxtglobalshortcuts.cpp")
+        set(QXT_HEADERS "../3rdparty/qxt/qxtglobalshortcut.h")
+	set(QXT_SOURCES "../3rdparty/qxt/qxtglobalshortcut.cpp")
 endif (UNIX AND NOT APPLE)
 
   
