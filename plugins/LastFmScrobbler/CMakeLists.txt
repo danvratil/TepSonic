@@ -55,16 +55,17 @@ set(lastfmscrobbler_QUIS
     ui/lastfmscrobblerconfig.ui
 )
 
-option(LANGUAGES "Using translations")
+option(LANGS "Using translations" "")
 if (NOT DEFINED LANGS)
-  set (LANGUAGES cs CACHE STRING "Using translations" FORCE)
+  set (LANGS cs CACHE STRING "Using translations" FORCE)
+  set (LANGUAGES cs)
 else (NOT DEFINED LANGS)
   if (NOT LANGS)
     set(LANGUAGES "")
   else (NOT LANGS)
     string(REGEX MATCHALL [a-zA-Z]+
            langs1 ${LANGS})
-    set (LANGUAGES ${langs1} CACHE STRING "Using translations" FORCE)
+    set (LANGUAGES ${langs1})
   endif (NOT LANGS)
 endif (NOT DEFINED LANGS)
 
@@ -93,7 +94,9 @@ add_library(tepsonic_lastfmscrobbler SHARED
 	       ${TRANSLATIONS_BINARY}
 )
 
-add_dependencies(tepsonic_lastfmscrobbler ${TRANSLATIONS})
+if (TRANSLATIONS)
+	add_dependencies(tepsonic_lastfmscrobbler ${TRANSLATIONS})
+endif (TRANSLATIONS)
 
 target_link_libraries(tepsonic_lastfmscrobbler
 	       ${QT_LIBRARIES}
