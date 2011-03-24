@@ -19,20 +19,72 @@
 
 #include "metadataeditor.h"
 #include "ui_metadataeditor.h"
+#include "databasemanager.h"
 
 #include <QFontMetrics>
 #include <QFileInfo>
+#include <QSqlQuery>
+
+#include <QDebug>
+
+
 
 MetadataEditor::MetadataEditor(QWidget *parent) :
     QDialog(parent),
-    m_ui(new Ui::MetadataEditor)
+    m_ui(new Ui::MetadataEditor),
+    m_artistCompleter(0),
+    m_albumCompleter(0),
+    m_genreCompleter(0)
 {
     m_ui->setupUi(this);
+
+    DatabaseManager dbManager("metadataEditorConnection");
+    if (DatabaseManager::connectionAvailable() || dbManager.connectToDB())
+    {
+
+        QStringList list;
+
+        {
+            QSqlQuery query("SELECT interpret FROM interprets ORDER BY interpret ASC;", *dbManager.sqlDb());
+            while (query.next())
+                list.append(query.value(0).toString());
+        }
+        m_artistCompleter = new QCompleter(list, this);
+        m_artistCompleter->setCaseSensitivity(Qt::CaseInsensitive);
+        m_ui->artistEdit->setCompleter(m_artistCompleter);
+        list.clear();
+
+        {
+            QSqlQuery query("SELECT album FROM albums ORDER BY album ASC;", *dbManager.sqlDb());
+            while (query.next())
+                list.append(query.value(0).toString());
+        }
+        m_albumCompleter = new QCompleter(list, this);
+        m_albumCompleter->setCaseSensitivity(Qt::CaseInsensitive);
+        m_ui->albumEdit->setCompleter(m_albumCompleter);
+        list.clear();
+
+        {
+            QSqlQuery query("SELECT genre FROM genres ORDER BY genre ASC;", *dbManager.sqlDb());
+            while (query.next())
+                list.append(query.value(0).toString());
+        }
+        m_genreCompleter = new QCompleter(list, this);
+        m_genreCompleter->setCaseSensitivity(Qt::CaseInsensitive);
+        m_ui->genreEdit->setCompleter(m_genreCompleter);
+    }
 }
 
 MetadataEditor::~MetadataEditor()
 {
     delete m_ui;
+
+    if (m_artistCompleter)
+        delete m_artistCompleter;
+    if (m_albumCompleter)
+        delete m_albumCompleter;
+    if  (m_genreCompleter)
+        delete m_genreCompleter;
 }
 
 

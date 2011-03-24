@@ -23,6 +23,7 @@
 #define METADATAEDITOR_H
 
 #include <QDialog>
+#include <QCompleter>
 
 #include "ui_metadataeditor.h"
 
@@ -63,6 +64,10 @@ class MetadataEditor : public QDialog
         Ui::MetadataEditor *m_ui;
 
         QString m_filename;
+
+        QCompleter *m_artistCompleter;
+        QCompleter *m_albumCompleter;
+        QCompleter *m_genreCompleter;
 
 };
 
