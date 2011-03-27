@@ -42,6 +42,10 @@
 #include "supportedformats.h"
 #include "metadataeditor.h"
 
+#include <taglib/fileref.h>
+#include <taglib/tag.h>
+#include <taglib/tstring.h>
+
 #include <QMessageBox>
 #include <QDir>
 #include <QDesktopServices>
@@ -276,16 +280,16 @@ void MainWindow::createMenus()
 
     // Create collections popup menu
     m_collectionsPopupMenu = new QMenu(this);
-    m_collectionsPopupMenu->addAction(tr("Expand all"),m_ui->collectionBrowser,SLOT(expandAll()));
-    m_collectionsPopupMenu->addAction(tr("Collapse all"),m_ui->collectionBrowser,SLOT(collapseAll()));
+    m_collectionsPopupMenu->addAction(tr("&Expand all"),m_ui->collectionBrowser,SLOT(expandAll()));
+    m_collectionsPopupMenu->addAction(tr("&Collapse all"),m_ui->collectionBrowser,SLOT(collapseAll()));
     m_collectionsPopupMenu->addSeparator();
-    m_collectionsPopupMenu->addAction(tr("Delete file from disk"),this,SLOT(removeFileFromDisk()));
+    m_collectionsPopupMenu->addAction(tr("&Delete file from disk"),this,SLOT(removeFileFromDisk()));
     m_ui->collectionBrowser->setContextMenuPolicy(Qt::CustomContextMenu);
 
     // Create playlist popup menu
     m_playlistPopupMenu = new QMenu(this);
-    m_playlistPopupMenu->addAction(tr("Stop after this track"), m_ui->playlistBrowser, SLOT(setStopTrack()));
-    m_playlistPopupMenu->addAction(tr("Edit metadata"), this, SLOT(showMetadataEditor()));
+    m_playlistPopupMenu->addAction(tr("&Stop after this track"), m_ui->playlistBrowser, SLOT(setStopTrack()));
+    m_playlistPopupMenu->addAction(tr("&Edit metadata"), this, SLOT(showMetadataEditor()));
     m_ui->playlistBrowser->setContextMenuPolicy(Qt::CustomContextMenu);
 
 }
@@ -896,13 +900,19 @@ void MainWindow::showCollectionsContextMenu(QPoint pos)
 
 void MainWindow::showPlaylistContextMenu(QPoint pos)
 {
-    // When didn't click on item but on an empty area then disable all the items
-    bool itemSelected = m_ui->playlistBrowser->indexAt(pos).isValid();
+    bool valid =  ((m_ui->playlistBrowser->currentIndex() == m_ui->playlistBrowser->indexAt(pos)) ||
+                   (m_ui->playlistBrowser->currentIndex().isValid() && !m_ui->playlistBrowser->indexAt(pos).isValid()));
+
     for (int i = 0; i < m_playlistPopupMenu->actions().count(); i++)
-        m_playlistPopupMenu->actions().at(i)->setEnabled(itemSelected);
+        m_playlistPopupMenu->actions().at(i)->setEnabled(valid);
 
     // Store pointer to playlist item's index
-    QModelIndex *index = new QModelIndex(m_ui->playlistBrowser->indexAt(pos));
+    QModelIndex *index;
+    if (!m_ui->playlistBrowser->indexAt(pos).isValid())
+        index = new QModelIndex(m_ui->playlistBrowser->currentIndex());
+    else
+        index = new QModelIndex(m_ui->playlistBrowser->indexAt(pos));
+
     QVariant pitem = qVariantFromValue((void *) index);
     m_playlistPopupMenu->setProperty("playlistItem", pitem);
 
@@ -1060,6 +1070,21 @@ void MainWindow::metadataEditorAccepted()
     if (!m_metadataEditor)
         return;
 
+    TagLib::FileRef f(m_metadataEditor->filename().toLocal8Bit().constData());
+    // FileRef::isNull() is not enough sometimes. Let's check the tag() too...
+    if (f.isNull() || !f.tag()) {
+      return;
+    }
+
+    f.tag()->setTrack(m_metadataEditor->trackNumber());
+    f.tag()->setArtist(m_metadataEditor->artist().toLocal8Bit().constData());
+    f.tag()->setAlbum(m_metadataEditor->album().toLocal8Bit().constData());
+    f.tag()->setTitle(m_metadataEditor->trackTitle().toLocal8Bit().constData());
+    f.tag()->setYear(m_metadataEditor->year());
+    f.tag()->setGenre(m_metadataEditor->genre().toLocal8Bit().constData());
+    f.save();
+
+
     QModelIndex currentIndex = m_ui->playlistBrowser->currentIndex();
     QModelIndex mappedIndex = m_playlistProxyModel->mapToSource(currentIndex);
     PlaylistItem *item = m_playlistModel->getItem(mappedIndex);
@@ -1070,6 +1095,8 @@ void MainWindow::metadataEditorAccepted()
     item->setData(PlaylistBrowser::GenreColumn, m_metadataEditor->genre());
     item->setData(PlaylistBrowser::YearColumn, m_metadataEditor->year());
     item->setData(PlaylistBrowser::TrackColumn, m_metadataEditor->trackNumber());
+
+    m_taskManager->rebuildCollections(m_metadataEditor->filename());
 
     delete m_metadataEditor;
 }
