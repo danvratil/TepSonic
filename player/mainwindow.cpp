@@ -900,8 +900,8 @@ void MainWindow::showCollectionsContextMenu(QPoint pos)
 
 void MainWindow::showPlaylistContextMenu(QPoint pos)
 {
-    bool valid =  ((m_ui->playlistBrowser->currentIndex() == m_ui->playlistBrowser->indexAt(pos)) ||
-                   (m_ui->playlistBrowser->currentIndex().isValid() && !m_ui->playlistBrowser->indexAt(pos).isValid()));
+    bool valid =  (m_ui->playlistBrowser->currentIndex().isValid() ||
+                   m_ui->playlistBrowser->indexAt(pos).isValid());
 
     for (int i = 0; i < m_playlistPopupMenu->actions().count(); i++)
         m_playlistPopupMenu->actions().at(i)->setEnabled(valid);
