@@ -111,6 +111,7 @@
   <tabstop>albumEdit</tabstop>
   <tabstop>yearEdit</tabstop>
   <tabstop>genreEdit</tabstop>
+  <tabstop>trackNumberEdit</tabstop>
   <tabstop>buttonBox</tabstop>
  </tabstops>
  <resources/>
