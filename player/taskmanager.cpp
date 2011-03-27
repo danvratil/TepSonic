@@ -113,7 +113,11 @@ void TaskManager::rebuildCollections(const QString &folder)
         QSettings settings(QString(_CONFIGDIR).append("/main.conf"),QSettings::IniFormat,this);
         dirs << settings.value("Collections/SourcePaths",QStringList()).toStringList();
     } else {
-        dirs << folder;
+        QFileInfo finfo (folder);
+        if (finfo.isDir())
+            dirs << folder;
+        else
+            dirs << finfo.absolutePath();
     }
 
     if (!dirs.isEmpty()) {

@@ -69,7 +69,7 @@ void CollectionBuilder::run()
                 QStringList filters = SupportedFormats::getExtensionList();
 
                 {   // Populate dbFiles map by ALL tracks from db
-                    QSqlQuery query("SELECT filename, mtime FROM tracks;",*dbManager.sqlDb());
+                    QSqlQuery query("SELECT filename, mtime FROM tracks WHERE filename LIKE '"+m_folders.first()+"%';",*dbManager.sqlDb());
                     while (query.next()) {
                         dbFiles.insert(query.value(0).toString(),query.value(1).toUInt());
                     }
