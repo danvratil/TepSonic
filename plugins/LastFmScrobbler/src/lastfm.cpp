@@ -577,6 +577,7 @@ void LastFm::Cache::submitted(QNetworkReply *reply)
     if (lfm.attribute("status", "") == "ok") {
         qDebug() << method << "for tracks in cache successfull, purging cache";
         qDeleteAll(m_cache);
+        m_cache.clear();
 
         // If we were able to submit track BEFORE the timer or this is timer's event, then
         // destroy the timer so that it won't tick anymore
