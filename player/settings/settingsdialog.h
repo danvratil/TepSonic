@@ -42,6 +42,7 @@ namespace SettingsPages {
 }
 
 class MainWindow;
+class Player;
 
 
 //! SettingsDialog is a dialog window with application settings

@@ -125,6 +125,9 @@ class Player: public QObject
     */
     Phonon::AudioOutput* audioOutput() { return m_audioOutput; }
 
+    //! Returns pointer to list of available effects
+    QList<Phonon::Effect*>* effects() { return &m_effects; }
+
   private:
     //! Current repeat mode
     RepeatMode m_repeatMode;
@@ -137,6 +140,14 @@ class Player: public QObject
 
     //! Phonon AudioOutput
     Phonon::AudioOutput *m_audioOutput;
+
+    //! Phonon Path
+    Phonon::Path m_phononPath;
+
+    QList<Phonon::Effect*> m_effects;
+
+    //! Loads all effects to m_effects and installs chosen effects according to configuration
+    void loadEffects();
 
  private slots:
     //! When a track is finished calls currentSource() and then emits trackFinished(MetaData) and trackFinished() signals
@@ -187,6 +198,9 @@ class Player: public QObject
     /*! Default output device is defined as "OutputDevice" in settings file.
      */
     void setDefaultOutputDevice();
+
+    //! Install or uninstall effect from Phonon. When the effect is already loaded, do nothing.
+    void enableEffect(Phonon::Effect *effect, bool enable);
 
  signals:
     //! Informs about new repeat mode

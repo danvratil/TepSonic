@@ -19,9 +19,15 @@
 
 #include "playerpage.h"
 #include "ui_playerpage.h"
+#include "playereffectdialog.h"
+#include "player.h"
 
 #include <QStandardItem>
 #include <Phonon/BackendCapabilities>
+#include <Phonon/Effect>
+#include <Phonon/EffectDescription>
+
+extern Player *player;
 
 using namespace SettingsPages;
 
@@ -41,11 +47,30 @@ PlayerPage::PlayerPage(QWidget *parent):
         m_devicesModel->appendRow(item);
     }
     ui->outputDevicesList->setModel (m_devicesModel);
+
+
+    m_effectsModel = new QStandardItemModel();
+    QList<Phonon::Effect*> *effects = player->effects();
+    for (int i = 0; i < effects->length(); i++)
+    {
+        Phonon::EffectDescription ed = effects->at(i)->description();
+        QStandardItem *item = new QStandardItem(ed.name());
+        item->setData(QVariant(ed.index()), Qt::UserRole);
+        item->setData(QVariant(quintptr(effects->at(i))), Qt::UserRole+1);
+        item->setCheckable(true);
+        m_effectsModel->appendRow(item);
+    }
+    ui->playerEffectsList->setModel(m_effectsModel);
+    connect(ui->playerEffectsList, SIGNAL(clicked(QModelIndex)),
+            this, SLOT(setEffectDescription(QModelIndex)));
+    connect(ui->playerEffectsList, SIGNAL(doubleClicked(QModelIndex)),
+            this, SLOT(showEffectSettings(QModelIndex)));
 }
 
 PlayerPage::~PlayerPage()
 {
     delete m_devicesModel;
+    delete m_effectsModel;
 }
 
 QModelIndex PlayerPage::getOutputDeviceModelIndex(int deviceIndex)
@@ -62,4 +87,26 @@ QModelIndex PlayerPage::getOutputDeviceModelIndex(int deviceIndex)
 int PlayerPage::getOutputDeviceIndex (QModelIndex index)
 {
     return m_devicesModel->data(index, Qt::UserRole).toInt();
+}
+
+void PlayerPage::setEffectDescription(QModelIndex effect)
+{
+    Phonon::Effect *peffect = (Phonon::Effect*)effect.data(Qt::UserRole+1).toLongLong();
+    Phonon::EffectDescription description = peffect->description();
+    ui->effectDescription->setText(description.description());
+}
+
+void PlayerPage::showEffectSettings(QModelIndex effect)
+{
+    int index = effect.data(Qt::UserRole).toInt();
+
+    QList<Phonon::EffectDescription> effects = Phonon::BackendCapabilities::availableAudioEffects();
+    for (int i = 0; i < effects.length(); i++)
+    {
+        if (effects.at(i).index() == index) {
+            // Dialog deletes itself automatically when closed
+            PlayerEffectDialog *playerEffectDialog = new PlayerEffectDialog((Phonon::Effect*)(effect.data(Qt::UserRole+1).toLongLong()));
+            playerEffectDialog->open();
+        }
+    }
 }

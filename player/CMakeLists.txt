@@ -78,6 +78,7 @@ set(player_HDRS
     settings/pluginspage.h
     settings/shortcutspage.h
     settings/changeshortcutdialog.h
+    settings/playereffectdialog.h
     collections/collectionpopulator.h
     collections/collectionmodel.h
     collections/collectionbuilder.h
@@ -115,6 +116,7 @@ set(player_SRCS
     settings/pluginspage.cpp
     settings/shortcutspage.cpp
     settings/changeshortcutdialog.cpp
+    settings/playereffectdialog.cpp
     collections/collectionpopulator.cpp
     collections/collectionbrowser.cpp
     collections/collectionmodel.cpp

@@ -24,6 +24,7 @@
 #include "pluginsmanager.h"
 #include "mainwindow.h"
 #include "constants.h"
+#include "player.h"
 
 #include "playerpage.h"
 #include "collectionspage.h"
@@ -38,12 +39,14 @@
 
 #include <QFileDialog>
 #include <QDebug>
+#include <QStandardItemModel>
 
 SettingsDialog::SettingsDialog(MainWindow *parent):
         _ui(new Ui::SettingsDialog),
         _parent(parent)
 {
     extern PluginsManager *pluginsManager;
+    extern Player *player;
 
     _ui->setupUi(this);
     _ui->pagesButtons->item(0)->setSelected(true);
@@ -72,11 +75,13 @@ SettingsDialog::SettingsDialog(MainWindow *parent):
     _ui->pages->addWidget(_shortcuts);
 
     QSettings settings(QString(_CONFIGDIR).append("/main.conf"),QSettings::IniFormat,this);
+
     settings.beginGroup("Collections");
     _collections->ui->enableCollectionsCheckbox->setChecked(settings.value("EnableCollections",true).toBool());
     _collections->ui->autoupdateCollectionsCheckbox->setChecked(settings.value("AutoRebuildAfterStart",true).toBool());
     _collections->ui->collectionsPathsList->addItems(settings.value("SourcePaths",QStringList()).toStringList());
     _collections->ui->dbEngineCombo->setCurrentIndex(settings.value("StorageEngine",0).toInt());
+
     settings.beginGroup("MySQL");
     _collections->ui->mysqlServerEdit->setText(settings.value("Server","127.0.0.1").toString());
     _collections->ui->mysqlUsernameEdit->setText(settings.value("Username",QString()).toString());
@@ -84,10 +89,19 @@ SettingsDialog::SettingsDialog(MainWindow *parent):
     _collections->ui->mysqlDatabaseEdit->setText(settings.value("Database",QString()).toString());
     settings.endGroup();
     settings.endGroup();
+
     settings.beginGroup("Preferences");
     _player->ui->restorePreviousSessionCheckBox->setChecked(settings.value("RestoreSession",true).toBool());
     _player->ui->outputDevicesList->setCurrentIndex (_player->getOutputDeviceModelIndex (settings.value("OutputDevice", 0).toInt()));
     m_oldOutputDeviceIndex = settings.value("OutputDevice", 0).toInt();
+    QList<Phonon::Effect*> *effects = player->effects();
+    for (int i = 0; i < effects->count(); i++)
+    {
+        Phonon::EffectDescription ed = effects->at(i)->description();
+        bool state = settings.value("Effects/"+ed.name(), false).toBool();
+        if (state)
+            qobject_cast<QStandardItemModel*>(_player->ui->playerEffectsList->model())->item(i, 0)->setCheckState(Qt::Checked);
+    }
     settings.endGroup();
 
     settings.beginGroup("Plugins");
@@ -164,8 +178,10 @@ void SettingsDialog::dialogAccepted()
 {
 
     extern PluginsManager *pluginsManager;
+    extern Player *player;
 
     QSettings settings(QString(_CONFIGDIR).append("/main.conf"),QSettings::IniFormat,this);
+
     settings.beginGroup("Collections");
     settings.setValue("EnableCollections",_collections->ui->enableCollectionsCheckbox->isChecked());
     settings.setValue("AutoRebuildAfterStart",_collections->ui->autoupdateCollectionsCheckbox->isChecked());
@@ -175,6 +191,7 @@ void SettingsDialog::dialogAccepted()
     }
     settings.setValue("SourcePaths",items);
     settings.setValue("StorageEngine",_collections->ui->dbEngineCombo->currentIndex());
+
     settings.beginGroup("MySQL");
     settings.setValue("Server",_collections->ui->mysqlServerEdit->text());
     settings.setValue("Username",_collections->ui->mysqlUsernameEdit->text());
@@ -182,16 +199,24 @@ void SettingsDialog::dialogAccepted()
     settings.setValue("Password",_collections->ui->mysqlPasswordEdit->text());
     settings.setValue("Database",_collections->ui->mysqlDatabaseEdit->text());
     settings.endGroup(); // MySQL group
+
     settings.endGroup(); // Collections group
+
     settings.beginGroup("Preferences");
     settings.setValue("RestoreSession",_player->ui->restorePreviousSessionCheckBox->isChecked());
     settings.setValue("OutputDevice", _player->getOutputDeviceIndex(_player->ui->outputDevicesList->currentIndex()));
+    QList<Phonon::Effect*> *effects = player->effects();
+    for (int i = 0; i < effects->count(); i++) {
+        Phonon::EffectDescription ed = effects->at(i)->description();
+        settings.setValue("Effects/"+ed.name(), qobject_cast<QStandardItemModel*>(_player->ui->playerEffectsList->model())->item(i,0)->checkState() == Qt::Checked);
+        player->enableEffect(effects->at(i), (qobject_cast<QStandardItemModel*>(_player->ui->playerEffectsList->model())->item(i,0)->checkState() == Qt::Checked));
+    }
     settings.endGroup(); // Preferences group
+
     settings.beginGroup("Plugins");
     QMap<QString,QVariant> plugins;
     // Go through all plugins in the UI list
     for (int i = 0; i < _plugins->ui->pluginsList->count(); i++) {
-
         QListWidgetItem *item = _plugins->ui->pluginsList->item(i);
         // insert into the map value pluginid - checked(bool)
         plugins.insert(pluginsManager->pluginAt(i)->pluginID,QVariant((item->checkState()==2)));
