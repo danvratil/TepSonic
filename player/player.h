@@ -183,6 +183,11 @@ class Player: public QObject
     */
     void setTrack(const QString fileName, bool autoPlay = false);
 
+    //! Sets default output device
+    /*! Default output device is defined as "OutputDevice" in settings file.
+     */
+    void setDefaultOutputDevice();
+
  signals:
     //! Informs about new repeat mode
     /*!

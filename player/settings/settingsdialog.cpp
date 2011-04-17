@@ -86,6 +86,8 @@ SettingsDialog::SettingsDialog(MainWindow *parent):
     settings.endGroup();
     settings.beginGroup("Preferences");
     _player->ui->restorePreviousSessionCheckBox->setChecked(settings.value("RestoreSession",true).toBool());
+    _player->ui->outputDevicesList->setCurrentIndex (_player->getOutputDeviceModelIndex (settings.value("OutputDevice", 0).toInt()));
+    m_oldOutputDeviceIndex = settings.value("OutputDevice", 0).toInt();
     settings.endGroup();
 
     settings.beginGroup("Plugins");
@@ -183,6 +185,7 @@ void SettingsDialog::dialogAccepted()
     settings.endGroup(); // Collections group
     settings.beginGroup("Preferences");
     settings.setValue("RestoreSession",_player->ui->restorePreviousSessionCheckBox->isChecked());
+    settings.setValue("OutputDevice", _player->getOutputDeviceIndex(_player->ui->outputDevicesList->currentIndex()));
     settings.endGroup(); // Preferences group
     settings.beginGroup("Plugins");
     QMap<QString,QVariant> plugins;
@@ -207,6 +210,9 @@ void SettingsDialog::dialogAccepted()
     if (_collections->collectionsSourceChanged()) {
         emit rebuildCollections();
     }
+
+    if (settings.value("Preferences/OutputDevice", 0).toInt() != m_oldOutputDeviceIndex)
+        emit outputDeviceChanged();
 
     accept();
     this->close();

@@ -22,6 +22,8 @@
 
 #include <QWidget>
 
+#include <QStandardItemModel>
+
 namespace Ui {
     class PlayerPage;
 }
@@ -35,7 +37,15 @@ namespace SettingsPages {
         Q_OBJECT
         public:
             explicit PlayerPage(QWidget *parent = 0);
+            ~PlayerPage();
             ::Ui::PlayerPage *ui;
+
+            QModelIndex getOutputDeviceModelIndex(int deviceIndex);
+            int getOutputDeviceIndex(QModelIndex index);
+            bool outputDeviceChanged();
+
+        private:
+            QStandardItemModel *m_devicesModel;
     };
 
 }

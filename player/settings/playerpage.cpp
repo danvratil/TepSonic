@@ -20,6 +20,9 @@
 #include "playerpage.h"
 #include "ui_playerpage.h"
 
+#include <QStandardItem>
+#include <Phonon/BackendCapabilities>
+
 using namespace SettingsPages;
 
 PlayerPage::PlayerPage(QWidget *parent):
@@ -27,4 +30,36 @@ PlayerPage::PlayerPage(QWidget *parent):
 {
     ui = new Ui::PlayerPage();
     ui->setupUi(this);
+
+    m_devicesModel = new QStandardItemModel();
+
+    QList<Phonon::AudioOutputDevice> devices = Phonon::BackendCapabilities::availableAudioOutputDevices();
+    for (int i = 0; i < devices.length(); i++)
+    {
+        QStandardItem *item = new QStandardItem(devices.at(i).name());
+        item->setData(QVariant(devices.at(i).index()), Qt::UserRole);
+        m_devicesModel->appendRow(item);
+    }
+    ui->outputDevicesList->setModel (m_devicesModel);
+}
+
+PlayerPage::~PlayerPage()
+{
+    delete m_devicesModel;
+}
+
+QModelIndex PlayerPage::getOutputDeviceModelIndex(int deviceIndex)
+{
+    for (int i = 0; i < m_devicesModel->rowCount(); i++)
+    {
+        if (m_devicesModel->item(i, 0)->data(Qt::UserRole).toInt() == deviceIndex)
+            return m_devicesModel->index(i, 0);
+    }
+
+    return QModelIndex();
+}
+
+int PlayerPage::getOutputDeviceIndex (QModelIndex index)
+{
+    return m_devicesModel->data(index, Qt::UserRole).toInt();
 }

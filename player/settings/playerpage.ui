@@ -14,11 +14,33 @@
    <string>Form</string>
   </property>
   <layout class="QFormLayout" name="formLayout">
-   <item row="0" column="0">
+   <property name="fieldGrowthPolicy">
+    <enum>QFormLayout::ExpandingFieldsGrow</enum>
+   </property>
+   <item row="1" column="0" colspan="2">
     <widget class="QCheckBox" name="restorePreviousSessionCheckBox">
      <property name="text">
       <string>Restore previous session</string>
      </property>
+    </widget>
+   </item>
+   <item row="2" column="0" colspan="2">
+    <widget class="QGroupBox" name="groupBox">
+     <property name="title">
+      <string>Output Audio Device</string>
+     </property>
+     <property name="checkable">
+      <bool>false</bool>
+     </property>
+     <layout class="QVBoxLayout" name="verticalLayout">
+      <item>
+       <widget class="QListView" name="outputDevicesList">
+        <property name="editTriggers">
+         <set>QAbstractItemView::NoEditTriggers</set>
+        </property>
+       </widget>
+      </item>
+     </layout>
     </widget>
    </item>
   </layout>

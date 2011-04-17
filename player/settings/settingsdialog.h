@@ -28,6 +28,8 @@
 #include <QSettings>
 #include <QListWidgetItem>
 
+#include <Phonon/AudioOutputDevice>
+
 namespace Ui {
     class SettingsDialog;
 }
@@ -66,6 +68,9 @@ class SettingsDialog : public QDialog {
         //! Informs main window that rebuilding collections was requested
         void rebuildCollections();
 
+        //! Informs that a new audio output device has been selected
+        void outputDeviceChanged();
+
     protected:
         //! When language is changed the window is retranslated
         virtual void changeEvent(QEvent *e);
@@ -88,6 +93,8 @@ class SettingsDialog : public QDialog {
 
         //! Main window
         MainWindow *_parent;
+
+        int m_oldOutputDeviceIndex;
 
     private slots:
 

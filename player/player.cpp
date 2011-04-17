@@ -19,6 +19,9 @@
 
 
 #include "player.h"
+#include "constants.h"
+
+#include <QSettings>
 
 #include <QFileInfo>
 #include <QStringList>
@@ -26,6 +29,7 @@
 #include <phonon/path.h>
 #include <phonon/audiooutput.h>
 #include <phonon/mediasource.h>
+#include <phonon/backendcapabilities.h>
 
 #include <taglib/fileref.h>
 #include <taglib/tag.h>
@@ -35,6 +39,7 @@ Player::Player()
 {
     m_phononPlayer = new Phonon::MediaObject();
     m_audioOutput = new Phonon::AudioOutput(Phonon::MusicCategory);
+    setDefaultOutputDevice();
     Phonon::createPath(m_phononPlayer,
                        m_audioOutput);
 
@@ -130,4 +135,17 @@ void Player::emitFinished()
     // Emit both signals - with parameter and without!!!!
     emit trackFinished(currentMetaData());
     emit trackFinished();
+}
+
+void Player::setDefaultOutputDevice()
+{
+    QSettings settings(QString(_CONFIGDIR).append("/main.conf"),QSettings::IniFormat,this);
+    int index = settings.value("Preferences/OutputDevice", 0).toInt();
+
+    QList<Phonon::AudioOutputDevice> devices = Phonon::BackendCapabilities::availableAudioOutputDevices();
+    for (int i = 0; i < devices.length(); i++)
+        if (devices.at(i).index() == index) {
+            qDebug() << "Changing output audio device to" << devices.at(i).name();
+            m_audioOutput->setOutputDevice(devices.at(i));
+        }
 }
