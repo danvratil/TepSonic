@@ -25,7 +25,7 @@ CONTENT
  * Qt >= 4.5
  * Phonon
  * TagLib (http://developer.kde.org/~wheeler/taglib.html)
- * lastfmlib (http://code.google.com/p/lastfmlib/)
+ * Qxt (on Linux only, see part 'Compiling')
  * SQLite or MySQL database for collections
  * some music
 
@@ -38,13 +38,18 @@ CONTENT
  make
  make install
 
- You may want to append -DCMAKE_INSTALL_PREFIX=/usr to the cmake command
+ You may want to append -DCMAKE_INSTALL_PREFIX=/usr to the cmake command.
+ 
+ You can force CMake to link statically against Qxt compiled from sources distributed together with TepSonic 
+ by using -DFORCE_INBUILD_QXT=ON. This means that you don't need to have libQxt installed on your system. 
+ Without this switch on Linux systems CMake will be looking for libqxt and will fail if does not find it. 
+ On MacOS X and Windows CMake will automatically use the Qxt sources in /3rdparty/qxt.
 
 3) BUGS
 --------
 
  If you find something you think that is a bug, please use bugzilla on http://bugs.tepsonic.org. Also if you have any suggestions,
- ideas, fill a feature request in bugzilla.
+ ideas, fill a feature request in bugzilla or send mail to devel@tepsonic.org
 
 
 4) CONTRIBUTING

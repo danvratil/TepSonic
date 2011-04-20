@@ -75,6 +75,10 @@ if (PROFILING)
     MESSAGE(STATUS "Profiling enabled")
 endif (PROFILING)
 
+if (FORCE_INBUILD_QXT)
+    MESSAGE(STATUS "Using inbuild Qxt")
+endif (FORCE_INBUILD_QXT)
+
 # First player, then plugins, this is strict order!
 add_subdirectory(3rdparty)
 add_subdirectory(player)

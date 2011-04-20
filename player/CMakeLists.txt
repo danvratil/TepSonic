@@ -16,19 +16,19 @@ find_package(Taglib REQUIRED)
 find_package(Phonon REQUIRED)
 
 # Use native libqxt on Linux and patched sources in /3rdparty/qxt on Mac an Win.
-if (UNIX AND NOT APPLE)
+if (UNIX AND NOT APPLE AND NOT FORCE_INBUILD_QXT)
 	set(QXT_USE_QXTCORE TRUE)
 	set(QXT_USE_QXTGUI TRUE)
 	find_package(Qxt REQUIRED)
 	set(QXT_HEADERS "")
 	set(QXT_SOURCES "")
-else (UNIX AND NOT APPLE)
+else (UNIX AND NOT APPLE AND NOT FORCE_INBUILD_QXT)
 	add_definitions(-DQXT_STATIC -DBUILD_QXT_GUI -DBUILD_QXT_CORE)
 	set(QXT_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/../3rdparty/qxt)
 	set(QXT_LIBRARIES qxt)
         set(QXT_HEADERS "../3rdparty/qxt/qxtglobalshortcut.h")
 	set(QXT_SOURCES "../3rdparty/qxt/qxtglobalshortcut.cpp")
-endif (UNIX AND NOT APPLE)
+endif (UNIX AND NOT APPLE AND NOT FORCE_INBUILD_QXT)
 
   
 
