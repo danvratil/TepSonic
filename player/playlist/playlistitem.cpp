@@ -19,13 +19,14 @@
  */
 
 #include "playlistitem.h"
+#include "playlistbrowser.h"
 
 #include <QDebug>
 
 PlaylistItem::PlaylistItem(const QVector<QVariant> &data, PlaylistItem *parent)
 {
     if (data.isEmpty()) {
-        m_itemData.fill(QString(),8);
+        m_itemData.fill(QString(),PlaylistBrowser::ColumnsCount);
     } else {
         m_itemData = data;
     }

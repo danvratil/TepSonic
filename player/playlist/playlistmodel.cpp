@@ -147,7 +147,7 @@ bool PlaylistModel::removeRows(int position, int rows, const QModelIndex &parent
 
     int totalRemoveTime = 0;
     for (int i=position;i<position+rows;i++) {
-        QString trackLength = index(i, 7, QModelIndex()).data().toString();
+        QString trackLength = index(i, PlaylistBrowser::LengthColumn, QModelIndex()).data().toString();
         if (trackLength.length()==5) {
             trackLength.prepend("00:");
         }

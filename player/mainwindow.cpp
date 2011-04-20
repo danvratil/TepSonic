@@ -113,7 +113,8 @@ MainWindow::MainWindow(Player *player):
                           << tr("Genre")
                           << tr("Year")
                           << tr("Length")
-                          << tr("Bitrate");
+                          << tr("Bitrate")
+                          << tr("Order");
 
     m_playlistProxyModel = new PlaylistProxyModel(this);
     m_playlistModel = new PlaylistModel(this, headers, m_playlistProxyModel);
@@ -129,12 +130,12 @@ MainWindow::MainWindow(Player *player):
     m_ui->playlistBrowser->setModel(m_playlistProxyModel);
     m_ui->playlistBrowser->setItemDelegate(m_playlistItemDelegate);
     m_ui->playlistBrowser->setDropIndicatorShown(true);
-    m_ui->playlistBrowser->setSortingEnabled(true);
     m_ui->playlistBrowser->header()->setContextMenuPolicy(Qt::CustomContextMenu);
     m_ui->playlistBrowser->setAlternatingRowColors(true);
     m_ui->playlistBrowser->sortByColumn(-1);
-    // Hide the first column (with filename)
-    m_ui->playlistBrowser->hideColumn(0);
+    // Hide the first column (with filename) and the last one (with order number)
+    m_ui->playlistBrowser->hideColumn(PlaylistBrowser::FilenameColumn);
+    m_ui->playlistBrowser->hideColumn(PlaylistBrowser::RandomOrderColumn);
 
     // Set playlist browser columns widths and visibility
     QList<QVariant> playlistColumnsStates(m_settings->value("Window/PlaylistColumnsStates", QList<QVariant>()).toList());
@@ -406,6 +407,8 @@ void MainWindow::bindSignals()
             this, SLOT(clearPlaylist()));
     connect(m_ui->actionSave_playlist, SIGNAL(triggered(bool)),
             this, SLOT(savePlaylist()));
+    connect(m_ui->actionShuffle_playlist, SIGNAL(triggered(bool)),
+            m_ui->playlistBrowser, SLOT(shuffle()));
 
     // Menu 'TepSonic'
     connect(m_ui->actionSettings, SIGNAL(triggered(bool)),
@@ -448,6 +451,8 @@ void MainWindow::bindSignals()
             m_ui->actionStop, SLOT(trigger()));
     connect(m_ui->nextTrackButton, SIGNAL(clicked()),
             m_ui->actionNext_track, SLOT(trigger()));
+    connect(m_ui->shufflePlaylistButton, SIGNAL(clicked()),
+            m_ui->actionShuffle_playlist, SLOT(trigger()));
 
 
     // Connect individual PlaylistBrowser columns' visibility state with QActions in ui->menuVisiblem_columns

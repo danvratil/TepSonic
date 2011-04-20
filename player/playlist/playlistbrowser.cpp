@@ -245,3 +245,16 @@ void PlaylistBrowser::setStopTrack()
 
     pmodel->setStopTrack(selectedIndexes().first());
 }
+
+void PlaylistBrowser::shuffle()
+{
+    srand(time(NULL)); /* Prilis male rozliseni hodin, potrebujeme mikrosekundy */
+    int rowCount = model()->rowCount();
+    for (int row = 0; row < rowCount; row++)
+    {
+        qulonglong order = (qulonglong)rand();
+        static_cast<PlaylistModel*>(model())->setData(model()->index(row, PlaylistBrowser::RandomOrderColumn), QVariant(order));
+    }
+
+    model()->sort(PlaylistBrowser::RandomOrderColumn, Qt::AscendingOrder);
+}

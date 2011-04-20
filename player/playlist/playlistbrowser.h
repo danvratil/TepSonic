@@ -54,13 +54,17 @@ class PlaylistBrowser : public QTreeView
             GenreColumn = 5,
             YearColumn = 6,
             LengthColumn = 7,
-            BitrateColumn = 8
+            BitrateColumn = 8,
+            RandomOrderColumn = 9,
+            ColumnsCount
         };
 
 
     public slots:
         //! Set "stop-on-this" flag to selected items
         void setStopTrack();
+
+        void shuffle();
 
     protected:
         //! Called when items are dropped on the browser

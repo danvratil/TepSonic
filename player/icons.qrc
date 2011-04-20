@@ -24,5 +24,6 @@
 	<file alias="goUp">../icons/go-up.png</file>
 	<file alias="goPrev">../icons/go-previous.png</file>
 	<file alias="bookmarks">../icons/bookmarks.png</file>
+        <file alias="shuffle">../icons/media-playlist-shuffle.png</file>
     </qresource>
 </RCC>
