@@ -38,6 +38,13 @@
 
 #include <QDrag>
 
+#ifdef Q_WS_WIN
+#include <cstdlib>
+#include <ctime>
+#else
+#include <stdlib.h>
+#include <time.h>
+#endif
 
 PlaylistBrowser::PlaylistBrowser(QWidget* parent):
         QTreeView(parent)
