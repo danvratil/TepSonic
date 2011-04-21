@@ -57,6 +57,8 @@ int PlaylistModel::columnCount(const QModelIndex & /* parent */) const
 
 QVariant PlaylistModel::data(const QModelIndex &index, int role) const
 {
+    QVariant data;
+
     if (!index.isValid())
         return QVariant();
 
@@ -64,6 +66,11 @@ QVariant PlaylistModel::data(const QModelIndex &index, int role) const
         return QVariant();
 
     PlaylistItem *item = getItem(index);
+
+    data = item->data(index.column());
+
+    if (index.column() == PlaylistBrowser::BitrateColumn)
+        return QVariant(data.toString().append(" kbps"));
 
     return item->data(index.column());
 }
