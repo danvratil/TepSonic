@@ -48,7 +48,7 @@ class LastFmScrobblerPlugin : public AbstractPlugin
         LastFmScrobblerPlugin();
 
         //! Destructor
-        ~LastFmScrobblerPlugin() {}
+        ~LastFmScrobblerPlugin();
 
         //! Initialize the plugins
         /*!
@@ -66,7 +66,6 @@ class LastFmScrobblerPlugin : public AbstractPlugin
           \param parentWidget widget to setup the UI on
         */
         void settingsWidget(QWidget *parentWidget);
-
 
         //! Add custom menu items to given menu. */
         void setupMenu(QMenu *menu, Plugins::MenuTypes menuType);
