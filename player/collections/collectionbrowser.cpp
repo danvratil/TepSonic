@@ -27,12 +27,12 @@
 #include <QUrl>
 #include <QFileInfo>
 
-CollectionBrowser::CollectionBrowser(QWidget* parent):
-        QTreeView(parent)
+CollectionBrowser::CollectionBrowser(QWidget* parent)
 {
     setAcceptDrops(false);
     setDragDropMode(DragOnly);
 
+    Q_UNUSED (parent);
 }
 
 CollectionBrowser::~CollectionBrowser()

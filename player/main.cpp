@@ -102,7 +102,10 @@ int main(int argc, char *argv[])
 
     }
 
+    int ret = tepsonic.exec();
 
+    delete player;
+    delete pluginsManager;
 
-    return tepsonic.exec();
+    return ret;
 }

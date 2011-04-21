@@ -64,6 +64,8 @@ BookmarksManager::~BookmarksManager()
         settings.setValue(QString::number(i)+"/title", pair.first);
         settings.setValue(QString::number(i)+"/path", pair.second);
     }
+
+    delete m_contextMenu;
 }
 
 

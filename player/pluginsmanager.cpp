@@ -44,7 +44,7 @@ PluginsManager::~PluginsManager()
     // Unload all plugins
     foreach (Plugin *plugin, m_pluginsList) {
         disablePlugin(plugin);
-        plugin->pluginLoader->unload();
+        delete plugin;
     }
 }
 
@@ -153,6 +153,7 @@ void PluginsManager::disablePlugin(Plugin *plugin)
     plugin->pluginLoader->unload();
     delete plugin->pluginLoader;
 
+    plugin->pluginLoader = NULL;
     plugin->hasUI = false;
     plugin->enabled = false;
 }
