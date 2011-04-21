@@ -70,27 +70,23 @@ void PlaylistPopulator::run()
 void PlaylistPopulator::expandDir(QString dir)
 {
     QStringList filters = SupportedFormats::getExtensionList();
-    //QDir dirlist(dir,QString(),QDir::Name,QDir::NoDotAndDotDot);
     QDir dirlist(dir);
     dirlist.setNameFilters(filters);
-    QFileInfo fileInfo;
+    dirlist.setFilter(QDir::AllDirs | QDir::Files | QDir::NoDotAndDotDot);
+    dirlist.setSorting(QDir::Name | QDir::LocaleAware);
 
-    QStringList files;
+    QFileInfoList fileInfo = dirlist.entryInfoList();
 
-    QDirIterator dirIterator(dirlist,QDirIterator::Subdirectories);
+    for (int i = 0; i < fileInfo.length(); i++)
+    {
+        QFileInfo finfo = fileInfo.at(i);
 
-    while (dirIterator.hasNext()) {
-        dirIterator.next();
-        fileInfo = dirIterator.fileInfo();
-        if (fileInfo.isFile()) {
-            files << fileInfo.filePath();
+        if (finfo.isFile()) {
+            m_files << finfo.filePath();
+        } else if (finfo.isDir()) {
+            expandDir(finfo.absoluteFilePath());
         }
     }
-
-    files.append(m_files);
-
-    // We don't need to lock the mutex here since we are already in locked mutex
-    m_files = files;
 }
 
 void PlaylistPopulator::expandPlaylist(QString filename)
