@@ -118,9 +118,15 @@ void PlaylistBrowser::mouseMoveEvent(QMouseEvent *event)
     for (int i = 0; i < selection.indexes().size(); i ++)
     {
         PlaylistItem *item = model->getItem(selection.indexes().at(i));
-        for (int j = 0; j < item->columnCount(); j++) {
-            stream << item->data(j).toString();
-        }
+        stream << item->data(PlaylistBrowser::FilenameColumn).toString();
+        stream << item->data(PlaylistBrowser::TrackColumn).toString();
+        stream << item->data(PlaylistBrowser::InterpretColumn).toString();
+        stream << item->data(PlaylistBrowser::TracknameColumn).toString();
+        stream << item->data(PlaylistBrowser::AlbumColumn).toString();
+        stream << item->data(PlaylistBrowser::GenreColumn).toString();
+        stream << item->data(PlaylistBrowser::YearColumn).toString();
+        stream << item->data(PlaylistBrowser::LengthColumn).toString();
+        stream << item->data(PlaylistBrowser::BitrateColumn).toString();
         // Remove the row from view
         model->removeRow(selection.indexes().at(i).row());
     }
