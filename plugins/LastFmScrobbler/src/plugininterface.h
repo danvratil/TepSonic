@@ -74,9 +74,12 @@ class PluginInterface
         //! Allows plugin to setup custom menu to givem menu. The type of menu is set in menuType.
         virtual void setupMenu(QMenu *menu, Plugins::MenuTypes menuType) = 0;
 
+        //! Allows plugin to setup a tab.
+        virtual bool setupPane(QWidget *widget, QString *label) = 0;
+
 };
 
 
-Q_DECLARE_INTERFACE(PluginInterface,"TepSonic.PluginInterface/1.0");
+Q_DECLARE_INTERFACE(PluginInterface,"TepSonic.PluginInterface/1.1");
 
 #endif // PLUGININTERFACE_H

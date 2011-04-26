@@ -124,6 +124,8 @@ void PluginsManager::loadPlugins()
             }
         }
     }
+
+    emit pluginsLoaded();
 }
 
 int PluginsManager::pluginsCount()
@@ -241,4 +243,26 @@ void PluginsManager::installMenus(QMenu *menu, Plugins::MenuTypes menuType)
 
         aplg->setupMenu(menu, menuType);
     }
+}
+
+void PluginsManager::installPanes(QTabWidget *tabwidget)
+{
+    for (int i = 0; i < m_pluginsList.size(); i++)
+    {
+        Plugin *plugin = m_pluginsList.at(i);
+        if (!plugin) continue;
+
+        if (!plugin->enabled) continue;
+
+        AbstractPlugin *aplg = reinterpret_cast<AbstractPlugin*>(plugin->pluginLoader->instance());
+        if (!aplg) continue;
+
+        QWidget *pane = new QWidget(tabwidget);
+        QString label;
+        if (aplg->setupPane(pane, &label))
+            tabwidget->addTab(pane, label);
+    }
+
+    // Do not let plugins to automatically activate themselves
+    tabwidget->setCurrentIndex(0);
 }

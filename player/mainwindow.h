@@ -244,6 +244,9 @@ public slots:
     */
     void setTrack(int row);
 
+    //! When plugins are loaded, this method setups plugins menus and panes
+    void setupPluginsUIs();
+
 
 private slots:
 
