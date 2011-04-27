@@ -55,7 +55,7 @@ void PlaylistItemDelegate::paint(QPainter *painter, const QStyleOptionViewItem &
             painter->fillRect(rect, option.palette.dark().color());
         }
         painter->setPen(option.palette.light().color());
-    } else if (mappedIndex.row() == m_playlistModel->currentItem().row()) {
+    } else if (m_playlistModel->currentItem().isValid() && mappedIndex.row() == m_playlistModel->currentItem().row()) {
         painter->fillRect(rect, option.palette.link());
         painter->setPen(option.palette.highlightedText().color());
     } else if (option.state & QStyle::State_Selected) {

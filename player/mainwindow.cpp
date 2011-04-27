@@ -743,10 +743,8 @@ void MainWindow::nextTrack()
     QModelIndex currentItem = m_playlistModel->currentItem();
 
     // If the track we just played was "stop-on-this" track then stop playback
-    qDebug() << m_playlistModel->getStopTrack();
-    qDebug() << currentItem;
-
-    if (m_playlistModel->getStopTrack().row() == currentItem.row()) {
+    QModelIndex stopTrack = m_playlistModel->getStopTrack();
+    if (stopTrack.isValid() && stopTrack.row() == currentItem.row()) {
         stopPlayer();
         return;
     }

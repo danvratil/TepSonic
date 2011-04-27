@@ -150,7 +150,6 @@ bool PlaylistModel::removeRows(int position, int rows, const QModelIndex &parent
     if (rows == 0) return true;
 
     bool success = true;
-    bool renewCurrentItem = false;
 
     int totalRemoveTime = 0;
     for (int i=position;i<position+rows;i++) {
@@ -161,11 +160,12 @@ bool PlaylistModel::removeRows(int position, int rows, const QModelIndex &parent
         QTime tl(0,0,0,0);
         totalRemoveTime += tl.secsTo(QTime::fromString(trackLength,"hh:mm:ss"));
 
-        if (i == m_currentItem.row()) {
-            renewCurrentItem = true;
-        }
         if (i == m_stopTrack.row()) {
             m_stopTrack = QModelIndex();
+        }
+
+        if (i == m_currentItem.row()) {
+            m_currentItem = QModelIndex();
         }
     }
 
@@ -174,10 +174,6 @@ bool PlaylistModel::removeRows(int position, int rows, const QModelIndex &parent
     beginRemoveRows(parent, position, position + rows - 1);
     success = m_rootItem->removeChildren(position, rows);
     endRemoveRows();
-
-    if (renewCurrentItem) {
-        setCurrentItem(index(position,0,QModelIndex()));
-    }
 
      m_mutex.unlock();
 
@@ -262,19 +258,13 @@ bool PlaylistModel::insertItem(Player::MetaData metadata, int row)
 
 QModelIndex PlaylistModel::currentItem()
 {
-    if (m_currentItem.isValid()) {
-        return m_currentItem;
-    } else {
-        return index(0,0,QModelIndex());
-    }
+    return m_currentItem;
 }
 
 void PlaylistModel::setCurrentItem(QModelIndex currentIndex)
 {
-    if (!currentIndex.isValid())
-        return;
-
     emit layoutAboutToBeChanged();
+
     m_currentItem = currentIndex;
 
     emit layoutChanged();
@@ -284,47 +274,39 @@ void PlaylistModel::setCurrentItem(QModelIndex currentIndex)
 
 QModelIndex PlaylistModel::nextItem(QModelIndex index)
 {
-    if (rowCount(QModelIndex()) == 0) return QModelIndex();
-
-    if (!index.isValid()) {
-        index = currentItem();
-    }
-
-    // remap the given index from PlaylistModel to PlaylistProxyModel (if possible)
-    QModelIndex mappedIndex = m_proxyModel->mapFromSource(index);
-    if (!mappedIndex.isValid()) mappedIndex = index;
-
-    if (index.row() >= rowCount()) {
+    if (rowCount() == 0)
         return QModelIndex();
-    }
 
-    // Get ModelIndex of the next item in the PlaylistProxyModel
-    QModelIndex prevItem =  m_proxyModel->index(mappedIndex.row()+1, 0, QModelIndex());
-    // Remap the result to PlaylistModel
-    return m_proxyModel->mapToSource(prevItem);
+    if (!index.isValid() && !m_currentItem.isValid())
+        return this->index(0, 0);
+
+    index = m_currentItem;
+
+    QModelIndex mappedIndex = m_proxyModel->mapFromSource(index);
+    QModelIndex sibling = mappedIndex.sibling(mappedIndex.row()+1, 0);
+    if (sibling.isValid())
+        return m_proxyModel->mapToSource(sibling);
+
+    return QModelIndex();
 }
 
 QModelIndex PlaylistModel::previousItem(QModelIndex index)
 {
-    if (rowCount(QModelIndex()) == 0) QModelIndex();
-
-    if (!index.isValid()) {
-        index = currentItem();
-    }
-
-    // remap the given index from PlaylistModel to PlaylistProxyModel (if possible)
-    QModelIndex mappedIndex = m_proxyModel->mapFromSource(index);
-    if (!mappedIndex.isValid()) mappedIndex = index;
-
-    if (index.row() == 0) {
+    if (rowCount(QModelIndex()) == 0)
         return QModelIndex();
+
+    if (!index.isValid() && !m_currentItem.isValid()) {
+        return this->index(0, 0);
     }
 
-    // Get index of the previous item in PlaylistProxyModel
-    QModelIndex prevItem =  m_proxyModel->index(mappedIndex.row()-1, 0, QModelIndex());
-    // And remap the result to PlaylistModel
-    return m_proxyModel->mapToSource(prevItem);
+    index = m_currentItem;
 
+    QModelIndex mappedIndex = m_proxyModel->mapFromSource(index);
+    QModelIndex sibling = mappedIndex.sibling(mappedIndex.row()-1, 0);
+    if (sibling.isValid())
+        return m_proxyModel->mapToSource(sibling);
+
+    return QModelIndex();
  }
 
 void PlaylistModel::setStopTrack(QModelIndex track)
@@ -349,4 +331,5 @@ void PlaylistModel::clear()
 {
     removeRows(0, rowCount(QModelIndex()), QModelIndex());
     m_stopTrack = QModelIndex();
+    m_currentItem = QModelIndex();
 }
