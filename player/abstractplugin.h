@@ -91,6 +91,15 @@ class AbstractPlugin : public QObject, public PluginInterface
         //! Allows plugin to setup custom menu to given menu. The type of menu is set in menuType.
         virtual void setupMenu(QMenu *menu, Plugins::MenuTypes menuType) = 0;
 
+        //! Allows plugin to setup a UI on widget which is a tab in playlist tabwidget
+        /*!
+          If you want plugin to have a tab (displayed in the tabwidget with playlist), reimplement this method,
+          setup UI on given widget and return TRUE.
+          \return Plugin has to return TRUE whan a widget has been setup or FALSE, when plugin does not want
+            to have a custom tab. Default implementation returns FALSE.
+        */
+        virtual bool setupPane(QWidget *widget, QString *label) { return false; Q_UNUSED (widget); Q_UNUSED (label); }
+
     public slots:
         //! Called when Settings dialog is accepted
         /*!

@@ -277,6 +277,10 @@ void SettingsDialog::enablePlugin(int pluginIndex)
     extern PluginsManager *pluginsManager;
 
     pluginsManager->enablePlugin(pluginsManager->pluginAt(pluginIndex));
+
+    if (!pluginsManager->pluginAt(pluginIndex) || !pluginsManager->pluginAt(pluginIndex)->pluginLoader)
+        return;
+
     AbstractPlugin *plugin = reinterpret_cast<AbstractPlugin*>(pluginsManager->pluginAt(pluginIndex)->pluginLoader->instance());
     // If the plugin has a config UI then add a tab with the UI to Plugins page
     if (plugin->hasConfigUI()) {

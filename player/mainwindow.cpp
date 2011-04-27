@@ -188,12 +188,9 @@ MainWindow::MainWindow(Player *player):
     if (fsbpath.isEmpty() || fsbpath == QDir::rootPath())
         m_ui->fsbCdUpBtn->setDisabled(true);
 
-
-
     // Create seek slider and volume slider
     m_ui->seekSlider->setMediaObject(m_player->mediaObject());
     m_ui->volumeSlider->setAudioOutput(m_player->audioOutput());
-
 
     // Load last playlist
     if (m_settings->value("Preferences/RestoreSession", true).toBool()) {
@@ -510,7 +507,7 @@ void MainWindow::bindSignals()
 }
 
 
-void MainWindow::installPluginsMenus()
+void MainWindow::setupPluginsUIs()
 {
     extern PluginsManager *pluginsManager;
 
@@ -521,9 +518,10 @@ void MainWindow::installPluginsMenus()
     pluginsManager->installMenus(m_playlistPopupMenu, Plugins::PlaylistPopup);
     if (m_collectionModel)
         pluginsManager->installMenus(m_collectionsPopupMenu, Plugins::CollectionsPopup);
+
+    // Let plugins install their tabs
+    pluginsManager->installPanes(m_ui->mainTabWidget);
 }
-
-
 
 
 void MainWindow::changeEvent(QEvent *e)

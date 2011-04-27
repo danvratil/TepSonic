@@ -75,6 +75,11 @@ LastFmScrobblerPlugin::LastFmScrobblerPlugin():
 
 }
 
+LastFmScrobblerPlugin::~LastFmScrobblerPlugin()
+{
+    delete _translator;
+}
+
 void LastFmScrobblerPlugin::init()
 {
     QSettings settings(QString(_CONFIGDIR) + QDir::separator() + "lastfmscrobbler.conf",QSettings::IniFormat,this);

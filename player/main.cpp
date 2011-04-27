@@ -77,6 +77,7 @@ int main(int argc, char *argv[])
     pluginsManager = new PluginsManager();
     MainWindow mainWindow(player);
 
+    QObject::connect(pluginsManager, SIGNAL(pluginsLoaded()), &mainWindow, SLOT(setupPluginsUIs()));
     QObject::connect(player,SIGNAL(stateChanged(Phonon::State,Phonon::State)),pluginsManager,SIGNAL(playerStatusChanged(Phonon::State,Phonon::State)));
     QObject::connect(player,SIGNAL(trackChanged(Player::MetaData)),pluginsManager,SIGNAL(trackChanged(Player::MetaData)));
     QObject::connect(player,SIGNAL(trackFinished(Player::MetaData)),pluginsManager,SIGNAL(trackFinished(Player::MetaData)));
@@ -85,7 +86,6 @@ int main(int argc, char *argv[])
     QObject::connect(&mainWindow,SIGNAL(settingsAccepted()),pluginsManager,SIGNAL(settingsAccepted()));
     pluginsManager->loadPlugins();
 
-    mainWindow.installPluginsMenus();
     mainWindow.show();
 
     for (int i=1; i<tepsonic.arguments().count(); i++) {
