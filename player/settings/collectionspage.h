@@ -52,7 +52,9 @@ namespace SettingsPages {
             void removeAllPaths();
             void removePath();
             void addPath();
-            void changeEngine(QString );
+            void changeEngine(QString);
+
+            void collectionStateToggled();
 
         signals:
             void rebuildCollections();

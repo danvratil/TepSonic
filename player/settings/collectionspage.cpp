@@ -25,13 +25,18 @@
 
 using namespace SettingsPages;
 
+enum {
+    TAB_SETTINGS,
+    TAB_SOURCES
+};
+
 CollectionsPage::CollectionsPage(QWidget *parent):
         SettingsPage(parent),
         m_collectionsSourceChanged(false)
 {
     m_ui = new Ui::CollectionsPage();
     m_ui->setupUi(this);
-    m_ui->tabWidget->setCurrentIndex(0);
+    m_ui->tabWidget->setCurrentIndex(TAB_SETTINGS);
 
     connect(m_ui->dbEngineCombo, SIGNAL(currentIndexChanged(QString)),
             this, SLOT(changeEngine(QString)));
@@ -43,6 +48,8 @@ CollectionsPage::CollectionsPage(QWidget *parent):
             this, SLOT(removePath()));
     connect(m_ui->removeAllPathsButton, SIGNAL(clicked()),
             this, SLOT(removeAllPaths()));
+    connect(m_ui->enableCollectionsCheckbox, SIGNAL(toggled(bool)),
+            this, SLOT(collectionStateToggled()));
 }
 
 CollectionsPage::~CollectionsPage()
@@ -85,6 +92,23 @@ void CollectionsPage::removeAllPaths()
     m_collectionsSourceChanged = true;
 }
 
+void CollectionsPage::collectionStateToggled()
+{
+    bool checked = m_ui->enableCollectionsCheckbox->isChecked();
+
+    m_ui->autoupdateCollectionsCheckbox->setEnabled(checked);
+    m_ui->dbEngineCombo->setEnabled(checked);
+    m_ui->rebuildCollectionsButton->setEnabled(checked);
+    if (checked && m_ui->dbEngineCombo->currentText() == "MySQL")
+        m_ui->mysqlSettings->setEnabled(true);
+    else
+        m_ui->mysqlSettings->setEnabled(false);
+
+    m_ui->tabWidget->setTabEnabled(TAB_SOURCES, checked);
+    // Always enabled
+    m_ui->enableCollectionsCheckbox->setEnabled(true);
+}
+
 void CollectionsPage::loadSettings(QSettings *settings)
 {
     settings->beginGroup("Collections");
@@ -100,6 +124,8 @@ void CollectionsPage::loadSettings(QSettings *settings)
     m_ui->mysqlDatabaseEdit->setText(settings->value("Database", QString()).toString());
     settings->endGroup();
     settings->endGroup();
+
+    collectionStateToggled();
 }
 
 void CollectionsPage::saveSettings(QSettings *settings)
