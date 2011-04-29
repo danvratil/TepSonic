@@ -41,7 +41,7 @@ CollectionsPage::CollectionsPage(QWidget *parent):
     connect(m_ui->dbEngineCombo, SIGNAL(currentIndexChanged(QString)),
             this, SLOT(changeEngine(QString)));
     connect(m_ui->rebuildCollectionsButton, SIGNAL(clicked()),
-            this, SIGNAL(rebm_uildCollections()));
+            this, SIGNAL(rebuildCollections()));
     connect(m_ui->addPathButton, SIGNAL(clicked()),
             this, SLOT(addPath()));
     connect(m_ui->removePathButton, SIGNAL(clicked()),
