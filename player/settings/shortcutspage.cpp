@@ -44,7 +44,5 @@ void ShortcutsPage::changeShortcut(QModelIndex index)
 void ShortcutsPage::shortcutChanged(QModelIndex index, QKeySequence shortcut)
 {
     QTreeWidgetItem *item = static_cast<QTreeWidgetItem*>(index.internalPointer());
-    item->setData(1,
-                  Qt::EditRole,
-                  QVariant(shortcut.toString(QKeySequence::NativeText)));
+    item->setData(1, Qt::EditRole, QVariant(shortcut.toString(QKeySequence::NativeText)));
 }

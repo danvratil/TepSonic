@@ -135,24 +135,29 @@ SettingsDialog::SettingsDialog(MainWindow *parent):
 
     settings.beginGroup("Shortcuts");
     QTreeWidgetItem *item = new QTreeWidgetItem();
-    item->setData(0, Qt::EditRole, tr("Play/pause"));
-    item->setData(1, Qt::EditRole, settings.value("PlayPause", "Meta+Space"));
+    item->setData(0, Qt::DisplayRole, tr("Play/pause"));
+    item->setData(1, Qt::DisplayRole, settings.value("PlayPause", "Meta+Space"));
+    item->setData(0, Qt::UserRole, "PlayPause");
     _shortcuts->ui->shortcutsList->addTopLevelItem(item);
     item = new QTreeWidgetItem();
     item->setData(0, Qt::EditRole, tr("Stop"));
     item->setData(1, Qt::EditRole, settings.value("Stop", "Meta+S"));
+    item->setData(0, Qt::UserRole, "Stop");
     _shortcuts->ui->shortcutsList->addTopLevelItem(item);
     item = new QTreeWidgetItem();
     item->setData(0, Qt::EditRole, tr("Previous track"));
     item->setData(1, Qt::EditRole, settings.value("PrevTrack", "Meta+P"));
+    item->setData(0, Qt::UserRole, "PrevTrack");
     _shortcuts->ui->shortcutsList->addTopLevelItem(item);
     item = new QTreeWidgetItem();
     item->setData(0, Qt::EditRole, tr("Next track"));
     item->setData(1, Qt::EditRole, settings.value("NextTrack", "Meta+N"));
+    item->setData(0, Qt::UserRole, "NextTrack");
     _shortcuts->ui->shortcutsList->addTopLevelItem(item);
     item = new QTreeWidgetItem();
     item->setData(0, Qt::EditRole, tr("Show/Hide window"));
     item->setData(1, Qt::EditRole, settings.value("ShowHideWin", "Meta+H"));
+    item->setData(0, Qt::UserRole, "ShowHideWin");
     _shortcuts->ui->shortcutsList->addTopLevelItem(item);
     settings.endGroup();
 
@@ -225,11 +230,11 @@ void SettingsDialog::dialogAccepted()
     settings.endGroup();
 
     settings.beginGroup("Shortcuts");
-    settings.setValue("PlayPause", _shortcuts->ui->shortcutsList->topLevelItem(0)->data(1,Qt::EditRole));
-    settings.setValue("Stop", _shortcuts->ui->shortcutsList->topLevelItem(1)->data(1,Qt::EditRole));
-    settings.setValue("PrevTrack", _shortcuts->ui->shortcutsList->topLevelItem(2)->data(1,Qt::EditRole));
-    settings.setValue("NextTrack", _shortcuts->ui->shortcutsList->topLevelItem(3)->data(1,Qt::EditRole));
-    settings.setValue("ShowHideWin", _shortcuts->ui->shortcutsList->topLevelItem(4)->data(1,Qt::EditRole));
+    for (int i = 0; i < _shortcuts->ui->shortcutsList->topLevelItemCount(); i++)
+    {
+        settings.setValue(_shortcuts->ui->shortcutsList->topLevelItem(i)->data(0, Qt::UserRole).toString(),
+                          _shortcuts->ui->shortcutsList->topLevelItem(i)->data(1,Qt::DisplayRole));
+    }
     settings.endGroup();
 
     if (_collections->collectionsSourceChanged()) {
