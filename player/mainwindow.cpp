@@ -245,6 +245,7 @@ MainWindow::~MainWindow()
     delete m_collectionProxyModel;
     delete m_collectionModel;
 
+    delete m_appIcon;
     delete m_ui;
 }
 

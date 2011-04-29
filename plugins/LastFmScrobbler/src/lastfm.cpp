@@ -216,6 +216,8 @@ void LastFm::Auth::getToken()
     QNetworkAccessManager *nam = new QNetworkAccessManager();
     connect(nam, SIGNAL(finished(QNetworkReply*)),
             this, SLOT(slotGotToken(QNetworkReply*)));
+    connect(nam, SIGNAL(finished(QNetworkReply*)),
+            nam, SLOT(deleteLater()));
     nam->get(request);
 
     qDebug() << "Requesting new token...";
@@ -274,6 +276,8 @@ void LastFm::Auth::getSession()
     QNetworkAccessManager *nam = new QNetworkAccessManager(this);
     connect(nam, SIGNAL(finished(QNetworkReply*)),
             this, SLOT(slotGotSession(QNetworkReply*)));
+    connect(nam, SIGNAL(finished(QNetworkReply*)),
+            nam, SLOT(deleteLater()));
     nam->get(request);
 
     qDebug() << "Requesting new session key...";
@@ -386,6 +390,8 @@ void LastFm::Track::nowPlaying()
     QNetworkAccessManager *nam = new QNetworkAccessManager();
     connect(nam, SIGNAL(finished(QNetworkReply*)),
             this, SLOT(scrobbled(QNetworkReply*)));
+    connect(nam, SIGNAL(finished(QNetworkReply*)),
+            nam, SLOT(deleteLater()));
     // Send the date
     nam->post(request, data);
 
@@ -511,6 +517,9 @@ LastFm::Cache::~Cache()
 
     // Delete all tracks in cache
     qDeleteAll(m_cache);
+
+    if (m_resubmitTimer)
+        delete m_resubmitTimer;
 }
 
 
@@ -559,6 +568,8 @@ void LastFm::Cache::submit()
     // When request is done, destroy the QNetworkAccessManager
     connect(nam, SIGNAL(finished(QNetworkReply*)),
             this, SLOT(submitted(QNetworkReply*)));
+    connect(nam, SIGNAL(finished(QNetworkReply*)),
+            nam, SLOT(deleteLater()));
 
     // Send the date
     nam->post(request, data);
@@ -581,8 +592,10 @@ void LastFm::Cache::submitted(QNetworkReply *reply)
 
         // If we were able to submit track BEFORE the timer or this is timer's event, then
         // destroy the timer so that it won't tick anymore
-        if (m_resubmitTimer)
+        if (m_resubmitTimer) {
             delete m_resubmitTimer;
+            m_resubmitTimer = NULL;
+        }
 
     } else {
         qDebug() << method << "for  cache failed:";
@@ -596,6 +609,8 @@ void LastFm::Cache::submitted(QNetworkReply *reply)
         m_resubmitTimer->setInterval(120000);
         connect(m_resubmitTimer, SIGNAL(timeout()),
                 this, SLOT(submit()));
+        connect(m_resubmitTimer, SIGNAL(timeout()),
+                m_resubmitTimer, SLOT(deleteLater()));
     }
 }
 
