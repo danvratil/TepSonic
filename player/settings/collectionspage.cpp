@@ -26,32 +26,36 @@
 using namespace SettingsPages;
 
 CollectionsPage::CollectionsPage(QWidget *parent):
-        QWidget(parent),
+        SettingsPage(parent),
         m_collectionsSourceChanged(false)
 {
-    ui = new Ui::CollectionsPage();
-    ui->setupUi(this);
-    ui->tabWidget->setCurrentIndex(0);
+    m_ui = new Ui::CollectionsPage();
+    m_ui->setupUi(this);
+    m_ui->tabWidget->setCurrentIndex(0);
 
-    connect(ui->dbEngineCombo, SIGNAL(currentIndexChanged(QString)),
+    connect(m_ui->dbEngineCombo, SIGNAL(currentIndexChanged(QString)),
             this, SLOT(changeEngine(QString)));
-    connect(ui->rebuildCollectionsButton, SIGNAL(clicked()),
-            this, SIGNAL(rebuildCollections()));
-    connect(ui->addPathButton, SIGNAL(clicked()),
+    connect(m_ui->rebuildCollectionsButton, SIGNAL(clicked()),
+            this, SIGNAL(rebm_uildCollections()));
+    connect(m_ui->addPathButton, SIGNAL(clicked()),
             this, SLOT(addPath()));
-    connect(ui->removePathButton, SIGNAL(clicked()),
+    connect(m_ui->removePathButton, SIGNAL(clicked()),
             this, SLOT(removePath()));
-    connect(ui->removeAllPathsButton, SIGNAL(clicked()),
+    connect(m_ui->removeAllPathsButton, SIGNAL(clicked()),
             this, SLOT(removeAllPaths()));
+}
 
+CollectionsPage::~CollectionsPage()
+{
+    delete m_ui;
 }
 
 void CollectionsPage::changeEngine(QString currEngine)
 {
     if (currEngine == "SQLite") {
-        ui->mysqlSettings->setDisabled(true);
+        m_ui->mysqlSettings->setDisabled(true);
     } else {
-        ui->mysqlSettings->setEnabled(true);
+        m_ui->mysqlSettings->setEnabled(true);
     }
 }
 
@@ -62,21 +66,61 @@ void CollectionsPage::addPath()
                       QString(),
                       QFileDialog::ShowDirsOnly);
     if (!dirName.isEmpty()) {
-        ui->collectionsPathsList->addItem(dirName);
+        m_ui->collectionsPathsList->addItem(dirName);
     }
     m_collectionsSourceChanged = true;
 }
 
 void CollectionsPage::removePath()
 {
-    foreach (QListWidgetItem *item, ui->collectionsPathsList->selectedItems()) {
-        delete ui->collectionsPathsList->takeItem(ui->collectionsPathsList->row(item));
+    foreach (QListWidgetItem *item, m_ui->collectionsPathsList->selectedItems()) {
+        delete m_ui->collectionsPathsList->takeItem(m_ui->collectionsPathsList->row(item));
     }
     m_collectionsSourceChanged = true;
 }
 
 void CollectionsPage::removeAllPaths()
 {
-    ui->collectionsPathsList->clear();
+    m_ui->collectionsPathsList->clear();
     m_collectionsSourceChanged = true;
+}
+
+void CollectionsPage::loadSettings(QSettings *settings)
+{
+    settings->beginGroup("Collections");
+    m_ui->enableCollectionsCheckbox->setChecked(settings->value("EnableCollections", true).toBool());
+    m_ui->autoupdateCollectionsCheckbox->setChecked(settings->value("AutoRebm_uildAfterStart", true).toBool());
+    m_ui->collectionsPathsList->addItems(settings->value("SourcePaths", QStringList()).toStringList());
+    m_ui->dbEngineCombo->setCurrentIndex(settings->value("StorageEngine", 0).toInt());
+
+    settings->beginGroup("MySQL");
+    m_ui->mysqlServerEdit->setText(settings->value("Server", "127.0.0.1").toString());
+    m_ui->mysqlUsernameEdit->setText(settings->value("Username", QString()).toString());
+    m_ui->mysqlPasswordEdit->setText(settings->value("Password", QString()).toString());
+    m_ui->mysqlDatabaseEdit->setText(settings->value("Database", QString()).toString());
+    settings->endGroup();
+    settings->endGroup();
+}
+
+void CollectionsPage::saveSettings(QSettings *settings)
+{
+    settings->beginGroup("Collections");
+    settings->setValue("EnableCollections", m_ui->enableCollectionsCheckbox->isChecked());
+    settings->setValue("AutoRebm_uildAfterStart", m_ui->autoupdateCollectionsCheckbox->isChecked());
+
+    QStringList items;
+    for (int i = 0; i < m_ui->collectionsPathsList->count(); i++) {
+        items.append(m_ui->collectionsPathsList->item(i)->text());
+    }
+    settings->setValue("SourcePaths", items);
+    settings->setValue("StorageEngine", m_ui->dbEngineCombo->currentIndex());
+
+    settings->beginGroup("MySQL");
+    settings->setValue("Server", m_ui->mysqlServerEdit->text());
+    settings->setValue("Username", m_ui->mysqlUsernameEdit->text());
+    // I'd like to have the password encrypted (but not hashed!) - I don't like passwords in plaintext...
+    settings->setValue("Password", m_ui->mysqlPasswordEdit->text());
+    settings->setValue("Database", m_ui->mysqlDatabaseEdit->text());
+    settings->endGroup();
+    settings->endGroup();
 }

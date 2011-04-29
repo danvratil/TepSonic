@@ -41,138 +41,52 @@
 #include <QDebug>
 #include <QStandardItemModel>
 
+enum {
+    PLAYER_PAGE,
+    COLLECTIONS_PAGE,
+    PLUGINS_PAGE,
+    SHORTCUTS_PAGE
+};
+
 SettingsDialog::SettingsDialog(MainWindow *parent):
-        _ui(new Ui::SettingsDialog),
-        _parent(parent)
+        m_ui(new Ui::SettingsDialog),
+        m_parent(parent)
 {
-    extern PluginsManager *pluginsManager;
-    extern Player *player;
+    m_ui->setupUi(this);
+    m_ui->pagesButtons->item(0)->setSelected(true);
 
-    _ui->setupUi(this);
-    _ui->pagesButtons->item(0)->setSelected(true);
-
-    connect(_ui->pagesButtons, SIGNAL(currentItemChanged(QListWidgetItem*, QListWidgetItem*)),
+    connect(m_ui->pagesButtons, SIGNAL(currentItemChanged(QListWidgetItem*, QListWidgetItem*)),
             this, SLOT(changePage(QListWidgetItem*,QListWidgetItem*)));
 
-
-    _player = new SettingsPages::PlayerPage();
-    _collections = new SettingsPages::CollectionsPage();
-    _plugins = new SettingsPages::PluginsPage();
-    _shortcuts = new SettingsPages::ShortcutsPage();
-
-    connect(_collections, SIGNAL(rebuildCollections()),
-            this, SLOT(emitRebuildCollections()));
-    connect(_ui->buttonBox, SIGNAL(accepted()),
-            this, SLOT(dialogAccepted()));
-    connect(_plugins, SIGNAL(pluginDisabled(int)),
-            this, SLOT(disablePlugin(int)));
-    connect(_plugins, SIGNAL(pluginEnabled(int)),
-            this, SLOT(enablePlugin(int)));
-
-    _ui->pages->addWidget(_player);
-    _ui->pages->addWidget(_collections);
-    _ui->pages->addWidget(_plugins);
-    _ui->pages->addWidget(_shortcuts);
+    m_pages.insert(PLAYER_PAGE, new SettingsPages::PlayerPage);
+    m_pages.insert(COLLECTIONS_PAGE, new SettingsPages::CollectionsPage);
+    m_pages.insert(PLUGINS_PAGE, new SettingsPages::PluginsPage);
+    m_pages.insert(SHORTCUTS_PAGE, new SettingsPages::ShortcutsPage);
 
     QSettings settings(QString(_CONFIGDIR).append("/main.conf"),QSettings::IniFormat,this);
-
-    settings.beginGroup("Collections");
-    _collections->ui->enableCollectionsCheckbox->setChecked(settings.value("EnableCollections",true).toBool());
-    _collections->ui->autoupdateCollectionsCheckbox->setChecked(settings.value("AutoRebuildAfterStart",true).toBool());
-    _collections->ui->collectionsPathsList->addItems(settings.value("SourcePaths",QStringList()).toStringList());
-    _collections->ui->dbEngineCombo->setCurrentIndex(settings.value("StorageEngine",0).toInt());
-
-    settings.beginGroup("MySQL");
-    _collections->ui->mysqlServerEdit->setText(settings.value("Server","127.0.0.1").toString());
-    _collections->ui->mysqlUsernameEdit->setText(settings.value("Username",QString()).toString());
-    _collections->ui->mysqlPasswordEdit->setText(settings.value("Password",QString()).toString());
-    _collections->ui->mysqlDatabaseEdit->setText(settings.value("Database",QString()).toString());
-    settings.endGroup();
-    settings.endGroup();
-
-    settings.beginGroup("Preferences");
-    _player->ui->restorePreviousSessionCheckBox->setChecked(settings.value("RestoreSession",true).toBool());
-    _player->ui->outputDevicesList->setCurrentIndex (_player->getOutputDeviceModelIndex (settings.value("OutputDevice", 0).toInt()));
-    m_oldOutputDeviceIndex = settings.value("OutputDevice", 0).toInt();
-    QList<Phonon::Effect*> *effects = player->effects();
-    for (int i = 0; i < effects->count(); i++)
-    {
-        Phonon::EffectDescription ed = effects->at(i)->description();
-        bool state = settings.value("Effects/"+ed.name(), false).toBool();
-        if (state)
-            qobject_cast<QStandardItemModel*>(_player->ui->playerEffectsList->model())->item(i, 0)->setCheckState(Qt::Checked);
-    }
-    settings.endGroup();
-
-    settings.beginGroup("Plugins");
-    QMap<QString,QVariant> plugins = settings.value("pluginsEnabled").toMap();
-    settings.endGroup();
-
-    // Iterate through all plugins
-    for (int i=0; i < pluginsManager->pluginsCount(); i++) {
-
-        if (pluginsManager->pluginAt(i)->enabled) {
-            // If the plugin has a config UI then add a tab with the UI to Plugins page
-            if (pluginsManager->pluginAt(i)->hasUI) {
-                QWidget *pluginWidget = new QWidget();
-                _plugins->ui->tabs->addTab(pluginWidget, pluginsManager->pluginAt(i)->pluginName);
-                AbstractPlugin *plugin = reinterpret_cast<AbstractPlugin*>(pluginsManager->pluginAt(i)->pluginLoader->instance());
-                plugin->settingsWidget(pluginWidget);
-            }
-        }
-
-        QListWidgetItem *item = new QListWidgetItem(pluginsManager->pluginAt(i)->pluginName);
-        // If the plugin is not yet listed in the QSettings then set it as disabled by default
-        if (pluginsManager->pluginAt(i)->enabled) {
-            item->setCheckState(Qt::Checked);
-        } else {
-            item->setCheckState(Qt::Unchecked);
-        }
-        _plugins->ui->pluginsList->addItem(item);
-
+    foreach (SettingsPage *page, m_pages) {
+        m_ui->pages->addWidget(page);
+        page->loadSettings(&settings);
     }
 
+    connect(m_pages[COLLECTIONS_PAGE], SIGNAL(rebuildCollections()),
+            this, SLOT(emitRebuildCollections()));
 
-    settings.beginGroup("Shortcuts");
-    QTreeWidgetItem *item = new QTreeWidgetItem();
-    item->setData(0, Qt::DisplayRole, tr("Play/pause"));
-    item->setData(1, Qt::DisplayRole, settings.value("PlayPause", "Meta+Space"));
-    item->setData(0, Qt::UserRole, "PlayPause");
-    _shortcuts->ui->shortcutsList->addTopLevelItem(item);
-    item = new QTreeWidgetItem();
-    item->setData(0, Qt::EditRole, tr("Stop"));
-    item->setData(1, Qt::EditRole, settings.value("Stop", "Meta+S"));
-    item->setData(0, Qt::UserRole, "Stop");
-    _shortcuts->ui->shortcutsList->addTopLevelItem(item);
-    item = new QTreeWidgetItem();
-    item->setData(0, Qt::EditRole, tr("Previous track"));
-    item->setData(1, Qt::EditRole, settings.value("PrevTrack", "Meta+P"));
-    item->setData(0, Qt::UserRole, "PrevTrack");
-    _shortcuts->ui->shortcutsList->addTopLevelItem(item);
-    item = new QTreeWidgetItem();
-    item->setData(0, Qt::EditRole, tr("Next track"));
-    item->setData(1, Qt::EditRole, settings.value("NextTrack", "Meta+N"));
-    item->setData(0, Qt::UserRole, "NextTrack");
-    _shortcuts->ui->shortcutsList->addTopLevelItem(item);
-    item = new QTreeWidgetItem();
-    item->setData(0, Qt::EditRole, tr("Show/Hide window"));
-    item->setData(1, Qt::EditRole, settings.value("ShowHideWin", "Meta+H"));
-    item->setData(0, Qt::UserRole, "ShowHideWin");
-    _shortcuts->ui->shortcutsList->addTopLevelItem(item);
-    settings.endGroup();
-
+    connect(m_ui->buttonBox, SIGNAL(accepted()),
+            this, SLOT(dialogAccepted()));
 }
 
 SettingsDialog::~SettingsDialog()
 {
-    delete _ui;
+    qDeleteAll(m_pages);
+    delete m_ui;
 }
 
 void SettingsDialog::changeEvent(QEvent *e)
 {
     switch (e->type()) {
     case QEvent::LanguageChange:
-        _ui->retranslateUi(this);
+        m_ui->retranslateUi(this);
         break;
     default:
         break;
@@ -181,77 +95,27 @@ void SettingsDialog::changeEvent(QEvent *e)
 
 void SettingsDialog::dialogAccepted()
 {
-
-    extern PluginsManager *pluginsManager;
-    extern Player *player;
-
     QSettings settings(QString(_CONFIGDIR).append("/main.conf"),QSettings::IniFormat,this);
+    foreach (SettingsPage *page, m_pages)
+        page->saveSettings(&settings);
 
-    settings.beginGroup("Collections");
-    settings.setValue("EnableCollections",_collections->ui->enableCollectionsCheckbox->isChecked());
-    settings.setValue("AutoRebuildAfterStart",_collections->ui->autoupdateCollectionsCheckbox->isChecked());
-    QStringList items;
-    for (int i = 0; i < _collections->ui->collectionsPathsList->count(); i++) {
-        items.append(_collections->ui->collectionsPathsList->item(i)->text());
-    }
-    settings.setValue("SourcePaths",items);
-    settings.setValue("StorageEngine",_collections->ui->dbEngineCombo->currentIndex());
-
-    settings.beginGroup("MySQL");
-    settings.setValue("Server",_collections->ui->mysqlServerEdit->text());
-    settings.setValue("Username",_collections->ui->mysqlUsernameEdit->text());
-    // I'd like to have the password encrypted (but not hashed!) - I don't like password in plaintext...
-    settings.setValue("Password",_collections->ui->mysqlPasswordEdit->text());
-    settings.setValue("Database",_collections->ui->mysqlDatabaseEdit->text());
-    settings.endGroup(); // MySQL group
-
-    settings.endGroup(); // Collections group
-
-    settings.beginGroup("Preferences");
-    settings.setValue("RestoreSession",_player->ui->restorePreviousSessionCheckBox->isChecked());
-    settings.setValue("OutputDevice", _player->getOutputDeviceIndex(_player->ui->outputDevicesList->currentIndex()));
-    QList<Phonon::Effect*> *effects = player->effects();
-    for (int i = 0; i < effects->count(); i++) {
-        Phonon::EffectDescription ed = effects->at(i)->description();
-        settings.setValue("Effects/"+ed.name(), qobject_cast<QStandardItemModel*>(_player->ui->playerEffectsList->model())->item(i,0)->checkState() == Qt::Checked);
-        player->enableEffect(effects->at(i), (qobject_cast<QStandardItemModel*>(_player->ui->playerEffectsList->model())->item(i,0)->checkState() == Qt::Checked));
-    }
-    settings.endGroup(); // Preferences group
-
-    settings.beginGroup("Plugins");
-    QMap<QString,QVariant> plugins;
-    // Go through all plugins in the UI list
-    for (int i = 0; i < _plugins->ui->pluginsList->count(); i++) {
-        QListWidgetItem *item = _plugins->ui->pluginsList->item(i);
-        // insert into the map value pluginid - checked(bool)
-        plugins.insert(pluginsManager->pluginAt(i)->pluginID,QVariant((item->checkState()==2)));
-    }
-    settings.setValue("pluginsEnabled",QVariant(plugins));
-    settings.endGroup();
-
-    settings.beginGroup("Shortcuts");
-    for (int i = 0; i < _shortcuts->ui->shortcutsList->topLevelItemCount(); i++)
-    {
-        settings.setValue(_shortcuts->ui->shortcutsList->topLevelItem(i)->data(0, Qt::UserRole).toString(),
-                          _shortcuts->ui->shortcutsList->topLevelItem(i)->data(1,Qt::DisplayRole));
-    }
-    settings.endGroup();
-
-    if (_collections->collectionsSourceChanged()) {
+    if (qobject_cast<SettingsPages::CollectionsPage*>(m_pages[COLLECTIONS_PAGE])->collectionsSourceChanged()) {
         emit rebuildCollections();
     }
 
-    if (settings.value("Preferences/OutputDevice", 0).toInt() != m_oldOutputDeviceIndex)
+    if (qobject_cast<SettingsPages::PlayerPage*>(m_pages[PLAYER_PAGE])->outputDeviceChanged()) {
         emit outputDeviceChanged();
+    }
 
     accept();
+
     this->close();
 }
 
 void SettingsDialog::changePage(QListWidgetItem* current, QListWidgetItem* previous)
 {
     Q_UNUSED(previous);
-    _ui->pages->setCurrentIndex(_ui->pagesButtons->row(current));
+    m_ui->pages->setCurrentIndex(m_ui->pagesButtons->row(current));
 }
 
 void SettingsDialog::emitRebuildCollections()
@@ -259,46 +123,7 @@ void SettingsDialog::emitRebuildCollections()
     // Save current state of collections configurations and emit rebuilding
 
     QSettings settings(QString(_CONFIGDIR).append("/main.conf"),QSettings::IniFormat,this);
-    settings.beginGroup("Collections");
-    QStringList items;
-    for (int i = 0; i < _collections->ui->collectionsPathsList->count(); i++) {
-        items.append(_collections->ui->collectionsPathsList->item(i)->text());
-    }
-    settings.setValue("SourcePaths",items);
-    settings.setValue("StorageEngine",_collections->ui->dbEngineCombo->currentIndex());
-    settings.beginGroup("MySQL");
-    settings.setValue("Server",_collections->ui->mysqlServerEdit->text());
-    settings.setValue("Username",_collections->ui->mysqlUsernameEdit->text());
-    // I'd like to have the password encrypted (but not hashed!) - I don't like password in plaintext...
-    settings.setValue("Password",_collections->ui->mysqlPasswordEdit->text());
-    settings.setValue("Database",_collections->ui->mysqlDatabaseEdit->text());
-    settings.endGroup(); // MySQL group
-    settings.endGroup(); // Collections group
+    m_pages[COLLECTIONS_PAGE]->saveSettings(&settings);
+
     emit rebuildCollections();
-}
-
-void SettingsDialog::enablePlugin(int pluginIndex)
-{
-    extern PluginsManager *pluginsManager;
-
-    pluginsManager->enablePlugin(pluginsManager->pluginAt(pluginIndex));
-
-    if (!pluginsManager->pluginAt(pluginIndex) || !pluginsManager->pluginAt(pluginIndex)->pluginLoader)
-        return;
-
-    AbstractPlugin *plugin = reinterpret_cast<AbstractPlugin*>(pluginsManager->pluginAt(pluginIndex)->pluginLoader->instance());
-    // If the plugin has a config UI then add a tab with the UI to Plugins page
-    if (plugin->hasConfigUI()) {
-        QWidget *pluginWidget = new QWidget();
-        _plugins->ui->tabs->insertTab(pluginIndex+1, pluginWidget, pluginsManager->pluginAt(pluginIndex)->pluginName);
-        plugin->settingsWidget(pluginWidget);
-    }
-}
-
-void SettingsDialog::disablePlugin(int pluginIndex)
-{
-    extern PluginsManager *pluginsManager;
-
-    pluginsManager->disablePlugin(pluginsManager->pluginAt(pluginIndex));
-    _plugins->ui->tabs->removeTab(pluginIndex+1);
 }

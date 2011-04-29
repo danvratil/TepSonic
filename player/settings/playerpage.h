@@ -20,12 +20,11 @@
 #ifndef PLAYERPAGE_H
 #define PLAYERPAGE_H
 
-#include <QWidget>
 #include <QStandardItemModel>
-#include <QCloseEvent>
 
 #include <Phonon/Effect>
-#include <Phonon/EffectWidget>
+
+#include "settingspage.h"
 
 namespace Ui {
     class PlayerPage;
@@ -33,15 +32,12 @@ namespace Ui {
 
 namespace SettingsPages {
 
-
-
-    class PlayerPage : public QWidget
+    class PlayerPage : public SettingsPage
     {
         Q_OBJECT
         public:
             explicit PlayerPage(QWidget *parent = 0);
             ~PlayerPage();
-            ::Ui::PlayerPage *ui;
 
             QModelIndex getOutputDeviceModelIndex(int deviceIndex);
             int getOutputDeviceIndex(QModelIndex index);
@@ -49,9 +45,17 @@ namespace SettingsPages {
 
             int effectsCount() { return m_effectsModel->rowCount(); }
 
+        public slots:
+            void loadSettings(QSettings *settings);
+            void saveSettings(QSettings *settings);
+
         private:
+            ::Ui::PlayerPage *m_ui;
+
             QStandardItemModel *m_devicesModel;
             QStandardItemModel *m_effectsModel;
+
+            int m_oldOutputDeviceIndex;
 
         private slots:
             void setEffectDescription(QModelIndex effect);
@@ -61,7 +65,6 @@ namespace SettingsPages {
             void effectEnabled(Phonon::EffectDescription description);
             void effectDiasabled(Phonon::Effect *effect);
     };
-
 }
 
 #endif // PLAYERPAGE_H

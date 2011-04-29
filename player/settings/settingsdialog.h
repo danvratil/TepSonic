@@ -30,15 +30,10 @@
 
 #include <Phonon/AudioOutputDevice>
 
+#include "settingspage.h"
+
 namespace Ui {
     class SettingsDialog;
-}
-
-namespace SettingsPages {
-    class PlayerPage;
-    class PluginsPage;
-    class CollectionsPage;
-    class ShortcutsPage;
 }
 
 class MainWindow;
@@ -78,24 +73,12 @@ class SettingsDialog : public QDialog {
 
     private:
         //! Dialog interface
-        Ui::SettingsDialog *_ui;
+        Ui::SettingsDialog *m_ui;
 
-        //! Player page
-        SettingsPages::PlayerPage *_player;
-
-        //! Collections page
-        SettingsPages::CollectionsPage *_collections;
-
-        //! Plugins page
-        SettingsPages::PluginsPage *_plugins;
-
-        //! Shorcuts settings page
-        SettingsPages::ShortcutsPage *_shortcuts;
+        QList<SettingsPage*> m_pages;
 
         //! Main window
-        MainWindow *_parent;
-
-        int m_oldOutputDeviceIndex;
+        MainWindow *m_parent;
 
     private slots:
 
@@ -111,10 +94,6 @@ class SettingsDialog : public QDialog {
 
         //! Saves current confugration and then emits signal rebuildCollections()
         void emitRebuildCollections();
-
-        void enablePlugin(int);
-
-        void disablePlugin(int);
 };
 
 #endif // PREFERENCESDIALOG_H

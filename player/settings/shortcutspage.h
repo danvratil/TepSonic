@@ -20,8 +20,9 @@
 #ifndef SHORTCUTSPAGE_H
 #define SHORTCUTSPAGE_H
 
-#include <QWidget>
 #include <QModelIndex>
+
+#include "settingspage.h"
 
 namespace Ui {
     class ShortcutsPage;
@@ -29,22 +30,27 @@ namespace Ui {
 
 namespace SettingsPages {
 
-
     class ChangeShortcutDialog;
 
-    class ShortcutsPage: public QWidget
+    class ShortcutsPage: public SettingsPage
     {
         Q_OBJECT
         public:
             ShortcutsPage(QWidget *parent = 0);
-            ::Ui::ShortcutsPage *ui;
+            ~ShortcutsPage();
+
+        public slots:
+            void loadSettings(QSettings *settings);
+            void saveSettings(QSettings *settings);
 
         private slots:
             void changeShortcut(QModelIndex index);
             void shortcutChanged(QModelIndex index, QKeySequence shortcut);
 
         private:
-            ChangeShortcutDialog *csw;
+            ChangeShortcutDialog *m_csw;
+
+            ::Ui::ShortcutsPage *m_ui;
     };
 
 }

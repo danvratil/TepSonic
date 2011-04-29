@@ -25,24 +25,81 @@
 
 using namespace SettingsPages;
 
-ShortcutsPage::ShortcutsPage(QWidget *parent)
+ShortcutsPage::ShortcutsPage(QWidget *parent):
+    SettingsPage(parent)
 {
-    ui = new Ui::ShortcutsPage();
-    ui->setupUi(this);
-    connect(ui->shortcutsList, SIGNAL(doubleClicked(QModelIndex)),
+    m_ui = new Ui::ShortcutsPage();
+    m_ui->setupUi(this);
+    connect(m_ui->shortcutsList, SIGNAL(doubleClicked(QModelIndex)),
             this, SLOT(changeShortcut(QModelIndex)));
+}
+
+ShortcutsPage::~ShortcutsPage()
+{
+    delete m_ui;
 }
 
 void ShortcutsPage::changeShortcut(QModelIndex index)
 {
-    csw = new ChangeShortcutDialog(index, this);
-    connect(csw, SIGNAL(shortcutChanged(QModelIndex,QKeySequence)),
+    m_csw = new ChangeShortcutDialog(index, this);
+    connect(m_csw, SIGNAL(shortcutChanged(QModelIndex,QKeySequence)),
             this, SLOT(shortcutChanged(QModelIndex,QKeySequence)));
-    csw->show();
+    m_csw->show();
 }
 
 void ShortcutsPage::shortcutChanged(QModelIndex index, QKeySequence shortcut)
 {
     QTreeWidgetItem *item = static_cast<QTreeWidgetItem*>(index.internalPointer());
     item->setData(1, Qt::EditRole, QVariant(shortcut.toString(QKeySequence::NativeText)));
+
+    if (m_csw)
+        delete m_csw;
+}
+
+void ShortcutsPage::loadSettings(QSettings *settings)
+{
+    settings->beginGroup("Shortcuts");
+
+    QTreeWidgetItem *item = new QTreeWidgetItem();
+    item->setData(0, Qt::DisplayRole, tr("Play/pause"));
+    item->setData(1, Qt::DisplayRole, settings->value("PlayPause", "Meta+Space"));
+    item->setData(0, Qt::UserRole, "PlayPause");
+    m_ui->shortcutsList->addTopLevelItem(item);
+
+    item = new QTreeWidgetItem();
+    item->setData(0, Qt::EditRole, tr("Stop"));
+    item->setData(1, Qt::EditRole, settings->value("Stop", "Meta+S"));
+    item->setData(0, Qt::UserRole, "Stop");
+    m_ui->shortcutsList->addTopLevelItem(item);
+
+    item = new QTreeWidgetItem();
+    item->setData(0, Qt::EditRole, tr("Previous track"));
+    item->setData(1, Qt::EditRole, settings->value("PrevTrack", "Meta+P"));
+    item->setData(0, Qt::UserRole, "PrevTrack");
+    m_ui->shortcutsList->addTopLevelItem(item);
+
+    item = new QTreeWidgetItem();
+    item->setData(0, Qt::EditRole, tr("Next track"));
+    item->setData(1, Qt::EditRole, settings->value("NextTrack", "Meta+N"));
+    item->setData(0, Qt::UserRole, "NextTrack");
+    m_ui->shortcutsList->addTopLevelItem(item);
+
+    item = new QTreeWidgetItem();
+    item->setData(0, Qt::EditRole, tr("Show/Hide window"));
+    item->setData(1, Qt::EditRole, settings->value("ShowHideWin", "Meta+H"));
+    item->setData(0, Qt::UserRole, "ShowHideWin");
+    m_ui->shortcutsList->addTopLevelItem(item);
+
+    settings->endGroup();
+}
+
+void ShortcutsPage::saveSettings(QSettings *settings)
+{
+    settings->beginGroup("Shortcuts");
+    for (int i = 0; i < m_ui->shortcutsList->topLevelItemCount(); i++)
+    {
+        settings->setValue(m_ui->shortcutsList->topLevelItem(i)->data(0, Qt::UserRole).toString(),
+                           m_ui->shortcutsList->topLevelItem(i)->data(1, Qt::DisplayRole));
+    }
+    settings->endGroup();
 }

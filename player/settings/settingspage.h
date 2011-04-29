@@ -1,6 +1,6 @@
 /*
  * TEPSONIC
- * Copyright 2010 Dan Vratil <vratil@progdansoft.com>
+ * Copyright 2011 Dan Vratil <vratil@progdansoft.com>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -17,37 +17,23 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Cambridge, MA 02110-1301, USA.
  */
 
-#ifndef PLUGINSPAGE_H
-#define PLUGINSPAGE_H
 
-#include <QListWidgetItem>
+#ifndef SETTINGSPAGE_H
+#define SETTINGSPAGE_H
 
-#include "settingspage.h"
+#include <QWidget>
+#include <QSettings>
 
-namespace Ui {
-    class PluginsPage;
-}
+class SettingsPage: public QWidget {
 
-namespace SettingsPages {
+    Q_OBJECT
+    public:
+        SettingsPage (QWidget *parent): QWidget(parent) {};
 
-    class PluginsPage: public SettingsPage
-    {
-        Q_OBJECT
-        public:
-            PluginsPage(QWidget *parent = 0);
-            ~PluginsPage();
+    public slots:
+        virtual void loadSettings (QSettings *settings) = 0;
 
-        public slots:
-            void loadSettings(QSettings *settings);
-            void saveSettings(QSettings *settings);
+        virtual void saveSettings (QSettings *settings) = 0;
+};
 
-        private slots:
-            void pluginsListItemChanged(QListWidgetItem*);
-
-        private:
-            ::Ui::PluginsPage *m_ui;
-    };
-
-}
-
-#endif // PLUGINSPAGE_H
+#endif // SETTINGSPAGE_H

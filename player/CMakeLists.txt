@@ -73,6 +73,7 @@ set(player_HDRS
     filesystembrowser.h
     metadataeditor.h
     settings/settingsdialog.h
+    settings/settingspage.h
     settings/playerpage.h
     settings/collectionspage.h
     settings/pluginspage.h

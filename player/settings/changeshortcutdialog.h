@@ -56,7 +56,6 @@ namespace SettingsPages {
 
         signals:
             void shortcutChanged(QModelIndex index, QKeySequence newshortcut);
-
     };
 }
 

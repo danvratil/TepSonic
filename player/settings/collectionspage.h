@@ -21,7 +21,7 @@
 #ifndef COLLECTIONSPAGE_H
 #define COLLECTIONSPAGE_H
 
-#include <QWidget>
+#include "settingspage.h"
 #include "ui_collectionspage.h"
 
 namespace Ui {
@@ -30,18 +30,22 @@ namespace Ui {
 
 namespace SettingsPages {
 
-
-    class CollectionsPage: public QWidget
+    class CollectionsPage: public SettingsPage
     {
         Q_OBJECT
         public:
             CollectionsPage(QWidget *parent = 0);
-            ::Ui::CollectionsPage *ui;
-            bool collectionsSourceChanged() {
-                return m_collectionsSourceChanged;
-            }
+            ~CollectionsPage();
+
+            bool collectionsSourceChanged() { return m_collectionsSourceChanged; }
+
+        public slots:
+            void loadSettings(QSettings *settings);
+            void saveSettings(QSettings *settings);
 
         private:
+            ::Ui::CollectionsPage *m_ui;
+
             bool m_collectionsSourceChanged;
 
         private slots:
@@ -53,7 +57,6 @@ namespace SettingsPages {
         signals:
             void rebuildCollections();
     };
-
 }
 
 #endif // COLLECTIONSPAGE_H

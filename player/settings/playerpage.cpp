@@ -19,6 +19,7 @@
 
 #include "playerpage.h"
 #include "ui_playerpage.h"
+
 #include "playereffectdialog.h"
 #include "player.h"
 
@@ -26,16 +27,17 @@
 #include <Phonon/BackendCapabilities>
 #include <Phonon/Effect>
 #include <Phonon/EffectDescription>
+#include <Phonon/EffectWidget>
 
 extern Player *player;
 
 using namespace SettingsPages;
 
 PlayerPage::PlayerPage(QWidget *parent):
-        QWidget(parent)
+        SettingsPage(parent)
 {
-    ui = new Ui::PlayerPage();
-    ui->setupUi(this);
+    m_ui = new Ui::PlayerPage();
+    m_ui->setupUi(this);
 
     m_devicesModel = new QStandardItemModel();
 
@@ -46,7 +48,7 @@ PlayerPage::PlayerPage(QWidget *parent):
         item->setData(QVariant(devices.at(i).index()), Qt::UserRole);
         m_devicesModel->appendRow(item);
     }
-    ui->outputDevicesList->setModel (m_devicesModel);
+    m_ui->outputDevicesList->setModel (m_devicesModel);
 
 
     m_effectsModel = new QStandardItemModel();
@@ -60,15 +62,16 @@ PlayerPage::PlayerPage(QWidget *parent):
         item->setCheckable(true);
         m_effectsModel->appendRow(item);
     }
-    ui->playerEffectsList->setModel(m_effectsModel);
-    connect(ui->playerEffectsList, SIGNAL(clicked(QModelIndex)),
+    m_ui->playerEffectsList->setModel(m_effectsModel);
+    connect(m_ui->playerEffectsList, SIGNAL(clicked(QModelIndex)),
             this, SLOT(setEffectDescription(QModelIndex)));
-    connect(ui->playerEffectsList, SIGNAL(doubleClicked(QModelIndex)),
+    connect(m_ui->playerEffectsList, SIGNAL(doubleClicked(QModelIndex)),
             this, SLOT(showEffectSettings(QModelIndex)));
 }
 
 PlayerPage::~PlayerPage()
 {
+    delete m_ui;
     delete m_devicesModel;
     delete m_effectsModel;
 }
@@ -89,11 +92,16 @@ int PlayerPage::getOutputDeviceIndex (QModelIndex index)
     return m_devicesModel->data(index, Qt::UserRole).toInt();
 }
 
+bool PlayerPage::outputDeviceChanged()
+{
+    return (getOutputDeviceIndex(m_ui->outputDevicesList->currentIndex()) != m_oldOutputDeviceIndex);
+}
+
 void PlayerPage::setEffectDescription(QModelIndex effect)
 {
     Phonon::Effect *peffect = (Phonon::Effect*)effect.data(Qt::UserRole+1).toLongLong();
     Phonon::EffectDescription description = peffect->description();
-    ui->effectDescription->setText(description.description());
+    m_ui->effectDescription->setText(description.description());
 }
 
 void PlayerPage::showEffectSettings(QModelIndex effect)
@@ -109,4 +117,40 @@ void PlayerPage::showEffectSettings(QModelIndex effect)
             playerEffectDialog->open();
         }
     }
+}
+
+void PlayerPage::loadSettings(QSettings *settings)
+{
+    settings->beginGroup("Preferences");
+    m_ui->restorePreviousSessionCheckBox->setChecked(settings->value("RestoreSession",true).toBool());
+    m_ui->outputDevicesList->setCurrentIndex (getOutputDeviceModelIndex (settings->value("OutputDevice", 0).toInt()));
+
+    m_oldOutputDeviceIndex = settings->value("OutputDevice", 0).toInt();
+
+    QList<Phonon::Effect*> *effects = player->effects();
+    for (int i = 0; i < effects->count(); i++)
+    {
+        Phonon::EffectDescription ed = effects->at(i)->description();
+        bool state = settings->value("Effects/"+ed.name(), false).toBool();
+        if (state)
+            qobject_cast<QStandardItemModel*>(m_ui->playerEffectsList->model())->item(i, 0)->setCheckState(Qt::Checked);
+    }
+    settings->endGroup();
+}
+
+void PlayerPage::saveSettings(QSettings *settings)
+{
+    settings->beginGroup("Preferences");
+    settings->setValue("RestoreSession", m_ui->restorePreviousSessionCheckBox->isChecked());
+    settings->setValue("OutputDevice", getOutputDeviceIndex(m_ui->outputDevicesList->currentIndex()));
+
+    QList<Phonon::Effect*> *effects = player->effects();
+    for (int i = 0; i < effects->count(); i++) {
+        Phonon::EffectDescription ed = effects->at(i)->description();
+        settings->setValue("Effects/"+ed.name(),
+            qobject_cast<QStandardItemModel*>(m_ui->playerEffectsList->model())->item(i, 0)->checkState() == Qt::Checked);
+        player->enableEffect(effects->at(i),
+            (qobject_cast<QStandardItemModel*>(m_ui->playerEffectsList->model())->item(i, 0)->checkState() == Qt::Checked));
+    }
+    settings->endGroup();
 }
