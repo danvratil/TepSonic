@@ -142,25 +142,34 @@ void PlaylistBrowser::dropEvent(QDropEvent* event)
 {
     event->acceptProposedAction();
 
-    // Drop from CollectionsBrowser
-    if (event->mimeData()->hasFormat("data/tepsonic-tracks")) {
-        QByteArray encodedData = event->mimeData()->data("data/tepsonic-tracks");
-        QDataStream stream(&encodedData, QIODevice::ReadOnly);
-        QStringList newItems;
+	if (event->mimeData()->hasFormat("data/tepsonic-tracks") || event->mimeData()->hasUrls()) {
+	
+		QStringList files;
+		// Drop from CollectionsBrowser
+		if (event->mimeData()->hasFormat("data/tepsonic-tracks")) {
+			QByteArray encodedData = event->mimeData()->data("data/tepsonic-tracks");
+			QDataStream stream(&encodedData, QIODevice::ReadOnly);
+			QStringList newItems;
+	
+			while (!stream.atEnd()) {
+				QString text;
+				stream >> text;
+				files << text;
+			}
+		// Drop from URLs
+		} else if (event->mimeData()->hasUrls()) {
 
-        QStringList files;
+			QList<QUrl> urlList = event->mimeData()->urls();
+		
+			foreach(QUrl url, urlList)
+				files << url.path();
+		}
+			
+		//row where the items were dropped
+		int row = indexAt(event->pos()).row();
+		if (row == -1) row = model()->rowCount();
 
-        while (!stream.atEnd()) {
-            QString text;
-            stream >> text;
-            files << text;
-        }
-
-        //row where the items were dropped
-        int row = indexAt(event->pos()).row();
-        if (row == -1) row = model()->rowCount(QModelIndex());
-
-        emit addedFiles(files, row);
+		emit addedFiles(files, row);
     }
 
     // Drop from internal move
