@@ -540,15 +540,20 @@ void LastFm::Cache::submit()
     request.setUrl(requestUrl);
     QByteArray data;
     QUrl params;
+    int items_count;
 
+    if (m_cache.size() > 40)
+        items_count = 40;
+    else
+        items_count = m_cache.size();
 
-    qDebug() << "Scrobbling " << m_cache.size() << " tracks";
+    qDebug() << "Scrobbling " << items_count << " tracks";
 
     params.addQueryItem("api_key", LastFm::Global::api_key);
     params.addQueryItem("method", "track.scrobble");
     params.addQueryItem("sk", LastFm::Global::session_key);
     params.addQueryItem("token", LastFm::Global::token);
-    for (int i = 0; i < m_cache.size(); i++)
+    for (int i = 0; i <= items_count; i++)
     {
         if (m_cache.at(i)) {
             params.addQueryItem("album["+QString::number(i)+"]", m_cache.at(i)->album());
@@ -560,9 +565,10 @@ void LastFm::Cache::submit()
         }
     }
     params.addQueryItem("api_sig", LastFm::Scrobbler::getRequestSignature(params));
+    request.setAttribute(QNetworkRequest::User, QVariant(items_count));
 
 
-    data.append(params.toString().remove(0,1));
+    data.append(params.toString().remove(0, 1));
 
     QNetworkAccessManager *nam = new QNetworkAccessManager();
     // When request is done, destroy the QNetworkAccessManager
@@ -586,9 +592,13 @@ void LastFm::Cache::submitted(QNetworkReply *reply)
 
     QDomElement lfm = document.documentElement();
     if (lfm.attribute("status", "") == "ok") {
-        qDebug() << method << "for tracks in cache successfull, purging cache";
-        qDeleteAll(m_cache);
-        m_cache.clear();
+        qDebug() << method << "for tracks in cache successfull, removing them from cache";
+        int items_count = reply->request().attribute(QNetworkRequest::User).toInt();
+        for (int i = 0; i < items_count; i++) {
+            delete m_cache.at(i);
+            m_cache.removeAt(i);
+        }
+        qDebug() << "There are now" << m_cache.size() << "items in cache";
 
         // If we were able to submit track BEFORE the timer or this is timer's event, then
         // destroy the timer so that it won't tick anymore
