@@ -1,7 +1,6 @@
  TEPSONIC
 ==========
- Homepage: www.tepsonic.org
- Author: Dan Vratil <vratil@progdansoft.com>
+ Author: Dan Vratil <dan@progdan.cz>
  Contributors: Petr Los, David Watzke
 
  TepSonic is just yet another audio player. It is based on Qt and as an audio 
@@ -48,12 +47,10 @@ CONTENT
 3) BUGS
 --------
 
- If you find something you think that is a bug, please use bugzilla on http://bugs.tepsonic.org. Also if you have any suggestions,
- ideas, fill a feature request in bugzilla or send mail to devel@tepsonic.org
-
+ If you find something you think that is a bug, please use issue tracker on GitHub.
 
 4) CONTRIBUTING
 ----------------
- Please, feel free to contribute to TepSonic in any way. You can get latest sources from http://git.gitorious.org/tepsonic/tepsonic.git and
+ Please, feel free to contribute to TepSonic in any way. You can get latest sources from https://github.com/danvratil/TepSonic and
  start working on it. If you have any question, I'll be happy to answer it :-)
 
