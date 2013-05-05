@@ -104,27 +104,15 @@ target_link_libraries(tepsonic_lastfmscrobbler
                ${QT_QTXML_LIBRARIES}
 )
 
-if (NOT APPLEBUNDLE)
-    # standard UNIX and windows
-    set_target_properties(tepsonic_lastfmscrobbler
-                  PROPERTIES
-                  VERSION 0.2.0
-                  SOVERSION 1
-    )
-    install(TARGETS tepsonic_lastfmscrobbler
-	    DESTINATION ${INSTALL_LIBRARY_DIR}/
-    )
-    install(FILES ${TRANSLATIONS_BINARY}
-	    DESTINATION ${INSTALL_DATA_DIR}/tepsonic/locale/
-    )
-else (NOT APPLEBUNDLE)
-    # no symlinks for apple bundle
-    #set_target_properties(tepsonic_lastfmscrobbler PROPERTIES PREFIX "" SUFFIX ".dylib")    
-    install(TARGETS tepsonic_lastfmscrobbler
-            DESTINATION ${CMAKE_INSTALL_PREFIX}/tepsonic.app/Contents/plugins
-    )
-    install(FILES ${TRANSLATIONS_BINARY}
-            DESTINATION ${CMAKE_INSTALL_PREFIX}/tepsonic.app/Contents/Resources/
-    )
-endif (NOT APPLEBUNDLE)
-
+# standard UNIX and windows
+set_target_properties(tepsonic_lastfmscrobbler
+                PROPERTIES
+                VERSION 0.2.0
+                SOVERSION 1
+)
+install(TARGETS tepsonic_lastfmscrobbler
+        DESTINATION ${INSTALL_LIBRARY_DIR}/
+)
+install(FILES ${TRANSLATIONS_BINARY}
+        DESTINATION ${INSTALL_DATA_DIR}/tepsonic/locale/
+)

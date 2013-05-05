@@ -16,19 +16,19 @@ find_package(Taglib REQUIRED)
 find_package(Phonon REQUIRED)
 
 # Use native libqxt on Linux and patched sources in /3rdparty/qxt on Mac an Win.
-if (UNIX AND NOT APPLE AND NOT FORCE_INBUILD_QXT)
+if (NOT FORCE_INBUILD_QXT)
 	set(QXT_USE_QXTCORE TRUE)
 	set(QXT_USE_QXTGUI TRUE)
 	find_package(Qxt REQUIRED)
 	set(QXT_HEADERS "")
 	set(QXT_SOURCES "")
-else (UNIX AND NOT APPLE AND NOT FORCE_INBUILD_QXT)
+else ()
 	add_definitions(-DQXT_STATIC -DBUILD_QXT_GUI -DBUILD_QXT_CORE)
 	set(QXT_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/../3rdparty/qxt)
 	set(QXT_LIBRARIES qxt)
         set(QXT_HEADERS "../3rdparty/qxt/qxtglobalshortcut.h")
 	set(QXT_SOURCES "../3rdparty/qxt/qxtglobalshortcut.cpp")
-endif (UNIX AND NOT APPLE AND NOT FORCE_INBUILD_QXT)
+endif ()
 
   
 
@@ -192,26 +192,6 @@ if (WIN32)
   set(GUI_TYPE WIN32)
 endif (WIN32)
 
-if (APPLEBUNDLE)
-    set(GUI_TYPE MACOSX_BUNDLE)
-    # create Info.plist file
-    SET(MACOSX_BUNDLE_ICON_FILE tepsonic.icns)
-    SET(MACOSX_BUNDLE_INFO_STRING "tepsonic ${VERSION}")
-    SET(MACOSX_BUNDLE_GUI_IDENTIFIER "org.tepsonic")
-    SET(MACOSX_BUNDLE_LONG_VERSION_STRING "${TEPSONIC_VERSION}")
-    SET(MACOSX_BUNDLE_BUNDLE_NAME "${tepsonic}")
-    SET(MACOSX_BUNDLE_SHORT_VERSION_STRING "${TEPSONIC_VERSION}")
-    SET(MACOSX_BUNDLE_BUNDLE_VERSION "${TEPSONIC_VERSION}")
-    SET(MACOSX_BUNDLE_COPYRIGHT "(c) tepsonic.org")
-    SET_SOURCE_FILES_PROPERTIES(${CMAKE_SOURCE_DIR}/macosx/tepsonic.icns
-                                PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
-    # use icon for app bundle to be visible in finder
-    SET(APPLE_BUNDLE_SOURCES ${CMAKE_SOURCE_DIR}/macosx/tepsonic.icns)
-else (APPLEBUNDLE)
-    # failback variable settings for non-bundle environments
-    SET(APPLE_BUNDLE_SOURCES "")
-endif (APPLEBUNDLE)
-
 add_executable(tepsonic
   	       ${GUI_TYPE}
 	       ${player_RCCS_SRCS}
@@ -219,7 +199,6 @@ add_executable(tepsonic
 	       ${player_QMOC_SRCS}
 	       ${player_SRCS}
 	       ${TRANSLATIONS_BINARY}
-               ${APPLE_BUNDLE_SOURCES}
 )
 
 if (TRANSLATIONS)
@@ -235,60 +214,33 @@ target_link_libraries(tepsonic
 		      ${X11_LIBRARIES}
 )
 
-if (APPLE)
-    target_link_libraries(tepsonic ${CARBON_LIBRARY})
-endif (APPLE)
+# standard instalation of the binary
+install(TARGETS tepsonic
+        RUNTIME DESTINATION ${INSTALL_BINARY_DIR}
+)
 
+install(FILES ${TRANSLATIONS_BINARY}
+        DESTINATION ${INSTALL_DATA_DIR}/tepsonic/locale/
+)
 
-
-if (APPLEBUNDLE)
-    
-    # Used only for mac's bundle builds
-    # Warning: This is dangerous to touch. Except you know what are you doing.
-    #          I ususaly don't know anything about it. But it's working ;)
-    INSTALL(TARGETS tepsonic BUNDLE DESTINATION ${CMAKE_INSTALL_PREFIX})
-
-else (APPLEBUNDLE)        
-
-    # standard instalation of the binary
-    install(TARGETS tepsonic
-	    RUNTIME DESTINATION ${INSTALL_BINARY_DIR}
-    )
-
-endif (APPLEBUNDLE)
-
-
-
-if (UNIX AND NOT APPLEBUNDLE)
-	install(FILES ${TRANSLATIONS_BINARY}
-		DESTINATION ${INSTALL_DATA_DIR}/tepsonic/locale/
-	)
-
-	install(FILES ../tepsonic.desktop
-		DESTINATION ${INSTALL_DATA_DIR}/applications
-	)
-	install(FILES ../icons/app_icons/16x16/tepsonic.png
-		DESTINATION ${INSTALL_DATA_DIR}/icons/hicolor/16x16/apps
-	)
-	install(FILES ../icons/app_icons/32x32/tepsonic.png
-        	DESTINATION ${INSTALL_DATA_DIR}/icons/hicolor/32x32/apps
-	)
-	install(FILES ../icons/app_icons/48x48/tepsonic.png
-        	DESTINATION ${INSTALL_DATA_DIR}/icons/hicolor/48x48/apps
-	)
-	install(FILES ../icons/app_icons/64x64/tepsonic.png
-        	DESTINATION ${INSTALL_DATA_DIR}/icons/hicolor/64x64/apps
-	)
-	install(FILES ../icons/app_icons/128x128/tepsonic.png
-        	DESTINATION ${INSTALL_DATA_DIR}/icons/hicolor/128x128/apps
-	)
-	install(FILES ../icons/app_icons/256x256/tepsonic.png
-        	DESTINATION ${INSTALL_DATA_DIR}/icons/hicolor/256x256/apps
-	)
-endif(UNIX AND NOT APPLEBUNDLE)
-
-if (APPLEBUNDLE)
-    install(FILES ${TRANSLATIONS_BINARY}
-            DESTINATION ${CMAKE_INSTALL_PREFIX}/tepsonic.app/Contents/Resources)
-endif (APPLEBUNDLE)
-
+install(FILES ../tepsonic.desktop
+        DESTINATION ${INSTALL_DATA_DIR}/applications
+)
+install(FILES ../icons/app_icons/16x16/tepsonic.png
+        DESTINATION ${INSTALL_DATA_DIR}/icons/hicolor/16x16/apps
+)
+install(FILES ../icons/app_icons/32x32/tepsonic.png
+        DESTINATION ${INSTALL_DATA_DIR}/icons/hicolor/32x32/apps
+)
+install(FILES ../icons/app_icons/48x48/tepsonic.png
+        DESTINATION ${INSTALL_DATA_DIR}/icons/hicolor/48x48/apps
+)
+install(FILES ../icons/app_icons/64x64/tepsonic.png
+        DESTINATION ${INSTALL_DATA_DIR}/icons/hicolor/64x64/apps
+)
+install(FILES ../icons/app_icons/128x128/tepsonic.png
+        DESTINATION ${INSTALL_DATA_DIR}/icons/hicolor/128x128/apps
+)
+install(FILES ../icons/app_icons/256x256/tepsonic.png
+        DESTINATION ${INSTALL_DATA_DIR}/icons/hicolor/256x256/apps
+)

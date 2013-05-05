@@ -27,9 +27,6 @@ QString getConfigDir()
 
     QString configdir;
 
-#ifdef Q_OS_WIN32
-    configdir = QDir::homePath()+QDir::separator()+".config"+QDir::separator()+"tepsonic";
-#else
     if (getenv("XDG_CONFIG_HOME")==NULL) {
         configdir = getenv("HOME");
         configdir.append("/.config/tepsonic");
@@ -37,6 +34,6 @@ QString getConfigDir()
         configdir = getenv("XDG_CONFIG_HOME");
         configdir.append("/tepsonic");
     }
-#endif
+
     return configdir;
 }
