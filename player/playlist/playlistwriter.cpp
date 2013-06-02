@@ -24,38 +24,32 @@
 #include <QDir>
 #include <QFileInfo>
 
-PlaylistWriter::PlaylistWriter(PlaylistModel *playlistModel)
+PlaylistWriter::PlaylistWriter(PlaylistModel *playlistModel):
+    QObject(),
+    QRunnable(),
+    m_playlistModel(playlistModel)
 {
-
-    m_outputFile = QString();
-    m_playlistModel = playlistModel;
-
 }
-
 
 void PlaylistWriter::run()
 {
-
-        if (!m_outputFile.isEmpty())
-        {
-            QDir playlistDir(QFileInfo(m_outputFile).path());
-
-            QFile file(m_outputFile);
-            if (file.open(QFile::WriteOnly)) {
-
-                file.flush();
-                for (int i = 0; i < m_playlistModel->rowCount(QModelIndex()); i++) {
-                    QString trackfname = playlistDir.relativeFilePath(m_playlistModel->index(i, 0, QModelIndex()).data().toString());
-                    file.write(QByteArray().append(trackfname).append("\n"));
-                }
+    if (!m_outputFile.isEmpty()) {
+        const QDir playlistDir(QFileInfo(m_outputFile).path());
+        QFile file(m_outputFile);
+        if (file.open(QFile::WriteOnly)) {
+            file.flush();
+            for (int i = 0; i < m_playlistModel->rowCount(QModelIndex()); i++) {
+                const QString trackfname = playlistDir.relativeFilePath(m_playlistModel->index(i, 0, QModelIndex()).data().toString());
+                file.write(QByteArray().append(trackfname).append("\n"));
             }
-            file.close();
         }
-        emit playlistSaved();
+        file.close();
+    }
 
+    Q_EMIT playlistSaved();
 }
 
-void PlaylistWriter::saveToFile(QString filename)
+void PlaylistWriter::saveToFile(const QString &filename)
 {
     m_outputFile = filename;
 }

@@ -21,9 +21,9 @@
 #ifndef COLLECTIONPOPULATOR_H
 #define COLLECTIONPOPULATOR_H
 
-#include <QRunnable>
-#include <QObject>
-#include <QModelIndex>
+#include <QtCore/QRunnable>
+#include <QtCore/QObject>
+#include <QtCore/QModelIndex>
 
 class CollectionModel;
 
@@ -35,28 +35,31 @@ class CollectionModel;
 class CollectionPopulator : public QObject, public QRunnable
 {
     Q_OBJECT
-public:
+
+  public:
     //! Constructor
     /*!
       Constructor that sets up collectionModel and launches the thread
       \param collectionModel ptr-to-ptr CollectionModel
     */
-    explicit CollectionPopulator(CollectionModel **collectionModel);
+    explicit CollectionPopulator(CollectionModel *collectionModel);
 
     //! Main thread method
     void run();
 
-signals:
+  Q_SIGNALS:
     //! Emitted when whole collections are populated
     void collectionsPopulated();
 
     void clearCollectionModel();
 
-    void addChild(QModelIndex parent, QString title, QString filename, QString data1, QString data2, QModelIndex *item);
+    void addChild(const QModelIndex &parent, const QString &title,
+                  const QString &filename, const QString &data1,
+                  const QString &data2, QModelIndex &item);
 
-private:
+  private:
     //! Pointer to pointer to CollectionModel
-    CollectionModel **m_collectionModel;
+    CollectionModel *m_collectionModel;
 
 };
 

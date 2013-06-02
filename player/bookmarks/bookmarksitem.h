@@ -21,18 +21,19 @@
 #ifndef BOOKMARKSITEM_H
 #define BOOKMARKSITEM_H
 
-#include <QListWidgetItem>
+#include <QtGui/QListWidgetItem>
 
 class BookmarksItem : public QListWidgetItem
 {
-    public:
-        explicit BookmarksItem(QString title, QString path, QListWidgetItem *parent = 0);
-        QString getPath();
+  public:
+    explicit BookmarksItem(const QString &title, const QString &path,
+                           QListWidget *parent = 0);
+    virtual ~BookmarksItem();
 
-    private:
-        QString m_path;
+    QString getPath() const;
 
-
+  private:
+    QString m_path;
 };
 
 #endif // BOOKMARKSITEM_H

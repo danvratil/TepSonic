@@ -24,41 +24,46 @@
 #include "settingspage.h"
 #include "ui_collectionspage.h"
 
-namespace Ui {
-    class CollectionsPage;
+namespace Ui
+{
+class CollectionsPage;
 }
 
-namespace SettingsPages {
+namespace SettingsPages
+{
 
-    class CollectionsPage: public SettingsPage
-    {
-        Q_OBJECT
-        public:
-            CollectionsPage(QWidget *parent = 0);
-            ~CollectionsPage();
+class CollectionsPage: public SettingsPage
+{
+    Q_OBJECT
 
-            bool collectionsSourceChanged() { return m_collectionsSourceChanged; }
+  public:
+    CollectionsPage(QWidget *parent = 0);
+    ~CollectionsPage();
 
-        public slots:
-            void loadSettings(QSettings *settings);
-            void saveSettings(QSettings *settings);
+    bool collectionsSourceChanged() {
+        return m_collectionsSourceChanged;
+    }
 
-        private:
-            ::Ui::CollectionsPage *m_ui;
+  public Q_SLOTS:
+    void loadSettings(QSettings *settings);
+    void saveSettings(QSettings *settings);
 
-            bool m_collectionsSourceChanged;
+  private:
+    ::Ui::CollectionsPage *m_ui;
 
-        private slots:
-            void removeAllPaths();
-            void removePath();
-            void addPath();
-            void changeEngine(QString);
+    bool m_collectionsSourceChanged;
 
-            void collectionStateToggled();
+  private Q_SLOTS:
+    void removeAllPaths();
+    void removePath();
+    void addPath();
+    void changeEngine(const QString &engine);
 
-        signals:
-            void rebuildCollections();
-    };
+    void collectionStateToggled();
+
+  Q_SIGNALS:
+    void rebuildCollections();
+};
 }
 
 #endif // COLLECTIONSPAGE_H

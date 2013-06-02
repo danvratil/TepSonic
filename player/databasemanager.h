@@ -20,8 +20,8 @@
 #ifndef DATABASEMANAGER_H
 #define DATABASEMANAGER_H
 
-#include <QObject>
-#include <QSettings>
+#include <QtCore/QObject>
+#include <QtCore/QSettings>
 #include <QtSql/QSqlDatabase>
 
 
@@ -29,7 +29,7 @@
 /* When connecting to DB, we automatically checked for DB revision. When the numbers
    don't match, the DB is dropped and collections are rebuilt
 */
-#define _DBREVISION "7";
+#define _DBREVISION "7"
 
 //! DatabaseManager handles connection to database
 /*!
@@ -44,84 +44,92 @@ class DatabaseManager : public QObject
     Q_OBJECT
     Q_ENUMS(DriverTypes)
 
-    public:
-        //! Enumerates supported database storage backends.
-        /*!
-          DriverTypes provide enumeration of supported drivers. Manager sets currently
-          used driver type according to user settings. The current driver type can be obtained
-          by method driverType().
-          \sa driverType()
-        */
-        enum DriverTypes { SQLite, MySQL };
+public:
+    //! Enumerates supported database storage backends.
+    /*!
+      DriverTypes provide enumeration of supported drivers. Manager sets currently
+      used driver type according to user settings. The current driver type can be obtained
+      by method driverType().
+      \sa driverType()
+    */
+    enum DriverTypes { SQLite, MySQL };
 
-        //! Constructor
-        /*!
-          Initialize manager, set which db backend will be used
-          \param connectionName uniq indentificator of the connection
-        */
-        DatabaseManager(QString connectionName = "");
+    //! Constructor
+    /*!
+      Initialize manager, set which db backend will be used
+      \param connectionName uniq indentificator of the connection
+    */
+    DatabaseManager(const QString &connectionName = QString());
 
-        //! Destructor
-        ~DatabaseManager();
+    //! Destructor
+    ~DatabaseManager();
 
-        //! Attempts to establish connection to database
-        /*!
-          \return Returns true on success, false when fails to connect.
-        */
-        bool connectToDB();
+    //! Attempts to establish connection to database
+    /*!
+      \return Returns true on success, false when fails to connect.
+    */
+    bool connectToDB();
 
-        //! Returns type of database storage backend that will be used.
-        /*!
-          This can be usefull especially for more complex queries that may differ in syntax
-          in various databases (SQLite vs MySQL...)
-          \return Returns type of database storage backend that is used.
-        */
-        DriverTypes driverType()  { return m_driverType; };
+    //! Returns type of database storage backend that will be used.
+    /*!
+      This can be usefull especially for more complex queries that may differ in syntax
+      in various databases (SQLite vs MySQL...)
+      \return Returns type of database storage backend that is used.
+    */
+    DriverTypes driverType() const  {
+        return m_driverType;
+    };
 
-        //! Returns QSqlDatabase connection object
-        QSqlDatabase* sqlDb() { return m_sqlDb; }
+    //! Returns QSqlDatabase connection object
+    QSqlDatabase sqlDb() const {
+        return m_sqlDb;
+    }
 
-        //! Returns wheter connection is now available or not
-        static bool connectionAvailable() { return m_static_connectionAvailable; }
+    //! Returns wheter connection is now available or not
+    static bool connectionAvailable() {
+        return m_static_connectionAvailable;
+    }
 
-        //! Force new state of connection availability
-        static void forceConnectionAvailable(bool forceState = true) { m_static_connectionAvailable = forceState; }
+    //! Force new state of connection availability
+    static void forceConnectionAvailable(bool forceState = true) {
+        m_static_connectionAvailable = forceState;
+    }
 
-    private:
-        //! Check if the database contains all required tables and if not creates them
-        /*!
-          Checks wheter the structure of tables is up-to-date and all tables are present. When not, it's recreated.
-        */
-        void initDb();
+private:
+    //! Check if the database contains all required tables and if not creates them
+    /*!
+      Checks wheter the structure of tables is up-to-date and all tables are present. When not, it's recreated.
+    */
+    void initDb();
 
-        //! Unique identification of the connection
-        QString m_connectionName;
+    //! Unique identification of the connection
+    QString m_connectionName;
 
-        //! Driver type that is used in this session
-        /*!
-          \sa driverType()
-        */
-        DriverTypes m_driverType;
+    //! Driver type that is used in this session
+    /*!
+      \sa driverType()
+    */
+    DriverTypes m_driverType;
 
-        //! Database server hostname or IP
-        QString m_server;
+    //! Database server hostname or IP
+    QString m_server;
 
-        //! Database server username
-        QString m_username;
+    //! Database server username
+    QString m_username;
 
-        //! Database server password
-        QString m_password;
+    //! Database server password
+    QString m_password;
 
-        //! Database
-        QString m_db;
+    //! Database
+    QString m_db;
 
-        //! SQL database
-        QSqlDatabase *m_sqlDb;
+    //! SQL database
+    QSqlDatabase m_sqlDb;
 
-        //! Is connection available?
-        static bool m_static_connectionAvailable;
+    //! Is connection available?
+    static bool m_static_connectionAvailable;
 
-        bool m_connectionAvailable;
+    bool m_connectionAvailable;
 
 
 };

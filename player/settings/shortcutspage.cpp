@@ -21,7 +21,7 @@
 #include "ui_shortcutspage.h"
 #include "changeshortcutdialog.h"
 
-#include <QTreeWidgetItem>
+#include <QtGui/QTreeWidgetItem>
 
 using namespace SettingsPages;
 
@@ -39,21 +39,22 @@ ShortcutsPage::~ShortcutsPage()
     delete m_ui;
 }
 
-void ShortcutsPage::changeShortcut(QModelIndex index)
+void ShortcutsPage::changeShortcut(const QModelIndex &index)
 {
     m_csw = new ChangeShortcutDialog(index, this);
-    connect(m_csw, SIGNAL(shortcutChanged(QModelIndex,QKeySequence)),
-            this, SLOT(shortcutChanged(QModelIndex,QKeySequence)));
+    connect(m_csw, SIGNAL(shortcutChanged(QModelIndex, QKeySequence)),
+            this, SLOT(shortcutChanged(QModelIndex, QKeySequence)));
     m_csw->show();
 }
 
-void ShortcutsPage::shortcutChanged(QModelIndex index, QKeySequence shortcut)
+void ShortcutsPage::shortcutChanged(const QModelIndex &index, const QKeySequence &shortcut)
 {
-    QTreeWidgetItem *item = static_cast<QTreeWidgetItem*>(index.internalPointer());
+    QTreeWidgetItem *item = static_cast<QTreeWidgetItem *>(index.internalPointer());
     item->setData(1, Qt::EditRole, QVariant(shortcut.toString(QKeySequence::NativeText)));
 
-    if (m_csw)
+    if (m_csw) {
         delete m_csw;
+    }
 }
 
 void ShortcutsPage::loadSettings(QSettings *settings)
@@ -96,8 +97,7 @@ void ShortcutsPage::loadSettings(QSettings *settings)
 void ShortcutsPage::saveSettings(QSettings *settings)
 {
     settings->beginGroup("Shortcuts");
-    for (int i = 0; i < m_ui->shortcutsList->topLevelItemCount(); i++)
-    {
+    for (int i = 0; i < m_ui->shortcutsList->topLevelItemCount(); i++) {
         settings->setValue(m_ui->shortcutsList->topLevelItem(i)->data(0, Qt::UserRole).toString(),
                            m_ui->shortcutsList->topLevelItem(i)->data(1, Qt::DisplayRole));
     }

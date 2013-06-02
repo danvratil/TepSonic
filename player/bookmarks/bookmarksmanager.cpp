@@ -24,55 +24,52 @@
 #include "constants.h"
 #include "ui_mainwindow.h"
 
-#include <QSettings>
-#include <QDir>
-#include <QMenu>
-#include <QMessageBox>
-#include <QListWidgetItem>
+#include <QtCore/QSettings>
+#include <QtCore/QDir>
+#include <QtGui/QMenu>
+#include <QtGui/QMessageBox>
+#include <QtGui/QListWidgetItem>
 
 
-BookmarksManager::BookmarksManager(Ui::MainWindow *ui):
-        m_bookmarksBrowser(0),
-        m_mwui(ui),
-        m_addBookmarkDlg(0),
-        m_contextMenu(0),
-        m_dontDeleteBookmarksBrowser(false)
+BookmarksManager::BookmarksManager(Ui::MainWindow *ui, QObject *parent):
+    QObject(parent),
+    m_bookmarksBrowser(0),
+    m_mwui(ui),
+    m_addBookmarkDlg(0),
+    m_contextMenu(0),
+    m_dontDeleteBookmarksBrowser(false)
 {
-    QSettings settings(_CONFIGDIR + QDir::separator() + "bookmarks",QSettings::IniFormat,this);
+    const QSettings settings(_CONFIGDIR + QDir::separator() + "bookmarks", QSettings::IniFormat);
 
-    QStringList bookmarks = settings.childGroups();
-    foreach (QString bookmark, bookmarks) {
-        QString title = settings.value(bookmark+"/title", QString()).toString();
-        QString path = settings.value(bookmark+"/path", QString()).toString();
-        m_bookmarks.append(QPair<QString,QString>(title, path));
+    const QStringList bookmarks = settings.childGroups();
+    Q_FOREACH (const QString &bookmark, bookmarks) {
+        const QString title = settings.value(bookmark + "/title", QString()).toString();
+        const QString path = settings.value(bookmark + "/path", QString()).toString();
+        m_bookmarks.append(QPair<QString, QString>(title, path));
     }
 
     m_contextMenu = new QMenu();
     m_contextMenu->addAction(tr("Remove bookmark"), this, SLOT(removeBookmark()));
-
 }
-
 
 BookmarksManager::~BookmarksManager()
 {
-    QSettings settings(_CONFIGDIR + QDir::separator() + "bookmarks",QSettings::IniFormat,this);
+    QSettings settings(_CONFIGDIR + QDir::separator() + "bookmarks", QSettings::IniFormat);
 
-    for (int i = 0; i < m_bookmarks.length(); i++)
-    {
+    for (int i = 0; i < m_bookmarks.length(); i++) {
         //no qobject_cast since BookmarksItem is not a QObject
-        QPair<QString,QString> pair = m_bookmarks.at(i);
-        settings.setValue(QString::number(i)+"/title", pair.first);
-        settings.setValue(QString::number(i)+"/path", pair.second);
+        QPair<QString, QString> pair = m_bookmarks.at(i);
+        settings.setValue(QString::number(i) + "/title", pair.first);
+        settings.setValue(QString::number(i) + "/path", pair.second);
     }
 
     delete m_contextMenu;
 }
 
-
 void BookmarksManager::toggleBookmarks()
 {
     if (m_bookmarksBrowser) {
-        /* BEWARE: HACK! When this method is called from openBookmarkInFSB() (via
+        /* FIXME: HACK! When this method is called from openBookmarkInFSB() (via
            m_mwui->fsbBookmarksBtn->toggled() slot, the variable is set to true,
            because the bookmarks browser must not be deleted from here (it crashes tepsonic).
            The browser is then deleted in the openBookmarkInFSB() method.
@@ -101,8 +98,9 @@ void BookmarksManager::toggleBookmarks()
         m_bookmarksBrowser->setContextMenuPolicy(Qt::CustomContextMenu);
         m_mwui->fsbTab->layout()->addWidget(m_bookmarksBrowser);
 
-        for (int i = 0; i < m_bookmarks.length(); i++)
+        for (int i = 0; i < m_bookmarks.length(); i++) {
             m_bookmarksBrowser->addItem(m_bookmarks.at(i).first);
+        }
 
         connect(m_bookmarksBrowser, SIGNAL(customContextMenuRequested(QPoint)),
                 this, SLOT(showBookmarksContextMenu(QPoint)));
@@ -110,7 +108,6 @@ void BookmarksManager::toggleBookmarks()
                 m_bookmarksBrowser, SLOT(setFilter(QString)));
         connect(m_bookmarksBrowser, SIGNAL(doubleClicked(QModelIndex)),
                 this, SLOT(openBookmarkInFSB(QModelIndex)));
-
 
         m_fwdBtnEnabled = m_mwui->fsbFwBtn->isEnabled();
         m_backBtnEnabled = m_mwui->fsbBackBtn->isEnabled();
@@ -123,16 +120,13 @@ void BookmarksManager::toggleBookmarks()
     }
 }
 
-
-void BookmarksManager::showAddBookmarkDialog(QString path)
+void BookmarksManager::showAddBookmarkDialog(const QString &path)
 {
     m_addBookmarkDlg = new AddBookmarkDlg(path);
-    connect(m_addBookmarkDlg, SIGNAL(accepted(QString,QString)),
-            this, SLOT(addBookmark(QString,QString)));
+    connect(m_addBookmarkDlg, SIGNAL(accepted(QString, QString)),
+            this, SLOT(addBookmark(QString, QString)));
     m_addBookmarkDlg->exec();
-
 }
-
 
 void BookmarksManager::removeBookmark()
 {
@@ -143,42 +137,37 @@ void BookmarksManager::removeBookmark()
                        QMessageBox::Yes,
                        QMessageBox::No,
                        0); // empty 3rd button
-    if (msgbox.exec() == QMessageBox::No)
+    if (msgbox.exec() == QMessageBox::No) {
         return;
+    }
 
-    QModelIndex bmark = m_bookmarksBrowser->currentIndex();
+    const QModelIndex bmark = m_bookmarksBrowser->currentIndex();
 
     m_bookmarks.removeAt(bmark.row());
     m_bookmarksBrowser->removeAt(bmark.row());
-    QSettings settings(_CONFIGDIR + QDir::separator() + "bookmarks",QSettings::IniFormat,this);
+    QSettings settings(_CONFIGDIR + QDir::separator() + "bookmarks", QSettings::IniFormat);
     settings.remove(QString::number(bmark.row()));
 }
 
-
-void BookmarksManager::showBookmarksContextMenu(QPoint pos)
+void BookmarksManager::showBookmarksContextMenu(const QPoint &pos) const
 {
-    if (!m_bookmarksBrowser->indexAt(pos).isValid())
+    if (!m_bookmarksBrowser->indexAt(pos).isValid()) {
         m_contextMenu->actions().at(0)->setDisabled(true);
+    }
 
-    QPoint ppos = m_bookmarksBrowser->mapToGlobal(pos);
+    const QPoint ppos = m_bookmarksBrowser->mapToGlobal(pos);
     m_contextMenu->popup(ppos);
 }
 
-
-
-void BookmarksManager::addBookmark(QString title, QString path)
+void BookmarksManager::addBookmark(const QString &title, const QString &path)
 {
-    m_bookmarks.append(QPair<QString,QString>(title,path));
+    m_bookmarks.append(qMakePair(title, path));
 }
 
-
-
-void BookmarksManager::openBookmarkInFSB(QModelIndex bookmark)
+void BookmarksManager::openBookmarkInFSB(const QModelIndex &bookmark)
 {
-    QModelIndex mappedRow = m_bookmarksBrowser->mapToSource(bookmark);
-
-    QString dir = m_bookmarks.at(mappedRow.row()).second;
-
+    const QModelIndex mappedRow = m_bookmarksBrowser->mapToSource(bookmark);
+    const QString dir = m_bookmarks.at(mappedRow.row()).second;
 
     m_mwui->filesystemBrowser->goToDir(dir);
 
@@ -198,9 +187,7 @@ void BookmarksManager::openBookmarkInFSB(QModelIndex bookmark)
     delete m_bookmarksBrowser;
 }
 
-
-
-QString BookmarksManager::getBookmarkPath(int row)
+QString BookmarksManager::getBookmarkPath(int row) const
 {
     return m_bookmarks.at(row).second;
 }

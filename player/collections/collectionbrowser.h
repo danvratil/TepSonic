@@ -20,7 +20,7 @@
 #ifndef COLLECTIONBROWSER_H
 #define COLLECTIONBROWSER_H
 
-#include <QTreeView>
+#include <QtGui/QTreeView>
 
 //! A View for displaying tree structure of collections
 /*!
@@ -30,24 +30,23 @@
 */
 class CollectionBrowser : public QTreeView
 {
-public:
-
+  public:
     //! Constructor
-    CollectionBrowser(QWidget* = 0);
+    CollectionBrowser(QWidget *parent = 0);
 
     //! Destructor
     ~CollectionBrowser();
 
-protected:
+  protected:
     //! Event that is fired when drag operation is started
-    void startDrag(Qt::DropActions);
+    void startDrag(Qt::DropActions dropActions);
 
     //! Event handler that is fired when a key is pressed
     /*!
       It is called only when CollectionBrowser has focus when the key
       is pressed
     */
-    void keyPressEvent(QKeyEvent*);
+    void keyPressEvent(QKeyEvent *event);
 
 };
 

@@ -19,9 +19,8 @@
  * Contributors: Petr Vaněk
  */
 
-#include <QString>
-#include <QStringList>
-#include <QObject>
+#include <QtCore/QString>
+#include <QtCore/QStringList>
 
 #include "tools.h"
 

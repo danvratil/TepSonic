@@ -18,21 +18,21 @@
  */
 
 #include <QtGui/QApplication>
-#include <QDir>
-#include <QFileInfo>
-#include <QObject>
-#include <QLocale>
-#include <QLibraryInfo>
-#include <QTextCodec>
-#include <QTranslator>
-#include <QString>
+#include <QtCore/QDir>
+#include <QtCore/QFileInfo>
+#include <QtCore/QObject>
+#include <QtCore/QLocale>
+#include <QtCore/QLibraryInfo>
+#include <QtCore/QTextCodec>
+#include <QtCore/QTranslator>
+#include <QtCore/QString>
+#include <QtCore/QDebug>
+
 #include "player.h"
 #include "mainwindow.h"
 #include "pluginsmanager.h"
-
 #include "constants.h"
 
-#include <QDebug>
 
 Player *player;
 PluginsManager *pluginsManager;

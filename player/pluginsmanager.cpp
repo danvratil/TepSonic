@@ -27,14 +27,14 @@
 #include "player.h"
 
 
-#include <QApplication>
-#include <QDir>
-#include <QFileInfo>
-#include <QLibrary>
-#include <QMap>
-#include <QPluginLoader>
-#include <QDebug>
-#include <QSettings>
+#include <QtGui/QApplication>
+#include <QtCore/QDir>
+#include <QtCore/QFileInfo>
+#include <QtCore/QLibrary>
+#include <QtCore/QMap>
+#include <QtCore/QPluginLoader>
+#include <QtCore/QDebug>
+#include <QtCore/QSettings>
 #include <phonon/mediaobject.h>
 
 PluginsManager::PluginsManager(){}
@@ -42,12 +42,11 @@ PluginsManager::PluginsManager(){}
 PluginsManager::~PluginsManager()
 {
     // Unload all plugins
-    foreach (Plugin *plugin, m_pluginsList) {
+    Q_FOREACH (Plugin *plugin, m_pluginsList) {
         disablePlugin(plugin);
         delete plugin;
     }
 }
-
 
 void PluginsManager::loadPlugins()
 {
@@ -93,13 +92,13 @@ void PluginsManager::loadPlugins()
     QDir pluginsDir;
     pluginsDir.setNameFilters(QStringList() << "libtepsonic_*");
     pluginsDir.setFilter(QDir::Files | QDir::NoSymLinks);
-    foreach(QString folder, pluginsDirs) {
+    Q_FOREACH (const QString &folder, pluginsDirs) {
         // Use each of the pluginsDirs
         pluginsDir.setPath(folder);
         // Now go through all the plugins found in the current folder
-        foreach(QString filename, pluginsDir.entryList()) {
+        Q_FOREACH (const QString &filename, pluginsDir.entryList()) {
             // Get complete path+filename
-            QString pluginFile = folder+QDir::separator()+filename;
+            const QString pluginFile = folder+QDir::separator() + filename;
             // If the file is a library...
             if (QLibrary::isLibrary(pluginFile)) {
 
@@ -111,8 +110,7 @@ void PluginsManager::loadPlugins()
                     continue;
                 }
 
-                QString pluginid = pluginID();
-
+                const QString pluginid = pluginID();
                 if (!pluginsNames.contains(pluginid)) {
                     qDebug() << "Found plugin " << pluginid;
                     Plugin *plugin = loadPlugin(pluginFile);
@@ -125,22 +123,24 @@ void PluginsManager::loadPlugins()
         }
     }
 
-    emit pluginsLoaded();
+    Q_EMIT pluginsLoaded();
 }
 
-int PluginsManager::pluginsCount()
+int PluginsManager::pluginsCount() const
 {
     return m_pluginsList.count();
 }
 
-struct PluginsManager::Plugin* PluginsManager::pluginAt(int index)
+PluginsManager::Plugin* PluginsManager::pluginAt(int index) const
 {
     return m_pluginsList.at(index);
 }
 
 void PluginsManager::disablePlugin(Plugin *plugin)
 {
-    if (!plugin->enabled) return;
+    if (!plugin->enabled) {
+        return;
+    }
 
     AbstractPlugin* aplg = reinterpret_cast<AbstractPlugin*>(plugin->pluginLoader->instance());
 
@@ -158,7 +158,9 @@ void PluginsManager::disablePlugin(Plugin *plugin)
 void PluginsManager::enablePlugin(Plugin *plugin)
 {
     // There's nothing to do when plugin is enabled
-    if (plugin->enabled) return;
+    if (plugin->enabled) {
+        return;
+    }
 
     QPluginLoader *pluginLoader = new QPluginLoader(plugin->filename);
     if (! pluginLoader->load()) {
@@ -166,7 +168,6 @@ void PluginsManager::enablePlugin(Plugin *plugin)
         return;
     }
     plugin->pluginLoader = pluginLoader;
-
 
     AbstractPlugin *aplg = reinterpret_cast<AbstractPlugin*>(plugin->pluginLoader->instance());
 
@@ -182,21 +183,22 @@ void PluginsManager::enablePlugin(Plugin *plugin)
     plugin->enabled = true;
 
     // Install menus for the plugins
-    for (int i = 0; i < menus.size(); i++)
+    for (int i = 0; i < menus.size(); i++) {
         installMenus(menus.keys().at(i), menus.values().at(i));
-
+    }
 }
 
-PluginsManager::Plugin* PluginsManager::loadPlugin(QString filename)
+PluginsManager::Plugin* PluginsManager::loadPlugin(const QString &filename)
 {
     // Check if the plugin isn't already loaded
     QLibrary lib(filename);
     PluginIDFcn pluginID = (PluginIDFcn)lib.resolve("pluginID");
-    QString pluginid = pluginID();
+    const QString pluginid = pluginID();
 
     for (int i = 0; i < m_pluginsList.count(); i++) {
-        if (m_pluginsList.at(i)->pluginID == pluginid)
+        if (m_pluginsList.at(i)->pluginID == pluginid) {
             return m_pluginsList.at(i);
+        }
     }
 
     PluginNameFcn pluginName = (PluginNameFcn)lib.resolve("pluginName");
@@ -218,18 +220,20 @@ PluginsManager::Plugin* PluginsManager::loadPlugin(QString filename)
 
 void PluginsManager::installMenus(QMenu *menu, Plugins::MenuTypes menuType)
 {
-    if (!menus.contains(menu))
+    if (!menus.contains(menu)) {
         menus.insert(menu, menuType);
+    }
 
-    for (int i = 0; i < m_pluginsList.size(); i++)
-    {
+    for (int i = 0; i < m_pluginsList.size(); i++) {
         Plugin *plugin = m_pluginsList.at(i);
-        if (!plugin) continue;
-
-        if (!plugin->enabled) continue;
+        if (!plugin || !plugin->enabled) {
+            continue;
+        }
 
         AbstractPlugin *aplg = reinterpret_cast<AbstractPlugin*>(plugin->pluginLoader->instance());
-        if (!aplg) continue;
+        if (!aplg) {
+            continue;
+        }
 
         aplg->setupMenu(menu, menuType);
     }
@@ -237,15 +241,16 @@ void PluginsManager::installMenus(QMenu *menu, Plugins::MenuTypes menuType)
 
 void PluginsManager::installPanes(QTabWidget *tabwidget)
 {
-    for (int i = 0; i < m_pluginsList.size(); i++)
-    {
+    for (int i = 0; i < m_pluginsList.size(); i++) {
         Plugin *plugin = m_pluginsList.at(i);
-        if (!plugin) continue;
-
-        if (!plugin->enabled) continue;
+        if (!plugin || !plugin->enabled) {
+            continue;
+        }
 
         AbstractPlugin *aplg = reinterpret_cast<AbstractPlugin*>(plugin->pluginLoader->instance());
-        if (!aplg) continue;
+        if (!aplg) {
+            continue;
+        }
 
         QWidget *pane = new QWidget(tabwidget);
         QString label;

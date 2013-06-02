@@ -19,7 +19,7 @@
 
 #include "playereffectdialog.h"
 
-PlayerEffectDialog::PlayerEffectDialog(Phonon::Effect* effect)
+PlayerEffectDialog::PlayerEffectDialog(Phonon::Effect *effect)
 {
     setWindowTitle(tr("Effect settings"));
     setAttribute(Qt::WA_DeleteOnClose);

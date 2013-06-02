@@ -21,42 +21,45 @@
 #ifndef CHANGESHORTCUTDIALOG_H
 #define CHANGESHORTCUTDIALOG_H
 
-#include <QDialog>
-#include <QModelIndex>
-#include <QKeySequence>
-#include <QKeyEvent>
+#include <QtGui/QDialog>
+#include <QtGui/QKeySequence>
+#include <QtGui/QKeyEvent>
+#include <QtCore/QModelIndex>
 
-namespace Ui {
-    class ChangeShortcutDialog;
+namespace Ui
+{
+class ChangeShortcutDialog;
 }
 
-namespace SettingsPages {
+namespace SettingsPages
+{
 
-    class ChangeShortcutDialog : public QDialog
-    {
-        Q_OBJECT
+class ChangeShortcutDialog : public QDialog
+{
+    Q_OBJECT
 
-        public:
-            explicit ChangeShortcutDialog(QModelIndex index, QWidget *parent = 0);
-            ~ChangeShortcutDialog();
+  public:
+    explicit ChangeShortcutDialog(const QModelIndex &index, QWidget *parent = 0);
+    ~ChangeShortcutDialog();
 
-        protected:
-            void changeEvent(QEvent *e);
-            void keyReleaseEvent(QKeyEvent *e);
+  protected:
+    void changeEvent(QEvent *e);
+    void keyReleaseEvent(QKeyEvent *e);
 
-        private:
-            ::Ui::ChangeShortcutDialog *m_ui;
-            QModelIndex m_index;
-            QKeySequence m_shortcut;
+  private:
+    ::Ui::ChangeShortcutDialog *m_ui;
+    QModelIndex m_index;
+    QKeySequence m_shortcut;
 
-            QList<Qt::KeyboardModifiers> m_modifiers;
+    QList<Qt::KeyboardModifiers> m_modifiers;
 
-        private slots:
-            void accept();
+  private Q_SLOTS:
+    void accept();
 
-        signals:
-            void shortcutChanged(QModelIndex index, QKeySequence newshortcut);
-    };
+  Q_SIGNALS:
+    void shortcutChanged(const QModelIndex &index, const QKeySequence &newshortcut);
+};
+
 }
 
 #endif // CHANGESHORTCUTDIALOG_H

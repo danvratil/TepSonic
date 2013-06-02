@@ -15,8 +15,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Cambridge, MA 02110-1301, USA.
- * 
- * Contributors: Petr Vaněk 
+ *
+ * Contributors: Petr Vaněk
  */
 
 #include "settingsdialog.h"
@@ -37,9 +37,9 @@
 
 #include "abstractplugin.h"
 
-#include <QFileDialog>
-#include <QDebug>
-#include <QStandardItemModel>
+#include <QtGui/QFileDialog>
+#include <QtGui/QStandardItemModel>
+#include <QtCore/QDebug>
 
 enum {
     PLAYER_PAGE,
@@ -49,22 +49,22 @@ enum {
 };
 
 SettingsDialog::SettingsDialog(MainWindow *parent):
-        m_ui(new Ui::SettingsDialog),
-        m_parent(parent)
+    m_ui(new Ui::SettingsDialog),
+    m_parent(parent)
 {
     m_ui->setupUi(this);
     m_ui->pagesButtons->item(0)->setSelected(true);
 
-    connect(m_ui->pagesButtons, SIGNAL(currentItemChanged(QListWidgetItem*, QListWidgetItem*)),
-            this, SLOT(changePage(QListWidgetItem*,QListWidgetItem*)));
+    connect(m_ui->pagesButtons, SIGNAL(currentItemChanged(QListWidgetItem *, QListWidgetItem *)),
+            this, SLOT(changePage(QListWidgetItem *, QListWidgetItem *)));
 
     m_pages.insert(PLAYER_PAGE, new SettingsPages::PlayerPage);
     m_pages.insert(COLLECTIONS_PAGE, new SettingsPages::CollectionsPage);
     m_pages.insert(PLUGINS_PAGE, new SettingsPages::PluginsPage);
     m_pages.insert(SHORTCUTS_PAGE, new SettingsPages::ShortcutsPage);
 
-    QSettings settings(QString(_CONFIGDIR).append("/main.conf"),QSettings::IniFormat,this);
-    foreach (SettingsPage *page, m_pages) {
+    QSettings settings(QString(_CONFIGDIR).append("/main.conf"), QSettings::IniFormat, this);
+    foreach (SettingsPage * page, m_pages) {
         m_ui->pages->addWidget(page);
         page->loadSettings(&settings);
     }
@@ -95,16 +95,17 @@ void SettingsDialog::changeEvent(QEvent *e)
 
 void SettingsDialog::dialogAccepted()
 {
-    QSettings settings(QString(_CONFIGDIR).append("/main.conf"),QSettings::IniFormat,this);
-    foreach (SettingsPage *page, m_pages)
+    QSettings settings(QString(_CONFIGDIR).append("/main.conf"), QSettings::IniFormat);
+    Q_FOREACH (SettingsPage * page, m_pages) {
         page->saveSettings(&settings);
-
-    if (qobject_cast<SettingsPages::CollectionsPage*>(m_pages[COLLECTIONS_PAGE])->collectionsSourceChanged()) {
-        emit rebuildCollections();
     }
 
-    if (qobject_cast<SettingsPages::PlayerPage*>(m_pages[PLAYER_PAGE])->outputDeviceChanged()) {
-        emit outputDeviceChanged();
+    if (qobject_cast<SettingsPages::CollectionsPage *>(m_pages[COLLECTIONS_PAGE])->collectionsSourceChanged()) {
+        Q_EMIT rebuildCollections();
+    }
+
+    if (qobject_cast<SettingsPages::PlayerPage *>(m_pages[PLAYER_PAGE])->outputDeviceChanged()) {
+        Q_EMIT outputDeviceChanged();
     }
 
     accept();
@@ -112,7 +113,7 @@ void SettingsDialog::dialogAccepted()
     this->close();
 }
 
-void SettingsDialog::changePage(QListWidgetItem* current, QListWidgetItem* previous)
+void SettingsDialog::changePage(QListWidgetItem *current, QListWidgetItem *previous)
 {
     Q_UNUSED(previous);
     m_ui->pages->setCurrentIndex(m_ui->pagesButtons->row(current));
@@ -122,8 +123,8 @@ void SettingsDialog::emitRebuildCollections()
 {
     // Save current state of collections configurations and emit rebuilding
 
-    QSettings settings(QString(_CONFIGDIR).append("/main.conf"),QSettings::IniFormat,this);
+    QSettings settings(QString(_CONFIGDIR).append("/main.conf"), QSettings::IniFormat);
     m_pages[COLLECTIONS_PAGE]->saveSettings(&settings);
 
-    emit rebuildCollections();
+    Q_EMIT rebuildCollections();
 }

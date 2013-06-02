@@ -20,10 +20,10 @@
 #ifndef PLAYLISTWRITER_H
 #define PLAYLISTWRITER_H
 
-#include <QRunnable>
-#include <QObject>
-#include <QMutex>
-#include <QWaitCondition>
+#include <QtCore/QRunnable>
+#include <QtCore/QObject>
+#include <QtCore/QMutex>
+#include <QtCore/QWaitCondition>
 
 class PlaylistModel;
 
@@ -35,39 +35,40 @@ class PlaylistModel;
 class PlaylistWriter : public QObject, public QRunnable
 {
     Q_OBJECT
-    public:
-        //! Constructor
-        /*!
-          Sets up the playlistModel and launches the thread.
-          \param playlistModel pointer to PlaylistModel
-        */
-        explicit PlaylistWriter(PlaylistModel *playlistModel);
+
+  public:
+    //! Constructor
+    /*!
+      Sets up the playlistModel and launches the thread.
+      \param playlistModel pointer to PlaylistModel
+    */
+    explicit PlaylistWriter(PlaylistModel *playlistModel);
 
 
-        //! Main loop
-        void run();
+    //! Main loop
+    void run();
 
-    public slots:
-        //! Wakes the thread and passes the given \p filename to it.
-        /*!
-          The playlist is saved into the given filename
-            \param filename file to save the current playlist to
-        */
-        void saveToFile(QString filename);
+  public Q_SLOTS:
+    //! Wakes the thread and passes the given \p filename to it.
+    /*!
+      The playlist is saved into the given filename
+        \param filename file to save the current playlist to
+    */
+    void saveToFile(const QString &filename);
 
-    private:
-        //! Pointer to PlaylistModel
-        PlaylistModel *m_playlistModel;
+  private:
+    //! Pointer to PlaylistModel
+    PlaylistModel *m_playlistModel;
 
-        //! File to output the playlist into
-        QString m_outputFile;
+    //! File to output the playlist into
+    QString m_outputFile;
 
-    signals:
-        //! Emitted when playlist is succesfully written to a file
-        /*!
-          The signal is emitted after each playlist in queue is saved.
-        */
-        void playlistSaved();
+  Q_SIGNALS:
+    //! Emitted when playlist is succesfully written to a file
+    /*!
+      The signal is emitted after each playlist in queue is saved.
+    */
+    void playlistSaved();
 
 
 };

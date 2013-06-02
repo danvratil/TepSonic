@@ -20,8 +20,8 @@
 #ifndef TRACKSITERATOR_H
 #define TRACKSITERATOR_H
 
-#include <QObject>
-#include <QThread>
+#include <QtCore/QObject>
+#include <QtCore/QThread>
 
 class PlaylistModel;
 
@@ -29,16 +29,16 @@ class TracksIterator : public QThread
 {
     Q_OBJECT
 
-public:
-    TracksIterator(QString topDir, PlaylistModel *model);
+  public:
+    TracksIterator(const QString &topDir, PlaylistModel *model);
     void run();
 
-private:
+  private:
     QString m_rootDir;
     PlaylistModel *m_model;
 
-signals:
-    void fileFound(QString filename);
+  Q_SIGNALS:
+    void fileFound(const QString &filename);
 };
 
 #endif // TRACKSITERATOR_H

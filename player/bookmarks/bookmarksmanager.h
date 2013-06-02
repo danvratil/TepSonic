@@ -21,53 +21,54 @@
 #ifndef BOOKMARKSMANAGER_H
 #define BOOKMARKSMANAGER_H
 
-#include <QObject>
-#include <QList>
-#include <QPair>
-#include <QPoint>
-#include <QMenu>
-#include <QModelIndex>
-#include <QLineEdit>
+#include <QtCore/QObject>
+#include <QtCore/QList>
+#include <QtCore/QPair>
+#include <QtCore/QPoint>
+#include <QtCore/QModelIndex>
+#include <QtGui/QMenu>
+#include <QtGui/QLineEdit>
 
 
 class BookmarksBrowser;
 class AddBookmarkDlg;
 
-namespace Ui {
-    class MainWindow;
+namespace Ui
+{
+class MainWindow;
 }
 
 class BookmarksManager: public QObject
 {
     Q_OBJECT
-    public:
-        BookmarksManager(Ui::MainWindow *ui);
-        ~BookmarksManager();
+  public:
+    explicit BookmarksManager(Ui::MainWindow *ui, QObject *parent = 0);
+    virtual ~BookmarksManager();
 
-        QString getBookmarkPath(int row);
+    QString getBookmarkPath(int row) const;
 
-    public slots:
-        void toggleBookmarks();
-        void showAddBookmarkDialog(QString path);
-        void removeBookmark();
-        void addBookmark(QString title, QString path);
-        void showBookmarksContextMenu(QPoint pos);
-        void openBookmarkInFSB(QModelIndex);
+  public Q_SLOTS:
+    void toggleBookmarks();
+    void showAddBookmarkDialog(const QString &path);
+    void removeBookmark();
+    void addBookmark(const QString &title, const QString &path);
+    void showBookmarksContextMenu(const QPoint &pos) const;
+    void openBookmarkInFSB(const QModelIndex &index);
 
 
-    private:
-        BookmarksBrowser *m_bookmarksBrowser;
-        QLineEdit *m_bookmarksFilterEdit;
-        QList< QPair<QString,QString> >  m_bookmarks;
-        Ui::MainWindow *m_mwui;
-        AddBookmarkDlg *m_addBookmarkDlg;
-        QMenu *m_contextMenu;
+  private:
+    BookmarksBrowser *m_bookmarksBrowser;
+    QLineEdit *m_bookmarksFilterEdit;
+    QList< QPair<QString, QString> >  m_bookmarks;
+    Ui::MainWindow *m_mwui;
+    AddBookmarkDlg *m_addBookmarkDlg;
+    QMenu *m_contextMenu;
 
-        bool m_fwdBtnEnabled;
-        bool m_backBtnEnabled;
-        bool m_upBtnEnabled;
+    bool m_fwdBtnEnabled;
+    bool m_backBtnEnabled;
+    bool m_upBtnEnabled;
 
-        bool m_dontDeleteBookmarksBrowser;
+    bool m_dontDeleteBookmarksBrowser;
 };
 
 #endif // BOOKMARKSMANAGER_H

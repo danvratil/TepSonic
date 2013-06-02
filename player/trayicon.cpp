@@ -19,15 +19,17 @@
 
 #include "trayicon.h"
 
-#include <QEvent>
-#include <QWheelEvent>
+#include <QtCore/QEvent>
+#include <QtGui/QWheelEvent>
 
-TrayIcon::TrayIcon(QObject *parent)
+TrayIcon::TrayIcon(QObject *parent):
+    QSystemTrayIcon(parent)
 {
     setParent(parent);
 }
 
-TrayIcon::TrayIcon(const QIcon &icon, QObject* parent)
+TrayIcon::TrayIcon(const QIcon &icon, QObject* parent):
+    QSystemTrayIcon(parent)
 {
     setIcon(icon);
     setParent(parent);

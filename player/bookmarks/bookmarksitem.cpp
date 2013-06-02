@@ -20,14 +20,19 @@
 
 #include "bookmarksitem.h"
 
-BookmarksItem::BookmarksItem(QString title, QString path, QListWidgetItem *parent) :
-    QListWidgetItem(*parent)
+BookmarksItem::BookmarksItem(const QString &title, const QString &path,
+                             QListWidget *parent) :
+    QListWidgetItem(parent),
+    m_path(path)
 {
-    m_path = path;
     setData(Qt::EditRole, title);
 }
 
-QString BookmarksItem::getPath()
+BookmarksItem::~BookmarksItem()
+{
+}
+
+QString BookmarksItem::getPath() const
 {
     return m_path;
 }

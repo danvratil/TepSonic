@@ -21,38 +21,34 @@
 #ifndef BOOKMARKSBROWSER_H
 #define BOOKMARKSBROWSER_H
 
-#include <QListView>
-#include <QObject>
-#include <QStandardItemModel>
-#include <QSortFilterProxyModel>
+#include <QtGui/QListView>
+#include <QtGui/QStandardItemModel>
+#include <QtGui/QSortFilterProxyModel>
 
 class BookmarksManager;
 
 class BookmarksBrowser : public QListView
 {
     Q_OBJECT
-    public:
-        explicit BookmarksBrowser(BookmarksManager *bookmarksManager, QWidget *parent = 0);
 
-        void startDrag(Qt::DropActions supportedActions);
+  public:
+    explicit BookmarksBrowser(BookmarksManager *bookmarksManager, QWidget *parent = 0);
+    virtual ~BookmarksBrowser();
 
-    signals:
+    void startDrag(Qt::DropActions supportedActions);
 
-    public slots:
-        void setFilter(QString);
-        void addItem(QString);
-        void removeAt(int);
+  public Q_SLOTS:
+    void setFilter(const QString &filter);
+    void addItem(const QString &title);
+    void removeAt(int index);
 
-        QModelIndex mapToSource(QModelIndex);
-        QModelIndex mapFromSource(QModelIndex);
+    QModelIndex mapToSource(const QModelIndex &index) const;
+    QModelIndex mapFromSource(const QModelIndex &index) const;
 
-    private:
-        BookmarksManager *m_booksmarkManager;
-        QStandardItemModel *m_model;
-        QSortFilterProxyModel *m_proxyModel;
-
-
-
+  private:
+    BookmarksManager *m_booksmarkManager;
+    QStandardItemModel *m_model;
+    QSortFilterProxyModel *m_proxyModel;
 };
 
 #endif // BOOKMARKSBROWSER_H

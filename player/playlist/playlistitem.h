@@ -21,10 +21,10 @@
 #ifndef PLAYLISTITEM_H
 #define PLAYLISTITEM_H
 
-#include <QStandardItem>
-#include <QList>
-#include <QVariant>
-#include <QVector>
+#include <QtGui/QStandardItem>
+#include <QtCore/QList>
+#include <QtCore/QVariant>
+#include <QtCore/QVector>
 
 //! PlaylistItem is a model item that represents one row in PlaylistModel
 /*!
@@ -32,102 +32,102 @@
   by storing values of all columns in itemData vector.
 */
 class PlaylistItem: public QStandardItem
- {
+{
 
- public:
-     //! Constructor
-     /*!
-       Initializes the item
-       \param data vector that contains data for all columns
-       \param parent pointer to parent item
+  public:
+    //! Constructor
+    /*!
+      Initializes the item
+      \param data vector that contains data for all columns
+      \param parent pointer to parent item
+    */
+    PlaylistItem(const QVector<QVariant> &data, PlaylistItem *parent = 0);
+
+    //! Destructor
+    ~PlaylistItem();
+
+    //! Returns pointer to n-th item's child
+    /*!
+      \param number number of child to be returned
+      \return Returns pointer to matching PlaylistItem or null pointer.
+    */
+    PlaylistItem *child(int number);
+
+    //! Returns number of item's children
+    /*!
+      \return Returns number of item's children.
+    */
+    int childCount() const;
+
+    //! Returns number of item's columns
+    /*!
+      \return Returs number of item's columns. It should be 8 by default
+    */
+    int columnCount() const;
+
+    //! Returns item's data for given column
+    /*!
+      \param column column of which data are retrieved
+      \return Returns QVariant with column data.
+    */
+    QVariant data(int column) const;
+
+    //! Appends new children to this item
+    /*!
+      Appends PlaylistItem to list of item's children.
+      \param item pointer to new PlaylistItem to be appended
+    */
+    void appendChild(PlaylistItem *item);
+
+    //! Inserts given number of rows and column beginning on given row
+    /*!
+      Inserts \p count items with \columns columns to list of item's children from \p position row.
+      \param position position where to insert first row
+      \param count number of rows to insert
+      \param columns number of columns the item will have
+      \return Returns true on success, false when fails.
+    */
+    bool insertChildren(int position, int count, int columns);
+
+    //! Returns pointer to item's parent
+    /*!
+      \return Returns pointer to item's parent or null pointer if item has no parent.
+    */
+    PlaylistItem *parent();
+
+    //! Removes item's children
+    /*!
+      Removes given number of item's children beginning with child on \p position position.
+      \param position position of first item to be removed
+      \param count number of rows to be removed
+      \return Returns true on success, false when fails.
+    */
+    bool removeChildren(int position, int count);
+
+    //! Returns number of current item relatively to it's parent.
+    /*!
+      Returns index (number) of current item relatively to it's parent
+      \return Returns number of current item.
+    */
+    int childNumber() const;
+
+    //! Sets given data for given column
+    /*!
+      Sets value of \p column to \value.
+      \param column number of column to set data in
+      \param value data to be set
+      \return Returns true on success, false when fails.
      */
-     PlaylistItem(const QVector<QVariant> &data, PlaylistItem *parent = 0);
+    bool setData(int column, const QVariant &value);
 
-     //! Destructor
-     ~PlaylistItem();
+  private:
+    //! List of item's child PlaylistItems
+    QList<PlaylistItem *> m_childItems;
 
-     //! Returns pointer to n-th item's child
-     /*!
-       \param number number of child to be returned
-       \return Returns pointer to matching PlaylistItem or null pointer.
-     */
-     PlaylistItem *child(int number);
+    //! Vector with data for single columns
+    QVector<QVariant> m_itemData;
 
-     //! Returns number of item's children
-     /*!
-       \return Returns number of item's children.
-     */
-     int childCount() const;
-
-     //! Returns number of item's columns
-     /*!
-       \return Returs number of item's columns. It should be 8 by default
-     */
-     int columnCount() const;
-
-     //! Returns item's data for given column
-     /*!
-       \param column column of which data are retrieved
-       \return Returns QVariant with column data.
-     */
-     QVariant data(int column) const;
-
-     //! Appends new children to this item
-     /*!
-       Appends PlaylistItem to list of item's children.
-       \param item pointer to new PlaylistItem to be appended
-     */
-     void appendChild(PlaylistItem *item);
-
-     //! Inserts given number of rows and column beginning on given row
-     /*!
-       Inserts \p count items with \columns columns to list of item's children from \p position row.
-       \param position position where to insert first row
-       \param count number of rows to insert
-       \param columns number of columns the item will have
-       \return Returns true on success, false when fails.
-     */
-     bool insertChildren(int position, int count, int columns);
-
-     //! Returns pointer to item's parent
-     /*!
-       \return Returns pointer to item's parent or null pointer if item has no parent.
-     */
-     PlaylistItem *parent();
-
-     //! Removes item's children
-     /*!
-       Removes given number of item's children beginning with child on \p position position.
-       \param position position of first item to be removed
-       \param count number of rows to be removed
-       \return Returns true on success, false when fails.
-     */
-     bool removeChildren(int position, int count);
-
-     //! Returns number of current item relatively to it's parent.
-     /*!
-       Returns index (number) of current item relatively to it's parent
-       \return Returns number of current item.
-     */
-     int childNumber() const;
-
-     //! Sets given data for given column
-     /*!
-       Sets value of \p column to \value.
-       \param column number of column to set data in
-       \param value data to be set
-       \return Returns true on success, false when fails.
-      */
-     bool setData(int column, const QVariant &value);
-
- private:
-     //! List of item's child PlaylistItems
-     QList<PlaylistItem*> m_childItems;
-
-     //! Vector with data for single columns
-     QVector<QVariant> m_itemData;
-
-     //! Pointer to parent PlaylistItem
-     PlaylistItem *m_parentItem;
- };
+    //! Pointer to parent PlaylistItem
+    PlaylistItem *m_parentItem;
+};
 #endif // PLAYLISTITEM_H

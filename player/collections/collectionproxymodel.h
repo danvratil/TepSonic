@@ -20,8 +20,8 @@
 #ifndef COLLECTIONPROXYMODEL_H
 #define COLLECTIONPROXYMODEL_H
 
-#include <QSortFilterProxyModel>
-#include <QModelIndexList>
+#include <QtGui/QSortFilterProxyModel>
+#include <QtCore/QModelIndexList>
 
 // Class CollectionProxyModel provides filter model for collections
 /*!
@@ -36,7 +36,7 @@ class CollectionProxyModel : public QSortFilterProxyModel
 {
     Q_OBJECT
 
-public:
+  public:
     //! Constructor
     /*!
       Initializes the model
@@ -44,7 +44,7 @@ public:
     */
     CollectionProxyModel(QObject *parent = 0);
 
-protected:
+  protected:
     //! Called for each item in model, decides wheter the item will be displayed or not
     /*!
       Checks, wheter the item determined by \p sourceParent and \p sourceRow matches the
@@ -56,7 +56,7 @@ protected:
     */
     bool filterAcceptsRow(int sourceRow, const QModelIndex &sourceParent) const;
 
-private:
+  private:
     //! Returns list of children of given parent
     /*!
       Recursively returns list of all parent's children including children's children.

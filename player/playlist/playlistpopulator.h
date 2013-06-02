@@ -20,14 +20,13 @@
 #ifndef PLAYLISTPOPULATOR_H
 #define PLAYLISTPOPULATOR_H
 
-#include <QRunnable>
-#include <QObject>
-#include <QStringList>
-#include <QMutex>
-#include <QWaitCondition>
+#include <QtCore/QRunnable>
+#include <QtCore/QObject>
+#include <QtCore/QStringList>
+#include <QtCore/QMutex>
+#include <QtCore/QWaitCondition>
 
 #include "player.h"
-
 
 //! PlaylistPopulator is thread that populates the playlist by given data
 /*!
@@ -38,81 +37,82 @@
 class PlaylistPopulator : public QObject, public QRunnable
 {
     Q_OBJECT
-    public:
-        //! Constructor
-        /*!
-          Constructor sets the playlistModel pointer and launches the thread
-        */
-        explicit PlaylistPopulator();
 
-        //! Main loop
-        void run();
+  public:
+    //! Constructor
+    /*!
+      Constructor sets the playlistModel pointer and launches the thread
+    */
+    explicit PlaylistPopulator();
 
-    signals:
-        //! Emitted when new item is parsed and data are ready to be send to the model
-        /*!
-          The signal is connected to PlaylistModel::insertItem(metadata, row) slot
-        */
-        void insertItemToPlaylist(Player::MetaData metadata, int row);
+    //! Main loop
+    void run();
 
-        //! Emitted when task has finished
-        void playlistPopulated();
+  Q_SIGNALS:
+    //! Emitted when new item is parsed and data are ready to be send to the model
+    /*!
+      The signal is connected to PlaylistModel::insertItem(metadata, row) slot
+    */
+    void insertItemToPlaylist(const Player::MetaData &metadata, int row);
+
+    //! Emitted when task has finished
+    void playlistPopulated();
 
 
-    public slots:
-        //! Appends given list to \p _files list
-        /*!
-          Waits until _files mutex is unlocked, then locks it (this blocks the thread!), appends
-          list of files to the \p _files list and unlocks it again.
-          \note This is a blocking method.
-          \note Folders and playlists are supported too. They are parsed by expandDir() or expandPlaylist().
-          \param files list of files to be appended
-          \param firstRow first row in playlist to insert the items to
-          \sa addFile()
-        */
-        void addFiles(const QStringList &files, int firstRow = 0);
+  public Q_SLOTS:
+    //! Appends given list to \p _files list
+    /*!
+      Waits until _files mutex is unlocked, then locks it (this blocks the thread!), appends
+      list of files to the \p _files list and unlocks it again.
+      \note This is a blocking method.
+      \note Folders and playlists are supported too. They are parsed by expandDir() or expandPlaylist().
+      \param files list of files to be appended
+      \param firstRow first row in playlist to insert the items to
+      \sa addFile()
+    */
+    void addFiles(const QStringList &files, int firstRow = 0);
 
-        //! Appends given file to \p _files list
-        /*!
-          Waits until _files mutex is unlocked, then locks it (this blocks the thread!), appends
-          the file to the \p _files list and unlocks it again.
-          \note This is a blocking method.
-          \note Folders and playlists are supported too. They are parsed by expandDir() or expandPlaylist().
-          \param file file to be appended
-          \param row row in playlist to insert the item to
-          \sa addFiles()
-        */
-        void addFile(const QString &file, int row = 0);
+    //! Appends given file to \p _files list
+    /*!
+      Waits until _files mutex is unlocked, then locks it (this blocks the thread!), appends
+      the file to the \p _files list and unlocks it again.
+      \note This is a blocking method.
+      \note Folders and playlists are supported too. They are parsed by expandDir() or expandPlaylist().
+      \param file file to be appended
+      \param row row in playlist to insert the item to
+      \sa addFiles()
+    */
+    void addFile(const QString &file, int row = 0);
 
-    private:
-        //! Expands the _files by list of files in \p dir
-        /*!
-          Removes given \p dir from the files list and replaces it by a list of all files in the given \p dir and
-          it's subdirs
-          \param dir folder to expand
-        */
-        void expandDir(QString dir);
+  private:
+    //! Expands the _files by list of files in \p dir
+    /*!
+      Removes given \p dir from the files list and replaces it by a list of all files in the given \p dir and
+      it's subdirs
+      \param dir folder to expand
+    */
+    void expandDir(const QString &dir);
 
-        //! Expands the _files by list of files listed in \p filename playlist
-        /*!
-          Removes given \p filename from the files list and replaces it by a list of all files in given playlist
-          \param filename playlist file to load
-        */
-        void expandPlaylist(QString filename);
+    //! Expands the _files by list of files listed in \p filename playlist
+    /*!
+      Removes given \p filename from the files list and replaces it by a list of all files in given playlist
+      \param filename playlist file to load
+    */
+    void expandPlaylist(const QString &filename);
 
-        //! Loads metadata from given file
-        /*!
-          Loads metadata from given file \p filename and returns Player::MetaData metadata. The data are loaded
-          from database when available or directly from file using taglib when not available
-          \param filename the file to read
-        */
-        Player::MetaData getFileMetaData(QString file);
+    //! Loads metadata from given file
+    /*!
+      Loads metadata from given file \p filename and returns Player::MetaData metadata. The data are loaded
+      from database when available or directly from file using taglib when not available
+      \param filename the file to read
+    */
+    Player::MetaData getFileMetaData(const QString &file);
 
-        //! List of files that are loaded
-        QStringList m_files;
+    //! List of files that are loaded
+    QStringList m_files;
 
-        //! Row where to insert the first item
-        int m_row;
+    //! Row where to insert the first item
+    int m_row;
 
 };
 

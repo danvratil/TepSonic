@@ -20,33 +20,36 @@
 #ifndef PLUGINSPAGE_H
 #define PLUGINSPAGE_H
 
-#include <QListWidgetItem>
+#include <QtGui/QListWidgetItem>
 
 #include "settingspage.h"
 
-namespace Ui {
-    class PluginsPage;
+namespace Ui
+{
+class PluginsPage;
 }
 
-namespace SettingsPages {
+namespace SettingsPages
+{
 
-    class PluginsPage: public SettingsPage
-    {
-        Q_OBJECT
-        public:
-            PluginsPage(QWidget *parent = 0);
-            ~PluginsPage();
+class PluginsPage: public SettingsPage
+{
+    Q_OBJECT
 
-        public slots:
-            void loadSettings(QSettings *settings);
-            void saveSettings(QSettings *settings);
+  public:
+    PluginsPage(QWidget *parent = 0);
+    ~PluginsPage();
 
-        private slots:
-            void pluginsListItemChanged(QListWidgetItem*);
+  public Q_SLOTS:
+    void loadSettings(QSettings *settings);
+    void saveSettings(QSettings *settings);
 
-        private:
-            ::Ui::PluginsPage *m_ui;
-    };
+  private Q_SLOTS:
+    void pluginsListItemChanged(QListWidgetItem *item);
+
+  private:
+    ::Ui::PluginsPage *m_ui;
+};
 
 }
 

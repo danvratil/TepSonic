@@ -21,26 +21,28 @@
 #ifndef ADDBOOKMARKDLG_H
 #define ADDBOOKMARKDLG_H
 
-#include <QDialog>
+#include <QtGui/QDialog>
 
-namespace Ui {
-    class AddBookmarkDlg;
+namespace Ui
+{
+class AddBookmarkDlg;
 }
 
 class AddBookmarkDlg : public QDialog
 {
     Q_OBJECT
-    public:
-        explicit AddBookmarkDlg(QString path, QWidget *parent = 0);
+  public:
+    explicit AddBookmarkDlg(const QString &path, QWidget *parent = 0);
+    virtual ~AddBookmarkDlg();
 
-    signals:
-        void accepted(QString title, QString path);
+  Q_SIGNALS:
+    void accepted(const QString &title, const QString &path);
 
-    private slots:
-        void emitAccepted();
+  private Q_SLOTS:
+    void emitAccepted();
 
-    private:
-        Ui::AddBookmarkDlg *m_ui;
+  private:
+    Ui::AddBookmarkDlg *m_ui;
 
 };
 

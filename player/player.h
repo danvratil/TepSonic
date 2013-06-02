@@ -21,7 +21,7 @@
 #ifndef PLAYER_H
 #define PLAYER_H
 
-#include <QObject>
+#include <QtCore/QObject>
 #include <phonon/mediasource.h>
 #include <phonon/audiooutput.h>
 #include <phonon/mediaobject.h>
@@ -44,6 +44,7 @@ class Player: public QObject
                WRITE setRandomMode)
     Q_PROPERTY(Player::MetaData metadata
                READ currentMetaData)
+
   public:
     //! Structure to pass track's metadata
     struct MetaData {
@@ -64,9 +65,9 @@ class Player: public QObject
     enum RepeatMode { RepeatOff = 0,    /*! < Disable repeat */
                       RepeatTrack = 1,  /*! < Repeat current track */
                       RepeatAll = 2     /*! < Repeat whole playlist */
-    };
+                    };
 
-    static Player* instance();
+    static Player *instance();
 
     //! Destructor
     ~Player();
@@ -76,56 +77,72 @@ class Player: public QObject
       \return Returns meta data of current track
       \sa trackChanged(), trackFinished()
     */
-    Player::MetaData currentMetaData();
+    Player::MetaData currentMetaData() const;
 
     //! Returns current repeat mode
     /*!
       \return Returns current player repeat mode
       \sa setRepeatMode(), repeatModeChanged()
     */
-    RepeatMode repeatMode() { return m_repeatMode; }
+    RepeatMode repeatMode() const {
+        return m_repeatMode;
+    }
 
     //! Returns current random mode state
     /*!
       \return Returns true when random mode is enabled, false when it's disabled
       \sa setRandomMode(), randomModeChanged()
     */
-    bool randomMode() { return m_randomMode; }
+    bool randomMode() const {
+        return m_randomMode;
+    }
 
     //! Returns current media source
     /*!
       \return Returns current player media source
       \sa setTrack()
     */
-    Phonon::MediaSource currentSource() { return m_phononPlayer->currentSource(); }
+    Phonon::MediaSource currentSource() const {
+        return m_phononPlayer->currentSource();
+    }
 
     //! Returns current player state
     /*!
       \return Returns current player state
       \sa stateChanged()
     */
-    Phonon::State playerState() { return m_phononPlayer->state(); }
+    Phonon::State playerState() const {
+        return m_phononPlayer->state();
+    }
 
     //! Returns players error string
     /*!
       \return Returns description of a player failure
     */
-    QString errorString() { return m_phononPlayer->errorString(); }
+    QString errorString() const {
+        return m_phononPlayer->errorString();
+    }
 
     //! Returns pointer to media object
     /*!
       \return Returns pointer to player Phonon MediaObject object
     */
-    Phonon::MediaObject* mediaObject() { return m_phononPlayer; }
+    Phonon::MediaObject *mediaObject() const {
+        return m_phononPlayer;
+    }
 
     //! Returns pointer to audio object
     /*!
       \return Returns pointer to player Phonon AudioOutput object
     */
-    Phonon::AudioOutput* audioOutput() { return m_audioOutput; }
+    Phonon::AudioOutput *audioOutput() const {
+        return m_audioOutput;
+    }
 
     //! Returns pointer to list of available effects
-    QList<Phonon::Effect*>* effects() { return &m_effects; }
+    QList<Phonon::Effect *> effects() const {
+        return m_effects;
+    }
 
   private:
     explicit Player();
@@ -146,19 +163,19 @@ class Player: public QObject
     //! Phonon Path
     Phonon::Path m_phononPath;
 
-    QList<Phonon::Effect*> m_effects;
+    QList<Phonon::Effect *> m_effects;
 
     //! Loads all effects to m_effects and installs chosen effects according to configuration
     void loadEffects();
 
- private slots:
+  private Q_SLOTS:
     //! When a track is finished calls currentSource() and then emits trackFinished(MetaData) and trackFinished() signals
     /*!
       \sa trackFinished(), trackFinished(MetaData)
     */
     void emitFinished();
 
- public slots:
+  public Q_SLOTS:
     //! Changes repeat mode to \p repeatMode
     /*!
       \param repeatMode new repeat mode
@@ -175,7 +192,9 @@ class Player: public QObject
     /*!
       \sa stateChanged()
     */
-    void play() { m_phononPlayer->play(); }
+    void play() {
+        m_phononPlayer->play();
+    }
 
     //! Pauses playback
     /*!
@@ -194,7 +213,7 @@ class Player: public QObject
       \param fileName name of new media file to play
       \param autoPlay when true, playback will automatically start after new track is loaded
     */
-    void setTrack(const QString fileName, bool autoPlay = false);
+    void setTrack(const QString &fileName, bool autoPlay = false);
 
     //! Sets default output device
     /*! Default output device is defined as "OutputDevice" in settings file.
@@ -204,7 +223,7 @@ class Player: public QObject
     //! Install or uninstall effect from Phonon. When the effect is already loaded, do nothing.
     void enableEffect(Phonon::Effect *effect, bool enable);
 
- signals:
+  Q_SIGNALS:
     //! Informs about new repeat mode
     /*!
       \param repeatMode new repeat mode
@@ -224,13 +243,13 @@ class Player: public QObject
       \param metadata meta data of the new track
       \sa setTrack()
     */
-    void trackChanged(Player::MetaData metadata);
+    void trackChanged(const Player::MetaData &metadata);
 
     //! Informs that end of the current track was reached and provides it's metadata
     /*!
       \param metadata meta data of the just finished track
     */
-    void trackFinished(Player::MetaData metadata);
+    void trackFinished(const Player::MetaData &metadata);
 
     //! Informs that end of the current track was reached
     void trackFinished();

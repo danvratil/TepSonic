@@ -20,14 +20,15 @@
 #include "collectionbrowser.h"
 #include "collectionproxymodel.h"
 
-#include <QDropEvent>
-#include <QDebug>
-#include <QList>
-#include <QStringList>
-#include <QUrl>
-#include <QFileInfo>
+#include <QtCore/QDebug>
+#include <QtCore/QList>
+#include <QtCore/QStringList>
+#include <QtCore/QUrl>
+#include <QtCore/QFileInfo>
+#include <QtGui/QDropEvent>
 
-CollectionBrowser::CollectionBrowser(QWidget* parent)
+CollectionBrowser::CollectionBrowser(QWidget* parent):
+    QTreeView(parent)
 {
     setAcceptDrops(false);
     setDragDropMode(DragOnly);
@@ -39,9 +40,11 @@ CollectionBrowser::~CollectionBrowser()
 {
 }
 
-void CollectionBrowser::startDrag(Qt::DropActions)
+void CollectionBrowser::startDrag(Qt::DropActions actions)
 {
-    QModelIndexList indexes = selectedIndexes();
+    Q_UNUSED(actions);
+
+    const QModelIndexList indexes = selectedIndexes();
 
     QString filename;
 
@@ -49,17 +52,16 @@ void CollectionBrowser::startDrag(Qt::DropActions)
     QByteArray encodedData;
     QDataStream stream(&encodedData, QIODevice::WriteOnly);;
 
-    QModelIndex index;
     for (int i = 0; i < indexes.count(); i++) {
-        index = indexes.at(i).sibling(indexes.at(i).row(), 1);
+        const QModelIndex index = indexes.at(i).sibling(indexes.at(i).row(), 1);
         if (index.data().toString().isEmpty()) {
             // Artist(s) is being dragged (child of the dragged item is empty)
             if (index.sibling(index.row(), 0).child(0, 1).data().toString().isEmpty()) {
                 int album = 0;
-                QModelIndex artistIndex = index.sibling(index.row(), 0);
-                QModelIndex albumIndex = artistIndex.child(album, 0);
+                const QModelIndex artistIndex = index.sibling(index.row(), 0);
+                const QModelIndex albumIndex = artistIndex.child(album, 0);
                 while (albumIndex.sibling(album, 0).isValid()) {
-                    QModelIndex trackIndex = albumIndex.sibling(album, 0).child(0, 0);
+                    const QModelIndex trackIndex = albumIndex.sibling(album, 0).child(0, 0);
                     int row = 0;
                     while (trackIndex.sibling(row, 0).isValid()) {
                         stream << trackIndex.sibling(row, 1).data().toString();
@@ -69,8 +71,8 @@ void CollectionBrowser::startDrag(Qt::DropActions)
                 }
                 // Album(s) is being dragged
             } else {
-                QModelIndex albumIndex = index.sibling(index.row(), 0);
-                QModelIndex trackIndex = albumIndex.child(0, 0);
+                const QModelIndex albumIndex = index.sibling(index.row(), 0);
+                const QModelIndex trackIndex = albumIndex.child(0, 0);
                 int row = 0;
                 while (trackIndex.sibling(row, 0).isValid()) {
                     stream << trackIndex.sibling(row, 1).data().toString();
@@ -94,8 +96,10 @@ void CollectionBrowser::keyPressEvent(QKeyEvent* event)
 {
     // When 'delete' pressed, remove selected row from collections
     if (event->matches(QKeySequence::Delete)) {
-        QModelIndex index = selectionModel()->currentIndex();
-        static_cast<CollectionProxyModel*>(model())->sourceModel()->removeRow(selectionModel()->currentIndex().row(),selectionModel()->currentIndex().parent());
+        const QModelIndex index = selectionModel()->currentIndex();
+        CollectionProxyModel *collectionProxy = qobject_cast<CollectionProxyModel*>(model());
+        QAbstractItemModel *sourceModel = collectionProxy->sourceModel();
+        sourceModel->removeRow(selectionModel()->currentIndex().row(),
+                               selectionModel()->currentIndex().parent());
     }
-
 }

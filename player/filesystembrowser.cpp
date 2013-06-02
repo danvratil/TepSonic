@@ -19,16 +19,16 @@
 
 #include "filesystembrowser.h"
 
-#include <QMimeData>
-#include <QByteArray>
-#include <QDataStream>
-#include <QDrag>
-#include <QDir>
-#include <QFileSystemModel>
+#include <QtCore/QMimeData>
+#include <QtCore/QByteArray>
+#include <QtCore/QDataStream>
+#include <QtCore/QDir>
+#include <QtGui/QDrag>
+#include <QtGui/QFileSystemModel>
 
 
 FileSystemBrowser::FileSystemBrowser(QWidget *parent):
-        QListView(parent)
+    QListView(parent)
 {
     setAcceptDrops(false);
     setDragDropMode(DragOnly);
@@ -41,20 +41,18 @@ FileSystemBrowser::FileSystemBrowser(QWidget *parent):
             this, SLOT(setRootDir(QModelIndex)));
     connect(this, SIGNAL(customContextMenuRequested(QPoint)),
             this, SLOT(showContextMenu(QPoint)));
-
 }
-
 
 void FileSystemBrowser::startDrag(Qt::DropActions supportedActions)
 {
-    QModelIndexList indexes = selectedIndexes();
+    const QModelIndexList indexes = selectedIndexes();
 
     QMimeData *mimeData = new QMimeData;
     QByteArray encodedData;
     QDataStream stream(&encodedData, QIODevice::WriteOnly);;
 
     for (int i = 0; i < indexes.count(); i++) {
-        stream << static_cast<QFileSystemModel*>(model())->filePath(indexes.at(i));
+        stream << static_cast<QFileSystemModel *>(model())->filePath(indexes.at(i));
     }
 
     mimeData->setData("data/tepsonic-tracks", encodedData);
@@ -64,16 +62,18 @@ void FileSystemBrowser::startDrag(Qt::DropActions supportedActions)
 }
 
 
-void FileSystemBrowser::setRootDir(QModelIndex dir)
+void FileSystemBrowser::setRootDir(const QModelIndex &dir)
 {
-    QFileSystemModel *fsmodel = qobject_cast<QFileSystemModel*>(model());
-    if (!fsmodel) return;
+    QFileSystemModel *fsmodel = qobject_cast<QFileSystemModel *>(model());
+    if (!fsmodel) {
+        return;
+    }
 
-    QString path = fsmodel->filePath(dir);
+    const QString path = fsmodel->filePath(dir);
 
     // If the selected item is a file then add it to playlist
     if (fsmodel->fileInfo(dir).isFile()) {
-        emit addTrackToPlaylist(fsmodel->filePath(dir));
+        Q_EMIT addTrackToPlaylist(fsmodel->filePath(dir));
         return;
     }
 
@@ -84,59 +84,63 @@ void FileSystemBrowser::setRootDir(QModelIndex dir)
     setRootIndex(fsmodel->index(path));
     setCurrentIndex(QModelIndex());
 
-    emit pathChanged(path);
-
-    emit disableCdUp(path == QDir::rootPath() || path.isEmpty());
-    emit disableBack(m_backDirs.isEmpty());
+    Q_EMIT pathChanged(path);
+    Q_EMIT disableCdUp(path == QDir::rootPath() || path.isEmpty());
+    Q_EMIT disableBack(m_backDirs.isEmpty());
 }
-
 
 void FileSystemBrowser::goBack()
 {
-    if (m_backDirs.isEmpty()) return;
+    if (m_backDirs.isEmpty()) {
+        return;
+    }
 
-    QFileSystemModel *fsmodel = qobject_cast<QFileSystemModel*>(model());
-    if (!fsmodel) return;
+    QFileSystemModel *fsmodel = qobject_cast<QFileSystemModel *>(model());
+    if (!fsmodel) {
+        return;
+    }
 
     m_forwardDirs.prepend(fsmodel->filePath(rootIndex()));
 
-    QString newpath = m_backDirs.takeFirst();
+    const QString newpath = m_backDirs.takeFirst();
     setRootIndex(fsmodel->index(newpath));
     setCurrentIndex(QModelIndex());
 
-    emit pathChanged(newpath);
-
-    emit disableCdUp(newpath == QDir::rootPath() || newpath.isEmpty());
-    emit disableBack(m_backDirs.isEmpty());
-    emit disableForward(false);
+    Q_EMIT pathChanged(newpath);
+    Q_EMIT disableCdUp(newpath == QDir::rootPath() || newpath.isEmpty());
+    Q_EMIT disableBack(m_backDirs.isEmpty());
+    Q_EMIT disableForward(false);
 }
-
 
 void FileSystemBrowser::goForward()
 {
-    if (m_forwardDirs.isEmpty()) return;
+    if (m_forwardDirs.isEmpty()) {
+        return;
+    }
 
-    QFileSystemModel *fsmodel = qobject_cast<QFileSystemModel*>(model());
-    if (!fsmodel) return;
+    QFileSystemModel *fsmodel = qobject_cast<QFileSystemModel *>(model());
+    if (!fsmodel) {
+        return;
+    }
 
     m_backDirs.prepend(fsmodel->filePath(rootIndex()));
 
-    QString newpath = m_forwardDirs.takeFirst();
+    const QString newpath = m_forwardDirs.takeFirst();
     setRootIndex(fsmodel->index(newpath));
     setCurrentIndex(QModelIndex());
 
-    emit pathChanged(newpath);
-
-    emit disableBack(m_backDirs.isEmpty());
-    emit disableForward(m_forwardDirs.isEmpty());
-    emit disableCdUp(newpath == QDir::rootPath() || newpath.isEmpty());
+    Q_EMIT pathChanged(newpath);
+    Q_EMIT disableBack(m_backDirs.isEmpty());
+    Q_EMIT disableForward(m_forwardDirs.isEmpty());
+    Q_EMIT disableCdUp(newpath == QDir::rootPath() || newpath.isEmpty());
 }
-
 
 void FileSystemBrowser::cdUp()
 {
-    QFileSystemModel *fsmodel = qobject_cast<QFileSystemModel*>(model());
-    if (!fsmodel) return;
+    QFileSystemModel *fsmodel = qobject_cast<QFileSystemModel *>(model());
+    if (!fsmodel) {
+        return;
+    }
 
     QModelIndex previousItem = rootIndex().parent();
 
@@ -151,59 +155,59 @@ void FileSystemBrowser::cdUp()
 
     m_backDirs.prepend(fsmodel->filePath(rootIndex()));
 
-
     setRootIndex(previousItem);
     setCurrentIndex(QModelIndex());
 
-    QString newpath = fsmodel->filePath(previousItem);
-
-    emit disableCdUp(newpath == QDir::rootPath() || newpath.isEmpty());
-    emit pathChanged(newpath);
+    const QString newpath = fsmodel->filePath(previousItem);
+    Q_EMIT disableCdUp(newpath == QDir::rootPath() || newpath.isEmpty());
+    Q_EMIT pathChanged(newpath);
 }
-
 
 void FileSystemBrowser::goHome()
 {
-    QFileSystemModel *fsmodel = qobject_cast<QFileSystemModel*>(model());
-    if (!fsmodel) return;
+    QFileSystemModel *fsmodel = qobject_cast<QFileSystemModel *>(model());
+    if (!fsmodel) {
+        return;
+    }
 
     m_backDirs.prepend(fsmodel->filePath(rootIndex()));
 
     setRootIndex(fsmodel->index(QDir::homePath()));
     setCurrentIndex(QModelIndex());
 
-    emit pathChanged(QDir::homePath());
-
-    QString newpath = fsmodel->fileName(rootIndex());
-
-    emit disableBack(m_backDirs.isEmpty());
-    emit disableCdUp(newpath == QDir::rootPath() || newpath.isEmpty());
+    const QString newpath = fsmodel->fileName(rootIndex());
+    Q_EMIT pathChanged(QDir::homePath());
+    Q_EMIT disableBack(m_backDirs.isEmpty());
+    Q_EMIT disableCdUp(newpath == QDir::rootPath() || newpath.isEmpty());
 }
 
-
-void FileSystemBrowser::goToDir(QString newPath)
+void FileSystemBrowser::goToDir(const QString &newPath)
 {
     QDir dir(newPath);
-    if (!dir.exists()) return;
+    if (!dir.exists()) {
+        return;
+    }
 
-    QFileSystemModel *fsmodel = qobject_cast<QFileSystemModel*>(model());
-    if (!fsmodel) return;
+    QFileSystemModel *fsmodel = qobject_cast<QFileSystemModel *>(model());
+    if (!fsmodel) {
+        return;
+    }
 
     // Because when pathChanged() is emitted, the fsbPath edit is updated and this slot is fired.
     // That's why we need to stop here now
-    if (newPath == fsmodel->filePath(rootIndex())) return;
+    if (newPath == fsmodel->filePath(rootIndex())) {
+        return;
+    }
 
     m_backDirs.prepend(fsmodel->filePath(rootIndex()));
 
     setRootIndex(fsmodel->index(newPath));
     setCurrentIndex(QModelIndex());
 
-    emit pathChanged(newPath);
-
-    emit disableCdUp(newPath == QDir::rootPath() || newPath.isEmpty());
-    emit disableBack(m_backDirs.isEmpty());
+    Q_EMIT pathChanged(newPath);
+    Q_EMIT disableCdUp(newPath == QDir::rootPath() || newPath.isEmpty());
+    Q_EMIT disableBack(m_backDirs.isEmpty());
 }
-
 
 void FileSystemBrowser::keyPressEvent(QKeyEvent *event)
 {
@@ -221,7 +225,7 @@ void FileSystemBrowser::keyPressEvent(QKeyEvent *event)
 
     // Backspace or Alt+Up for "Up". There is no predefined key sequence in Qt for this
     else if ((event->key() == Qt::Key_Backspace) ||
-        ((event->modifiers() == Qt::AltModifier) && (event->key() == Qt::Key_Up))) {
+             ((event->modifiers() == Qt::AltModifier) && (event->key() == Qt::Key_Up))) {
         cdUp();
         event->accept();
     }
@@ -229,30 +233,30 @@ void FileSystemBrowser::keyPressEvent(QKeyEvent *event)
     // Alt+Home or Homepage button (this must be tested because I don't have such button) to
     // navigate to home dir
     else if (((event->modifiers() == Qt::AltModifier) && (event->key() == Qt::Key_Home))
-        || (event->key() == Qt::Key_HomePage)) {
+             || (event->key() == Qt::Key_HomePage)) {
         goHome();
         event->accept();
     }
 
     // Arrow up to select an item above current item (or last item when non is selected)
     else if (event->key() == Qt::Key_Up) {
-        QFileSystemModel *fsmodel = qobject_cast<QFileSystemModel*>(model());
+        QFileSystemModel *fsmodel = qobject_cast<QFileSystemModel *>(model());
         if (!fsmodel) return;
-        QModelIndex newIndex = fsmodel->index(currentIndex().row()-1,0, rootIndex());
+        QModelIndex newIndex = fsmodel->index(currentIndex().row() - 1, 0, rootIndex());
         if (newIndex.isValid())
             setCurrentIndex(newIndex);
         else {
-            int row = fsmodel->rowCount(rootIndex())-1;
-            setCurrentIndex(fsmodel->index(row,0, rootIndex()));
+            int row = fsmodel->rowCount(rootIndex()) - 1;
+            setCurrentIndex(fsmodel->index(row, 0, rootIndex()));
         }
         event->accept();
     }
 
     // Arrow down to select an item below current item (or first item when non is selected)
     else if (event->key() == Qt::Key_Down) {
-        QFileSystemModel *fsmodel = qobject_cast<QFileSystemModel*>(model());
+        QFileSystemModel *fsmodel = qobject_cast<QFileSystemModel *>(model());
         if (!fsmodel) return;
-        QModelIndex newIndex = fsmodel->index(currentIndex().row()+1,0, rootIndex());
+        QModelIndex newIndex = fsmodel->index(currentIndex().row() + 1, 0, rootIndex());
         if (newIndex.isValid())
             setCurrentIndex(newIndex);
         else {
@@ -263,23 +267,23 @@ void FileSystemBrowser::keyPressEvent(QKeyEvent *event)
 
     // Enter key to enter selected folder or add selected track to playlist
     else if ((event->key() == Qt::Key_Enter) ||
-        (event->key() == Qt::Key_Return)) {
+             (event->key() == Qt::Key_Return)) {
         setRootDir(currentIndex());
         event->accept();
     }
 }
 
-
 void FileSystemBrowser::emitAddBookmark()
 {
-    QFileSystemModel *fsmodel = qobject_cast<QFileSystemModel*>(model());
-    if (!fsmodel) return;
+    QFileSystemModel *fsmodel = qobject_cast<QFileSystemModel *>(model());
+    if (!fsmodel) {
+        return;
+    }
 
-    emit addBookmark(fsmodel->filePath(currentIndex()));
+    Q_EMIT addBookmark(fsmodel->filePath(currentIndex()));
 }
 
-
-void FileSystemBrowser::showContextMenu(QPoint pos)
+void FileSystemBrowser::showContextMenu(const QPoint &pos)
 {
     if (!indexAt(pos).isValid()) {
         m_contextMenu->actions().at(0)->setDisabled(true);

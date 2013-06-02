@@ -21,8 +21,8 @@
 #ifndef PLAYEREFFECTDIALOG_H
 #define PLAYEREFFECTDIALOG_H
 
-#include <QDialog>
-#include <QHBoxLayout>
+#include <QtGui/QDialog>
+#include <QtGui/QHBoxLayout>
 
 #include <Phonon/EffectDescription>
 #include <Phonon/Effect>
@@ -31,13 +31,14 @@
 class PlayerEffectDialog : public QDialog
 {
     Q_OBJECT
-    public:
-        explicit PlayerEffectDialog(Phonon::Effect* effect);
-        ~PlayerEffectDialog();
 
-   private:
-        Phonon::EffectWidget *m_effectWidget;
-        QVBoxLayout *m_layout;
+  public:
+    explicit PlayerEffectDialog(Phonon::Effect *effect);
+    ~PlayerEffectDialog();
+
+  private:
+    Phonon::EffectWidget *m_effectWidget;
+    QVBoxLayout *m_layout;
 };
 
 #endif // PLAYEREFFECTDIALOG_H

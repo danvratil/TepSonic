@@ -21,23 +21,21 @@
 #ifndef TRAYICON_H
 #define TRAYICON_H
 
-#include <QSystemTrayIcon>
+#include <QtGui/QSystemTrayIcon>
 
 class TrayIcon : public QSystemTrayIcon
 {
     Q_OBJECT
-public:
+
+  public:
     explicit TrayIcon(QObject *parent = 0);
     explicit TrayIcon(const QIcon &icon, QObject *parent = 0);
 
-
-protected:
+  protected:
     bool event(QEvent *event);
 
-signals:
+  Q_SIGNALS:
     void mouseWheelScrolled(int delta);
-
-
 
 };
 

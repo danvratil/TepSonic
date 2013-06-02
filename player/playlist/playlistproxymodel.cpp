@@ -20,7 +20,7 @@
 #include "playlistproxymodel.h"
 
 PlaylistProxyModel::PlaylistProxyModel(QObject *parent):
-        QSortFilterProxyModel(parent)
+    QSortFilterProxyModel(parent)
 {
     setFilterRole(Qt::EditRole);
     setFilterCaseSensitivity(Qt::CaseInsensitive);
@@ -31,7 +31,7 @@ bool PlaylistProxyModel::filterAcceptsRow(int sourceRow,
         const QModelIndex &sourceParent) const
 {
     for (int col = 1; col <= 6; col++) {
-        QModelIndex index = sourceModel()->index(sourceRow, col, sourceParent);
+        const QModelIndex index = sourceModel()->index(sourceRow, col, sourceParent);
         if (sourceModel()->data(index).toString().contains(filterRegExp())) {
             return true;
         }

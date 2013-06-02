@@ -21,7 +21,7 @@
 #include "qdebug.h"
 
 CollectionProxyModel::CollectionProxyModel(QObject *parent) :
-        QSortFilterProxyModel(parent)
+    QSortFilterProxyModel(parent)
 {
 }
 
@@ -33,8 +33,8 @@ QModelIndexList CollectionProxyModel::getChildren(const QModelIndex item) const
     QModelIndexList result;
 
     if (sourceModel()->hasChildren(item)) {
-        for (int i=0; i<sourceModel()->rowCount(item);i++) {
-            QModelIndex child = item.child(i,0);
+        for (int i = 0; i < sourceModel()->rowCount(item); i++) {
+            const QModelIndex child = item.child(i, 0);
             if (child.isValid()) {
                 result << child;
                 if (sourceModel()->hasChildren(child)) {
@@ -50,7 +50,7 @@ QModelIndexList CollectionProxyModel::getChildren(const QModelIndex item) const
 bool CollectionProxyModel::filterAcceptsRow(int sourceRow, const QModelIndex &sourceParent) const
 {
     // Current item
-    QModelIndex item = sourceModel()->index(sourceRow,0,sourceParent);
+    const QModelIndex item = sourceModel()->index(sourceRow, 0, sourceParent);
 
     if (!item.isValid())
         return false;
@@ -69,10 +69,10 @@ bool CollectionProxyModel::filterAcceptsRow(int sourceRow, const QModelIndex &so
     /* Finally, if none the previous conditions was met, the creates a QList of all of this item's
        children and if any of them matches the current filter. In that case this item must stay
        visible */
-    QModelIndexList children = getChildren(item);
+    const QModelIndexList children = getChildren(item);
 
     // Go through all the children and if any of them matches then set canHide to false
-    for (int i=0; i<children.count(); i++) {
+    for (int i = 0; i < children.count(); i++) {
         if (children.at(i).data().toString().contains(filterRegExp()))
             return true;
     }

@@ -21,25 +21,21 @@
 #include "playlistmodel.h"
 #include "supportedformats.h"
 
-#include <QDir>
-#include <QDirIterator>
-#include <QFileInfo>
+#include <QtCore/QDir>
+#include <QtCore/QDirIterator>
+#include <QtCore/QFileInfo>
+#include <QtCore/QDebug>
 
-#include <QDebug>
 
-
-TracksIterator::TracksIterator(QString  topDir, PlaylistModel *model)
+TracksIterator::TracksIterator(const QString &topDir, PlaylistModel *model):
+    m_rootDir(topDir),
+    m_model(model)
 {
-    m_rootDir = topDir;
-    m_model = model;
 }
 
 void TracksIterator::run()
 {
-    /**
-         * @todo: Complete list of supported extensions
-         */
-    QStringList filters = SupportedFormats::getExtensionList();
+    const QStringList filters = SupportedFormats::getExtensionList();
     QDir dirlist(m_rootDir);
     dirlist.setNameFilters(filters);
     QFileInfo fileInfo;

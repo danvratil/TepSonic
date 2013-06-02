@@ -23,13 +23,11 @@
 
 using namespace SettingsPages;
 
-ChangeShortcutDialog::ChangeShortcutDialog(QModelIndex index, QWidget *parent) :
+ChangeShortcutDialog::ChangeShortcutDialog(const QModelIndex &index, QWidget *parent) :
     QDialog(parent),
-    m_ui(new Ui::ChangeShortcutDialog)
+    m_ui(new Ui::ChangeShortcutDialog),
+    m_index(index)
 {
-    m_index = index;
-
-
     m_ui->setupUi(this);
     connect(m_ui->buttonBox, SIGNAL(rejected()),
             this, SLOT(close()));
@@ -40,7 +38,6 @@ ChangeShortcutDialog::ChangeShortcutDialog(QModelIndex index, QWidget *parent) :
 
     // List legal modifiers
     m_modifiers << Qt::ControlModifier << Qt::AltModifier << Qt::MetaModifier << Qt::ShiftModifier;
-
 }
 
 ChangeShortcutDialog::~ChangeShortcutDialog()
@@ -70,6 +67,6 @@ void ChangeShortcutDialog::keyReleaseEvent(QKeyEvent *e)
 
 void ChangeShortcutDialog::accept()
 {
-    emit shortcutChanged(m_index, m_shortcut);
+    Q_EMIT shortcutChanged(m_index, m_shortcut);
     close();
 }

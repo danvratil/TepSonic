@@ -21,7 +21,7 @@
 #include "addbookmarkdlg.h"
 #include "ui_addbookmarkdlg.h"
 
-AddBookmarkDlg::AddBookmarkDlg(QString path, QWidget *parent) :
+AddBookmarkDlg::AddBookmarkDlg(const QString &path, QWidget *parent) :
     QDialog(parent)
 {
     m_ui = new Ui::AddBookmarkDlg;
@@ -32,6 +32,11 @@ AddBookmarkDlg::AddBookmarkDlg(QString path, QWidget *parent) :
 
     connect(this, SIGNAL(accepted()),
             this, SLOT(emitAccepted()));
+}
+
+AddBookmarkDlg::~AddBookmarkDlg()
+{
+    delete m_ui;
 }
 
 void AddBookmarkDlg::emitAccepted()

@@ -21,29 +21,29 @@
 #ifndef COLLECTIONITEMDELEGATE_H
 #define COLLECTIONITEMDELEGATE_H
 
-#include <QList>
-#include <QModelIndex>
-#include <QPainter>
-#include <QSize>
-#include <QStyledItemDelegate>
-#include <QStyleOptionViewItem>
+#include <QtGui/QStyledItemDelegate>
+#include <QtGui/QStyleOptionViewItem>
+#include <QtGui/QPainter>
+#include <QtCore/QList>
+#include <QtCore/QModelIndex>
+#include <QtCore/QSize>
 
 class CollectionProxyModel;
 
 class CollectionItemDelegate : public QStyledItemDelegate
 {
     Q_OBJECT
-    public:
-        explicit CollectionItemDelegate(QObject *parent = 0, CollectionProxyModel *proxyModel = 0);
-        void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const;
-        QSize sizeHint(const QStyleOptionViewItem &option = QStyleOptionViewItem(),
-                       const QModelIndex &index = QModelIndex()) const;
 
-    private:
-        mutable QList<QModelIndex> m_currentIndexes;
+  public:
+    explicit CollectionItemDelegate(QObject *parent = 0, CollectionProxyModel *proxyModel = 0);
+    void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const;
+    QSize sizeHint(const QStyleOptionViewItem &option = QStyleOptionViewItem(),
+                   const QModelIndex &index = QModelIndex()) const;
 
-        CollectionProxyModel *m_proxyModel;
+  private:
+    mutable QList<QModelIndex> m_currentIndexes;
 
+    CollectionProxyModel *m_proxyModel;
 };
 
 #endif // COLLECTIONITEMDELEGATE_H

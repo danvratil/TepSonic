@@ -21,10 +21,10 @@
 #ifndef COLLECTIONBUILDER_H
 #define COLLECTIONBUILDER_H
 
-#include <QRunnable>
-#include <QObject>
-#include <QStringList>
-#include <QSqlDatabase>
+#include <QtCore/QRunnable>
+#include <QtCore/QObject>
+#include <QtCore/QStringList>
+#include <QtSql/QSqlDatabase>
 
 class CollectionModel;
 
@@ -39,13 +39,14 @@ class CollectionModel;
 class CollectionBuilder : public QObject, public QRunnable
 {
     Q_OBJECT
-public:
+
+  public:
 
     //! Constructor
     /*!
       \param model pointer to a CollectionModel that should be populated
     */
-    CollectionBuilder(CollectionModel **model);
+    CollectionBuilder(CollectionModel *model);
 
     //! Start the thread
     /*!
@@ -53,11 +54,11 @@ public:
     */
     void run();
 
-public slots:
+  public Q_SLOTS:
     //! Wake the thread and load given folder.
-    void rebuildFolder(QStringList folder);
+    void rebuildFolder(const QStringList &folder);
 
-signals:
+  Q_SIGNALS:
     //! Emitted when a change in collections is made
     void collectionChanged();
 
@@ -67,10 +68,9 @@ signals:
     //! Informs that building has finished
     void buildingFinished();
 
-
-private:
+  private:
     //! Pointer to pointer to CollectionModel that is populated
-    CollectionModel **m_collectionModel;
+    CollectionModel *m_collectionModel;
 
     //! List of folder to go through
     QStringList m_folders;
@@ -80,27 +80,27 @@ private:
       \param filename File to process
       \param    sqlDb Pointer to SQL connection to be used
     */
-    void insertTrack(QString filename, QSqlDatabase *sqlDb);
+    void insertTrack(const QString &filename, QSqlDatabase sqlDb);
 
     //! Load new informations about given file and update the database
     /*!
       \param filename File to process
       \param sqlDb Pointer to SQL connection to be used
     */
-    void updateTrack(QString filename, QSqlDatabase *sqlDb);
+    void updateTrack(const QString &filename, QSqlDatabase sqlDb);
 
     //! Remove given track from database
     /*!
       \param filename File to process
       \param sqlDb Pointer to SQL connection to be used
     */
-    void removeTrack(QString filename, QSqlDatabase *sqlDb);
+    void removeTrack(const QString &filename, QSqlDatabase sqlDb);
 
     //! Check for interprets/albums/genres...that are not used anymore
     /*!
       \param sqlDb Pointer to SQL connection to be used
     */
-    void cleanUpDatabase(QSqlDatabase *sqlDb);
+    void cleanUpDatabase(QSqlDatabase sqlDb);
 };
 
 #endif // COLLECTIONBUILDER_H

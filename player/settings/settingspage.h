@@ -21,19 +21,20 @@
 #ifndef SETTINGSPAGE_H
 #define SETTINGSPAGE_H
 
-#include <QWidget>
-#include <QSettings>
+#include <QtGui/QWidget>
+#include <QtCore/QSettings>
 
-class SettingsPage: public QWidget {
+class SettingsPage: public QWidget
+{
 
     Q_OBJECT
-    public:
-        SettingsPage (QWidget *parent): QWidget(parent) {};
 
-    public slots:
-        virtual void loadSettings (QSettings *settings) = 0;
+  public:
+    SettingsPage(QWidget *parent): QWidget(parent) {};
 
-        virtual void saveSettings (QSettings *settings) = 0;
+  public Q_SLOTS:
+    virtual void loadSettings(QSettings *settings) = 0;
+    virtual void saveSettings(QSettings *settings) = 0;
 };
 
 #endif // SETTINGSPAGE_H

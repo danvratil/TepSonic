@@ -21,10 +21,10 @@
 #include "player.h"
 #include "constants.h"
 
-#include <QSettings>
+#include <QtCore/QSettings>
 
-#include <QFileInfo>
-#include <QStringList>
+#include <QtCore/QFileInfo>
+#include <QtCore/QStringList>
 #include <phonon/mediaobject.h>
 #include <phonon/path.h>
 #include <phonon/audiooutput.h>
@@ -85,7 +85,7 @@ Player::~Player()
     m_effects.clear();
 }
 
-void Player::setTrack(const QString fileName, bool autoPlay)
+void Player::setTrack(const QString &fileName, bool autoPlay)
 {
     // Stop current track
     m_phononPlayer->stop();
@@ -94,7 +94,7 @@ void Player::setTrack(const QString fileName, bool autoPlay)
         m_phononPlayer->setCurrentSource(Phonon::MediaSource(fileName));
     }
 
-    emit trackChanged(currentMetaData());
+    Q_EMIT trackChanged(currentMetaData());
     if (autoPlay==true) {
         play();
     }
@@ -104,7 +104,7 @@ void Player::setRandomMode(bool randomMode)
 {
     if (m_randomMode != randomMode) {
         m_randomMode = randomMode;
-        emit randomModeChanged(randomMode);
+        Q_EMIT randomModeChanged(randomMode);
     }
 }
 
@@ -112,22 +112,21 @@ void Player::setRepeatMode(RepeatMode repeatMode)
 {
     if (m_repeatMode != repeatMode) {
         m_repeatMode = repeatMode;
-        emit repeatModeChanged(repeatMode);
+        Q_EMIT repeatModeChanged(repeatMode);
     }
 }
 
 void Player::pause()
 {
     m_phononPlayer->pause();
-    emit trackPaused((m_phononPlayer->state() == Phonon::PausedState));
+    Q_EMIT trackPaused((m_phononPlayer->state() == Phonon::PausedState));
 }
 
-Player::MetaData Player::currentMetaData()
+Player::MetaData Player::currentMetaData() const
 {
     Player::MetaData data;
 
-    QString filename = m_phononPlayer->currentSource().fileName();
-
+    const QString filename = m_phononPlayer->currentSource().fileName();
     if ((!QFileInfo(filename).exists()) ||
         (m_phononPlayer->currentSource().type()==Phonon::MediaSource::Invalid)) {
         return data;
@@ -150,20 +149,20 @@ void Player::stop()
     m_phononPlayer->stop();
     // Empty the source
     m_phononPlayer->setCurrentSource(Phonon::MediaSource());
-    emit trackChanged(MetaData());
+    Q_EMIT trackChanged(MetaData());
 }
 
 void Player::emitFinished()
 {
     // Emit both signals - with parameter and without!!!!
-    emit trackFinished(currentMetaData());
-    emit trackFinished();
+    Q_EMIT trackFinished(currentMetaData());
+    Q_EMIT trackFinished();
 }
 
 void Player::setDefaultOutputDevice()
 {
-    QSettings settings(QString(_CONFIGDIR).append("/main.conf"),QSettings::IniFormat,this);
-    int index = settings.value("Preferences/OutputDevice", 0).toInt();
+    const QSettings settings(QString(_CONFIGDIR).append("/main.conf"),QSettings::IniFormat);
+    const int index = settings.value("Preferences/OutputDevice", 0).toInt();
 
     QList<Phonon::AudioOutputDevice> devices = Phonon::BackendCapabilities::availableAudioOutputDevices();
     for (int i = 0; i < devices.length(); i++)
@@ -175,14 +174,13 @@ void Player::setDefaultOutputDevice()
 
 void Player::loadEffects()
 {
-    QSettings settings(QString(_CONFIGDIR).append("/main.conf"),QSettings::IniFormat,this);
-
-    QList<Phonon::EffectDescription> effects = Phonon::BackendCapabilities::availableAudioEffects();
+    const QSettings settings(QString(_CONFIGDIR).append("/main.conf"), QSettings::IniFormat);
+    const QList<Phonon::EffectDescription> effects = Phonon::BackendCapabilities::availableAudioEffects();
     for (int i = 0; i < effects.count(); i++)
     {
         Phonon::Effect *effect = new Phonon::Effect(effects.at(i));
         m_effects.append(effect);
-        bool state = settings.value("Preferences/Effects/"+effects.at(i).name(), 0).toBool();
+        const bool state = settings.value("Preferences/Effects/"+effects.at(i).name(), 0).toBool();
         if (state) {
             m_phononPath.insertEffect(effect);
         }
@@ -191,8 +189,9 @@ void Player::loadEffects()
 
 void Player::enableEffect(Phonon::Effect *effect, bool enable)
 {
-    if (enable && !m_phononPath.effects().contains(effect))
+    if (enable && !m_phononPath.effects().contains(effect)) {
         m_phononPath.insertEffect(effect);
-    else if (!enable && m_phononPath.effects().contains(effect))
+    } else if (!enable && m_phononPath.effects().contains(effect)) {
         m_phononPath.removeEffect(effect);
+    }
 }

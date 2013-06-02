@@ -20,49 +20,48 @@
 #ifndef FILESYSTEMBROWSER_H
 #define FILESYSTEMBROWSER_H
 
-#include <QListView>
-#include <QStringList>
-#include <QKeyEvent>
-#include <QMenu>
-#include <QModelIndex>
+#include <QtGui/QListView>
+#include <QtGui/QKeyEvent>
+#include <QtGui/QMenu>
+#include <QtCore/QStringList>
+#include <QtCore/QModelIndex>
 
 class FileSystemBrowser : public QListView
 {
     Q_OBJECT
-    public:
-        FileSystemBrowser(QWidget *parent = 0);
 
-        void startDrag(Qt::DropActions supportedActions);
+  public:
+    FileSystemBrowser(QWidget *parent = 0);
 
-    protected:
-        void keyPressEvent(QKeyEvent *event);
+    void startDrag(Qt::DropActions supportedActions);
 
+  protected:
+    void keyPressEvent(QKeyEvent *event);
 
-    private slots:
-        void setRootDir(QModelIndex dir);
-        void emitAddBookmark();
+  private Q_SLOTS:
+    void setRootDir(const QModelIndex &dir);
+    void emitAddBookmark();
 
+  public Q_SLOTS:
+    void goBack();
+    void goForward();
+    void goHome();
+    void cdUp();
+    void goToDir(const QString &newPath);
+    void showContextMenu(const QPoint &pos);
 
-    public slots:
-        void goBack();
-        void goForward();
-        void goHome();
-        void cdUp();
-        void goToDir(QString newPath);
-        void showContextMenu(QPoint pos);
+  private:
+    QStringList m_forwardDirs;
+    QStringList m_backDirs;
+    QMenu *m_contextMenu;
 
-    private:
-        QStringList m_forwardDirs;
-        QStringList m_backDirs;
-        QMenu *m_contextMenu;
-
-    signals:
-        void pathChanged(QString newPath);
-        void addTrackToPlaylist(QString filename);
-        void disableForward(bool);
-        void disableBack(bool);
-        void disableCdUp(bool);
-        void addBookmark(QString path);
+  Q_SIGNALS:
+    void pathChanged(const QString &newPath);
+    void addTrackToPlaylist(const QString &filename);
+    void disableForward(bool disable);
+    void disableBack(bool disable);
+    void disableCdUp(bool disable);
+    void addBookmark(const QString &path);
 
 
 };

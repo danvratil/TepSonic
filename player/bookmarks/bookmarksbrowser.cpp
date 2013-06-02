@@ -21,10 +21,9 @@
 #include "bookmarksbrowser.h"
 #include "bookmarksmanager.h"
 
-#include <QStandardItem>
-#include <QMimeData>
-#include <QDrag>
-
+#include <QtGui/QStandardItem>
+#include <QtGui/QDrag>
+#include <QtCore/QMimeData>
 
 BookmarksBrowser::BookmarksBrowser(BookmarksManager *manager, QWidget *parent) :
     QListView(parent),
@@ -42,13 +41,18 @@ BookmarksBrowser::BookmarksBrowser(BookmarksManager *manager, QWidget *parent) :
     setModel(m_proxyModel);
 }
 
+BookmarksBrowser::~BookmarksBrowser()
+{
 
+}
 
 void BookmarksBrowser::startDrag(Qt::DropActions supportedActions)
 {
-    if (!m_booksmarkManager) return;
+    if (!m_booksmarkManager) {
+        return;
+    }
 
-    QModelIndexList indexes = selectedIndexes();
+    const QModelIndexList indexes = selectedIndexes();
 
     QMimeData *mimeData = new QMimeData;
     QByteArray encodedData;
@@ -65,43 +69,32 @@ void BookmarksBrowser::startDrag(Qt::DropActions supportedActions)
     drag->exec(Qt::CopyAction);
 }
 
-
-
-void BookmarksBrowser::setFilter(QString filter)
+void BookmarksBrowser::setFilter(const QString &filter)
 {
     m_proxyModel->setFilterFixedString(filter);
 }
 
-
-
-void BookmarksBrowser::addItem(QString title)
+void BookmarksBrowser::addItem(const QString &title)
 {
     QStandardItem *item = new QStandardItem(title);
     m_model->appendRow(item);
 }
 
-
-
 void BookmarksBrowser::removeAt(int row)
 {
     //!! The row is unmapped!!
-
-    QModelIndex unmapped = m_proxyModel->index(row,0, QModelIndex());
-    QModelIndex mapped = m_proxyModel->mapToSource(unmapped);
+    const QModelIndex unmapped = m_proxyModel->index(row, 0, QModelIndex());
+    const QModelIndex mapped = m_proxyModel->mapToSource(unmapped);
 
     m_model->removeRow(mapped.row());
 }
 
-
-
-QModelIndex BookmarksBrowser::mapToSource(QModelIndex index)
+QModelIndex BookmarksBrowser::mapToSource(const QModelIndex &index) const
 {
     return m_proxyModel->mapToSource(index);
 }
 
-
-
-QModelIndex BookmarksBrowser::mapFromSource(QModelIndex index)
+QModelIndex BookmarksBrowser::mapFromSource(const QModelIndex &index) const
 {
     return m_proxyModel->mapFromSource(index);
 }

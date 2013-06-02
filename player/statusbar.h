@@ -20,9 +20,9 @@
 #ifndef STATUSBAR_H
 #define STATUSBAR_H
 
-#include <QStatusBar>
-#include <QLabel>
-#include <QProgressBar>
+#include <QtGui/QStatusBar>
+#include <QtGui/QLabel>
+#include <QtGui/QProgressBar>
 
 //! StatusBar is displays various informations about state of the application
 /*!
@@ -34,29 +34,30 @@
 class StatusBar : public QStatusBar
 {
     Q_OBJECT
-public:
+
+  public:
     //! Constructor
     /*!
       \param parent pointer to parent object
     */
     StatusBar(QWidget *parent = 0);
 
-private:
+  private:
     //! Label that describes the action
     QLabel *m_actionLabel;
 
     //! Progress bar that shows progress of the action
     QProgressBar *m_progressBar;
 
-public slots:
+  public Q_SLOTS:
     //! Updates action description and position of progressbar
-    void setProgressBar(QString action, int progress, int maxPosition = 100);
+    void setProgressBar(const QString &action, int progress, int maxPosition = 100);
 
     //! Hides action label and progressbar
     void cancelAction();
 
     //! Shows progress bar that is just informing about work, not showing exact progress
-    void showWorkingBar(QString action);
+    void showWorkingBar(const QString &action);
 
 };
 

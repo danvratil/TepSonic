@@ -22,8 +22,8 @@
 #ifndef METADATAEDITOR_H
 #define METADATAEDITOR_H
 
-#include <QDialog>
-#include <QCompleter>
+#include <QtGui/QDialog>
+#include <QtGui/QCompleter>
 
 #include "ui_metadataeditor.h"
 
@@ -31,43 +31,69 @@ class MetadataEditor : public QDialog
 {
     Q_OBJECT
 
-    public:
-        explicit MetadataEditor(QWidget *parent = 0);
-        ~MetadataEditor();
+public:
+    explicit MetadataEditor(QWidget *parent = 0);
+    ~MetadataEditor();
 
-        QString trackTitle() { return m_ui->trackTitleEdit->text(); }
-        void setTrackTitle(QString title) { m_ui->trackTitleEdit->setText(title); }
+    QString trackTitle() const {
+        return m_ui->trackTitleEdit->text();
+    }
+    void setTrackTitle(const QString &title) {
+        m_ui->trackTitleEdit->setText(title);
+    }
 
-        QString artist() { return m_ui->artistEdit->text(); }
-        void setArtist(QString artist) { m_ui->artistEdit->setText(artist); }
+    QString artist() const {
+        return m_ui->artistEdit->text();
+    }
+    void setArtist(const QString &artist) {
+        m_ui->artistEdit->setText(artist);
+    }
 
-        QString album() { return m_ui->albumEdit->text(); }
-        void setAlbum(QString album) { m_ui->albumEdit->setText(album); }
+    QString album() const {
+        return m_ui->albumEdit->text();
+    }
+    void setAlbum(const QString &album) {
+        m_ui->albumEdit->setText(album);
+    }
 
-        int year() { return m_ui->yearEdit->value(); }
-        void setYear(int year) { m_ui->yearEdit->setValue(year); }
+    int year() const {
+        return m_ui->yearEdit->value();
+    }
+    void setYear(int year) {
+        m_ui->yearEdit->setValue(year);
+    }
 
-        QString genre() { return m_ui->genreEdit->text(); }
-        void setGenre(QString genre) { m_ui->genreEdit->setText(genre); }
+    QString genre() const {
+        return m_ui->genreEdit->text();
+    }
+    void setGenre(const QString &genre) {
+        m_ui->genreEdit->setText(genre);
+    }
 
-        int trackNumber() { return m_ui->trackNumberEdit->text().toInt(); }
-        void setTrackNumber(int trackNumber) { m_ui->trackNumberEdit->setText(QString::number(trackNumber)); }
+    int trackNumber() const {
+        return m_ui->trackNumberEdit->text().toInt();
+    }
+    void setTrackNumber(int trackNumber) {
+        m_ui->trackNumberEdit->setText(QString::number(trackNumber));
+    }
 
-        QString filename() { return m_filename; }
-        void setFilename(QString filename);
+    QString filename() const {
+        return m_filename;
+    }
+    void setFilename(const QString &filename);
 
-    protected:
-        void resizeEvent(QResizeEvent *);
+protected:
+    void resizeEvent(QResizeEvent *);
 
 
-    private:
-        Ui::MetadataEditor *m_ui;
+private:
+    Ui::MetadataEditor *m_ui;
 
-        QString m_filename;
+    QString m_filename;
 
-        QCompleter *m_artistCompleter;
-        QCompleter *m_albumCompleter;
-        QCompleter *m_genreCompleter;
+    QCompleter *m_artistCompleter;
+    QCompleter *m_albumCompleter;
+    QCompleter *m_genreCompleter;
 
 };
 

@@ -21,13 +21,10 @@
 #include "ui_metadataeditor.h"
 #include "databasemanager.h"
 
-#include <QFontMetrics>
-#include <QFileInfo>
-#include <QSqlQuery>
-
-#include <QDebug>
-
-
+#include <QtGui/QFontMetrics>
+#include <QtSql/QSqlQuery>
+#include <QtCore/QFileInfo>
+#include <QtCore/QDebug>
 
 MetadataEditor::MetadataEditor(QWidget *parent) :
     QDialog(parent),
@@ -39,13 +36,12 @@ MetadataEditor::MetadataEditor(QWidget *parent) :
     m_ui->setupUi(this);
 
     DatabaseManager dbManager("metadataEditorConnection");
-    if (DatabaseManager::connectionAvailable() || dbManager.connectToDB())
-    {
+    if (DatabaseManager::connectionAvailable() || dbManager.connectToDB()) {
 
         QStringList list;
 
         {
-            QSqlQuery query("SELECT interpret FROM interprets ORDER BY interpret ASC;", *dbManager.sqlDb());
+            QSqlQuery query("SELECT interpret FROM interprets ORDER BY interpret ASC;", dbManager.sqlDb());
             while (query.next())
                 list.append(query.value(0).toString());
         }
@@ -55,7 +51,7 @@ MetadataEditor::MetadataEditor(QWidget *parent) :
         list.clear();
 
         {
-            QSqlQuery query("SELECT album FROM albums ORDER BY album ASC;", *dbManager.sqlDb());
+            QSqlQuery query("SELECT album FROM albums ORDER BY album ASC;", dbManager.sqlDb());
             while (query.next())
                 list.append(query.value(0).toString());
         }
@@ -65,7 +61,7 @@ MetadataEditor::MetadataEditor(QWidget *parent) :
         list.clear();
 
         {
-            QSqlQuery query("SELECT genre FROM genres ORDER BY genre ASC;", *dbManager.sqlDb());
+            QSqlQuery query("SELECT genre FROM genres ORDER BY genre ASC;", dbManager.sqlDb());
             while (query.next())
                 list.append(query.value(0).toString());
         }
@@ -79,27 +75,20 @@ MetadataEditor::~MetadataEditor()
 {
     delete m_ui;
 
-    if (m_artistCompleter)
-        delete m_artistCompleter;
-    if (m_albumCompleter)
-        delete m_albumCompleter;
-    if  (m_genreCompleter)
-        delete m_genreCompleter;
+    delete m_artistCompleter;
+    delete m_albumCompleter;
+    delete m_genreCompleter;
 }
 
-
-void MetadataEditor::setFilename(QString filename)
+void MetadataEditor::setFilename(const QString &filename)
 {
-    QFileInfo fi(filename);
+    const QFileInfo fi(filename);
     m_filename = fi.absoluteFilePath();
 
     resizeEvent(0);
 }
 
-
 void MetadataEditor::resizeEvent(QResizeEvent *e)
 {
-    QFontMetrics fm(font());
-    m_ui->box->setTitle(fm.elidedText(m_filename, Qt::ElideMiddle, m_ui->box->width()));
+    m_ui->box->setTitle(fontMetrics().elidedText(m_filename, Qt::ElideMiddle, m_ui->box->width()));
 }
-

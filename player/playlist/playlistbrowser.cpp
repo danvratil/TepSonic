@@ -24,19 +24,19 @@
 #include "playlistitem.h"
 #include "tools.h"
 
-#include <QApplication>
-#include <QDir>
-#include <QDropEvent>
-#include <QDebug>
-#include <QList>
-#include <QStringList>
-#include <QUrl>
-#include <QFile>
-#include <QFileInfo>
-#include <QModelIndex>
-#include <QItemSelectionRange>
+#include <QtGui/QApplication>
+#include <QtGui/QDropEvent>
+#include <QtGui/QItemSelectionRange>
+#include <QtGui/QDrag>
+#include <QtCore/QDir>
+#include <QtCore/QDebug>
+#include <QtCore/QList>
+#include <QtCore/QStringList>
+#include <QtCore/QUrl>
+#include <QtCore/QFile>
+#include <QtCore/QFileInfo>
+#include <QtCore/QModelIndex>
 
-#include <QDrag>
 
 #ifdef Q_WS_WIN
 #include <cstdlib>
@@ -46,8 +46,8 @@
 #include <time.h>
 #endif
 
-PlaylistBrowser::PlaylistBrowser(QWidget* parent):
-        QTreeView(parent)
+PlaylistBrowser::PlaylistBrowser(QWidget *parent):
+    QTreeView(parent)
 {
     setAcceptDrops(true);
     viewport()->setAcceptDrops(true);
@@ -72,7 +72,7 @@ void PlaylistBrowser::dragEnterEvent(QDragEnterEvent *event)
 }
 
 // Event: drag has moved above the widget
-void PlaylistBrowser::dragMoveEvent(QDragMoveEvent* event)
+void PlaylistBrowser::dragMoveEvent(QDragMoveEvent *event)
 {
     // Again - accept the proposed action
     event->acceptProposedAction();
@@ -92,12 +92,14 @@ void PlaylistBrowser::mousePressEvent(QMouseEvent *event)
 void PlaylistBrowser::mouseMoveEvent(QMouseEvent *event)
 {
     // No left buttton? Run!
-    if (!(event->buttons() & Qt::LeftButton))
+    if (!(event->buttons() & Qt::LeftButton)) {
         return;
+    }
 
     // If the move distance is shorter then startDragDistance() then this is not drag event and let's go away
-    if ((event->pos()-m_dragStartPosition).manhattanLength() < QApplication::startDragDistance())
+    if ((event->pos() - m_dragStartPosition).manhattanLength() < QApplication::startDragDistance()) {
         return;
+    }
 
     // Initiate the drag!
     QDrag *drag = new QDrag(this);
@@ -109,14 +111,17 @@ void PlaylistBrowser::mouseMoveEvent(QMouseEvent *event)
     // Selected indexes
     QItemSelection selection = selectionModel()->selection();
 
-    PlaylistProxyModel *proxyModel = qobject_cast<PlaylistProxyModel*>(model());
-    if (!proxyModel) return;
+    PlaylistProxyModel *proxyModel = qobject_cast<PlaylistProxyModel *>(model());
+    if (!proxyModel) {
+        return;
+    }
     selection = proxyModel->mapSelectionToSource(selection);
-    PlaylistModel *model = qobject_cast<PlaylistModel*>(proxyModel->sourceModel());
-    if (!model) return;
+    PlaylistModel *model = qobject_cast<PlaylistModel *>(proxyModel->sourceModel());
+    if (!model) {
+        return;
+    }
 
-    for (int i = 0; i < selection.indexes().size(); i ++)
-    {
+    for (int i = 0; i < selection.indexes().size(); i ++) {
         PlaylistItem *item = model->getItem(selection.indexes().at(i));
         stream << item->data(PlaylistBrowser::FilenameColumn).toString();
         stream << item->data(PlaylistBrowser::TrackColumn).toString();
@@ -138,38 +143,41 @@ void PlaylistBrowser::mouseMoveEvent(QMouseEvent *event)
 }
 
 // Drop event (item is dropped on the widget)
-void PlaylistBrowser::dropEvent(QDropEvent* event)
+void PlaylistBrowser::dropEvent(QDropEvent *event)
 {
     event->acceptProposedAction();
 
-	if (event->mimeData()->hasFormat("data/tepsonic-tracks") || event->mimeData()->hasUrls()) {
-	
-		QStringList files;
-		// Drop from CollectionsBrowser
-		if (event->mimeData()->hasFormat("data/tepsonic-tracks")) {
-			QByteArray encodedData = event->mimeData()->data("data/tepsonic-tracks");
-			QDataStream stream(&encodedData, QIODevice::ReadOnly);
-			QStringList newItems;
-	
-			while (!stream.atEnd()) {
-				QString text;
-				stream >> text;
-				files << text;
-			}
-		// Drop from URLs
-		} else if (event->mimeData()->hasUrls()) {
+    if (event->mimeData()->hasFormat("data/tepsonic-tracks") || event->mimeData()->hasUrls()) {
 
-			QList<QUrl> urlList = event->mimeData()->urls();
-		
-			foreach(QUrl url, urlList)
-				files << url.path();
-		}
-			
-		//row where the items were dropped
-		int row = indexAt(event->pos()).row();
-		if (row == -1) row = model()->rowCount();
+        QStringList files;
+        // Drop from CollectionsBrowser
+        if (event->mimeData()->hasFormat("data/tepsonic-tracks")) {
+            QByteArray encodedData = event->mimeData()->data("data/tepsonic-tracks");
+            QDataStream stream(&encodedData, QIODevice::ReadOnly);
+            QStringList newItems;
 
-		emit addedFiles(files, row);
+            while (!stream.atEnd()) {
+                QString text;
+                stream >> text;
+                files << text;
+            }
+            // Drop from URLs
+        } else if (event->mimeData()->hasUrls()) {
+
+            QList<QUrl> urlList = event->mimeData()->urls();
+
+            Q_FOREACH (const QUrl &url, urlList) {
+                files << url.path();
+            }
+        }
+
+        //row where the items were dropped
+        int row = indexAt(event->pos()).row();
+        if (row == -1) {
+            row = model()->rowCount();
+        }
+
+        Q_EMIT addedFiles(files, row);
     }
 
     // Drop from internal move
@@ -178,17 +186,23 @@ void PlaylistBrowser::dropEvent(QDropEvent* event)
         QDataStream stream(&encodedData, QIODevice::ReadOnly);
 
         // We need the original PlaylistModel
-        PlaylistProxyModel *proxyModel = qobject_cast<PlaylistProxyModel*>(model());
-        if (!proxyModel) return;
-        PlaylistModel *model = qobject_cast<PlaylistModel*>(proxyModel->sourceModel());
-        if (!model) return;
+        PlaylistProxyModel *proxyModel = qobject_cast<PlaylistProxyModel *>(model());
+        if (!proxyModel) {
+            return;
+        }
+        PlaylistModel *model = qobject_cast<PlaylistModel *>(proxyModel->sourceModel());
+        if (!model) {
+            return;
+        }
 
         // Some math about where to insert the item
         int row = indexAt(event->pos()).row();
-        if (row == -1)
+        if (row == -1) {
             row = model->rowCount();
-        else if (row < model->rowCount())
+        }
+        else if (row < model->rowCount()) {
             row += 1;
+        }
 
         Player::MetaData metadata;
         QString s;
@@ -212,7 +226,7 @@ void PlaylistBrowser::dropEvent(QDropEvent* event)
             stream >> s;
             metadata.bitrate = s.toInt();
             // length in milliseconds - to properly count total length of playlist
-            metadata.length = formattedLengthToSeconds(metadata.formattedLength)*1000;
+            metadata.length = formattedLengthToSeconds(metadata.formattedLength) * 1000;
 
             model->insertItem(metadata, row);
         }
@@ -221,33 +235,36 @@ void PlaylistBrowser::dropEvent(QDropEvent* event)
     event->setAccepted(true);
 }
 
-void PlaylistBrowser::keyPressEvent(QKeyEvent* event)
+void PlaylistBrowser::keyPressEvent(QKeyEvent *event)
 {
     switch (event->key()) {
-        case Qt::Key_Delete: // Key DELETE
-            for (int i = 0; i < selectedIndexes().size(); i++) {
-                model()->removeRow(selectedIndexes().at(i).row());
-            }
-            break;
-        case Qt::Key_Down: { // Key DOWN
-            QModelIndex nextItem = indexBelow(currentIndex());
-            if (nextItem.isValid())
-                setCurrentIndex(nextItem);
-            } break;
-        case Qt::Key_Up: { // Key UP
-            QModelIndex prevItem = indexAbove(currentIndex());
-            if (prevItem.isValid())
-                setCurrentIndex(prevItem);
-            } break;
-        case Qt::Key_Enter:  // key ENTER (on numeric keypad)
-        case Qt::Key_Return: { // Key ENTER
-            PlaylistProxyModel *ppmodel = qobject_cast<PlaylistProxyModel*>(model());
-            if (!ppmodel) return;
-            PlaylistModel *pmodel = qobject_cast<PlaylistModel*>(ppmodel->sourceModel());
-            if (!pmodel) return;
-            pmodel->setCurrentItem(currentIndex());
-            emit setTrack(currentIndex().row());
-            } break;
+    case Qt::Key_Delete: // Key DELETE
+        for (int i = 0; i < selectedIndexes().size(); i++) {
+            model()->removeRow(selectedIndexes().at(i).row());
+        }
+        break;
+    case Qt::Key_Down: { // Key DOWN
+        QModelIndex nextItem = indexBelow(currentIndex());
+        if (nextItem.isValid())
+            setCurrentIndex(nextItem);
+    }
+    break;
+    case Qt::Key_Up: { // Key UP
+        QModelIndex prevItem = indexAbove(currentIndex());
+        if (prevItem.isValid())
+            setCurrentIndex(prevItem);
+    }
+    break;
+    case Qt::Key_Enter:  // key ENTER (on numeric keypad)
+    case Qt::Key_Return: { // Key ENTER
+        PlaylistProxyModel *ppmodel = qobject_cast<PlaylistProxyModel *>(model());
+        if (!ppmodel) return;
+        PlaylistModel *pmodel = qobject_cast<PlaylistModel *>(ppmodel->sourceModel());
+        if (!pmodel) return;
+        pmodel->setCurrentItem(currentIndex());
+        emit setTrack(currentIndex().row());
+    }
+    break;
     }
     event->accept();
 
@@ -255,27 +272,26 @@ void PlaylistBrowser::keyPressEvent(QKeyEvent* event)
 
 void PlaylistBrowser::setStopTrack()
 {
-    PlaylistProxyModel* ppmodel = qobject_cast<PlaylistProxyModel*>(model());
-
-    if(!ppmodel)
+    PlaylistProxyModel *ppmodel = qobject_cast<PlaylistProxyModel *>(model());
+    if (!ppmodel) {
         return;
+    }
 
-    PlaylistModel* pmodel = qobject_cast<PlaylistModel*>(ppmodel->sourceModel());
-
-    if(!pmodel)
+    PlaylistModel *pmodel = qobject_cast<PlaylistModel *>(ppmodel->sourceModel());
+    if (!pmodel) {
         return;
+    }
 
     pmodel->setStopTrack(selectedIndexes().first());
 }
 
 void PlaylistBrowser::shuffle()
 {
-    srand(time(NULL)); /* Prilis male rozliseni hodin, potrebujeme mikrosekundy */
-    int rowCount = model()->rowCount();
-    for (int row = 0; row < rowCount; row++)
-    {
+    srand(time(0)); // We needs microseconds
+    const int rowCount = model()->rowCount();
+    for (int row = 0; row < rowCount; row++) {
         qulonglong order = (qulonglong)rand();
-        static_cast<PlaylistModel*>(model())->setData(model()->index(row, PlaylistBrowser::RandomOrderColumn), QVariant(order));
+        model()->setData(model()->index(row, PlaylistBrowser::RandomOrderColumn), QVariant(order));
     }
 
     model()->sort(PlaylistBrowser::RandomOrderColumn, Qt::AscendingOrder);

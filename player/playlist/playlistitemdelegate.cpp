@@ -24,29 +24,28 @@
 #include "playlistproxymodel.h"
 #include "playlistitem.h"
 
-#include <QRect>
-
+#include <QtCore/QRect>
 
 PlaylistItemDelegate::PlaylistItemDelegate(QObject *parent, PlaylistModel *playlistModel,
-                                           PlaylistBrowser *playlistBrowser, PlaylistProxyModel *playlistProxyModel):
-        QStyledItemDelegate(parent)
+        PlaylistBrowser *playlistBrowser,
+        PlaylistProxyModel *playlistProxyModel):
+    QStyledItemDelegate(parent),
+    m_playlistModel(playlistModel),
+    m_playlistBrowser(playlistBrowser),
+    m_playlistProxyModel(playlistProxyModel)
 {
-    m_playlistModel = playlistModel;
-    m_playlistBrowser = playlistBrowser;
-    m_playlistProxyModel = playlistProxyModel;
-
-
 }
 
-void PlaylistItemDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const
+void PlaylistItemDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option,
+                                 const QModelIndex &index) const
 {
     QRect rect(option.rect);
-    rect.setLeft(rect.left()-3);
+    rect.setLeft(rect.left() - 3);
 
     painter->setFont(option.font);
     painter->setPen(option.palette.text().color());
 
-    QModelIndex mappedIndex = m_playlistProxyModel->mapToSource(index);
+    const QModelIndex mappedIndex = m_playlistProxyModel->mapToSource(index);
 
     if (m_playlistModel->getStopTrack().row() == mappedIndex.row()) {
         if (mappedIndex.row() == m_playlistModel->currentItem().row()) {
@@ -59,7 +58,7 @@ void PlaylistItemDelegate::paint(QPainter *painter, const QStyleOptionViewItem &
         painter->fillRect(rect, option.palette.link());
         painter->setPen(option.palette.highlightedText().color());
     } else if (option.state & QStyle::State_Selected) {
-        painter->fillRect(rect,option.palette.highlight());
+        painter->fillRect(rect, option.palette.highlight());
     }
 
     painter->drawText(QRect(option.rect.left(),
@@ -67,8 +66,8 @@ void PlaylistItemDelegate::paint(QPainter *painter, const QStyleOptionViewItem &
                             m_playlistBrowser->columnWidth(index.column()),
                             option.rect.bottom()),
                       option.fontMetrics.elidedText(mappedIndex.data().toString(),
-                                                    Qt::ElideRight,
-                                                    m_playlistBrowser->columnWidth(mappedIndex.column()))
-                      );
+                              Qt::ElideRight,
+                              m_playlistBrowser->columnWidth(mappedIndex.column()))
+                     );
 
 }

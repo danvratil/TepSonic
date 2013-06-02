@@ -20,8 +20,8 @@
 #include "collectionspage.h"
 #include "ui_collectionspage.h"
 
-#include <QFileDialog>
-#include <QListWidgetItem>
+#include <QtGui/QFileDialog>
+#include <QtGui/QListWidgetItem>
 
 using namespace SettingsPages;
 
@@ -31,8 +31,8 @@ enum {
 };
 
 CollectionsPage::CollectionsPage(QWidget *parent):
-        SettingsPage(parent),
-        m_collectionsSourceChanged(false)
+    SettingsPage(parent),
+    m_collectionsSourceChanged(false)
 {
     m_ui = new Ui::CollectionsPage();
     m_ui->setupUi(this);
@@ -57,7 +57,7 @@ CollectionsPage::~CollectionsPage()
     delete m_ui;
 }
 
-void CollectionsPage::changeEngine(QString currEngine)
+void CollectionsPage::changeEngine(const QString &currEngine)
 {
     if (currEngine == "SQLite") {
         m_ui->mysqlSettings->setDisabled(true);
@@ -68,10 +68,9 @@ void CollectionsPage::changeEngine(QString currEngine)
 
 void CollectionsPage::addPath()
 {
-    QString dirName = QFileDialog::getExistingDirectory(this,
-                      tr("Add directory"),
-                      QString(),
-                      QFileDialog::ShowDirsOnly);
+    const QString dirName = QFileDialog::getExistingDirectory(this,
+                    tr("Add directory"),
+                     QString(), QFileDialog::ShowDirsOnly);
     if (!dirName.isEmpty()) {
         m_ui->collectionsPathsList->addItem(dirName);
     }
@@ -80,7 +79,7 @@ void CollectionsPage::addPath()
 
 void CollectionsPage::removePath()
 {
-    foreach (QListWidgetItem *item, m_ui->collectionsPathsList->selectedItems()) {
+    Q_FOREACH (QListWidgetItem * item, m_ui->collectionsPathsList->selectedItems()) {
         delete m_ui->collectionsPathsList->takeItem(m_ui->collectionsPathsList->row(item));
     }
     m_collectionsSourceChanged = true;
@@ -94,15 +93,16 @@ void CollectionsPage::removeAllPaths()
 
 void CollectionsPage::collectionStateToggled()
 {
-    bool checked = m_ui->enableCollectionsCheckbox->isChecked();
+    const bool checked = m_ui->enableCollectionsCheckbox->isChecked();
 
     m_ui->autoupdateCollectionsCheckbox->setEnabled(checked);
     m_ui->dbEngineCombo->setEnabled(checked);
     m_ui->rebuildCollectionsButton->setEnabled(checked);
-    if (checked && m_ui->dbEngineCombo->currentText() == "MySQL")
+    if (checked && m_ui->dbEngineCombo->currentText() == "MySQL") {
         m_ui->mysqlSettings->setEnabled(true);
-    else
+    } else {
         m_ui->mysqlSettings->setEnabled(false);
+    }
 
     m_ui->tabWidget->setTabEnabled(TAB_SOURCES, checked);
     // Always enabled

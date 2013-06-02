@@ -20,47 +20,54 @@
 #include "supportedformats.h"
 #include <phonon/backendcapabilities.h>
 
-#include <QDebug>
+#include <QtCore/QDebug>
 
 QStringList SupportedFormats::getExtensionList()
 {
-        QStringList availableMimeTypes = Phonon::BackendCapabilities::availableMimeTypes();
-        QString mimes = availableMimeTypes.join(" ");
+    const QStringList availableMimeTypes = Phonon::BackendCapabilities::availableMimeTypes();
+    const QString mimes = availableMimeTypes.join(" ");
 
-	QStringList checkList;
-	checkList << "ac3" << "flac" << "mp3" << "mp4" << "ogg" << "wav" << "wma";
+    QStringList checkList;
+    checkList << "ac3" << "flac" << "mp3" << "mp4" << "ogg" << "wav" << "wma";
 
-	//aiff, wavpack, musepack, mpeg2
+    //aiff, wavpack, musepack, mpeg2
 
-	QStringList list;
+    QStringList list;
 
-	foreach(QString ext, checkList)
-		if(mimes.contains(ext))
-			list << QString("*.%1").arg(ext);
+    Q_FOREACH(const QString & ext, checkList) {
+        if (mimes.contains(ext)) {
+            list << QString("*.%1").arg(ext);
+        }
+    }
 
-	if(mimes.contains("aiff"))
-		list << "*.aif" << "*.aiff";
+    if (mimes.contains("aiff")) {
+        list << "*.aif" << "*.aiff";
+    }
 
-	if(mimes.contains("ms-asf"))
-		list << "*.asf";
+    if (mimes.contains("ms-asf")) {
+        list << "*.asf";
+    }
 
-	if(mimes.contains("mpeg2"))
-		list << "*.mp2";
+    if (mimes.contains("mpeg2")) {
+        list << "*.mp2";
+    }
 
-	if(mimes.contains("musepack"))
-		list << "*.mpc";
+    if (mimes.contains("musepack")) {
+        list << "*.mpc";
+    }
 
-	if(mimes.contains("realaudio"))
-		list << "*.ra" << "*.ram";
+    if (mimes.contains("realaudio")) {
+        list << "*.ra" << "*.ram";
+    }
 
-	if(mimes.contains("wavpack"))
-		list << "*.wv";
+    if (mimes.contains("wavpack")) {
+        list << "*.wv";
+    }
 
-	// falback
-	if(list.isEmpty())
-		list << "*.flac" << "*.mp3" << "*.ogg" << "*.wav";
+    // falback
+    if (list.isEmpty()) {
+        list << "*.flac" << "*.mp3" << "*.ogg" << "*.wav";
+    }
 
-        //qDebug() << "the final supported extension list:" << list;
-
-	return list;
+    return list;
 }

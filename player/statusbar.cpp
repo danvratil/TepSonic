@@ -20,17 +20,17 @@
 #include "statusbar.h"
 
 StatusBar::StatusBar(QWidget *parent) :
-        QStatusBar(parent)
+    QStatusBar(parent)
 {
     m_actionLabel = 0;
     m_progressBar = 0;
 }
 
 
-void StatusBar::setProgressBar(QString action, int position, int maxPosition)
+void StatusBar::setProgressBar(const QString &action, int position, int maxPosition)
 {
     if (m_actionLabel == 0) {
-        m_actionLabel = new QLabel(action,this);
+        m_actionLabel = new QLabel(action, this);
         m_actionLabel->setSizePolicy(QSizePolicy::Minimum,
                                      QSizePolicy::Fixed);
         insertWidget(0, m_actionLabel, 1);
@@ -70,7 +70,7 @@ void StatusBar::cancelAction()
     m_progressBar = 0;
 }
 
-void StatusBar::showWorkingBar(QString action)
+void StatusBar::showWorkingBar(const QString &action)
 {
     setProgressBar(action, 1, 0);
 }

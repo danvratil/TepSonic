@@ -59,8 +59,8 @@ endif (TRANSLATIONS)
 
 target_link_libraries(tepsonic_lyricsplugin
                ${QT_QTCORE_LIBRARY}
-	       ${QT_QTNETWORK_LIBRART}
-               ${QT_QTXML_LIBRART}
+	       ${QT_QTNETWORK_LIBRARY}
+               ${QT_QTXML_LIBRARY}
 )
 
 # standard UNIX and windows

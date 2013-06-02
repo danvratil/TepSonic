@@ -20,38 +20,41 @@
 #ifndef SHORTCUTSPAGE_H
 #define SHORTCUTSPAGE_H
 
-#include <QModelIndex>
+#include <QtCore/QModelIndex>
 
 #include "settingspage.h"
 
-namespace Ui {
-    class ShortcutsPage;
+namespace Ui
+{
+class ShortcutsPage;
 }
 
-namespace SettingsPages {
+namespace SettingsPages
+{
 
-    class ChangeShortcutDialog;
+class ChangeShortcutDialog;
 
-    class ShortcutsPage: public SettingsPage
-    {
-        Q_OBJECT
-        public:
-            ShortcutsPage(QWidget *parent = 0);
-            ~ShortcutsPage();
+class ShortcutsPage: public SettingsPage
+{
+    Q_OBJECT
 
-        public slots:
-            void loadSettings(QSettings *settings);
-            void saveSettings(QSettings *settings);
+  public:
+    ShortcutsPage(QWidget *parent = 0);
+    ~ShortcutsPage();
 
-        private slots:
-            void changeShortcut(QModelIndex index);
-            void shortcutChanged(QModelIndex index, QKeySequence shortcut);
+  public Q_SLOTS:
+    void loadSettings(QSettings *settings);
+    void saveSettings(QSettings *settings);
 
-        private:
-            ChangeShortcutDialog *m_csw;
+  private Q_SLOTS:
+    void changeShortcut(const QModelIndex &index);
+    void shortcutChanged(const QModelIndex &index, const QKeySequence &shortcut);
 
-            ::Ui::ShortcutsPage *m_ui;
-    };
+  private:
+    ChangeShortcutDialog *m_csw;
+
+    ::Ui::ShortcutsPage *m_ui;
+};
 
 }
 

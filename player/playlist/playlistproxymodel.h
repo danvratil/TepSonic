@@ -21,9 +21,8 @@
 #ifndef PLAYLISTPROXYMODEL_H
 #define PLAYLISTPROXYMODEL_H
 
-#include <QObject>
-#include <QModelIndex>
-#include <QSortFilterProxyModel>
+#include <QtGui/QSortFilterProxyModel>
+#include <QtCore/QModelIndex>
 
 //! PlaylistProxyModel is a filter model for playlist
 /*!
@@ -34,14 +33,14 @@ class PlaylistProxyModel : public QSortFilterProxyModel
 {
     Q_OBJECT
 
-public:
+  public:
     //! Constructor
     /*!
       \param parent pointer to model's parent object
     */
     PlaylistProxyModel(QObject *parent = 0);
 
-protected:
+  protected:
     //! Decides wheter the source row will be displayed of hidden
     /*!
       This method compares values of all columns (excluding the first one, with filename) of item on row \p sourceRow

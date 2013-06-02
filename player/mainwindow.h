@@ -20,26 +20,24 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include <QObject>
-#include <QMessageBox>
+#include <QtGui/QMessageBox>
 #include <QtGui/QMainWindow>
 #include <QtGui/QActionGroup>
-#include <QSettings>
-#include <QSignalMapper>
-#include <QSortFilterProxyModel>
-#include <QItemSelectionModel>
-#include <QLabel>
-#include <QSystemTrayIcon>
-#include <QKeyEvent>
-#include <QFileSystemModel>
-#include <QPointer>
+#include <QtCore/QSettings>
+#include <QtCore/QSignalMapper>
+#include <QtCore/QPointer>
+#include <QtGui/QLabel>
+#include <QtGui/QSystemTrayIcon>
+#include <QtGui/QKeyEvent>
+#include <QtGui/QFileSystemModel>
+#include <QtGui/QSortFilterProxyModel>
+#include <QtGui/QItemSelectionModel>
 
 
 // These classes are used in inline methods
 #include "playlist/playlistmodel.h"
 #include "player.h"
 #include "trayicon.h"
-
 
 class PlaylistItemDelegate;
 class PlaylistProxyModel;
@@ -68,7 +66,7 @@ class MainWindow : public QMainWindow
                READ pluginsManager
                WRITE setPluginsManager)*/
 
-public:
+  public:
     //! Constructor
     /*!
       Initializes main window. Pointer to PluginsManager is set via method
@@ -104,7 +102,7 @@ public:
     void installPluginsMenus();
 
 
-private:
+  private:
     //! Pointer to main window's UI (generated from mainwindow.ui)
     Ui::MainWindow *m_ui;
 
@@ -207,7 +205,7 @@ private:
     void destroyCollections();
 
 
-protected:
+  protected:
     //! Close event handler
     /*!
       Executed when trying to close main window (eg. close application). According
@@ -221,12 +219,12 @@ protected:
     //! When language is changed the window is retranslated
     void changeEvent(QEvent *e);
 
-public slots:
+  public Q_SLOTS:
     //! Displays \p error message in status bar
     /*!
       \param error message that describes the error
     */
-    void showError(QString error);
+    void showError(const QString &error);
 
     //! Add file \p filename to playlist
     /*!
@@ -243,11 +241,9 @@ public slots:
     //! When plugins are loaded, this method setups plugins menus and panes
     void setupPluginsUIs();
 
-
-private slots:
-
+  private Q_SLOTS:
     //! When doubleclicked item is a track, move it to the playlist
-    void collectionBrowserDoubleClick(QModelIndex index);
+    void collectionBrowserDoubleClick(const QModelIndex &index);
 
     //! Workaround for QTBUG  7585
     /*!
@@ -267,7 +263,7 @@ private slots:
     /*!
       \param pos XY coordinates of cursor (relatively to MainWindow top-left corner) where the context menu will popup
     */
-    void showPlaylistHeaderContextMenu(QPoint pos);
+    void showPlaylistHeaderContextMenu(const QPoint &pos);
 
     //! Toggles visibility of given playlist column
     /*!
@@ -340,7 +336,7 @@ private slots:
       Passed index points to clicked item. This item is set as current player source and playback is started.
       \sa on_actionPlay_pause_triggered()
     */
-    void playlistBrowserDoubleClick(QModelIndex index);
+    void playlistBrowserDoubleClick(const QModelIndex &index);
 
     //! Removes all items from playlist
     void clearPlaylist() {
@@ -368,7 +364,7 @@ private slots:
     /*!
       \sa on_actionShow_Hide_triggered()
     */
-    void trayClicked(QSystemTrayIcon::ActivationReason);
+    void trayClicked(QSystemTrayIcon::ActivationReason reason);
 
     //! Opens external default browser and navigates to TepSonic bugzilla
     void reportBug();
@@ -378,7 +374,7 @@ private slots:
 
     //! Shows 'About Qt' dialog
     void aboutQt() {
-        QMessageBox::aboutQt(this,tr("About Qt"));
+        QMessageBox::aboutQt(this, tr("About Qt"));
     }
 
     //! Shows dialog with list of currently supported audio formats
@@ -407,10 +403,10 @@ private slots:
     void trayIconMouseWheelScrolled(int delta);
 
     //! Open the popup
-    void showCollectionsContextMenu(QPoint pos);
+    void showCollectionsContextMenu(const QPoint &pos);
 
     //! Open the playlist popup menu
-    void showPlaylistContextMenu(QPoint pos);
+    void showPlaylistContextMenu(const QPoint &pos);
 
     //! Deletes file locally on hardisk and calls for collections rebuild
     void removeFileFromDisk();
@@ -421,7 +417,7 @@ private slots:
     //! Called when metadata editor is accepted
     void metadataEditorAccepted();
 
-signals:
+  Q_SIGNALS:
     void settingsAccepted();
 
 

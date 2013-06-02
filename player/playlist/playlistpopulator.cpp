@@ -23,13 +23,13 @@
 #include "databasemanager.h"
 #include "tools.h"
 
-#include <QDirIterator>
-#include <QMutexLocker>
-#include <QDebug>
-#include <QFileInfo>
-#include <QSqlField>
-#include <QSqlDriver>
-#include <QSqlQuery>
+#include <QtCore/QDirIterator>
+#include <QtCore/QMutexLocker>
+#include <QtCore/QDebug>
+#include <QtCore/QFileInfo>
+#include <QtSql/QSqlField>
+#include <QtSql/QSqlDriver>
+#include <QtSql/QSqlQuery>
 
 #include <taglib/taglib.h>
 #include <taglib/fileref.h>
@@ -38,48 +38,43 @@
 PlaylistPopulator::PlaylistPopulator()
 {
     m_files.clear();
-
 }
 
 void PlaylistPopulator::run()
 {
     do {
-
         if (m_files.size() > 0) {
             if (QFileInfo(m_files.first()).isDir()) {
                 expandDir(m_files.takeFirst());
             }
-            if (m_files.size()>0) {
-                if (QFileInfo(m_files.first()).suffix().toLower()=="m3u") {
+            if (m_files.size() > 0) {
+                if (QFileInfo(m_files.first()).suffix().toLower() == "m3u") {
                     expandPlaylist(m_files.takeFirst());
                 }
             }
             if (m_files.size() > 0) {
-
-                Player::MetaData metadata = getFileMetaData(m_files.takeFirst());
-                emit insertItemToPlaylist(metadata, m_row);
+                const Player::MetaData metadata = getFileMetaData(m_files.takeFirst());
+                Q_EMIT insertItemToPlaylist(metadata, m_row);
                 m_row++; // Next item will be inserted AFTER the recently inserted
             }
         }
 
     } while (!m_files.isEmpty());
 
-    emit playlistPopulated();
+    Q_EMIT playlistPopulated();
 }
 
-void PlaylistPopulator::expandDir(QString dir)
+void PlaylistPopulator::expandDir(const QString &dir)
 {
-    QStringList filters = SupportedFormats::getExtensionList();
+    const QStringList filters = SupportedFormats::getExtensionList();
     QDir dirlist(dir);
     dirlist.setNameFilters(filters);
     dirlist.setFilter(QDir::AllDirs | QDir::Files | QDir::NoDotAndDotDot);
     dirlist.setSorting(QDir::Name | QDir::LocaleAware);
 
-    QFileInfoList fileInfo = dirlist.entryInfoList();
-
-    for (int i = 0; i < fileInfo.length(); i++)
-    {
-        QFileInfo finfo = fileInfo.at(i);
+    const QFileInfoList fileInfo = dirlist.entryInfoList();
+    for (int i = 0; i < fileInfo.length(); i++) {
+        const QFileInfo finfo = fileInfo.at(i);
 
         if (finfo.isFile()) {
             m_files << finfo.filePath();
@@ -89,9 +84,9 @@ void PlaylistPopulator::expandDir(QString dir)
     }
 }
 
-void PlaylistPopulator::expandPlaylist(QString filename)
+void PlaylistPopulator::expandPlaylist(const QString &filename)
 {
-    QDir playlistDir(QFileInfo(filename).path());
+    const QDir playlistDir(QFileInfo(filename).path());
     QFile file(filename);
 
     if (!file.open(QFile::ReadOnly)) {
@@ -106,8 +101,8 @@ void PlaylistPopulator::expandPlaylist(QString filename)
     do {
         lineLength = file.readLine(buf, sizeof(buf));
         if (lineLength != -1) {
-            QString filepath = playlistDir.absoluteFilePath(buf).remove("\n",Qt::CaseInsensitive);
-            if (filepath.length()>0)
+            QString filepath = playlistDir.absoluteFilePath(buf).remove("\n", Qt::CaseInsensitive);
+            if (filepath.length() > 0)
                 files << filepath;
         }
     } while (lineLength > -1);
@@ -118,16 +113,15 @@ void PlaylistPopulator::expandPlaylist(QString filename)
     m_files = files;
 }
 
-Player::MetaData PlaylistPopulator::getFileMetaData(QString file)
+Player::MetaData PlaylistPopulator::getFileMetaData(const QString &file)
 {
-    QFileInfo finfo(file);
+    const QFileInfo finfo(file);
 
     Player::MetaData metadata;
 
-    if ((!finfo.exists()) || (!finfo.isFile()))
+    if ((!finfo.exists()) || (!finfo.isFile())) {
         return metadata;
-
-
+    }
 
     // Just a harmless check wheter the file is in DB - reading data from DB will be faster then from file
     DatabaseManager dbManager("playlistPopulatorConnection");
@@ -135,22 +129,22 @@ Player::MetaData PlaylistPopulator::getFileMetaData(QString file)
       just slowing everything down */
     if (DatabaseManager::connectionAvailable()) {
         if (dbManager.connectToDB()) {
-            QSqlField data("col",QVariant::String);
+            QSqlField data("col", QVariant::String);
             data.setValue(file);
-            QString fname = dbManager.sqlDb()->driver()->formatValue(data,false);
-            QSqlQuery query("SELECT `filename`," \
-                            "       `trackname`," \
-                            "       `track`," \
-                            "       `length`," \
-                            "       `interpret`," \
-                            "       `genre`," \
-                            "       `album`," \
-                            "       `year`," \
-                            "       `bitrate`" \
-                            "FROM `view_tracks` "\
-                            "WHERE `filename`="+fname+ \
+            QString fname = dbManager.sqlDb().driver()->formatValue(data, false);
+            QSqlQuery query("SELECT `filename`,"
+                            "       `trackname`,"
+                            "       `track`,"
+                            "       `length`,"
+                            "       `interpret`,"
+                            "       `genre`,"
+                            "       `album`,"
+                            "       `year`,"
+                            "       `bitrate` "
+                            "FROM `view_tracks` "
+                            "WHERE `filename`=" + fname +
                             "LIMIT 1;",
-                            *dbManager.sqlDb());
+                            dbManager.sqlDb());
             if (query.first()) {
                 metadata.filename = query.value(0).toString();
                 metadata.title = query.value(1).toString();
@@ -181,7 +175,7 @@ Player::MetaData PlaylistPopulator::getFileMetaData(QString file)
         metadata.title = f.tag()->title().toCString(true);
         metadata.trackNumber = f.tag()->track();
         metadata.artist = f.tag()->artist().toCString(true);
-        metadata.length = f.audioProperties()->length()*1000;
+        metadata.length = f.audioProperties()->length() * 1000;
         metadata.album = f.tag()->album().toCString(true);
         metadata.genre = f.tag()->genre().toCString(true);
         metadata.year = f.tag()->year();

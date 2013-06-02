@@ -20,9 +20,9 @@
 #ifndef TASKMANAGER_H
 #define TASKMANAGER_H
 
-#include <QObject>
-#include <QThreadPool>
-#include <QModelIndex>
+#include <QtCore/QObject>
+#include <QtCore/QThreadPool>
+#include <QtCore/QModelIndex>
 
 #include "player.h"
 
@@ -47,117 +47,115 @@ class CollectionModel;
 class TaskManager : public QObject
 {
     Q_OBJECT
-    public:
-        //! Constructor
-        /*!
-          \param playlistModel pointer to PlaylistModel
-          \param collectionModel pointer to CollectionModel
-        */
-        explicit TaskManager(PlaylistModel **playlistModel, CollectionModel **collectionModel);
 
-        //! Destructor
-        /*!
-          Waits until all threads are stopped and terminated
-        */
-        ~TaskManager();
+  public:
+    //! Constructor
+    /*!
+      \param playlistModel pointer to PlaylistModel
+      \param collectionModel pointer to CollectionModel
+    */
+    explicit TaskManager(PlaylistModel *playlistModel, CollectionModel *collectionModel);
 
-    signals:
-        //! Emitted when all data in PlaylistPopulator are processed
-        void playlistPopulated();
+    //! Destructor
+    /*!
+      Waits until all threads are stopped and terminated
+    */
+    ~TaskManager();
 
-        //! Emitted when data from PlaylistPopulator are send
-        void insertItemToPlaylist(Player::MetaData metadata, int row);
+  Q_SIGNALS:
+    //! Emitted when all data in PlaylistPopulator are processed
+    void playlistPopulated();
 
-        void insertItemToCollections(QModelIndex parent,
-                                     QString title,
-                                     QString data1,
-                                     QString data2,
-                                     QString length,
-                                     QModelIndex *item);
+    //! Emitted when data from PlaylistPopulator are send
+    void insertItemToPlaylist(const Player::MetaData &metadata, int row);
 
-        //! Emitted when the playlist is sucessfully saved
-        void playlistSaved();
+    void insertItemToCollections(const QModelIndex &parent, const QString &title,
+                                 const QString &data1, const QString &data2,
+                                 const QString &length, QModelIndex &item);
 
-        //! Emitted when the CollectionModel is sucessfully populated
-        void collectionsPopulated();
+    //! Emitted when the playlist is sucessfully saved
+    void playlistSaved();
 
-        //! Emited when rebuilding collection is finished
-        void collectionsRebuilt();
+    //! Emitted when the CollectionModel is sucessfully populated
+    void collectionsPopulated();
 
-        //! Emitted when collections are rebuild and a change is made (some track is added, updated or removed)
-        void collectionsChanged();
+    //! Emited when rebuilding collection is finished
+    void collectionsRebuilt();
 
-        //! Emited when a task is finished
-        void taskDone();
+    //! Emitted when collections are rebuild and a change is made (some track is added, updated or removed)
+    void collectionsChanged();
 
-        //! Emited when a task is started describing the started task
-        /*!
-          \param action description of the task
-        */
-        void taskStarted(QString action);
+    //! Emited when a task is finished
+    void taskDone();
 
-        void clearCollectionModel();
+    //! Emited when a task is started describing the started task
+    /*!
+      \param action description of the task
+    */
+    void taskStarted(const QString &action);
 
-    public slots:
-        //! Appends given file to playlist
-        /*!
-          When called, PlaylistPopulator::addFile() method is called and
-          the thread is resumed to append the file to the model
-          \param filename file to add
-        */
-        void addFileToPlaylist(const QString &filename, int row = 0);
+    void clearCollectionModel();
 
-        //! Appends given files to playlist
-        /*!
-          When called, PlaylistPopulator::addFiles() method is called and
-          the thread is resumed to append the files to the model
-          \param files files to add
-        */
-        void addFilesToPlaylist(const QStringList &files, int row = 0);
+  public Q_SLOTS:
+    //! Appends given file to playlist
+    /*!
+      When called, PlaylistPopulator::addFile() method is called and
+      the thread is resumed to append the file to the model
+      \param filename file to add
+    */
+    void addFileToPlaylist(const QString &filename, int row = 0);
 
-        //! Saves current playlist to given file
-        /*!
-          When called, PlaylistWriter::saveToFile() method is called and
-          the thread is resumed to save the playlist to the given file
-          \param filename file to save to playlist into
-        */
-        void savePlaylistToFile(const QString &filename);
+    //! Appends given files to playlist
+    /*!
+      When called, PlaylistPopulator::addFiles() method is called and
+      the thread is resumed to append the files to the model
+      \param files files to add
+    */
+    void addFilesToPlaylist(const QStringList &files, int row = 0);
 
-        //! Starts populating the collection browser
-        /*!
-          When called, CollectionPopulator::populate() method is called and
-          the thread is resumed to populate the collection browser by data from
-          database storage backend
-        */
-        void populateCollections();
+    //! Saves current playlist to given file
+    /*!
+      When called, PlaylistWriter::saveToFile() method is called and
+      the thread is resumed to save the playlist to the given file
+      \param filename file to save to playlist into
+    */
+    void savePlaylistToFile(const QString &filename);
 
-        //! Starts rebuilding the collections in given folder
-        /*!
-          When called, CollectionBuilder::rebuildFolder() method is called and
-          the thread is resumed to scan for changes in given folder and store the data
-          in the database storage backend.
-          \param folder folder to update, when empty string is given then all collection folders
-          are rebuild
-        */
-        void rebuildCollections(const QString &folder = QString());
-        
-    private slots:
+    //! Starts populating the collection browser
+    /*!
+      When called, CollectionPopulator::populate() method is called and
+      the thread is resumed to populate the collection browser by data from
+      database storage backend
+    */
+    void populateCollections();
 
-        //! Emits signals with information about collections rebuilding has started
-        void collectionsRebuildingStarted();
+    //! Starts rebuilding the collections in given folder
+    /*!
+      When called, CollectionBuilder::rebuildFolder() method is called and
+      the thread is resumed to scan for changes in given folder and store the data
+      in the database storage backend.
+      \param folder folder to update, when empty string is given then all collection folders
+      are rebuild
+    */
+    void rebuildCollections(const QString &folder = QString());
 
-    private:
-        //! Pointer to pointer to PlaylistModel
-        PlaylistModel **m_playlistModel;
+  private Q_SLOTS:
 
-        //! Pointer to pointer to CollectionModel
-        CollectionModel **m_collectionModel;
+    //! Emits signals with information about collections rebuilding has started
+    void collectionsRebuildingStarted();
 
-        QThreadPool *m_threadPool;
+  private:
+    //! Pointer to pointer to PlaylistModel
+    PlaylistModel *m_playlistModel;
 
-        //! This pool is specially for collections where having two tasks running simultaneously is
-        // not very safe.
-        QThreadPool *m_collectionsThreadPool;
+    //! Pointer to pointer to CollectionModel
+    CollectionModel *m_collectionModel;
+
+    QThreadPool *m_threadPool;
+
+    //! This pool is specially for collections where having two tasks running simultaneously is
+    // not very safe.
+    QThreadPool *m_collectionsThreadPool;
 };
 
 #endif // TASKMANAGER_H

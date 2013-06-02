@@ -20,51 +20,56 @@
 #ifndef PLAYERPAGE_H
 #define PLAYERPAGE_H
 
-#include <QStandardItemModel>
+#include <QtGui/QStandardItemModel>
 
 #include <Phonon/Effect>
 
 #include "settingspage.h"
 
-namespace Ui {
-    class PlayerPage;
+namespace Ui
+{
+class PlayerPage;
 }
 
-namespace SettingsPages {
+namespace SettingsPages
+{
 
-    class PlayerPage : public SettingsPage
-    {
-        Q_OBJECT
-        public:
-            explicit PlayerPage(QWidget *parent = 0);
-            ~PlayerPage();
+class PlayerPage : public SettingsPage
+{
+    Q_OBJECT
 
-            QModelIndex getOutputDeviceModelIndex(int deviceIndex);
-            int getOutputDeviceIndex(QModelIndex index);
-            bool outputDeviceChanged();
+  public:
+    explicit PlayerPage(QWidget *parent = 0);
+    ~PlayerPage();
 
-            int effectsCount() { return m_effectsModel->rowCount(); }
+    QModelIndex getOutputDeviceModelIndex(int deviceIndex);
+    int getOutputDeviceIndex(const QModelIndex &index) const;
+    bool outputDeviceChanged() const;
 
-        public slots:
-            void loadSettings(QSettings *settings);
-            void saveSettings(QSettings *settings);
+    int effectsCount() const {
+        return m_effectsModel->rowCount();
+    }
 
-        private:
-            ::Ui::PlayerPage *m_ui;
+  public Q_SLOTS:
+    void loadSettings(QSettings *settings);
+    void saveSettings(QSettings *settings);
 
-            QStandardItemModel *m_devicesModel;
-            QStandardItemModel *m_effectsModel;
+  private:
+    ::Ui::PlayerPage *m_ui;
 
-            int m_oldOutputDeviceIndex;
+    QStandardItemModel *m_devicesModel;
+    QStandardItemModel *m_effectsModel;
 
-        private slots:
-            void setEffectDescription(QModelIndex effect);
-            void showEffectSettings(QModelIndex effect);
+    int m_oldOutputDeviceIndex;
 
-        signals:
-            void effectEnabled(Phonon::EffectDescription description);
-            void effectDiasabled(Phonon::Effect *effect);
-    };
+  private Q_SLOTS:
+    void setEffectDescription(const QModelIndex &effect);
+    void showEffectSettings(const QModelIndex &effect);
+
+  Q_SIGNALS:
+    void effectEnabled(const Phonon::EffectDescription &description);
+    void effectDiasabled(Phonon::Effect *effect);
+};
 }
 
 #endif // PLAYERPAGE_H
