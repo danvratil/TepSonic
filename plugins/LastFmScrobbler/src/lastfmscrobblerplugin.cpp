@@ -20,7 +20,8 @@
 #include "lastfmscrobblerplugin.h"
 #include "constants.h"
 #include "lastfm.h"
-#include "../../../player/playlist/playlistbrowser.h"
+#include "playlist/playlistbrowser.h"
+#include "player.h"
 
 #include <QObject>
 #include <QDir>
@@ -73,6 +74,10 @@ LastFmScrobblerPlugin::LastFmScrobblerPlugin():
     _translator->load("lastfmscrobbler_"+locale,localeDir);
     qApp->installTranslator(_translator);
 
+    connect(Player::instance(), SIGNAL(trackChanged(Player::MetaData)),
+            this, SLOT(trackChanged(Player::MetaData)));
+    connect(Player::instance(), SIGNAL(stateChanged(Phonon::State,Phonon::State)),
+            this, SLOT(playerStatusChanged(Phonon::State,Phonon::State)));
 }
 
 LastFmScrobblerPlugin::~LastFmScrobblerPlugin()

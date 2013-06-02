@@ -18,6 +18,7 @@
  */
 
 #include "lyrics.h"
+#include "player.h"
 
 #include <QDir>
 #include <QString>
@@ -73,6 +74,9 @@ LyricsPlugin::LyricsPlugin()
 
     _translator->load("lyricsplugin_"+locale,localeDir);
     qApp->installTranslator(_translator);
+
+    connect(Player::instance(), SIGNAL(trackChanged(Player::MetaData)),
+            this, SLOT(trackChanged(Player::MetaData)));
 }
 
 LyricsPlugin::~LyricsPlugin()

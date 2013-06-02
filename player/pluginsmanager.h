@@ -121,12 +121,6 @@ class PluginsManager : public QObject
     signals:
          // Signals emitted by plugins
          void settingsAccepted();
-         void playerStatusChanged(Phonon::State,Phonon::State);
-         void trackChanged(Player::MetaData);
-         void trackFinished(Player::MetaData);
-         void trackPositionChanged(qint64);
-         void trackPaused(bool);
-         void error(QString);
 
          // PluginsManager's own signals
          void pluginsLoaded();

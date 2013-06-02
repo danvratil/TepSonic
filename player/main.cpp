@@ -70,21 +70,16 @@ int main(int argc, char *argv[])
     QTextCodec::setCodecForCStrings(QTextCodec::codecForName("UTF-8"));
 
     qRegisterMetaType<Player::MetaData>("Player::MetaData");
-    player = new Player();
     pluginsManager = new PluginsManager();
-    MainWindow mainWindow(player);
+    MainWindow mainWindow;
 
     QObject::connect(pluginsManager, SIGNAL(pluginsLoaded()), &mainWindow, SLOT(setupPluginsUIs()));
-    QObject::connect(player,SIGNAL(stateChanged(Phonon::State,Phonon::State)),pluginsManager,SIGNAL(playerStatusChanged(Phonon::State,Phonon::State)));
-    QObject::connect(player,SIGNAL(trackChanged(Player::MetaData)),pluginsManager,SIGNAL(trackChanged(Player::MetaData)));
-    QObject::connect(player,SIGNAL(trackFinished(Player::MetaData)),pluginsManager,SIGNAL(trackFinished(Player::MetaData)));
-    QObject::connect(player,SIGNAL(trackPositionChanged(qint64)),pluginsManager,SIGNAL(trackPositionChanged(qint64)));
-    QObject::connect(player,SIGNAL(trackPaused(bool)),pluginsManager,SIGNAL(trackPaused(bool)));
     QObject::connect(&mainWindow,SIGNAL(settingsAccepted()),pluginsManager,SIGNAL(settingsAccepted()));
     pluginsManager->loadPlugins();
 
     mainWindow.show();
 
+    Player *player = Player::instance();
     for (int i=1; i<tepsonic.arguments().count(); i++) {
         qDebug() << tepsonic.arguments().at(i);
         QFileInfo param(tepsonic.arguments().at(i));
@@ -101,7 +96,6 @@ int main(int argc, char *argv[])
 
     int ret = tepsonic.exec();
 
-    delete player;
     delete pluginsManager;
 
     return ret;

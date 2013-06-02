@@ -64,11 +64,10 @@
 
 #include <QDebug>
 
-MainWindow::MainWindow(Player *player):
+MainWindow::MainWindow():
         m_collectionModel(0),
         m_collectionProxyModel(0),
         m_metadataEditor(0),
-        m_player(player),
         m_canClose(false)
 {
 
@@ -189,8 +188,8 @@ MainWindow::MainWindow(Player *player):
         m_ui->fsbCdUpBtn->setDisabled(true);
 
     // Create seek slider and volume slider
-    m_ui->seekSlider->setMediaObject(m_player->mediaObject());
-    m_ui->volumeSlider->setAudioOutput(m_player->audioOutput());
+    m_ui->seekSlider->setMediaObject(Player::instance()->mediaObject());
+    m_ui->volumeSlider->setAudioOutput(Player::instance()->audioOutput());
 
     // Load last playlist
     if (m_settings->value("Preferences/RestoreSession", true).toBool()) {
@@ -227,8 +226,8 @@ MainWindow::~MainWindow()
 
     m_settings->setValue("LastSession/LastFSBPath", m_fileSystemModel->filePath(m_ui->filesystemBrowser->rootIndex()));
     if (m_settings->value("Preferences/RestoreSession", true).toBool()) {
-        m_settings->setValue("LastSession/RepeatMode", int(m_player->repeatMode()));
-        m_settings->setValue("LastSession/RandomMode", m_player->randomMode());
+        m_settings->setValue("LastSession/RepeatMode", int(Player::instance()->repeatMode()));
+        m_settings->setValue("LastSession/RandomMode", Player::instance()->randomMode());
     }
 
     // Save current playlist to file
@@ -427,15 +426,15 @@ void MainWindow::bindSignals()
             this, SLOT(showSupportedFormats()));
 
     // Player object
-    connect(m_player, SIGNAL(trackFinished()),
+    connect(Player::instance(), SIGNAL(trackFinished()),
             this, SLOT(updatePlayerTrack()));
-    connect(m_player, SIGNAL(stateChanged(Phonon::State,Phonon::State)),
+    connect(Player::instance(), SIGNAL(stateChanged(Phonon::State,Phonon::State)),
             this, SLOT(playerStatusChanged(Phonon::State,Phonon::State)));
-    connect(m_player, SIGNAL(repeatModeChanged(Player::RepeatMode)),
+    connect(Player::instance(), SIGNAL(repeatModeChanged(Player::RepeatMode)),
             this, SLOT(repeatModeChanged(Player::RepeatMode)));
-    connect(m_player, SIGNAL(randomModeChanged(bool)),
+    connect(Player::instance(), SIGNAL(randomModeChanged(bool)),
             this, SLOT(randomModeChanged(bool)));
-    connect(m_player, SIGNAL(trackPositionChanged(qint64)),
+    connect(Player::instance(), SIGNAL(trackPositionChanged(qint64)),
             this, SLOT(playerPosChanged(qint64)));
 
     // Connect UI buttons to their equivalents in the main menu
@@ -608,7 +607,7 @@ void MainWindow::openSettingsDialog()
     // Show preferences dialog
     SettingsDialog *settingsDlg= new SettingsDialog(this);
     connect(settingsDlg,SIGNAL(rebuildCollections()),m_taskManager,SLOT(rebuildCollections()));
-    connect(settingsDlg,SIGNAL(outputDeviceChanged()),m_player,SLOT(setDefaultOutputDevice()));
+    connect(settingsDlg,SIGNAL(outputDeviceChanged()),Player::instance(),SLOT(setDefaultOutputDevice()));
     connect(settingsDlg,SIGNAL(accepted()),this,SIGNAL(settingsAccepted()));
     connect(settingsDlg,SIGNAL(accepted()),this,SLOT(settingsDialogAccepted()));
     settingsDlg->exec();
@@ -632,9 +631,10 @@ void MainWindow::settingsDialogAccepted()
 
 void MainWindow::updatePlayerTrack()
 {
-    if (m_player->repeatMode() == Player::RepeatTrack) {
-        m_player->setTrack(m_player->currentSource().fileName());
-        m_player->play();
+    Player *player = Player::instance();
+    if (player->repeatMode() == Player::RepeatTrack) {
+        player->setTrack(player->currentSource().fileName());
+        player->play();
     } else {
         nextTrack();
     }
@@ -654,7 +654,7 @@ void MainWindow::playerStatusChanged(Phonon::State newState, Phonon::State oldSt
 {
     Q_UNUSED(oldState);
 
-    Player::MetaData metadata = m_player->currentMetaData();
+    Player::MetaData metadata = Player::instance()->currentMetaData();
 
     QString playing;
     if (metadata.title.isEmpty()) {
@@ -694,7 +694,7 @@ void MainWindow::playerStatusChanged(Phonon::State newState, Phonon::State oldSt
         m_trayIcon->setToolTip(tr("Player is stopped"));
         break;
     case Phonon::ErrorState:
-        m_ui->statusBar->showMessage(m_player->errorString(),5000);
+        m_ui->statusBar->showMessage(Player::instance()->errorString(),5000);
         break;
     case Phonon::LoadingState:
         //todo
@@ -721,17 +721,18 @@ void MainWindow::previousTrack()
 
 void MainWindow::playPause()
 {
-    if (m_player->playerState() == Phonon::PlayingState) {
-        m_player->pause();
+    Player *player = Player::instance();
+    if (player->playerState() == Phonon::PlayingState) {
+        player->pause();
     } else {
         /* When the source is empty there are some files in playlist, select the
            first row and load it as current source */
-        if ((m_player->currentSource().fileName().isEmpty()) &&
+        if ((player->currentSource().fileName().isEmpty()) &&
                 (m_playlistModel->rowCount() > 0)) {
             m_playlistModel->setCurrentItem(m_playlistModel->index(0,0,QModelIndex()));
             setTrack(0);
         }
-        m_player->play();
+        player->play();
     }
 }
 
@@ -748,15 +749,16 @@ void MainWindow::nextTrack()
         return;
     }
 
+    Player *player = Player::instance();
     // 1) Random playback?
-    if (m_player->randomMode()) {
+    if (player->randomMode()) {
         int row = rand() % m_playlistModel->rowCount(QModelIndex());
         m_playlistModel->setCurrentItem(m_playlistModel->index(row,0,QModelIndex()));
     // 2) Not last item?
     } else if (m_playlistModel->nextItem().isValid()) {
         m_playlistModel->setCurrentItem(m_playlistModel->nextItem());
     // 3) Repeat all playlist?
-    } else if (m_player->repeatMode() == Player::RepeatAll) {
+    } else if (player->repeatMode() == Player::RepeatAll) {
         m_playlistModel->setCurrentItem(m_playlistModel->index(0,0,QModelIndex()));
     // 4) Stop, there's nothing else to play
     } else {
@@ -878,19 +880,20 @@ void MainWindow::collectionBrowserDoubleClick(QModelIndex index)
 
 void MainWindow::trayIconMouseWheelScrolled(int delta)
 {
+    Player *player = Player::instance();
     if (delta>0) {
-        m_player->audioOutput()->setMuted(false);
-        if (m_player->audioOutput()->volume() < 1) {
-            m_player->audioOutput()->setVolume(m_player->audioOutput()->volume()+0.1);
+        player->audioOutput()->setMuted(false);
+        if (player->audioOutput()->volume() < 1) {
+            player->audioOutput()->setVolume(player->audioOutput()->volume()+0.1);
         } else {
-            m_player->audioOutput()->setVolume(1);
+            player->audioOutput()->setVolume(1);
         }
     } else {
         // not a typo
-        if (m_player->audioOutput()->volume() > 0.01) {
-            m_player->audioOutput()->setVolume(m_player->audioOutput()->volume()-0.1);
+        if (player->audioOutput()->volume() > 0.01) {
+            player->audioOutput()->setVolume(player->audioOutput()->volume()-0.1);
         } else {
-            m_player->audioOutput()->setMuted(true);
+            player->audioOutput()->setMuted(true);
         }
     }
 }
@@ -1037,7 +1040,7 @@ void MainWindow::setTrack(int row)
     QModelIndex currentItem = m_playlistModel->currentItem();
     QModelIndex index = m_playlistModel->index(currentItem.row(),0,QModelIndex());
     QString filename = m_playlistModel->data(index,0).toString();
-    m_player->setTrack(filename,true);
+    Player::instance()->setTrack(filename,true);
 }
 
 

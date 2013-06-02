@@ -29,8 +29,6 @@
 #include <Phonon/EffectDescription>
 #include <Phonon/EffectWidget>
 
-extern Player *player;
-
 using namespace SettingsPages;
 
 PlayerPage::PlayerPage(QWidget *parent):
@@ -52,7 +50,7 @@ PlayerPage::PlayerPage(QWidget *parent):
 
 
     m_effectsModel = new QStandardItemModel();
-    QList<Phonon::Effect*> *effects = player->effects();
+    QList<Phonon::Effect*> *effects = Player::instance()->effects();
     for (int i = 0; i < effects->length(); i++)
     {
         Phonon::EffectDescription ed = effects->at(i)->description();
@@ -127,7 +125,7 @@ void PlayerPage::loadSettings(QSettings *settings)
 
     m_oldOutputDeviceIndex = settings->value("OutputDevice", 0).toInt();
 
-    QList<Phonon::Effect*> *effects = player->effects();
+    QList<Phonon::Effect*> *effects = Player::instance()->effects();
     for (int i = 0; i < effects->count(); i++)
     {
         Phonon::EffectDescription ed = effects->at(i)->description();
@@ -144,12 +142,12 @@ void PlayerPage::saveSettings(QSettings *settings)
     settings->setValue("RestoreSession", m_ui->restorePreviousSessionCheckBox->isChecked());
     settings->setValue("OutputDevice", getOutputDeviceIndex(m_ui->outputDevicesList->currentIndex()));
 
-    QList<Phonon::Effect*> *effects = player->effects();
+    QList<Phonon::Effect*> *effects = Player::instance()->effects();
     for (int i = 0; i < effects->count(); i++) {
         Phonon::EffectDescription ed = effects->at(i)->description();
         settings->setValue("Effects/"+ed.name(),
             qobject_cast<QStandardItemModel*>(m_ui->playerEffectsList->model())->item(i, 0)->checkState() == Qt::Checked);
-        player->enableEffect(effects->at(i),
+        Player::instance()->enableEffect(effects->at(i),
             (qobject_cast<QStandardItemModel*>(m_ui->playerEffectsList->model())->item(i, 0)->checkState() == Qt::Checked));
     }
     settings->endGroup();

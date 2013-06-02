@@ -66,8 +66,7 @@ class Player: public QObject
                       RepeatAll = 2     /*! < Repeat whole playlist */
     };
 
-    //! Constructor
-    Player();
+    static Player* instance();
 
     //! Destructor
     ~Player();
@@ -129,6 +128,9 @@ class Player: public QObject
     QList<Phonon::Effect*>* effects() { return &m_effects; }
 
   private:
+    explicit Player();
+    static Player *s_instance;
+
     //! Current repeat mode
     RepeatMode m_repeatMode;
 

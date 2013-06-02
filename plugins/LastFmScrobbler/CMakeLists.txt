@@ -34,7 +34,7 @@ include_directories(
         ${QT_QTXML_INCLUDE_DIR}
 	${CMAKE_CURRENT_SOURCE_DIR}
 	${CMAKE_CURRENT_BINARY_DIR}
-        ${CMAKE_CURRENT_SOURCE_DIR}/../../player
+        ${CMAKE_CURRENT_SOURCE_DIR}/../../player/
 )
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/../../player/constants.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/constants.h)

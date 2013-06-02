@@ -36,6 +36,17 @@
 #include <taglib/tag.h>
 #include <taglib/tstring.h>
 
+Player* Player::s_instance = 0;
+
+Player* Player::instance()
+{
+    if (s_instance == 0) {
+        s_instance = new Player();
+    }
+
+    return s_instance;
+}
+
 Player::Player()
 {
     m_phononPlayer = new Phonon::MediaObject();

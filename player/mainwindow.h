@@ -71,12 +71,11 @@ class MainWindow : public QMainWindow
 public:
     //! Constructor
     /*!
-      Initializes main window. Recieves pointer to Player as parameter. Pointer to PluginsManager is set via method
+      Initializes main window. Pointer to PluginsManager is set via method
       setPluginsManager() because PluginsManager is created after the MainWindow.
-      \param player pointer to Player object
       \sa setPluginsManager()
     */
-    MainWindow(Player *player);
+    MainWindow();
 
     //! Destructor
     ~MainWindow();
@@ -134,9 +133,6 @@ private:
 
     //! Pointer to BookmarksBrowser
     BookmarksManager *m_bookmarksManager;
-
-    //! Pointer to Player
-    Player *m_player;
 
     //! Pointer to TaskManager
     TaskManager *m_taskManager;
@@ -304,32 +300,32 @@ private slots:
 
     //! Stop the playback and reset the Player::CurrentSource
     void stopPlayer() {
-        m_player->stop();
+        Player::instance()->stop();
     }
 
     //! Set player repeat mode to \p RepeatAll
     void setRepeatModeAll() {
-        m_player->setRepeatMode(Player::RepeatAll);
+        Player::instance()->setRepeatMode(Player::RepeatAll);
     }
 
     //! Set player repeat mode to \p RepeatOff (disable repeat)
     void setRepeatModeOff() {
-        m_player->setRepeatMode(Player::RepeatOff);
+        Player::instance()->setRepeatMode(Player::RepeatOff);
     }
 
     //! Set player repeat mode to \p RepeatTrack
     void setRepeatModeTrack() {
-        m_player->setRepeatMode(Player::RepeatTrack);
+        Player::instance()->setRepeatMode(Player::RepeatTrack);
     }
 
     //! Disable player random mode
     void setRandomModeOff() {
-        m_player->setRandomMode(false);
+        Player::instance()->setRandomMode(false);
     }
 
     //! Enable player random mode
     void setRandomModeOn() {
-        m_player->setRandomMode(true);
+        Player::instance()->setRandomMode(true);
     }
 
     //! Called when player status is changed
