@@ -9,3 +9,8 @@ endif (DEFINED WITH_LASTFMSCROBBLER)
 if (NOT WITH_LYRICS_PLUGIN MATCHES OFF)
   add_subdirectory(lyrics)
 endif (NOT WITH_LYRICS_PLUGIN MATCHES OFF)
+
+
+if (NOT WITH_MPRIS2_PLUGIN MATCHES OFF)
+    add_subdirectory(mpris2)
+endif ()
