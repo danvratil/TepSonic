@@ -34,8 +34,8 @@ public:
     void run();
 
 private:
-    QString _rootDir;
-    PlaylistModel *_model;
+    QString m_rootDir;
+    PlaylistModel *m_model;
 
 signals:
     void fileFound(QString filename);

@@ -61,7 +61,7 @@ LastFmScrobblerPlugin::LastFmScrobblerPlugin():
     setHasConfigUI(true);
 
     QString locale = QLocale::system().name();
-    _translator = new QTranslator(this);
+    m_translator = new QTranslator(this);
 #ifndef APPLEBUNDLE
     // standard unix/windows
     QString dataDir = QLatin1String(PKGDATADIR);
@@ -71,8 +71,8 @@ LastFmScrobblerPlugin::LastFmScrobblerPlugin():
     QString localeDir = QCoreApplication::applicationDirPath() + "/../Resources/lastfmscrobbler";
 #endif
 
-    _translator->load("lastfmscrobbler_"+locale,localeDir);
-    qApp->installTranslator(_translator);
+    m_translator->load("lastfmscrobbler_"+locale,localeDir);
+    qApp->installTranslator(m_translator);
 
     connect(Player::instance(), SIGNAL(trackChanged(Player::MetaData)),
             this, SLOT(trackChanged(Player::MetaData)));
@@ -82,7 +82,7 @@ LastFmScrobblerPlugin::LastFmScrobblerPlugin():
 
 LastFmScrobblerPlugin::~LastFmScrobblerPlugin()
 {
-    delete _translator;
+    delete m_translator;
 }
 
 void LastFmScrobblerPlugin::init()
@@ -108,10 +108,10 @@ void LastFmScrobblerPlugin::quit()
 
 void LastFmScrobblerPlugin::settingsWidget(QWidget *parentWidget)
 {
-    _configWidget = new Ui::LastFmScrobblerConfig();
-    _configWidget->setupUi(parentWidget);
+    m_configWidget = new Ui::LastFmScrobblerConfig();
+    m_configWidget->setupUi(parentWidget);
 
-    connect(_configWidget->authButton, SIGNAL(clicked()),
+    connect(m_configWidget->authButton, SIGNAL(clicked()),
             this, SLOT(authenticate()));
 }
 
@@ -204,7 +204,7 @@ void LastFmScrobblerPlugin::gotToken(QString token)
 
     // Open browser with Last.fm auth web site so user can confirm the token
     QDesktopServices::openUrl(QUrl("http://www.last.fm/api/auth/?api_key="+LastFm::Global::api_key+"&token="+token));
-    _configWidget->label->setText(tr("Now click 'Allow' in your browser, then you can close the browser and this window too."));
+    m_configWidget->label->setText(tr("Now click 'Allow' in your browser, then you can close the browser and this window too."));
 
     // Wait 60 seconds (that should be enough time for browser to start and load page and for
     // user to click "Allow" button on the page), then re-initialize the scrobbler with

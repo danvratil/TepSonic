@@ -99,9 +99,9 @@ class LastFmScrobblerPlugin : public AbstractPlugin
         LastFm::Auth *m_auth;
 
         //! Configuration UI
-        Ui::LastFmScrobblerConfig *_configWidget;
+        Ui::LastFmScrobblerConfig *m_configWidget;
 
-        QTranslator *_translator;
+        QTranslator *m_translator;
 
         QString m_token;
 

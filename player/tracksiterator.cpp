@@ -30,8 +30,8 @@
 
 TracksIterator::TracksIterator(QString  topDir, PlaylistModel *model)
 {
-    _rootDir = topDir;
-    _model = model;
+    m_rootDir = topDir;
+    m_model = model;
 }
 
 void TracksIterator::run()
@@ -40,7 +40,7 @@ void TracksIterator::run()
          * @todo: Complete list of supported extensions
          */
     QStringList filters = SupportedFormats::getExtensionList();
-    QDir dirlist(_rootDir);
+    QDir dirlist(m_rootDir);
     dirlist.setNameFilters(filters);
     QFileInfo fileInfo;
 
@@ -48,7 +48,7 @@ void TracksIterator::run()
     while (dirIterator.hasNext()) {
         fileInfo = dirIterator.fileInfo();
         if (fileInfo.isFile()) {
-            _model->addItem(fileInfo.filePath());
+            m_model->addItem(fileInfo.filePath());
         }
         dirIterator.next();
     }

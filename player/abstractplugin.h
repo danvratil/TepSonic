@@ -80,13 +80,13 @@ class AbstractPlugin : public QObject, public PluginInterface
         /*!
           \return Returns state of hasConfigUI property.
         */
-        bool hasConfigUI() const { return _hasConfigUI; }
+        bool hasConfigUI() const { return m_hasConfigUI; }
 
         //! Changes state of hasConfigUI property
         /*!
           \param state new state of the property
         */
-        void setHasConfigUI(const bool &state) { _hasConfigUI = state; }
+        void setHasConfigUI(const bool &state) { m_hasConfigUI = state; }
 
         //! Allows plugin to setup custom menu to given menu. The type of menu is set in menuType.
         virtual void setupMenu(QMenu *menu, Plugins::MenuTypes menuType) = 0;
@@ -160,10 +160,10 @@ class AbstractPlugin : public QObject, public PluginInterface
 
     private:
         //! Has config UI?
-        bool _hasConfigUI;
+        bool m_hasConfigUI;
 
         //! Is the plugin initialized?
-        bool _initialized;
+        bool m_initialized;
 
 };
 

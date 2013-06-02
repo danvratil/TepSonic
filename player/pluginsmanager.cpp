@@ -172,7 +172,7 @@ void PluginsManager::enablePlugin(Plugin *plugin)
 
     // Initialize the plugin!
     aplg->init();
-    aplg->_initialized = true;
+    aplg->m_initialized = true;
 
     // Now we can connect all the signals/slots to the plugin
     connect(this,SIGNAL(settingsAccepted()),aplg,SLOT(settingsAccepted()));
