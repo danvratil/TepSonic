@@ -671,10 +671,11 @@ void LastFm::Cache::loadCache()
         if (track->artist().isEmpty() || track->trackTitle().isEmpty()
             || track->album().isEmpty() || track->trackLength() == 0
             || track->playbackStart() == 0) {
+            trackNode = trackNode.nextSibling();
             continue;
         }
-        m_cache.append(track);
 
+        m_cache.append(track);
         trackNode = trackNode.nextSibling();
     }
 }
