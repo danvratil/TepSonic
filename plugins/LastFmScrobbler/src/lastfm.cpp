@@ -668,6 +668,11 @@ void LastFm::Cache::loadCache()
                                   trackEl.attribute("genre", ""),
                                   trackEl.attribute("trackNumber", 0).toInt(),
                                   trackEl.attribute("playbackStart", 0).toInt());
+        if (track->artist().isEmpty() || track->trackTitle().isEmpty()
+            || track->album().isEmpty() || track->trackLength() == 0
+            || track->playbackStart() == 0) {
+            continue;
+        }
         m_cache.append(track);
 
         trackNode = trackNode.nextSibling();
