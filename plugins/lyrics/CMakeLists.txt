@@ -1,50 +1,19 @@
-project(LyricsPlugin)
-
-cmake_minimum_required(VERSION 2.6)
-
-# Add custom cmake modules
-set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/../../cmake/modules ${CMAKE_MODULE_PATH})
-
-if (NOT DEFINED CMAKE_BUILD_TYPE)
-   set(CMAKE_BUILD_TYPE "Debug")
-endif (NOT DEFINED CMAKE_BUILD_TYPE)
-
-find_package(PkgConfig REQUIRED)
-find_package(Qt4 REQUIRED)
-
-# Make sure all Qt parts will be available
-set(QT_USE_QTMAIN 1)
 set(QT_USE_QTNETWORK 1)
 set(QT_USE_QTXML 1)
 
-include(${QT_USE_FILE})
-# this is mandatory for Apple builds to load plugin correctly
-add_definitions(-DQT_NO_DEBUG)
-
-add_definitions(${QT_DEFINITIONS}
-		-DQT_PLUGIN
-		-DQT_SHARED
-)
+add_definitions(-DQT_PLUGIN -DQT_SHARED)
 
 include_directories(
-	${QT_INCLUDE_DIR}
 	${QT_QTNETWORK_INCLUDE_DIR}
         ${QT_QTXML_INCLUDE_DIR}
-	${CMAKE_CURRENT_SOURCE_DIR}
-	${CMAKE_CURRENT_BINARY_DIR}
-        ${CMAKE_CURRENT_SOURCE_DIR}/../../player
 )
-
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/../../player/constants.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/constants.h)
 
 set(lyricsplugin_HDRS
     src/lyrics.h
-    ../../player/abstractplugin.h
 )
 
 set(lyricsplugin_SRCS
     src/lyrics.cpp
-    ../../player/constants.cpp
 )
 
 option(LANGS "Using translations" "")
@@ -89,9 +58,9 @@ if (TRANSLATIONS)
 endif (TRANSLATIONS)
 
 target_link_libraries(tepsonic_lyricsplugin
-	       ${QT_LIBRARIES}
-	       ${QT_QTNETWORK_LIBRARIES}
-               ${QT_QTXML_LIBRARIES}
+               ${QT_QTCORE_LIBRARY}
+	       ${QT_QTNETWORK_LIBRART}
+               ${QT_QTXML_LIBRART}
 )
 
 # standard UNIX and windows

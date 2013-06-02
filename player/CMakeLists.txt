@@ -1,65 +1,13 @@
-project(tepsonic)
-
-set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/../cmake/modules ${CMAKE_MODULE_PATH})
-
-cmake_minimum_required(VERSION 2.6)
-
-set(TEPSONIC_VERSION_MAJOR 0)
-set(TEPSONIC_VERSION_MINOR 98)
-set(TEPSONIC_VERSION_PATCH 3)
-set(TEPSONIC_VERSION ${TEPSONIC_VERSION_MAJOR}.${TEPSONIC_VERSION_MINOR}.${TEPSONIC_VERSION_PATCH})
-
-find_package(PkgConfig REQUIRED)
-find_package(X11 REQUIRED)
-find_package(Qt4 4.5 REQUIRED)
-find_package(Taglib REQUIRED)
-find_package(Phonon REQUIRED)
-
-# Use native libqxt on Linux and patched sources in /3rdparty/qxt on Mac an Win.
-if (NOT FORCE_INBUILD_QXT)
-	set(QXT_USE_QXTCORE TRUE)
-	set(QXT_USE_QXTGUI TRUE)
-	find_package(Qxt REQUIRED)
-	set(QXT_HEADERS "")
-	set(QXT_SOURCES "")
-else ()
-	add_definitions(-DQXT_STATIC -DBUILD_QXT_GUI -DBUILD_QXT_CORE)
-	set(QXT_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/../3rdparty/qxt)
-	set(QXT_LIBRARIES qxt)
-        set(QXT_HEADERS "../3rdparty/qxt/qxtglobalshortcut.h")
-	set(QXT_SOURCES "../3rdparty/qxt/qxtglobalshortcut.cpp")
-endif ()
-
-  
-
-if (NOT DEFINED CMAKE_BUILD_TYPE)
-   set(CMAKE_BUILD_TYPE "Debug")
-endif (NOT DEFINED CMAKE_BUILD_TYPE)
-
-add_definitions(${TAGLIB_CFLAGS})
-
-# Make sure all Qt parts will be available
-set(QT_USE_QTMAIN 1)
-set(QT_USE_QTSQL 1)
-
-include(${QT_USE_FILE})
-# this is mandatory for Apple builds to load plugin correctly
-add_definitions(-DQT_NO_DEBUG)
 
 include_directories(
-        ${CMAKE_CURRENT_BINARY_DIR}
-        ${QT_INCLUDE_DIR}
-        ${PHONON_INCLUDES}
-	${CMAKE_CURRENT_SOURCE_DIR}
-	${TAGLIB_INCLUDES}
-        ${QXT_INCLUDE_DIRS}
 	"collections"
 	"playlist"
 	"settings"
         "bookmarks"
 )
 
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/constants.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/constants.h)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/constants.h.cmake
+               ${CMAKE_CURRENT_BINARY_DIR}/constants.h)
 
 set(player_HDRS
     mainwindow.h
@@ -151,7 +99,7 @@ set(player_QUIS
     bookmarks/addbookmarkdlg.ui
 )
 
-set(player_RCCS  
+set(player_RCCS
     icons.qrc
 )
 
@@ -183,7 +131,7 @@ foreach (LANGUAGE ${LANGUAGES})
 	add_custom_command(OUTPUT ${QM}
 			   PRE_BUILD
 			   COMMAND ${QT_LRELEASE_EXECUTABLE}
-			   ARGS ${TS} -qm ${QM})			   
+			   ARGS ${TS} -qm ${QM})
 	add_custom_target(transl_${LANGUAGE} DEPENDS ${QM})
 	set (TRANSLATIONS ${TRANSLATIONS} transl_${LANGUAGE})
 endforeach()
@@ -206,8 +154,9 @@ if (TRANSLATIONS)
 endif (TRANSLATIONS)
 
 target_link_libraries(tepsonic
-		      ${QT_LIBRARIES}
-		      ${QT_QTSQL_LIBRARIES}
+		      ${QT_QTCORE_LIBRARY}
+		      ${QT_QTGUI_LIBRARY}
+		      ${QT_QTSQL_LIBRARY}
 		      ${PHONON_LIBS}
 	              ${TAGLIB_LIBRARIES}
         	      ${QXT_LIBRARIES}
