@@ -1,8 +1,9 @@
  TEPSONIC
 ==========
  Author: Dan Vratil <dan@progdan.cz>
- Contributors: Petr Los, David Watzke
+ Homepage: http://danvratil.github.io/TepSonic
 
+ 
  TepSonic is just yet another audio player. It is based on Qt and as an audio 
  backend it uses Phonon. For retrieving metadata from media files is used TagLib. 
  This player should provide all the user-comfort functions such as collections, 

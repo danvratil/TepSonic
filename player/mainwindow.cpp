@@ -532,6 +532,7 @@ void MainWindow::aboutTepSonic()
 
     QString str = "<h1>" + QApplication::applicationName() + "</h1>"
                   + tr("Version %1").arg(QApplication::applicationVersion()) +
+                  "<p><a href=\"http://danvratil.github.io/TepSonic/\">http://danvratil.github.io/TepSonic/</a></p>"
                   "<p>This program is free software; you can redistribute it and/or modify it under the terms of "
                   "the GNU General Public License as published by the Free Software Foundation; either version "
                   "2 of the License, or (at your option) any later version.</p>"
