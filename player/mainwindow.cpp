@@ -539,7 +539,7 @@ void MainWindow::aboutTepSonic()
                   "<p>" + developers.join(", ") + "</p>"
                   "<h2>" + tr("Artwork") + ":</h2>"
                   "<p>" + artwork.join(", ") + "</p>"
-                  "<p>&copy; 2009 - 2010 <a href=\"mailto:vratil@progdansoft.com\">Dan Vrátil</a></p>";
+                  "<p>&copy; 2009 - 2013 <a href=\"mailto:dan@progdan.cz\">Dan Vrátil</a></p>";
     aboutDlg.about(this, tr("About TepSonic"), str.toAscii());
 }
 
@@ -555,7 +555,7 @@ void MainWindow::showSupportedFormats()
 
 void MainWindow::reportBug()
 {
-    QDesktopServices::openUrl(QUrl("http://bugs.tepsonic.org", QUrl::TolerantMode));
+    QDesktopServices::openUrl(QUrl("https://github.com/danvratil/TepSonic/issues", QUrl::TolerantMode));
 }
 
 void MainWindow::trayClicked(QSystemTrayIcon::ActivationReason reason)
