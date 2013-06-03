@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen" />
+    <link rel="stylesheet" type="text/css" href="stylesheets/pygment_trac.css" media="screen" />
+    <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print" />
+
+    <title>Tepsonic by danvratil</title>
+  </head>
+
+  <body>
+
+    <header>
+      <div class="container">
+        <h1>Tepsonic</h1>
+        <h2>TepSonic is a fast and lightweight audio player written in Qt</h2>
+
+        <section id="downloads">
+          <a href="https://github.com/danvratil/TepSonic/zipball/master" class="btn">Download as .zip</a>
+          <a href="https://github.com/danvratil/TepSonic/tarball/master" class="btn">Download as .tar.gz</a>
+          <a href="https://github.com/danvratil/TepSonic" class="btn btn-github"><span class="icon"></span>View on GitHub</a>
+        </section>
+      </div>
+    </header>
+
+    <div class="container">
+      <section id="main_content">
+        <p><img src="https://raw.github.com/danvratil/TepSonic/master/icons/TepSonic-Main.png" alt="TepSonic"></p>
+
+<h2>
+<a name="about" class="anchor" href="#about"><span class="octicon octicon-link"></span></a>About</h2>
+
+<p>TepSonic is just yet another audio player. It's based on Qt, it's simple, fast, lightweight, but it has various features that one can expect to find in application like this. The goal is to provide a audio player that will fit daily needs of average users, without growing to be beast like Amarok ;-).</p>
+
+<h2>
+<a name="history" class="anchor" href="#history"><span class="octicon octicon-link"></span></a>HISTORY</h2>
+
+<p>In 2009 I was starting with C++ and Qt and I so TepSonic was born. It went through many iterations and it has been rewritten from scratch several times since then. I dropped the project in mid 2011 due to lack of time (and motivation). Recently I decided to resurrect it, fix all the bugs, solve all the design issues and essentially apply all the experience I collected when developing various Qt and KDE apps over the two or three years.</p>
+
+<h2>
+<a name="requirements" class="anchor" href="#requirements"><span class="octicon octicon-link"></span></a>REQUIREMENTS</h2>
+
+<ul>
+<li>Qt &gt;= 4.5</li>
+<li>Phonon</li>
+<li>TagLib (<a href="http://developer.kde.org/%7Ewheeler/taglib.html">http://developer.kde.org/~wheeler/taglib.html</a>)</li>
+<li>Qxt (on Linux only, see part 'Compiling')</li>
+<li>SQLite or MySQL database for collections</li>
+<li>some music</li>
+</ul><h2>
+<a name="compiling" class="anchor" href="#compiling"><span class="octicon octicon-link"></span></a>COMPILING</h2>
+
+<p><code>mkdir build &amp;&amp; cd build
+ cmake ../
+ make
+ make install</code></p>
+
+<p>You may want to append <code>-DCMAKE_INSTALL_PREFIX=/usr</code> to the cmake command.</p>
+
+<p>You can force CMake to link statically against Qxt compiled from sources distributed together with TepSonic by using <code>-DFORCE_INBUILD_QXT=ON</code>. This means that you don't need to have libQxt installed on your system. Without this switch on Linux systems CMake will be looking for libqxt and will fail if does not find it.</p>
+
+<h2>
+<a name="bugs" class="anchor" href="#bugs"><span class="octicon octicon-link"></span></a>BUGS</h2>
+
+<p>If you find something you think that is a bug, please use issue tracker on GitHub.</p>
+
+<h2>
+<a name="contributing" class="anchor" href="#contributing"><span class="octicon octicon-link"></span></a>CONTRIBUTING</h2>
+
+<p>Please, feel free to contribute to TepSonic in any way. You can get latest sources from <a href="https://github.com/danvratil/TepSonic">https://github.com/danvratil/TepSonic</a> and  start working on it. If you have any question, I'll be happy to answer it :-)</p>
+      </section>
+    </div>
+
+    
+  </body>
+</html>
