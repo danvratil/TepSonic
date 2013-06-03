@@ -1,0 +1,4 @@
+ - PluginsManager => singleton
+ - kill PluginInterface
+ - check overuse of QThreadPools in TaskManager
+ - simplify models
