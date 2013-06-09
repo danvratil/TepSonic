@@ -50,11 +50,11 @@ void PluginsPage::pluginsListItemChanged(QListWidgetItem *item)
     if (item->checkState() == Qt::Checked) {
         pluginsManager->enablePlugin(plugin);
         // If the plugin has a config m_ui then add a tab with the m_ui to Plugins page
-        AbstractPlugin *aplg = reinterpret_cast<AbstractPlugin *>(plugin->pluginLoader->instance());
+        AbstractPlugin *aplg = reinterpret_cast<AbstractPlugin *>(plugin->loader->instance());
         if (aplg->hasConfigUI()) {
             QWidget *pluginWidget = new QWidget();
-            m_ui->tabs->insertTab(pluginIndex + 1, pluginWidget, plugin->pluginName);
-            aplg->settingsWidget(pluginWidget);
+            m_ui->tabs->insertTab(pluginIndex + 1, pluginWidget, plugin->name);
+            aplg->configUI(pluginWidget);
         }
     } else {
         QWidget *widget = m_ui->tabs->widget(pluginIndex + 1);
@@ -69,19 +69,19 @@ void PluginsPage::loadSettings(QSettings *settings)
     PluginsManager *pluginsManager = PluginsManager::instance();
     // Iterate through all plugins
     for (int i = 0; i < pluginsManager->pluginsCount(); i++) {
-        if (pluginsManager->pluginAt(i)->enabled) {
+        if (pluginsManager->pluginAt(i)->isEnabled) {
             // If the plugin has a config m_ui then add a tab with the m_ui to Plugins page
-            if (pluginsManager->pluginAt(i)->hasUI) {
+            AbstractPlugin *plugin = reinterpret_cast<AbstractPlugin *>(pluginsManager->pluginAt(i)->loader->instance());
+            if (plugin->hasConfigUI()) {
                 QWidget *pluginWidget = new QWidget();
-                m_ui->tabs->addTab(pluginWidget, pluginsManager->pluginAt(i)->pluginName);
-                AbstractPlugin *plugin = reinterpret_cast<AbstractPlugin *>(pluginsManager->pluginAt(i)->pluginLoader->instance());
-                plugin->settingsWidget(pluginWidget);
+                m_ui->tabs->addTab(pluginWidget, pluginsManager->pluginAt(i)->name);
+                plugin->configUI(pluginWidget);
             }
         }
 
-        QListWidgetItem *item = new QListWidgetItem(pluginsManager->pluginAt(i)->pluginName);
+        QListWidgetItem *item = new QListWidgetItem(pluginsManager->pluginAt(i)->name);
         // If the plugin is not yet listed in the QSettings then set it as disabled by default
-        if (pluginsManager->pluginAt(i)->enabled) {
+        if (pluginsManager->pluginAt(i)->isEnabled) {
             item->setCheckState(Qt::Checked);
         } else {
             item->setCheckState(Qt::Unchecked);
@@ -97,14 +97,10 @@ void PluginsPage::saveSettings(QSettings *settings)
 {
     settings->beginGroup("Plugins");
 
-    QMap<QString, QVariant> plugins;
     // Go through all plugins in the m_ui list
     for (int i = 0; i < m_ui->pluginsList->count(); i++) {
         QListWidgetItem *item = m_ui->pluginsList->item(i);
-        // insert into the map value pluginid - checked(bool)
-        plugins.insert(PluginsManager::instance()->pluginAt(i)->pluginID,
-                       QVariant((item->checkState() == 2)));
+        settings->setValue(PluginsManager::instance()->pluginAt(i)->id, QVariant((item->checkState() == 2)));
     }
-    settings->setValue("pluginsEnabled", QVariant(plugins));
     settings->endGroup();
 }

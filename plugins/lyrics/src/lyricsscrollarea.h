@@ -17,26 +17,24 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Cambridge, MA 02110-1301, USA.
  */
 
-#ifndef MPRIS2PLUGIN_H
-#define MPRIS2PLUGIN_H
 
-#include "abstractplugin.h"
+#ifndef LYRICSSCROLLAREA_H
+#define LYRICSSCROLLAREA_H
 
-class QDBusAbstractAdaptor;
+#include <QtGui/QScrollArea>
 
-class MPRIS2Plugin : public AbstractPlugin
+class QResizeEvent;
+
+class LyricsSrollArea: public QScrollArea
 {
     Q_OBJECT
 
   public:
-    explicit MPRIS2Plugin();
-    virtual ~MPRIS2Plugin();
+    LyricsSrollArea(QWidget *parent);
 
-    virtual void init();
+  protected:
+    void resizeEvent(QResizeEvent *);
 
-  private:
-    QDBusAbstractAdaptor *m_mediaPlayer2;
-    QDBusAbstractAdaptor *m_mediaPlayer2Player;
 };
 
-#endif // MPRIS2PLUGIN_H
+#endif // LYRICSSCROLLAREA_H

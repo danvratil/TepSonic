@@ -32,83 +32,46 @@
 #include <QTranslator>
 #include <QMenu>
 
-//! LastFmScrobbler is a plugin for scrobbling recently played tracks to Last.fm
-/*!
-  LastFmScrobbler is a plugin for scrobbling recently played tracks to Last.fm
-  via their submission API using lastfmlib.
-*/
 class LastFmScrobblerPlugin : public AbstractPlugin
 {
     Q_OBJECT
-    public:
-        //! Constructor
-        /*!
-          Creates the plugin.
-        */
-        LastFmScrobblerPlugin();
 
-        //! Destructor
-        ~LastFmScrobblerPlugin();
+  public:
+    explicit LastFmScrobblerPlugin();
+    virtual ~LastFmScrobblerPlugin();
 
-        //! Initialize the plugins
-        /*!
-          Loads settings
-        */
-        void init();
+    void init();
+    void quit();
 
-        //! Prepares the plugin to be disabled
-        void quit();
+    void configUI(QWidget *parentWidget);
+    virtual void setupMenu(QMenu *menu, MenuTypes menuType);
 
-        //! Initializes UI on given widget
-        /*!
-          Installs user interface for configuration via Ui::LastFmScrobblerConfig::setupUI() on
-          given parentWidget
-          \param parentWidget widget to setup the UI on
-        */
-        void settingsWidget(QWidget *parentWidget);
+  public slots:
+    void trackChanged(const Player::MetaData &trackData);
+    void playerStatusChanged(Phonon::State newState, Phonon::State oldState);
 
-        //! Add custom menu items to given menu. */
-        void setupMenu(QMenu *menu, Plugins::MenuTypes menuType);
+    //! Submit track as loved()
+    void loveTrack();
 
-    public slots:
+  private slots:
+    void initScrobbler();
 
-        //! Notification about new track
-        /*!
-          \param trackData meta data of the new track
-        */
-        void trackChanged(Player::MetaData trackData);
+    void authenticate();
 
+    void gotToken(const QString &token);
 
-        //! Notification that player state has changed (paused/unpuased etc)
-        void playerStatusChanged(Phonon::State newState, Phonon::State oldState);
+    void gotSessionKey(const QString &session);
 
-        //! Submit track as loved()
-        void loveTrack();
+  private:
+    LastFm::Scrobbler *m_scrobbler;
+    LastFm::Auth *m_auth;
 
-    private slots:
-        void initScrobbler();
+    //! Configuration UI
+    Ui::LastFmScrobblerConfig *m_configWidget;
 
-        void authenticate();
+    QTranslator *m_translator;
 
-        void gotToken(QString token);
-
-        void gotSessionKey(QString session);
-
-    private:
-        LastFm::Scrobbler *m_scrobbler;
-        LastFm::Auth *m_auth;
-
-        //! Configuration UI
-        Ui::LastFmScrobblerConfig *m_configWidget;
-
-        QTranslator *m_translator;
-
-        QString m_token;
-
-
-    signals:
-
-        void error(QString);
+    QString m_token;
 
 };
 

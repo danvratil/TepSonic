@@ -21,149 +21,55 @@
 #ifndef ABSTRACTPLUGIN_H
 #define ABSTRACTPLUGIN_H
 
-#include "player.h"
-#include "plugininterface.h"
+#include <QtCore/QObject>
 
-#include <QObject>
-#include <phonon/mediaobject.h>
-
-class QString;
 class QWidget;
 class QMenu;
-class PluginsManager;
 
-
-//! The AbstractPlugin class provides interface to be implemented by plugins
-/*!
-  When creating plugins for TepSonic, plugins must implement a few default functions
-  including settingsWidget() and pluginName().
-  Implementation of slots is optional. But at least settingsAccepted() should be implemented
-  if the plugin has a settings interface.
-*/
-class AbstractPlugin : public QObject, public PluginInterface
+class AbstractPlugin : public QObject
 {
-    // Plugins manager is our friend!
-    friend class PluginsManager;
-
     Q_OBJECT
-    Q_INTERFACES(PluginInterface);
-    Q_PROPERTY(bool hasConfigUI
-               READ hasConfigUI
-               WRITE setHasConfigUI);
-    public:
 
-        //! Initializes the plugin
-        /*!
-          The plugin should not be initiated in the constructor. The constructor is only for setting plugin's name
-          and hasConfigUI. The initialization itself (like loading settings, connection to network etc) should be done
-          here. This allows user to disable the plugin (init() is not called) but TepSonic still knows about the plugin
-          without initializing it.
-        */
-        virtual void init() = 0;
+  public:
+    enum MenuTypes {
+        MainMenu = 0,
+        TrayMenu = 1,
+        PlaylistPopup = 2,
+        CollectionsPopup = 3
+    };
 
-        //! Uninitializes the plugin
-        /*!
-          The plugin should stop doing it's work but it won't be destroyed. The plugin will be formally disabled.
-        */
-        virtual void quit() { }
+    explicit AbstractPlugin(QObject *parent = 0);
+    virtual ~AbstractPlugin();
 
-        //! Initilizes plugin's settings UI on given parentWidget. This is a pure virtual method.
-        /*!
-          When the Settings dialog is opened it requests PluginManager to give it a list of plugins. Then it
-          appends a new QWidget to the list of pages and ask the plugin to initialize it's settings UI on it
-          by calling settingsWidget() and passing pointer to the new QWidget.
-          \param parentWidget pointer to QWidget that plugin UI will be initialized on
-        */
-        virtual void settingsWidget(QWidget *parentWidget) = 0;
+    virtual void init() = 0;
+    virtual void quit();
 
-        //! Returns state of hasConfigUI property
-        /*!
-          \return Returns state of hasConfigUI property.
-        */
-        bool hasConfigUI() const { return m_hasConfigUI; }
+    virtual void configUI(QWidget *parentWidget);
+    bool hasConfigUI() const;
+    void setHasConfigUI(bool hasConfigUi);
 
-        //! Changes state of hasConfigUI property
-        /*!
-          \param state new state of the property
-        */
-        void setHasConfigUI(const bool &state) { m_hasConfigUI = state; }
+    void setPluginName(const QString &pluginName);
+    QString pluginName() const;
 
-        //! Allows plugin to setup custom menu to given menu. The type of menu is set in menuType.
-        virtual void setupMenu(QMenu *menu, Plugins::MenuTypes menuType) = 0;
+    virtual void setupMenu(QMenu *menu, AbstractPlugin::MenuTypes menuType);
+    virtual bool setupPane(QWidget *widget, QString &label);
 
-        //! Allows plugin to setup a UI on widget which is a tab in playlist tabwidget
-        /*!
-          If you want plugin to have a tab (displayed in the tabwidget with playlist), reimplement this method,
-          setup UI on given widget and return TRUE.
-          \return Plugin has to return TRUE whan a widget has been setup or FALSE, when plugin does not want
-            to have a custom tab. Default implementation returns FALSE.
-        */
-        virtual bool setupPane(QWidget *widget, QString *label) { return false; Q_UNUSED (widget); Q_UNUSED (label); }
+  public Q_SLOTS:
+    virtual void settingsAccepted();
 
-    public slots:
-        //! Called when Settings dialog is accepted
-        /*!
-          When user accepts the Settings dialog (by clicking on "OK" button) this slot is called. It is good to implement
-          saving of configuration to a file.
-        */
-        virtual void settingsAccepted() {}
+  protected:
+    void emitError(const QString &error);
 
-        //! Notifies about changing current track
-        /*!
-          Provides information about new track that was recently set to Player. It recieves MetaData with informations
-          about the new track.
-          \param metadata Meta data from the current track
-        */
-        virtual void trackChanged(Player::MetaData metadata) { Q_UNUSED(metadata) }
+  Q_SIGNALS:
+#if !defined(Q_MOC_RUN) && !defined(DOXYGEN_SHOULD_SKIP_THIS) && !defined(IN_IDE_PARSER)
+  private:
+#endif
+    void error(const QString &msg);
 
-        //! Notifies that current track was played.
-        /*!
-          This slot notifies plugin that current track was finished. The slot is called when playback reaches
-          the end of the current track, not when the playback was stopped by user or changed for another.
-          \param metadata Meta data from the current track
-          \sa trackChanged()
-        */
-        virtual void trackFinished(Player::MetaData metadata) { Q_UNUSED(metadata) }
-
-        //! Notifies about change of player's status
-        /*!
-          Provides information about change of state of the player. New state and previous (old) state are passed.
-          \param newState new state of the player
-          \param oldState previous state of the player
-        */
-        virtual void playerStatusChanged(Phonon::State newState, Phonon::State oldState) { Q_UNUSED(newState) Q_UNUSED(oldState) }
-
-        //! Informs about position of the playback
-        /*!
-          This slot is fired every second and provides information about current position in the track.
-          \param newPos gives current position from beginning of the track in milliseconds
-        */
-        virtual void trackPositionChanged(qint64 newPos) { Q_UNUSED(newPos) }
-
-        //! Informs that the playback has been (un)paused
-        /*!
-          When TRUE is passed as an argument, the playback has been paused. FALSE means, that
-          playback has been unpaused
-          \param paused paused (true) or unpaused (false)
-        */
-        virtual void trackPaused(bool paused) { Q_UNUSED(paused) }
-
-    signals:
-        //! Signalize failure of the plugin to main window
-        /*!
-          Plugin can emit this signal when an failure that user should be informed about occurs. Additionally it can
-          pass a string with short description of the error (eg. Failed to connect to...). The string should be prefixed
-          with name of the plugin as it's not done automatically
-          \param msg short description of the error
-        */
-        void error(QString msg);
-
-    private:
-        //! Has config UI?
-        bool m_hasConfigUI;
-
-        //! Is the plugin initialized?
-        bool m_initialized;
+  private:
+    class Private;
+    Private * const d;
+    friend class Private;
 
 };
 

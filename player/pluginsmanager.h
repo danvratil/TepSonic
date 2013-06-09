@@ -27,8 +27,7 @@
 #include <QtGui/QMenu>
 #include <QtGui/QTabWidget>
 
-#include "player.h"
-#include "plugininterface.h"
+#include "abstractplugin.h"
 
 typedef QString(*PluginNameFcn)(void);
 typedef QString(*PluginIDFcn)(void);
@@ -39,42 +38,50 @@ class PluginsManager : public QObject
     Q_DISABLE_COPY(PluginsManager)
 
   public:
-    typedef struct {
-        QString pluginName;
-        QString pluginID;
-        QPluginLoader *pluginLoader;
-        bool enabled;
-        QString filename;
-        bool hasUI;
-    } Plugin;
+    class Plugin
+    {
+      public:
+        Plugin();
+        ~Plugin();
+
+        QString name;
+        QString description;
+        QString id;
+        bool enabledByDefault;
+        QPluginLoader *loader;
+        QString version;
+        QString author;
+        QString email;
+        QString libraryFilePath;
+
+        bool isEnabled;
+    };
 
     static PluginsManager* instance();
 
     ~PluginsManager();
 
     int pluginsCount() const;
-
     Plugin *pluginAt(int index) const;
 
   public Q_SLOTS:
     void disablePlugin(Plugin *plugin);
-
     void enablePlugin(Plugin *plugin);
 
     void loadPlugins();
 
-    void installMenus(QMenu *menu, Plugins::MenuTypes menuType);
+    void installMenus(QMenu *menu, AbstractPlugin::MenuTypes menuType);
     void installPanes(QTabWidget *tabwidgets);
 
   private:
     explicit PluginsManager();
     static PluginsManager *s_instance;
 
+    Plugin* parseDesktopFile(const QString &filePath);
     void initPlugin(Plugin *plugin);
 
     QList<Plugin *> m_pluginsList;
-    PluginsManager::Plugin *loadPlugin(const QString &filename);
-    QMap<QMenu *, Plugins::MenuTypes> menus;
+    QMap<QMenu *, AbstractPlugin::MenuTypes> menus;
 
   Q_SIGNALS:
     // Signals emitted by plugins

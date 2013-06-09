@@ -38,6 +38,21 @@
 #include <QtCore/QTimer>
 #include <phonon/mediaobject.h>
 
+PluginsManager::Plugin::Plugin():
+    isEnabled(false)
+{
+}
+
+PluginsManager::Plugin::~Plugin()
+{
+    if (loader) {
+        loader->unload();
+        delete loader;
+    }
+}
+
+
+
 PluginsManager* PluginsManager::s_instance = 0;
 
 PluginsManager *PluginsManager::instance()
@@ -69,77 +84,72 @@ void PluginsManager::loadPlugins()
     QSettings settings(QString(_CONFIGDIR).append("/main.conf"),
                        QSettings::IniFormat);
     settings.beginGroup("Plugins");
-    QMap<QString,QVariant> pluginsEnabledList = settings.value("pluginsEnabled").toMap();
-    settings.endGroup();
 
-    QStringList pluginsDirs;
-    /* By default we will search in applicationDirPath/plugins
-       This is common situation on Windows where the plugins will probably be stored in
-       C:\Program Files\TepSonic\plugins
-       On Linux it can be usefull for developers who havie their TepSonic source
-       for example in /home/me/tepsonic/ and plugins in /home/me/tepsonic/plugins.
-       Putting this folder first will also result in preferring these plugins before
-       same-called plugins installed somewhere in system */
-#ifdef Q_WS_WIN
-    pluginsDirs << QDir::toNativeSeparators(qApp->applicationDirPath())+QDir::separator()+"plugins";
-    QCoreApplication::addLibraryPath(QDir::toNativeSeparators(qApp->applicationDirPath()));
-#endif
-#ifdef Q_WS_MAC
-    #ifdef APPLEBUNDLE
-    pluginsDirs << QCoreApplication::applicationDirPath() + "/../plugins/";
-    #else
-    pluginsDirs << LIBDIR;
-    #endif
-    qDebug() << "Searching in " << pluginsDirs;
-#endif
-#ifdef Q_WS_X11
-    QDir appDir(qApp->applicationDirPath());
-    appDir.cdUp();
-    pluginsDirs << appDir.path()+QDir::separator()+"lib";
-    // LIBDIR is defined in player/CMakeLists.txt and it is a location where all project's libs are installed
-    if (LIBDIR != appDir.path()+QDir::separator()+"lib") {
-        pluginsDirs << LIBDIR;
-    }
-    qDebug() << "Searching in " << pluginsDirs;
-#endif
+    QDir pluginsDir(QLatin1String(PKGDATADIR) + QDir::separator() + QLatin1String("tepsonic") + QDir::separator() + QLatin1String("plugins"));
 
     // Temporary list to avoid duplicate loading of plugins
-    QStringList pluginsNames;
-    QDir pluginsDir;
-    pluginsDir.setNameFilters(QStringList() << "libtepsonic_*");
+    pluginsDir.setNameFilters(QStringList() << QLatin1String("*.desktop"));
     pluginsDir.setFilter(QDir::Files | QDir::NoSymLinks);
-    Q_FOREACH (const QString &folder, pluginsDirs) {
-        // Use each of the pluginsDirs
-        pluginsDir.setPath(folder);
-        // Now go through all the plugins found in the current folder
-        Q_FOREACH (const QString &filename, pluginsDir.entryList()) {
-            // Get complete path+filename
-            const QString pluginFile = folder+QDir::separator() + filename;
-            // If the file is a library...
-            if (QLibrary::isLibrary(pluginFile)) {
 
-                // Load the library and resolve "pluginName" symbol
-                QLibrary lib(pluginFile);
-                PluginIDFcn pluginID = (PluginIDFcn)lib.resolve("pluginID");
-                if (pluginID == 0) {
-                    qDebug() << lib.errorString() << "...skipping!";
-                    continue;
-                }
-
-                const QString pluginid = pluginID();
-                if (!pluginsNames.contains(pluginid)) {
-                    qDebug() << "Found plugin " << pluginid;
-                    Plugin *plugin = loadPlugin(pluginFile);
-                    if (pluginsEnabledList[pluginid]==true) {
-                        enablePlugin(plugin);
-                    }
-                    pluginsNames.append(pluginid);
-                }
+    qDebug() << "Searching plugins in " << pluginsDir;
+    // Now go through all the plugins found in the current folder
+    Q_FOREACH (const QString &filename, pluginsDir.entryList()) {
+        // Get complete path+filename
+        const QString desktopFile = pluginsDir.path() + QDir::separator() + filename;
+        // If the file is a library...
+        Plugin *plugin = parseDesktopFile(desktopFile);
+        if (plugin) {
+            const bool enabled = settings.value(plugin->id, plugin->enabledByDefault).toBool();
+            if (enabled) {
+                enablePlugin(plugin);
             }
+            m_pluginsList << plugin;
         }
     }
 
     Q_EMIT pluginsLoaded();
+}
+
+PluginsManager::Plugin *PluginsManager::parseDesktopFile(const QString &filePath)
+{
+    QStringList mandatoryFields;
+    mandatoryFields << QLatin1String("Name")
+                    << QLatin1String("Comment")
+                    << QLatin1String("Type")
+                    << QLatin1String("X-TepSonic-Plugin-Id")
+                    << QLatin1String("X-TepSonic-Plugin-Library")
+                    << QLatin1String("X-TepSonic-Plugin-Version")
+                    << QLatin1String("X-TepSonic-Plugin-Author");
+
+    QSettings parser(filePath, QSettings::IniFormat);
+    parser.beginGroup(QLatin1String("Desktop Entry"));
+    Q_FOREACH (const QString &field, mandatoryFields) {
+        if (!parser.contains(field)) {
+            qDebug() << filePath << "is missing mandatory field" << field;
+            return 0;
+        }
+    }
+
+    const QString libraryName = parser.value(QLatin1String("X-TepSonic-Plugin-Library")).toString();
+    const QString extension = ".so";
+
+    const QString libPath = QLatin1String(LIBDIR) + QDir::separator() + libraryName + extension;
+    if (!QFile::exists(libPath)) {
+        qDebug() << libPath << "plugin library does not exist";
+        return 0;
+    }
+
+    Plugin *plugin = new Plugin;
+    plugin->libraryFilePath = libPath;
+    plugin->name = parser.value(QLatin1String("Name")).toString();
+    plugin->description = parser.value(QLatin1String("Comment")).toString();
+    plugin->id = parser.value(QLatin1String("X-TepSonic-Plugin-Id")).toString();
+    plugin->enabledByDefault = parser.value(QLatin1String("X-TepSonic-Plugin-EnabledByDefault"), false).toBool();
+    plugin->version = parser.value(QLatin1String("X-TepSonic-Plugin->Version")).toString();
+    plugin->author = parser.value(QLatin1String("X-TepSonic-Plugin-Author")).toString();
+    plugin->email = parser.value(QLatin1String("X-TepSonic-Plugin-Email")).toString();
+
+    return plugin;
 }
 
 int PluginsManager::pluginsCount() const
@@ -154,49 +164,45 @@ PluginsManager::Plugin* PluginsManager::pluginAt(int index) const
 
 void PluginsManager::disablePlugin(Plugin *plugin)
 {
-    if (!plugin->enabled) {
+    if (!plugin->isEnabled) {
         return;
     }
 
-    AbstractPlugin* aplg = reinterpret_cast<AbstractPlugin*>(plugin->pluginLoader->instance());
+    AbstractPlugin* aplg = reinterpret_cast<AbstractPlugin*>(plugin->loader->instance());
 
     disconnect(aplg,SLOT(settingsAccepted()));
     aplg->quit();
 
-    plugin->pluginLoader->unload();
-    delete plugin->pluginLoader;
-
-    plugin->pluginLoader = NULL;
-    plugin->hasUI = false;
-    plugin->enabled = false;
+    plugin->loader->unload();
+    delete plugin->loader;
+    plugin->loader = NULL;
+    plugin->isEnabled = false;
 }
 
 void PluginsManager::enablePlugin(Plugin *plugin)
 {
     // There's nothing to do when plugin is enabled
-    if (plugin->enabled) {
+    if (plugin->isEnabled) {
         return;
     }
 
-    QPluginLoader *pluginLoader = new QPluginLoader(plugin->filename);
+    QPluginLoader *pluginLoader = new QPluginLoader(plugin->libraryFilePath);
     if (! pluginLoader->load()) {
-        qDebug() << plugin->pluginName << " load error:" << pluginLoader->errorString();
+        qDebug() << plugin->id << " load error:" << pluginLoader->errorString();
         return;
     }
-    plugin->pluginLoader = pluginLoader;
+    plugin->loader = pluginLoader;
 
-    AbstractPlugin *aplg = reinterpret_cast<AbstractPlugin*>(plugin->pluginLoader->instance());
+    AbstractPlugin *aplg = reinterpret_cast<AbstractPlugin*>(plugin->loader->instance());
 
     // Initialize the plugin!
     aplg->init();
-    aplg->m_initialized = true;
 
     // Now we can connect all the signals/slots to the plugin
     connect(this,SIGNAL(settingsAccepted()),aplg,SLOT(settingsAccepted()));
     connect(aplg,SIGNAL(error(QString)),this,SIGNAL(error(QString)));
 
-    plugin->hasUI = aplg->hasConfigUI();
-    plugin->enabled = true;
+    plugin->isEnabled = true;
 
     // Install menus for the plugins
     for (int i = 0; i < menus.size(); i++) {
@@ -204,37 +210,7 @@ void PluginsManager::enablePlugin(Plugin *plugin)
     }
 }
 
-PluginsManager::Plugin* PluginsManager::loadPlugin(const QString &filename)
-{
-    // Check if the plugin isn't already loaded
-    QLibrary lib(filename);
-    PluginIDFcn pluginID = (PluginIDFcn)lib.resolve("pluginID");
-    const QString pluginid = pluginID();
-
-    for (int i = 0; i < m_pluginsList.count(); i++) {
-        if (m_pluginsList.at(i)->pluginID == pluginid) {
-            return m_pluginsList.at(i);
-        }
-    }
-
-    PluginNameFcn pluginName = (PluginNameFcn)lib.resolve("pluginName");
-
-    // Create new Plugin structure
-    Plugin *plugin = new PluginsManager::Plugin;
-    plugin->pluginLoader = NULL;
-    plugin->enabled = false;
-    plugin->pluginName = pluginName();
-    plugin->pluginID = pluginid;
-    plugin->filename = filename;
-    plugin->hasUI = false;
-
-    // Add it to the list of plugins
-    m_pluginsList.append(plugin);
-
-    return plugin;
-}
-
-void PluginsManager::installMenus(QMenu *menu, Plugins::MenuTypes menuType)
+void PluginsManager::installMenus(QMenu *menu, AbstractPlugin::MenuTypes menuType)
 {
     if (!menus.contains(menu)) {
         menus.insert(menu, menuType);
@@ -242,11 +218,11 @@ void PluginsManager::installMenus(QMenu *menu, Plugins::MenuTypes menuType)
 
     for (int i = 0; i < m_pluginsList.size(); i++) {
         Plugin *plugin = m_pluginsList.at(i);
-        if (!plugin || !plugin->enabled) {
+        if (!plugin || !plugin->isEnabled) {
             continue;
         }
 
-        AbstractPlugin *aplg = reinterpret_cast<AbstractPlugin*>(plugin->pluginLoader->instance());
+        AbstractPlugin *aplg = reinterpret_cast<AbstractPlugin*>(plugin->loader->instance());
         if (!aplg) {
             continue;
         }
@@ -259,21 +235,22 @@ void PluginsManager::installPanes(QTabWidget *tabwidget)
 {
     for (int i = 0; i < m_pluginsList.size(); i++) {
         Plugin *plugin = m_pluginsList.at(i);
-        if (!plugin || !plugin->enabled) {
+        if (!plugin || !plugin->isEnabled) {
             continue;
         }
 
-        AbstractPlugin *aplg = reinterpret_cast<AbstractPlugin*>(plugin->pluginLoader->instance());
+        AbstractPlugin *aplg = reinterpret_cast<AbstractPlugin*>(plugin->loader->instance());
         if (!aplg) {
             continue;
         }
 
         QWidget *pane = new QWidget(tabwidget);
         QString label;
-        if (aplg->setupPane(pane, &label))
+        if (aplg->setupPane(pane, label))
             tabwidget->addTab(pane, label);
     }
 
     // Do not let plugins to automatically activate themselves
     tabwidget->setCurrentIndex(0);
 }
+

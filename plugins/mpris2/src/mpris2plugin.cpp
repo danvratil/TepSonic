@@ -21,33 +21,18 @@
 #include "mpris2plugin.h"
 
 #include <QtDBus/QDBusConnection>
+#include <QtPlugin>
 
+//getpid()
 #include <unistd.h>
+
 
 #include "mprismediaplayer2.h"
 #include "mprismediaplayer2player.h"
 
-// Exports pluginName method
-#ifdef Q_WS_WIN
-#define NAME_EXPORT __declspec(dllexport)
-#define ID_EXPORT __declspec(dllexport)
-#else
-#define NAME_EXPORT
-#define ID_EXPORT
-#endif
-
-extern "C" NAME_EXPORT QString pluginName()
-{
-    return "MPRIS2 plugin";
-}
-
-extern "C" ID_EXPORT QString pluginID()
-{
-    return "mpris2";
-}
-
 MPRIS2Plugin::MPRIS2Plugin()
 {
+    setHasConfigUI(false);
 }
 
 MPRIS2Plugin::~MPRIS2Plugin()
@@ -73,21 +58,6 @@ void MPRIS2Plugin::init()
             QLatin1String("/org/mpris/MediaPlayer2"),
             this, QDBusConnection::ExportAdaptors);
     }
-}
-
-void MPRIS2Plugin::quit()
-{
-}
-
-void MPRIS2Plugin::settingsWidget(QWidget* parentWidget)
-{
-    Q_UNUSED(parentWidget);
-}
-
-void MPRIS2Plugin::setupMenu(QMenu* menu, Plugins::MenuTypes menuType)
-{
-    Q_UNUSED(menu);
-    Q_UNUSED(menuType);
 }
 
 Q_EXPORT_PLUGIN2(tepsonic_mpris2plugin, MPRIS2Plugin)

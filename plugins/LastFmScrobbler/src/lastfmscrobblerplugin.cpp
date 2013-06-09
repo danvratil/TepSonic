@@ -33,45 +33,23 @@
 #include <QTranslator>
 #include <QTimer>
 #include <QDateTime>
-
-// Exports pluginName method
-#ifdef Q_WS_WIN
-#define NAME_EXPORT __declspec(dllexport)
-#define ID_EXPORT __declspec(dllexport)
-#else
-#define NAME_EXPORT
-#define ID_EXPORT
-#endif
-
-extern "C" NAME_EXPORT QString pluginName()
-{
-    return "Last.fm plugin";
-}
-
-extern "C" ID_EXPORT QString pluginID()
-{
-    return "lastfm";
-}
-
+#include <QtPlugin>
 
 LastFmScrobblerPlugin::LastFmScrobblerPlugin():
-        m_scrobbler(0),
-        m_auth(0)
+    AbstractPlugin(),
+    m_scrobbler(0),
+    m_auth(0)
 {
     setHasConfigUI(true);
+    setPluginName(tr("Last.fm plugin"));
 
     QString locale = QLocale::system().name();
     m_translator = new QTranslator(this);
-#ifndef APPLEBUNDLE
+
     // standard unix/windows
     QString dataDir = QLatin1String(PKGDATADIR);
     QString localeDir = dataDir + QDir::separator() + "tepsonic" + QDir::separator() +  "locale" + QDir::separator() + "lastfmscrobbler";
-#else
-    // mac's bundle. Special stuff again.
-    QString localeDir = QCoreApplication::applicationDirPath() + "/../Resources/lastfmscrobbler";
-#endif
-
-    m_translator->load("lastfmscrobbler_"+locale,localeDir);
+    m_translator->load("lastfmscrobbler_" + locale, localeDir);
     qApp->installTranslator(m_translator);
 
     connect(Player::instance(), SIGNAL(trackChanged(Player::MetaData)),
@@ -106,7 +84,7 @@ void LastFmScrobblerPlugin::quit()
     delete m_scrobbler;
 }
 
-void LastFmScrobblerPlugin::settingsWidget(QWidget *parentWidget)
+void LastFmScrobblerPlugin::configUI(QWidget *parentWidget)
 {
     m_configWidget = new Ui::LastFmScrobblerConfig();
     m_configWidget->setupUi(parentWidget);
@@ -116,9 +94,9 @@ void LastFmScrobblerPlugin::settingsWidget(QWidget *parentWidget)
 }
 
 
-void LastFmScrobblerPlugin::setupMenu(QMenu *menu, Plugins::MenuTypes menuType)
+void LastFmScrobblerPlugin::setupMenu(QMenu *menu, AbstractPlugin::MenuTypes menuType)
 {
-    if (menuType == Plugins::PlaylistPopup) {
+    if (menuType == AbstractPlugin::PlaylistPopup) {
         QMenu *pmenu = new QMenu(tr("Last.fm"), menu);
         pmenu->addAction(tr("Love track"), this, SLOT(loveTrack()));
         pmenu->setProperty("menuType", menuType);
@@ -126,7 +104,7 @@ void LastFmScrobblerPlugin::setupMenu(QMenu *menu, Plugins::MenuTypes menuType)
         menu->addMenu(pmenu);
     }
 
-    if (menuType == Plugins::TrayMenu) {
+    if (menuType == AbstractPlugin::TrayMenu) {
         QMenu *pmenu = new QMenu(tr("Last.fm"), menu);
         pmenu->addAction(tr("Love current track"), this, SLOT(loveTrack()));
         pmenu->setProperty("menuType", menuType);
@@ -137,7 +115,7 @@ void LastFmScrobblerPlugin::setupMenu(QMenu *menu, Plugins::MenuTypes menuType)
     }
 }
 
-void LastFmScrobblerPlugin::trackChanged(Player::MetaData trackData)
+void LastFmScrobblerPlugin::trackChanged(const Player::MetaData &trackData)
 {
     // Submit the old track
     if (m_scrobbler->currentTrack())
@@ -191,7 +169,7 @@ void LastFmScrobblerPlugin::authenticate()
     m_auth->getToken();
 }
 
-void LastFmScrobblerPlugin::gotToken(QString token)
+void LastFmScrobblerPlugin::gotToken(const QString &token)
 {
     if (token.isEmpty()) {
         qDebug() << "LastFmScrobbler: Got empty token!";
@@ -212,7 +190,7 @@ void LastFmScrobblerPlugin::gotToken(QString token)
     QTimer::singleShot(60000, this, SLOT(initScrobbler()));
 }
 
-void LastFmScrobblerPlugin::gotSessionKey(QString session)
+void LastFmScrobblerPlugin::gotSessionKey(const QString &session)
 {
     QSettings settings(QString(_CONFIGDIR) + QDir::separator() + "lastfmscrobbler.conf",QSettings::IniFormat,this);
     settings.setValue("key", session);
@@ -233,7 +211,7 @@ void LastFmScrobblerPlugin::loveTrack()
 
 
     // Signal from playlist popup
-    if (lastfmmenu->property("menuType") == Plugins::PlaylistPopup) {
+    if (lastfmmenu->property("menuType") == AbstractPlugin::PlaylistPopup) {
 
         // The parent menu
         QMenu *popupmenu = qobject_cast<QMenu*>(lastfmmenu->parent());
@@ -257,15 +235,12 @@ void LastFmScrobblerPlugin::loveTrack()
     }
 
     // Signal from tray menu item
-    if (lastfmmenu->property("menuType") == Plugins::TrayMenu) {
+    if (lastfmmenu->property("menuType") == AbstractPlugin::TrayMenu) {
 
         // From tray, we can love only current track
         if (m_scrobbler->currentTrack())
             m_scrobbler->currentTrack()->love();
     }
-
-
-
 }
 
 Q_EXPORT_PLUGIN2(tepsonic_lastfmscrobbler, LastFmScrobblerPlugin)

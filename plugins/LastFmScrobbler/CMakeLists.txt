@@ -86,3 +86,6 @@ install(TARGETS tepsonic_lastfmscrobbler
 install(FILES ${TRANSLATIONS_BINARY}
         DESTINATION ${INSTALL_DATA_DIR}/tepsonic/locale/
 )
+install(FILES lastfmscrobbler.desktop
+        DESTINATION ${INSTALL_DATA_DIR}/tepsonic/plugins/
+)

@@ -499,10 +499,10 @@ void MainWindow::setupPluginsUIs()
 {
     PluginsManager *manager = PluginsManager::instance();
     // Let plugins install their menus
-    manager->installMenus(m_trayIconMenu, Plugins::TrayMenu);
-    manager->installMenus(m_playlistPopupMenu, Plugins::PlaylistPopup);
+    manager->installMenus(m_trayIconMenu, AbstractPlugin::TrayMenu);
+    manager->installMenus(m_playlistPopupMenu, AbstractPlugin::PlaylistPopup);
     if (m_collectionModel) {
-        manager->installMenus(m_collectionsPopupMenu, Plugins::CollectionsPopup);
+        manager->installMenus(m_collectionsPopupMenu, AbstractPlugin::CollectionsPopup);
     }
 
     // Let plugins install their tabs

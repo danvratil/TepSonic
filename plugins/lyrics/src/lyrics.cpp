@@ -18,6 +18,7 @@
  */
 
 #include "lyrics.h"
+#include "lyricsscrollarea.h"
 #include "player.h"
 
 #include <QDir>
@@ -25,6 +26,10 @@
 #include <QLocale>
 #include <QPushButton>
 #include <QApplication>
+#include <QtPlugin>
+#include <QSplitter>
+#include <QLabel>
+#include <QGridLayout>
 
 #include <QNetworkAccessManager>
 #include <QNetworkRequest>
@@ -32,45 +37,15 @@
 
 #include <QListWidgetItem>
 
-// Exports pluginName method
-#ifdef Q_WS_WIN
-#define NAME_EXPORT __declspec(dllexport)
-#define ID_EXPORT __declspec(dllexport)
-#else
-#define NAME_EXPORT
-#define ID_EXPORT
-#endif
-
-extern "C" NAME_EXPORT QString pluginName()
-{
-    return "Lyrics plugin";
-}
-
-extern "C" ID_EXPORT QString pluginID()
-{
-    return "lyrics";
-}
-
-void LyricsSrollArea::resizeEvent(QResizeEvent *e)
-{
-    widget()->adjustSize();
-}
-
-
 LyricsPlugin::LyricsPlugin()
 {
     setHasConfigUI(false);
 
     QString locale = QLocale::system().name();
     _translator = new QTranslator(this);
-#ifndef APPLEBUNDLE
-    // standard unix/windows
+
     QString dataDir = QLatin1String(PKGDATADIR);
     QString localeDir = dataDir + QDir::separator() + "tepsonic" + QDir::separator() +  "locale" + QDir::separator() + "lyricsplugin";
-#else
-    // mac's bundle. Special stuff again.
-    QString localeDir = QCoreApplication::applicationDirPath() + "/../Resources/lyricsplugin";
-#endif
 
     _translator->load("lyricsplugin_"+locale,localeDir);
     qApp->installTranslator(_translator);
@@ -81,28 +56,16 @@ LyricsPlugin::LyricsPlugin()
 
 LyricsPlugin::~LyricsPlugin()
 {
-    delete m_label;
-    delete m_scrollArea;
-    delete m_listWidget;
-    delete m_splitter;
-    delete m_layout;
 }
 
 void LyricsPlugin::init()
 {
-
-
 }
 
-void LyricsPlugin::quit()
+
+bool LyricsPlugin::setupPane(QWidget *widget, QString &label)
 {
-
-
-}
-
-bool LyricsPlugin::setupPane(QWidget *widget, QString *label)
-{
-    *label = QString("Lyrics");
+    label = tr("Lyrics");
 
     m_layout = new QGridLayout(widget);
 
@@ -134,7 +97,7 @@ bool LyricsPlugin::setupPane(QWidget *widget, QString *label)
     return true;
 }
 
-void LyricsPlugin::trackChanged(Player::MetaData trackData)
+void LyricsPlugin::trackChanged(const Player::MetaData &trackData)
 {
     QUrl url("http://webservices.lyrdb.com/lookup.php?q="+trackData.artist+"|"+trackData.title+"&for=match&agent=TepSonic");
 
@@ -147,7 +110,7 @@ void LyricsPlugin::trackChanged(Player::MetaData trackData)
     nam->get(req);
 }
 
-void LyricsPlugin::loadLyrics(QModelIndex index)
+void LyricsPlugin::loadLyrics(const QModelIndex &index)
 {
     if (!index.isValid())
         return;
@@ -201,7 +164,7 @@ void LyricsPlugin::lyricsInfoRetrieved(QNetworkReply *reply)
     }
 
 
-    foreach (QString track, tracks_list)
+    Q_FOREACH (const QString &track, tracks_list)
     {
         QStringList info = track.split("\\");
         if (info.size() != 3) continue;
@@ -231,8 +194,5 @@ void LyricsPlugin::lyricsPageRetrieved(QNetworkReply *reply)
     m_label->setText(lyrics);
     m_label->adjustSize();
 }
-
-
-
 
 Q_EXPORT_PLUGIN2(tepsonic_lyrics, LyricsPlugin)

@@ -1,0 +1,11 @@
+[Desktop Entry]
+Name=Last.Fm Scrobbler Plugin
+Comment=Automatically submits tracks to Last.Fm
+
+Type=Service
+X-TepSonic-Plugin-Id=lastfm
+X-TepSonic-Plugin-EnabledByDefault=false
+X-TepSonic-Plugin-Library=libtepsonic_lastfmscrobbler
+X-TepSonic-Plugin-Version=1.0
+X-TepSonic-Plugin-Author=Dan Vrátil
+X-TepSonic-Plugin-Email=dan@progdan.cz

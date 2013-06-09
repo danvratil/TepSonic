@@ -21,93 +21,54 @@
 #define LYRICS_H
 
 #include "abstractplugin.h"
+#include "player.h"
 
 #include <QTranslator>
 #include <QNetworkReply>
 
-#include <QScrollArea>
-#include <QLabel>
-#include <QListWidget>
-#include <QSplitter>
-#include <QGridLayout>
-
-#include <QResizeEvent>
-
 class LyricsSrollArea;
+class QLabel;
+class QListWidget;
+class QSplitter;
+class QGridLayout;
+class QModelIndex;
 
 class LyricsPlugin : public AbstractPlugin
 {
     Q_OBJECT
-    public:
-        //! Constructor
-        /*!
-          Creates the plugin.
-        */
-        LyricsPlugin();
 
-        //! Destructor
-        ~LyricsPlugin();
+  public:
+    explicit LyricsPlugin();
+    virtual ~LyricsPlugin();
 
-        //! Initialize the plugins
-        /*!
-          Loads settings
-        */
-        void init();
+    void init();
 
-        //! Prepares the plugin to be disabled
-        void quit();
+    bool setupPane(QWidget *widget, QString &label);
 
-        bool setupPane(QWidget *widget, QString *label);
+  public Q_SLOTS:
+    void trackChanged(const Player::MetaData &trackData);
 
-        void settingsWidget(QWidget *parentWidget) {};
+  private:
+    QTranslator *_translator;
 
-        void setupMenu(QMenu *menu, Plugins::MenuTypes menuType) {};
+    void setError(int err) {};
 
-    public slots:
+    LyricsSrollArea *m_scrollArea;
 
-        //! Notification about new track
-        /*!
-          \param trackData meta data of the new track
-        */
-        void trackChanged(Player::MetaData trackData);
+    QLabel *m_label;
 
+    QListWidget *m_listWidget;
 
-    private:
-        QTranslator *_translator;
+    QSplitter *m_splitter;
 
-        void setError(int err) {};
+    QGridLayout *m_layout;
 
-        int findMatchingElement(QString html, int start_pos);
+  private Q_SLOTS:
+    void loadLyrics(const QModelIndex &index);
 
-        LyricsSrollArea *m_scrollArea;
+    void lyricsInfoRetrieved(QNetworkReply *);
 
-        QLabel *m_label;
-
-        QListWidget *m_listWidget;
-
-        QSplitter *m_splitter;
-
-        QGridLayout *m_layout;
-
-    private slots:
-        void loadLyrics(QModelIndex);
-
-        void lyricsInfoRetrieved(QNetworkReply*);
-
-        void lyricsPageRetrieved(QNetworkReply*);
-};
-
-class LyricsSrollArea: public QScrollArea
-{
-    Q_OBJECT
-
-    public:
-        LyricsSrollArea (QWidget *parent):
-            QScrollArea(parent) {};
-
-    protected:
-        void resizeEvent(QResizeEvent *);
-
+    void lyricsPageRetrieved(QNetworkReply *);
 };
 
 #endif // LYRICS_H

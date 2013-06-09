@@ -51,6 +51,7 @@ set(player_SRCS
     mainwindow.cpp
     player.cpp
     statusbar.cpp
+    abstractplugin.cpp
     pluginsmanager.cpp
     taskmanager.cpp
     databasemanager.cpp

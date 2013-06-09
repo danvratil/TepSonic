@@ -10,10 +10,12 @@ include_directories(
 
 set(lyricsplugin_HDRS
     src/lyrics.h
+    src/lyricsscrollarea.h
 )
 
 set(lyricsplugin_SRCS
     src/lyrics.cpp
+    src/lyricsscrollarea.cpp
 )
 
 option(LANGS "Using translations" "")
@@ -74,4 +76,7 @@ install(TARGETS tepsonic_lyricsplugin
 )
 install(FILES ${TRANSLATIONS_BINARY}
         DESTINATION ${INSTALL_DATA_DIR}/tepsonic/locale/
+)
+install(FILES lyrics.desktop
+        DESTINATION ${INSTALL_DATA_DIR}/tepsonic/plugins/
 )
