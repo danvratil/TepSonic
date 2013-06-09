@@ -251,3 +251,4 @@ void PluginsManager::installPanes(QTabWidget *tabwidget)
     tabwidget->setCurrentIndex(0);
 }
 
+#include "moc_pluginsmanager.cpp"

@@ -299,3 +299,5 @@ void DatabaseManager::initDb()
     break;
     }
 }
+
+#include "moc_databasemanager.cpp"

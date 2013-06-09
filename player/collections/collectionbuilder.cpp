@@ -314,3 +314,5 @@ void CollectionBuilder::cleanUpDatabase(QSqlDatabase sqlDb)
         QSqlQuery query("DELETE FROM `years` WHERE `id` NOT IN (SELECT `year` FROM `tracks` GROUP BY `year`);", sqlDb);
     }
 }
+
+#include "moc_collectionbuilder.cpp"

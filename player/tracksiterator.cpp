@@ -52,3 +52,5 @@ void TracksIterator::run()
 
     exec();
 }
+
+#include "moc_tracksiterator.cpp"

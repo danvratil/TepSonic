@@ -295,3 +295,5 @@ void PlaylistBrowser::shuffle()
 
     model()->sort(PlaylistBrowser::RandomOrderColumn, Qt::AscendingOrder);
 }
+
+#include "moc_playlistbrowser.cpp"

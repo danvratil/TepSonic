@@ -32,7 +32,6 @@
 #include "playlist/playlistitem.h"
 #include "collections/collectionproxymodel.h"
 #include "collections/collectionmodel.h"
-#include "collections/collectionitem.h"
 #include "collections/collectionitemdelegate.h"
 #include "bookmarks/bookmarksmanager.h"
 #include "abstractplugin.h"
@@ -920,10 +919,7 @@ void MainWindow::removeFileFromDisk()
 
 void MainWindow::setupCollections()
 {
-    // Not translatable
-    QStringList headers;
-    headers = QStringList() << "title" << "filename" << "data1" << "data2";
-    m_collectionModel = new CollectionModel(headers, this);
+    m_collectionModel = new CollectionModel(this);
 
     /*m_collectionProxyModel = new CollectionProxyModel(this);
     m_collectionProxyModel->setSourceModel(m_collectionModel);
@@ -952,11 +948,6 @@ void MainWindow::setupCollections()
             this, SLOT(showCollectionsContextMenu(QPoint)));
     connect(m_ui->collectionBrowser, SIGNAL(doubleClicked(QModelIndex)),
             this, SLOT(collectionBrowserDoubleClick(QModelIndex)));
-    connect(m_taskManager, SIGNAL(clearCollectionModel()),
-            m_collectionModel, SLOT(clear()));
-    connect(m_taskManager, SIGNAL(insertItemToCollections(QModelIndex, QString, QString, QString, QString, QModelIndex*)),
-            m_collectionModel, SLOT(addItem(QModelIndex, QString, QString, QString, QString, QModelIndex*)));
-
 
     // Since we disabled the Proxy model, no search inputs are needed
     m_ui->label_2->hide();
@@ -964,9 +955,6 @@ void MainWindow::setupCollections()
     m_ui->clearCollectionSearch->hide();
 
     m_ui->viewsTab->setTabEnabled(0, true);
-
-    m_taskManager->setCollectionModel(m_collectionModel);
-    m_taskManager->populateCollections();
 }
 
 void MainWindow::destroyCollections()
@@ -976,7 +964,6 @@ void MainWindow::destroyCollections()
     m_collectionProxyModel = 0;
     delete m_collectionModel;
     m_collectionModel = 0;
-    m_taskManager->setCollectionModel(0);
 
     m_ui->viewsTab->setTabEnabled(0, false);
 }
@@ -1049,3 +1036,5 @@ void MainWindow::metadataEditorAccepted()
 
     delete m_metadataEditor;
 }
+
+#include "moc_mainwindow.cpp"

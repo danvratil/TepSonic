@@ -30,6 +30,8 @@
 */
 class CollectionBrowser : public QTreeView
 {
+    Q_OBJECT
+
   public:
     //! Constructor
     CollectionBrowser(QWidget *parent = 0);

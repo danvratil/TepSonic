@@ -122,3 +122,5 @@ void CollectionPopulator::run()
 
     Q_EMIT collectionsPopulated();
 }
+
+#include "moc_collectionpopulator.cpp"

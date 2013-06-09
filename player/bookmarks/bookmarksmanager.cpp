@@ -200,3 +200,5 @@ QString BookmarksManager::getBookmarkPath(int row) const
 {
     return m_bookmarks.at(row).second;
 }
+
+#include "moc_bookmarksmanager.cpp"

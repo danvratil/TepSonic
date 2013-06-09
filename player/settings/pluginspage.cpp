@@ -104,3 +104,5 @@ void PluginsPage::saveSettings(QSettings *settings)
     }
     settings->endGroup();
 }
+
+#include "moc_pluginspage.cpp"

@@ -1,6 +1,6 @@
 project(tepsonic)
 
-cmake_minimum_required(VERSION 2.6)
+cmake_minimum_required(VERSION 2.8.6)
 
 set(TEPSONIC_VERSION_MAJOR 0)
 set(TEPSONIC_VERSION_MINOR 99)

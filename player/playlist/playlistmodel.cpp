@@ -346,3 +346,5 @@ void PlaylistModel::clear()
     m_stopTrack = QModelIndex();
     m_currentItem = QModelIndex();
 }
+
+#include "moc_playlistmodel.cpp"

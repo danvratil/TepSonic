@@ -82,3 +82,5 @@ bool CollectionProxyModel::filterAcceptsRow(int sourceRow, const QModelIndex &so
     return false;
 
 }
+
+#include "moc_collectionproxymodel.cpp"

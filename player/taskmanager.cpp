@@ -147,3 +147,5 @@ void TaskManager::collectionsRebuildingStarted()
 {
     Q_EMIT taskStarted(tr("Rebuilding collections"));
 }
+
+#include "moc_taskmanager.cpp"

@@ -50,3 +50,5 @@ bool TrayIcon::event(QEvent *event)
 
     return false;
 }
+
+#include "moc_trayicon.cpp"

@@ -92,3 +92,5 @@ void MetadataEditor::resizeEvent(QResizeEvent *e)
 {
     m_ui->box->setTitle(fontMetrics().elidedText(m_filename, Qt::ElideMiddle, m_ui->box->width()));
 }
+
+#include "moc_metadataeditor.cpp"

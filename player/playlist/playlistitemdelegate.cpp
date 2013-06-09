@@ -70,3 +70,5 @@ void PlaylistItemDelegate::paint(QPainter *painter, const QStyleOptionViewItem &
                      );
 
 }
+
+#include "moc_playlistitemdelegate.cpp"

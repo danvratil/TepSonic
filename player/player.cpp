@@ -194,3 +194,5 @@ void Player::enableEffect(Phonon::Effect *effect, bool enable)
         m_phononPath.removeEffect(effect);
     }
 }
+
+#include "moc_player.cpp"

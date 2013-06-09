@@ -6,45 +6,10 @@ include_directories(
     "settings"
 )
 
+set(CMAKE_AUTOMOC TRUE)
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/constants.h.cmake
                ${CMAKE_CURRENT_BINARY_DIR}/constants.h)
-
-set(player_HDRS
-    mainwindow.h
-    player.h
-    statusbar.h
-    abstractplugin.h
-    pluginsmanager.h
-    taskmanager.h
-    databasemanager.h
-    trayicon.h
-    filesystembrowser.h
-    metadataeditor.h
-    settings/settingsdialog.h
-    settings/settingspage.h
-    settings/playerpage.h
-    settings/collectionspage.h
-    settings/pluginspage.h
-    settings/shortcutspage.h
-    settings/changeshortcutdialog.h
-    settings/playereffectdialog.h
-    collections/collectionpopulator.h
-    collections/collectionmodel.h
-    collections/collectionbuilder.h
-    collections/collectionproxymodel.h
-    collections/collectionitemdelegate.h
-    playlist/playlistbrowser.h
-    playlist/playlistitemdelegate.h
-    playlist/playlistmodel.h
-    playlist/playlistproxymodel.h
-    playlist/playlistpopulator.h
-    playlist/playlistwriter.h
-    bookmarks/bookmarksbrowser.h
-    bookmarks/bookmarksmanager.h
-    bookmarks/addbookmarkdlg.h
-    ${QXT_HEADERS}
-)
 
 set(player_SRCS
     main.cpp
@@ -61,6 +26,7 @@ set(player_SRCS
     supportedformats.cpp
     filesystembrowser.cpp
     metadataeditor.cpp
+    settings/settingspage.cpp
     settings/settingsdialog.cpp
     settings/playerpage.cpp
     settings/collectionspage.cpp
@@ -71,7 +37,6 @@ set(player_SRCS
     collections/collectionpopulator.cpp
     collections/collectionbrowser.cpp
     collections/collectionmodel.cpp
-    collections/collectionitem.cpp
     collections/collectionbuilder.cpp
     collections/collectionproxymodel.cpp
     collections/collectionitemdelegate.cpp
@@ -122,7 +87,6 @@ endif (NOT DEFINED LANGS)
 message(STATUS "Translations to build: ${LANGUAGES}")
 
 qt4_wrap_ui(player_QUIS_HDRS ${player_QUIS})
-qt4_wrap_cpp(player_QMOC_SRCS ${player_HDRS})
 qt4_add_resources(player_RCCS_SRCS ${player_RCCS})
 #Create translations
 set(TRANSLATIONS)

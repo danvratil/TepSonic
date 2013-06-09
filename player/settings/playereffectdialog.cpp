@@ -36,3 +36,5 @@ PlayerEffectDialog::~PlayerEffectDialog()
     delete m_effectWidget;
     delete m_layout;
 }
+
+#include "moc_playereffectdialog.cpp"

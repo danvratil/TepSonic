@@ -150,3 +150,5 @@ void CollectionsPage::saveSettings(QSettings *settings)
     settings->endGroup();
     settings->endGroup();
 }
+
+#include "moc_collectionspage.cpp"

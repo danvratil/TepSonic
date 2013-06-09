@@ -38,3 +38,5 @@ bool PlaylistProxyModel::filterAcceptsRow(int sourceRow,
     }
     return false;
 }
+
+#include "moc_playlistproxymodel.cpp"

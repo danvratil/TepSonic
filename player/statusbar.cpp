@@ -33,7 +33,7 @@ void StatusBar::setProgressBar(const QString &action, int position, int maxPosit
         m_actionLabel = new QLabel(action, this);
         m_actionLabel->setSizePolicy(QSizePolicy::Minimum,
                                      QSizePolicy::Fixed);
-        insertWidget(0, m_actionLabel, 1);
+        insertWidget(0, m_actionLabel);
     }
     m_actionLabel->setText(action);
 
@@ -74,3 +74,5 @@ void StatusBar::showWorkingBar(const QString &action)
 {
     setProgressBar(action, 1, 0);
 }
+
+#include "moc_statusbar.cpp"

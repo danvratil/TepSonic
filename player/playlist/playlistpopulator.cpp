@@ -202,3 +202,5 @@ void PlaylistPopulator::addFiles(const QStringList &files, int firstRow)
     m_files.append(files);
     m_row = firstRow;
 }
+
+#include "moc_playlistpopulator.cpp"

@@ -103,3 +103,5 @@ void CollectionBrowser::keyPressEvent(QKeyEvent* event)
                                selectionModel()->currentIndex().parent());
     }
 }
+
+#include "moc_collectionbrowser.cpp"

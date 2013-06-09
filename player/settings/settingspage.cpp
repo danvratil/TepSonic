@@ -17,22 +17,11 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Cambridge, MA 02110-1301, USA.
  */
 
-#ifndef SETTINGSPAGE_H
-#define SETTINGSPAGE_H
+#include "settingspage.h"
 
-#include <QWidget>
-#include <QSettings>
-
-class SettingsPage: public QWidget
+SettingsPage::SettingsPage(QWidget *parent):
+    QWidget(parent)
 {
-    Q_OBJECT
+}
 
-  public:
-    explicit SettingsPage(QWidget *parent);
-
-  public Q_SLOTS:
-    virtual void loadSettings(QSettings *settings) = 0;
-    virtual void saveSettings(QSettings *settings) = 0;
-};
-
-#endif // SETTINGSPAGE_H
+#include "moc_settingspage.cpp"
