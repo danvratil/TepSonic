@@ -26,7 +26,6 @@
 #include "playlist/playlistpopulator.h"
 #include "playlist/playlistwriter.h"
 
-
 #include <QDir>
 #include <QSettings>
 #include <QStringList>
@@ -39,7 +38,6 @@ TaskManager::TaskManager(PlaylistModel *playlistModel, CollectionModel *collecti
 {
     // Only one collections thread at once. Another thread will be queued until the running thread is done
     m_collectionsThreadPool->setMaxThreadCount(1);
-
 }
 
 TaskManager::~TaskManager()
@@ -53,7 +51,7 @@ TaskManager::~TaskManager()
 void TaskManager::addFilesToPlaylist(const QStringList &files, int row)
 {
     if ((row == 0) && (m_playlistModel)) {
-        row = (m_playlistModel)->rowCount(QModelIndex());
+        row = m_playlistModel->rowCount(QModelIndex());
     }
 
     PlaylistPopulator *playlistPopulator = new PlaylistPopulator();
@@ -70,7 +68,7 @@ void TaskManager::addFilesToPlaylist(const QStringList &files, int row)
 void TaskManager::addFileToPlaylist(const QString &filename, int row)
 {
     if ((row == 0) && (m_playlistModel)) {
-        row = (m_playlistModel)->rowCount(QModelIndex());
+        row = m_playlistModel->rowCount(QModelIndex());
     }
 
     PlaylistPopulator *playlistPopulator = new PlaylistPopulator();
@@ -132,7 +130,6 @@ void TaskManager::rebuildCollections(const QString &folder)
                 this,SIGNAL(taskDone()));
 
         m_collectionsThreadPool->start(collectionBuilder);
-
     }
 }
 
