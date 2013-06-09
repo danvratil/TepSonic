@@ -1,6 +1,6 @@
 /*
  * TEPSONIC
- * Copyright 2010 Dan Vratil <vratil@progdansoft.com>
+ * Copyright 2013 Daniel Vrátil <dan@progdan.cz>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -20,9 +20,9 @@
 #ifndef DATABASEMANAGER_H
 #define DATABASEMANAGER_H
 
-#include <QtCore/QObject>
-#include <QtCore/QSettings>
-#include <QtSql/QSqlDatabase>
+#include <QObject>
+#include <QSettings>
+#include <QSqlDatabase>
 
 
 // Current DB revision

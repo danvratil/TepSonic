@@ -37,7 +37,9 @@ endif ()
 
 
 include_directories(
-        ${QT_INCLUDE_DIR}
+        ${QT_QTCORE_INCLUDE_DIR}
+        ${QT_QTGUI_INCLUDE_DIR}
+        ${QT_QTNETWORK_INCLUDE_DIR}
         ${QT_QTSQL_INCLUDE_DIR}
         ${PHONON_INCLUDES}
         ${TAGLIB_INCLUDES}

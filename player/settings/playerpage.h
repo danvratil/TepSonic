@@ -1,6 +1,6 @@
 /*
  * TEPSONIC
- * Copyright 2010 Dan Vratil <vratil@progdansoft.com>
+ * Copyright 2013 Daniel Vrátil <dan@progdan.cz>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -20,7 +20,7 @@
 #ifndef PLAYERPAGE_H
 #define PLAYERPAGE_H
 
-#include <QtGui/QStandardItemModel>
+#include <QStandardItemModel>
 
 #include <Phonon/Effect>
 

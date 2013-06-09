@@ -1,6 +1,6 @@
 /*
  * TEPSONIC
- * Copyright 2010 Dan Vratil <vratil@progdansoft.com>
+ * Copyright 2013 Daniel Vrátil <dan@progdan.cz>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -19,8 +19,8 @@
 
 #include "trayicon.h"
 
-#include <QtCore/QEvent>
-#include <QtGui/QWheelEvent>
+#include <QEvent>
+#include <QWheelEvent>
 
 TrayIcon::TrayIcon(QObject *parent):
     QSystemTrayIcon(parent)

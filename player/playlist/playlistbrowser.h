@@ -1,6 +1,6 @@
 /*
  * TEPSONIC
- * Copyright 2009 Dan Vratil <vratil@progdansoft.com>
+ * Copyright 2013 Daniel Vrátil <dan@progdan.cz>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -20,8 +20,8 @@
 #ifndef PLAYLISTBROWSER_H
 #define PLAYLISTBROWSER_H
 
-#include <QtGui/QTreeView>
-#include <QtCore/QStringList>
+#include <QTreeView>
+#include <QStringList>
 
 //! PlaylistBrowser class is a QTreeView subclass with support for drop events
 /*!

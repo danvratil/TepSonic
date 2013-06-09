@@ -1,6 +1,6 @@
 /*
  * TEPSONIC
- * Copyright 2010 Dan Vratil <vratil@progdansoft.com>
+ * Copyright 2013 Daniel Vrátil <dan@progdan.cz>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -17,13 +17,12 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Cambridge, MA 02110-1301, USA.
  */
 
-
 #ifndef COLLECTIONPOPULATOR_H
 #define COLLECTIONPOPULATOR_H
 
-#include <QtCore/QRunnable>
-#include <QtCore/QObject>
-#include <QtCore/QModelIndex>
+#include <QRunnable>
+#include <QObject>
+#include <QModelIndex>
 
 class CollectionModel;
 

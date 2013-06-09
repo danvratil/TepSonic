@@ -1,6 +1,6 @@
 /*
  * TEPSONIC
- * Copyright 2010 Dan Vratil <vratil@progdansoft.com>
+ * Copyright 2013 Daniel Vrátil <dan@progdan.cz>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -17,14 +17,15 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Cambridge, MA 02110-1301, USA.
  */
 
+
 #include "tracksiterator.h"
 #include "playlistmodel.h"
 #include "supportedformats.h"
 
-#include <QtCore/QDir>
-#include <QtCore/QDirIterator>
-#include <QtCore/QFileInfo>
-#include <QtCore/QDebug>
+#include <QDir>
+#include <QDirIterator>
+#include <QFileInfo>
+#include <QDebug>
 
 
 TracksIterator::TracksIterator(const QString &topDir, PlaylistModel *model):

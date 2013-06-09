@@ -1,6 +1,6 @@
 /*
  * TEPSONIC
- * Copyright 2011 Dan Vratil <vratil@progdansoft.com>
+ * Copyright 2013 Daniel Vrátil <dan@progdan.cz>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -17,12 +17,11 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Cambridge, MA 02110-1301, USA.
  */
 
-
 #ifndef SETTINGSPAGE_H
 #define SETTINGSPAGE_H
 
-#include <QtGui/QWidget>
-#include <QtCore/QSettings>
+#include <QWidget>
+#include <QSettings>
 
 class SettingsPage: public QWidget
 {

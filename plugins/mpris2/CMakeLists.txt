@@ -1,5 +1,10 @@
 set(QT_USE_QTDBUS 1)
 
+
+include_directories(
+    ${QT_QTDBUS_INCLUDE_DIR}
+)
+
 add_definitions(-DQT_PLUGIN -DQT_SHARED)
 
 set(mpris2plugin_HDRS

@@ -1,6 +1,6 @@
 /*
  * TEPSONIC
- * Copyright 2010 Dan Vratil <vratil@progdansoft.com>
+ * Copyright 2013 Daniel Vrátil <dan@progdan.cz>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -21,7 +21,7 @@
 #include "ui_shortcutspage.h"
 #include "changeshortcutdialog.h"
 
-#include <QtGui/QTreeWidgetItem>
+#include <QTreeWidgetItem>
 
 using namespace SettingsPages;
 

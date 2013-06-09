@@ -1,6 +1,6 @@
 /*
  * TEPSONIC
- * Copyright 2010 Dan Vratil <vratil@progdansoft.com>
+ * Copyright 2013 Daniel Vrátil <dan@progdan.cz>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -20,9 +20,9 @@
 #ifndef STATUSBAR_H
 #define STATUSBAR_H
 
-#include <QtGui/QStatusBar>
-#include <QtGui/QLabel>
-#include <QtGui/QProgressBar>
+#include <QStatusBar>
+#include <QLabel>
+#include <QProgressBar>
 
 //! StatusBar is displays various informations about state of the application
 /*!

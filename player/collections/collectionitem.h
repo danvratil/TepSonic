@@ -1,7 +1,6 @@
 /*
  * TEPSONIC
- * Copyright 2009 Dan Vratil <vratil@progdansoft.com>
- * Copyright 2009 Petr Los <petr_los@centrum.cz>
+ * Copyright 2013 Daniel Vrátil <dan@progdan.cz>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -18,14 +17,13 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Cambridge, MA 02110-1301, USA.
  */
 
-
 #ifndef COLLECTIONITEM_H
 #define COLLECTIONITEM_H
 
-#include <QtGui/QStandardItem>
-#include <QtCore/QList>
-#include <QtCore/QVariant>
-#include <QtCore/QVector>
+#include <QStandardItem>
+#include <QList>
+#include <QVariant>
+#include <QVector>
 
 //! CollectionItem is a item in collections tree structure
 /*!

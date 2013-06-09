@@ -20,7 +20,7 @@
 #include "supportedformats.h"
 #include <phonon/backendcapabilities.h>
 
-#include <QtCore/QDebug>
+#include <QDebug>
 
 QStringList SupportedFormats::getExtensionList()
 {

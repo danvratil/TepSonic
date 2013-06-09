@@ -1,6 +1,6 @@
 /*
  * TEPSONIC
- * Copyright 2009 Dan Vratil <vratil@progdansoft.com>
+ * Copyright 2013 Daniel Vrátil <dan@progdan.cz>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -19,12 +19,12 @@
 
 #include "filesystembrowser.h"
 
-#include <QtCore/QMimeData>
-#include <QtCore/QByteArray>
-#include <QtCore/QDataStream>
-#include <QtCore/QDir>
-#include <QtGui/QDrag>
-#include <QtGui/QFileSystemModel>
+#include <QMimeData>
+#include <QByteArray>
+#include <QDataStream>
+#include <QDir>
+#include <QDrag>
+#include <QFileSystemModel>
 
 
 FileSystemBrowser::FileSystemBrowser(QWidget *parent):

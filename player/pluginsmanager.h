@@ -1,6 +1,6 @@
 /*
  * TEPSONIC
- * Copyright 2010 Dan Vratil <vratil@progdansoft.com>
+ * Copyright 2013 Daniel Vrátil <dan@progdan.cz>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -17,15 +17,14 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Cambridge, MA 02110-1301, USA.
  */
 
-
 #ifndef PLUGINSMANAGER_H
 #define PLUGINSMANAGER_H
 
-#include <QtCore/QObject>
-#include <QtCore/QList>
-#include <QtCore/QPluginLoader>
-#include <QtGui/QMenu>
-#include <QtGui/QTabWidget>
+#include <QObject>
+#include <QList>
+#include <QPluginLoader>
+#include <QMenu>
+#include <QTabWidget>
 
 #include "abstractplugin.h"
 

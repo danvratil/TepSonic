@@ -1,6 +1,6 @@
 /*
  * TEPSONIC
- * Copyright 2009 Dan Vratil <vratil@progdansoft.com>
+ * Copyright 2013 Daniel Vrátil <dan@progdan.cz>
  * Copyright 2009 Petr Los <petr_los@centrum.cz>
  *
  * This program is free software; you can redistribute it and/or
@@ -21,7 +21,7 @@
 #include "playlistitem.h"
 #include "playlistbrowser.h"
 
-#include <QtCore/QDebug>
+#include <QDebug>
 
 PlaylistItem::PlaylistItem(const QVector<QVariant> &data, PlaylistItem *parent):
     QStandardItem()

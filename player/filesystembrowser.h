@@ -1,6 +1,6 @@
 /*
  * TEPSONIC
- * Copyright 2009 Dan Vratil <vratil@progdansoft.com>
+ * Copyright 2013 Daniel Vrátil <dan@progdan.cz>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -20,11 +20,11 @@
 #ifndef FILESYSTEMBROWSER_H
 #define FILESYSTEMBROWSER_H
 
-#include <QtGui/QListView>
-#include <QtGui/QKeyEvent>
-#include <QtGui/QMenu>
-#include <QtCore/QStringList>
-#include <QtCore/QModelIndex>
+#include <QListView>
+#include <QKeyEvent>
+#include <QMenu>
+#include <QStringList>
+#include <QModelIndex>
 
 class FileSystemBrowser : public QListView
 {

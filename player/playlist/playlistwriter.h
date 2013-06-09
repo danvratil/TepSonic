@@ -1,6 +1,6 @@
 /*
  * TEPSONIC
- * Copyright 2010 Dan Vratil <vratil@progdansoft.com>
+ * Copyright 2013 Daniel Vrátil <dan@progdan.cz>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -20,10 +20,10 @@
 #ifndef PLAYLISTWRITER_H
 #define PLAYLISTWRITER_H
 
-#include <QtCore/QRunnable>
-#include <QtCore/QObject>
-#include <QtCore/QMutex>
-#include <QtCore/QWaitCondition>
+#include <QRunnable>
+#include <QObject>
+#include <QMutex>
+#include <QWaitCondition>
 
 class PlaylistModel;
 

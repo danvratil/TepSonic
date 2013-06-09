@@ -1,6 +1,6 @@
 /*
  * TEPSONIC
- * Copyright 2010 Dan Vratil <vratil@progdansoft.com>
+ * Copyright 2013 Daniel Vrátil <dan@progdan.cz>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -17,21 +17,19 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Cambridge, MA 02110-1301, USA.
  */
 
-
 #ifndef BOOKMARKSMANAGER_H
 #define BOOKMARKSMANAGER_H
 
-#include <QtCore/QObject>
-#include <QtCore/QList>
-#include <QtCore/QPair>
-#include <QtCore/QPoint>
-#include <QtCore/QModelIndex>
-#include <QtGui/QMenu>
-#include <QtGui/QLineEdit>
-
+#include <QObject>
+#include <QList>
+#include <QPair>
+#include <QPoint>
+#include <QModelIndex>
 
 class BookmarksBrowser;
 class AddBookmarkDlg;
+class QLineEdit;
+class QMenu;
 
 namespace Ui
 {

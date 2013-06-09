@@ -1,6 +1,6 @@
 /*
  * TEPSONIC
- * Copyright 2009 Dan Vratil <vratil@progdansoft.com>
+ * Copyright 2013 Daniel Vrátil <dan@progdan.cz>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -46,23 +46,23 @@
 #include <taglib/tag.h>
 #include <taglib/tstring.h>
 
-#include <QtGui/QMessageBox>
-#include <QtCore/QDir>
-#include <QtGui/QDesktopServices>
-#include <QtCore/QUrl>
-#include <QtGui/QCloseEvent>
-#include <QtGui/QFileDialog>
-#include <QtCore/QFileInfo>
-#include <QtGui/QHeaderView>
-#include <QtGui/QItemSelectionModel>
-#include <QtCore/QDateTime>
+#include <QMessageBox>
+#include <QDir>
+#include <QDesktopServices>
+#include <QUrl>
+#include <QCloseEvent>
+#include <QFileDialog>
+#include <QFileInfo>
+#include <QHeaderView>
+#include <QItemSelectionModel>
+#include <QDateTime>
 
 #include <phonon/seekslider.h>
 #include <phonon/volumeslider.h>
 
 #include "qxtglobalshortcut.h"
 
-#include <QtCore/QDebug>
+#include <QDebug>
 
 MainWindow::MainWindow():
     m_collectionModel(0),

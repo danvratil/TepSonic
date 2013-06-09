@@ -1,10 +1,11 @@
 
 include_directories(
-	"collections"
-	"playlist"
-	"settings"
-        "bookmarks"
+    "bookmarks"
+    "collections"
+    "playlist"
+    "settings"
 )
+
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/constants.h.cmake
                ${CMAKE_CURRENT_BINARY_DIR}/constants.h)

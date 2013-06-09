@@ -1,6 +1,6 @@
 /*
  * TEPSONIC
- * Copyright 2010 Dan Vratil <vratil@progdansoft.com>
+ * Copyright 2013 Daniel Vrátil <dan@progdan.cz>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -23,13 +23,13 @@
 #include "databasemanager.h"
 #include "tools.h"
 
-#include <QtCore/QDirIterator>
-#include <QtCore/QMutexLocker>
-#include <QtCore/QDebug>
-#include <QtCore/QFileInfo>
-#include <QtSql/QSqlField>
-#include <QtSql/QSqlDriver>
-#include <QtSql/QSqlQuery>
+#include <QDirIterator>
+#include <QMutexLocker>
+#include <QDebug>
+#include <QFileInfo>
+#include <QSqlField>
+#include <QSqlDriver>
+#include <QSqlQuery>
 
 #include <taglib/taglib.h>
 #include <taglib/fileref.h>

@@ -1,6 +1,6 @@
 /*
  * TEPSONIC
- * Copyright 2009 Dan Vratil <vratil@progdansoft.com>
+ * Copyright 2013 Daniel Vrátil <dan@progdan.cz>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -17,14 +17,13 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Cambridge, MA 02110-1301, USA.
  */
 
-
 #include "player.h"
 #include "constants.h"
 
 #include <QtCore/QSettings>
 
-#include <QtCore/QFileInfo>
-#include <QtCore/QStringList>
+#include <QFileInfo>
+#include <QStringList>
 #include <phonon/mediaobject.h>
 #include <phonon/path.h>
 #include <phonon/audiooutput.h>

@@ -1,6 +1,6 @@
 /*
  * TEPSONIC
- * Copyright 2010 Dan Vratil <vratil@progdansoft.com>
+ * Copyright 2013 Daniel Vrátil <dan@progdan.cz>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -20,13 +20,13 @@
 #ifndef SETTINGSDIALOG_H
 #define SETTINGSDIALOG_H
 
-#include <QtGui/QDialog>
-#include <QtGui/QAbstractButton>
-#include <QtGui/QDirModel>
-#include <QtGui/QTreeWidgetItem>
-#include <QtGui/QListWidgetItem>
-#include <QtCore/QPluginLoader>
-#include <QtCore/QSettings>
+#include <QDialog>
+#include <QAbstractButton>
+#include <QDirModel>
+#include <QTreeWidgetItem>
+#include <QListWidgetItem>
+#include <QPluginLoader>
+#include <QSettings>
 
 #include <Phonon/AudioOutputDevice>
 

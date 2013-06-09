@@ -1,6 +1,6 @@
 /*
  * TEPSONIC
- * Copyright 2010 Dan Vratil <vratil@progdansoft.com>
+ * Copyright 2013 Daniel Vrátil <dan@progdan.cz>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -17,14 +17,13 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Cambridge, MA 02110-1301, USA.
  */
 
-
 #ifndef CHANGESHORTCUTDIALOG_H
 #define CHANGESHORTCUTDIALOG_H
 
-#include <QtGui/QDialog>
-#include <QtGui/QKeySequence>
-#include <QtGui/QKeyEvent>
-#include <QtCore/QModelIndex>
+#include <QDialog>
+#include <QKeySequence>
+#include <QKeyEvent>
+#include <QModelIndex>
 
 namespace Ui
 {

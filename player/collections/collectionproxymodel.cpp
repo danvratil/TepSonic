@@ -1,6 +1,6 @@
 /*
  * TEPSONIC
- * Copyright 2010 Dan Vratil <vratil@progdansoft.com>
+ * Copyright 2013 Daniel Vrátil <dan@progdan.cz>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -18,7 +18,8 @@
  */
 
 #include "collectionproxymodel.h"
-#include "qdebug.h"
+
+#include <QDebug>
 
 CollectionProxyModel::CollectionProxyModel(QObject *parent) :
     QSortFilterProxyModel(parent)

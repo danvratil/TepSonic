@@ -1,6 +1,6 @@
 /*
  * TEPSONIC
- * Copyright 2009 Dan Vratil <vratil@progdansoft.com>
+ * Copyright 2013 Daniel Vrátil <dan@progdan.cz>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -20,12 +20,12 @@
 #include "collectionbrowser.h"
 #include "collectionproxymodel.h"
 
-#include <QtCore/QDebug>
-#include <QtCore/QList>
-#include <QtCore/QStringList>
-#include <QtCore/QUrl>
-#include <QtCore/QFileInfo>
-#include <QtGui/QDropEvent>
+#include <QDebug>
+#include <QList>
+#include <QStringList>
+#include <QUrl>
+#include <QFileInfo>
+#include <QDropEvent>
 
 CollectionBrowser::CollectionBrowser(QWidget* parent):
     QTreeView(parent)

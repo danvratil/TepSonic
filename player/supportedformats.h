@@ -24,10 +24,8 @@
 
 class SupportedFormats
 {
-public:
-	SupportedFormats() {}
-
-	static QStringList getExtensionList();
+  public:
+    static QStringList getExtensionList();
 };
 
 #endif // SUPPORTEDFORMATS_H

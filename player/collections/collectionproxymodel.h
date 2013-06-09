@@ -1,6 +1,6 @@
 /*
  * TEPSONIC
- * Copyright 2010 Dan Vratil <vratil@progdansoft.com>
+ * Copyright 2013 Daniel Vrátil <dan@progdan.cz>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -20,8 +20,8 @@
 #ifndef COLLECTIONPROXYMODEL_H
 #define COLLECTIONPROXYMODEL_H
 
-#include <QtGui/QSortFilterProxyModel>
-#include <QtCore/QModelIndexList>
+#include <QSortFilterProxyModel>
+#include <QModelIndexList>
 
 // Class CollectionProxyModel provides filter model for collections
 /*!

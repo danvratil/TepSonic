@@ -1,6 +1,6 @@
 /*
  * TEPSONIC
- * Copyright 2009 Dan Vratil <vratil@progdansoft.com>
+ * Copyright 2013 Daniel Vrátil <dan@progdan.cz>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -17,16 +17,16 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Cambridge, MA 02110-1301, USA.
  */
 
-#include <QtGui/QApplication>
-#include <QtCore/QDir>
-#include <QtCore/QFileInfo>
-#include <QtCore/QObject>
-#include <QtCore/QLocale>
-#include <QtCore/QLibraryInfo>
-#include <QtCore/QTextCodec>
-#include <QtCore/QTranslator>
-#include <QtCore/QString>
-#include <QtCore/QDebug>
+#include <QApplication>
+#include <QDir>
+#include <QFileInfo>
+#include <QObject>
+#include <QLocale>
+#include <QLibraryInfo>
+#include <QTextCodec>
+#include <QTranslator>
+#include <QString>
+#include <QDebug>
 
 #include "player.h"
 #include "mainwindow.h"

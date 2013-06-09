@@ -1,6 +1,6 @@
 /*
  * TEPSONIC
- * Copyright 2011 Dan Vratil <vratil@progdansoft.com>
+ * Copyright 2013 Daniel Vrátil <dan@progdan.cz>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -21,10 +21,10 @@
 #include "ui_metadataeditor.h"
 #include "databasemanager.h"
 
-#include <QtGui/QFontMetrics>
-#include <QtSql/QSqlQuery>
-#include <QtCore/QFileInfo>
-#include <QtCore/QDebug>
+#include <QFontMetrics>
+#include <QSqlQuery>
+#include <QFileInfo>
+#include <QDebug>
 
 MetadataEditor::MetadataEditor(QWidget *parent) :
     QDialog(parent),

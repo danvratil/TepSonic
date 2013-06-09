@@ -1,7 +1,7 @@
 /*
  * TEPSONIC
- * Copyright 2010 Dan Vratil <vratil@progdansoft.com>
-  *
+ * Copyright 2013 Daniel Vrátil <dan@progdan.cz>
+ *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 3
@@ -17,17 +17,16 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Cambridge, MA 02110-1301, USA.
  */
 
-
 #include "collectionitemdelegate.h"
 #include "collectionmodel.h"
 #include "collectionitem.h"
 #include "collectionproxymodel.h"
 #include "collectionbrowser.h"
 
-#include <QtGui/QApplication>
-#include <QtGui/QFont>
-#include <QtCore/QPoint>
-#include <QtCore/QDebug>
+#include <QApplication>
+#include <QFont>
+#include <QPoint>
+#include <QDebug>
 
 CollectionItemDelegate::CollectionItemDelegate(QObject *parent, CollectionProxyModel *proxyModel):
     QStyledItemDelegate(parent),

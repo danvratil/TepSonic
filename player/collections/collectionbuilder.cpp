@@ -1,6 +1,6 @@
 /*
  * TEPSONIC
- * Copyright 2010 Dan Vratil <vratil@progdansoft.com>
+ * Copyright 2013 Daniel Vrátil <dan@progdan.cz>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -17,7 +17,6 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Cambridge, MA 02110-1301, USA.
  */
 
-
 #include "collectionbuilder.h"
 #include "collectionmodel.h"
 #include "databasemanager.h"
@@ -27,20 +26,20 @@
 #include <taglib/tag.h>
 #include <taglib/tstring.h>
 
-#include <QtCore/QDebug>
-#include <QtCore/QDateTime>
-#include <QtCore/QDir>
-#include <QtCore/QDirIterator>
-#include <QtCore/QFileInfo>
-#include <QtCore/QModelIndex>
-#include <QtSql/QSqlDatabase>
-#include <QtSql/QSqlQuery>
-#include <QtSql/QSqlDriver>
-#include <QtSql/QSqlField>
-#include <QtSql/QSqlError>
-#include <QtSql/QSqlResult>
-#include <QtCore/QHash>
-#include <QtCore/QHashIterator>
+#include <QDebug>
+#include <QDateTime>
+#include <QDir>
+#include <QDirIterator>
+#include <QFileInfo>
+#include <QModelIndex>
+#include <QSqlDatabase>
+#include <QSqlQuery>
+#include <QSqlDriver>
+#include <QSqlField>
+#include <QSqlError>
+#include <QSqlResult>
+#include <QHash>
+#include <QHashIterator>
 
 CollectionBuilder::CollectionBuilder(CollectionModel *collectionModel):
     QObject(),

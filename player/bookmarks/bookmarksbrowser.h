@@ -1,6 +1,6 @@
 /*
  * TEPSONIC
- * Copyright 2010 Dan Vratil <vratil@progdansoft.com>
+ * Copyright 2013 Daniel Vrátil <dan@progdan.cz>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -17,15 +17,14 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Cambridge, MA 02110-1301, USA.
  */
 
-
 #ifndef BOOKMARKSBROWSER_H
 #define BOOKMARKSBROWSER_H
 
-#include <QtGui/QListView>
-#include <QtGui/QStandardItemModel>
-#include <QtGui/QSortFilterProxyModel>
+#include <QListView>
 
 class BookmarksManager;
+class QStandardItemModel;
+class QSortFilterProxyModel;
 
 class BookmarksBrowser : public QListView
 {

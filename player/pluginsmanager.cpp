@@ -1,6 +1,6 @@
 /*
  * TEPSONIC
- * Copyright 2010 Dan Vratil <vratil@progdansoft.com>
+ * Copyright 2013 Daniel Vrátil <dan@progdan.cz>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -15,10 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Cambridge, MA 02110-1301, USA.
- *
- * Contributors: Petr Vaněk
  */
-
 
 #include "constants.h"
 #include "pluginsmanager.h"
@@ -27,15 +24,15 @@
 #include "player.h"
 
 
-#include <QtGui/QApplication>
-#include <QtCore/QDir>
-#include <QtCore/QFileInfo>
-#include <QtCore/QLibrary>
-#include <QtCore/QMap>
-#include <QtCore/QPluginLoader>
-#include <QtCore/QDebug>
-#include <QtCore/QSettings>
-#include <QtCore/QTimer>
+#include <QApplication>
+#include <QDir>
+#include <QFileInfo>
+#include <QLibrary>
+#include <QMap>
+#include <QPluginLoader>
+#include <QDebug>
+#include <QSettings>
+#include <QTimer>
 #include <phonon/mediaobject.h>
 
 PluginsManager::Plugin::Plugin():

@@ -1,6 +1,6 @@
 /*
  * TEPSONIC
- * Copyright 2009 Dan Vratil <vratil@progdansoft.com>
+ * Copyright 2013 Daniel Vrátil <dan@progdan.cz>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -17,25 +17,24 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Cambridge, MA 02110-1301, USA.
  */
 
-
 #include "playlistbrowser.h"
 #include "playlistmodel.h"
 #include "playlistproxymodel.h"
 #include "playlistitem.h"
 #include "tools.h"
 
-#include <QtGui/QApplication>
-#include <QtGui/QDropEvent>
-#include <QtGui/QItemSelectionRange>
-#include <QtGui/QDrag>
-#include <QtCore/QDir>
-#include <QtCore/QDebug>
-#include <QtCore/QList>
-#include <QtCore/QStringList>
-#include <QtCore/QUrl>
-#include <QtCore/QFile>
-#include <QtCore/QFileInfo>
-#include <QtCore/QModelIndex>
+#include <QApplication>
+#include <QDropEvent>
+#include <QItemSelectionRange>
+#include <QDrag>
+#include <QDir>
+#include <QDebug>
+#include <QList>
+#include <QStringList>
+#include <QUrl>
+#include <QFile>
+#include <QFileInfo>
+#include <QModelIndex>
 
 
 #ifdef Q_WS_WIN

@@ -1,7 +1,7 @@
 /*
  * TEPSONIC
- * Copyright 2010 Dan Vratil <vratil@progdansoft.com>
-  *
+ * Copyright 2013 Daniel Vrátil <dan@progdan.cz>
+ *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 3
@@ -17,14 +17,13 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Cambridge, MA 02110-1301, USA.
  */
 
-
 #ifndef COLLECTIONBUILDER_H
 #define COLLECTIONBUILDER_H
 
-#include <QtCore/QRunnable>
-#include <QtCore/QObject>
-#include <QtCore/QStringList>
-#include <QtSql/QSqlDatabase>
+#include <QRunnable>
+#include <QObject>
+#include <QStringList>
+#include <QSqlDatabase>
 
 class CollectionModel;
 

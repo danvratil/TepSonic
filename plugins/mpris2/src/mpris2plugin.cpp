@@ -1,6 +1,6 @@
 /*
  * TEPSONIC
- * Copyright 2013 Dan Vrátil <dan@progdan.cz>
+ * Copyright 2013 Daniel Vrátil <dan@progdan.cz>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -17,10 +17,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Cambridge, MA 02110-1301, USA.
  */
 
-
 #include "mpris2plugin.h"
 
-#include <QtDBus/QDBusConnection>
+#include <QDBusConnection>
 #include <QtPlugin>
 
 //getpid()

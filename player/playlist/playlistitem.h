@@ -1,6 +1,6 @@
 /*
  * TEPSONIC
- * Copyright 2009 Dan Vratil <vratil@progdansoft.com>
+ * Copyright 2013 Daniel Vrátil <dan@progdan.cz>
  * Copyright 2009 Petr Los <petr_los@centrum.cz>
  *
  * This program is free software; you can redistribute it and/or
@@ -21,10 +21,10 @@
 #ifndef PLAYLISTITEM_H
 #define PLAYLISTITEM_H
 
-#include <QtGui/QStandardItem>
-#include <QtCore/QList>
-#include <QtCore/QVariant>
-#include <QtCore/QVector>
+#include <QStandardItem>
+#include <QList>
+#include <QVariant>
+#include <QVector>
 
 //! PlaylistItem is a model item that represents one row in PlaylistModel
 /*!
