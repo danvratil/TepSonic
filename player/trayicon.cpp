@@ -18,9 +18,11 @@
  */
 
 #include "trayicon.h"
+#include "player.h"
 
 #include <QEvent>
 #include <QWheelEvent>
+
 
 TrayIcon::TrayIcon(QObject *parent):
     QSystemTrayIcon(parent)
@@ -39,7 +41,22 @@ bool TrayIcon::event(QEvent *event)
 {
     if (event->type() == QEvent::Wheel) {
         QWheelEvent* wheelEvent = static_cast<QWheelEvent*>(event);
-        emit mouseWheelScrolled(wheelEvent->delta());
+        Player *player = Player::instance();
+        if (wheelEvent->delta() > 0) {
+            player->audioOutput()->setMuted(false);
+            if (player->audioOutput()->volume() < 1) {
+                player->audioOutput()->setVolume(player->audioOutput()->volume() + 0.1);
+            } else {
+                player->audioOutput()->setVolume(1);
+            }
+        } else {
+            // not a typo
+            if (player->audioOutput()->volume() > 0.01) {
+                player->audioOutput()->setVolume(player->audioOutput()->volume() - 0.1);
+            } else {
+                player->audioOutput()->setMuted(true);
+            }
+        }
         event->accept();
         return true;
     }

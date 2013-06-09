@@ -33,9 +33,6 @@ class TrayIcon : public QSystemTrayIcon
   protected:
     bool event(QEvent *event);
 
-  Q_SIGNALS:
-    void mouseWheelScrolled(int delta);
-
 };
 
 #endif // TRAYICON_H

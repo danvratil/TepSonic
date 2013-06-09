@@ -27,7 +27,6 @@
 #include <QtCore/QSignalMapper>
 #include <QtCore/QPointer>
 #include <QtGui/QLabel>
-#include <QtGui/QSystemTrayIcon>
 #include <QtGui/QKeyEvent>
 #include <QtGui/QFileSystemModel>
 #include <QtGui/QSortFilterProxyModel>
@@ -398,9 +397,6 @@ class MainWindow : public QMainWindow
 
     //! Called when position in track is changed
     void playerPosChanged(qint64 newPos);
-
-    //! Event that updates volume when scrolling on trayicon
-    void trayIconMouseWheelScrolled(int delta);
 
     //! Open the popup
     void showCollectionsContextMenu(const QPoint &pos);

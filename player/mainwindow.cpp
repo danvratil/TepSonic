@@ -308,8 +308,6 @@ void MainWindow::bindSignals()
     // Tray icon
     connect(m_trayIcon, SIGNAL(activated(QSystemTrayIcon::ActivationReason)),
             this, SLOT(trayClicked(QSystemTrayIcon::ActivationReason)));
-    connect(m_trayIcon, SIGNAL(mouseWheelScrolled(int)),
-            this, SLOT(trayIconMouseWheelScrolled(int)));
 
     // Playlist stuff
     connect(m_ui->playlistBrowser, SIGNAL(doubleClicked(QModelIndex)),
@@ -822,26 +820,6 @@ void MainWindow::collectionBrowserDoubleClick(const QModelIndex &index)
 
     if (!file.isEmpty()) {
         m_taskManager->addFileToPlaylist(file);
-    }
-}
-
-void MainWindow::trayIconMouseWheelScrolled(int delta)
-{
-    Player *player = Player::instance();
-    if (delta > 0) {
-        player->audioOutput()->setMuted(false);
-        if (player->audioOutput()->volume() < 1) {
-            player->audioOutput()->setVolume(player->audioOutput()->volume() + 0.1);
-        } else {
-            player->audioOutput()->setVolume(1);
-        }
-    } else {
-        // not a typo
-        if (player->audioOutput()->volume() > 0.01) {
-            player->audioOutput()->setVolume(player->audioOutput()->volume() - 0.1);
-        } else {
-            player->audioOutput()->setMuted(true);
-        }
     }
 }
 
