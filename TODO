@@ -1,4 +1,6 @@
- - PluginsManager => singleton
  - kill PluginInterface
  - check overuse of QThreadPools in TaskManager
  - simplify models
+ - looks like collections are broken now
+ - store UI settings immediately after change, so that they are preserved when TS crashes
+ - FSB does not remember last folder

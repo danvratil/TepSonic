@@ -33,14 +33,10 @@
 typedef QString(*PluginNameFcn)(void);
 typedef QString(*PluginIDFcn)(void);
 
-//! PluginsManager is a class for loading and providing access to plugins
-/*!
-  PluginsManager is a object that provides API for rest of the application to communicate
-  with plugins and vice versa.
-*/
 class PluginsManager : public QObject
 {
     Q_OBJECT
+    Q_DISABLE_COPY(PluginsManager)
 
   public:
     typedef struct {
@@ -52,70 +48,32 @@ class PluginsManager : public QObject
         bool hasUI;
     } Plugin;
 
-    //! Constructor
-    explicit PluginsManager();
+    static PluginsManager* instance();
 
-    //! Destructor
-    /*!
-      Removes all connections between plugins and main window or player and unloads it from memory
-    */
     ~PluginsManager();
 
-    //! Counts loaded plugins
-    /*!
-      \return Returns number of loaded plugins
-    */
     int pluginsCount() const;
 
-    //! Returns pointer to n-th QPluginLoader
-    /*!
-      Returns pointer to n-th QPluginLoader. The plugin is then accessible via instance() method.
-      \param index index of plugin to return
-      \return Returns pointer to QPluginLoader on given index
-    */
     Plugin *pluginAt(int index) const;
 
   public Q_SLOTS:
-    //! Disables given plugin
-    /*!
-      Disable given plugin
-      \param plugin
-    */
     void disablePlugin(Plugin *plugin);
 
-    //! Enables given plugin
-    /*!
-      Enable given plugin
-      \param plugin
-    */
     void enablePlugin(Plugin *plugin);
 
-    //! Loads all available plugins
-    /*!
-      Loads all available plugin libraries.
-      All plugins must be prefixed libtepsonic_.
-    */
     void loadPlugins();
 
-    //! Call setupMenu() for all loaded plugins */
     void installMenus(QMenu *menu, Plugins::MenuTypes menuType);
-
-    //! Call setupPane() for all loaded plugins */
     void installPanes(QTabWidget *tabwidgets);
 
   private:
-    //! Initializes given plugin
-    /*!
-      Initializes given plugin
-    */
+    explicit PluginsManager();
+    static PluginsManager *s_instance;
+
     void initPlugin(Plugin *plugin);
 
-    //! List of Plugins containing loaded plugins
     QList<Plugin *> m_pluginsList;
-
     PluginsManager::Plugin *loadPlugin(const QString &filename);
-
-    //! List of QMenus that plugins can install their menus to
     QMap<QMenu *, Plugins::MenuTypes> menus;
 
   Q_SIGNALS:
@@ -124,8 +82,6 @@ class PluginsManager : public QObject
 
     // PluginsManager's own signals
     void pluginsLoaded();
-
-
 
 };
 

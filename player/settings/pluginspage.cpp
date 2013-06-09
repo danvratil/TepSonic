@@ -23,8 +23,6 @@
 #include "pluginsmanager.h"
 #include "abstractplugin.h"
 
-extern PluginsManager *pluginsManager;
-
 using namespace SettingsPages;
 
 PluginsPage::PluginsPage(QWidget *parent):
@@ -46,6 +44,7 @@ void PluginsPage::pluginsListItemChanged(QListWidgetItem *item)
 {
     int pluginIndex = m_ui->pluginsList->row(item);
 
+    PluginsManager *pluginsManager = PluginsManager::instance();
     PluginsManager::Plugin *plugin = pluginsManager->pluginAt(pluginIndex);
 
     if (item->checkState() == Qt::Checked) {
@@ -67,6 +66,7 @@ void PluginsPage::pluginsListItemChanged(QListWidgetItem *item)
 
 void PluginsPage::loadSettings(QSettings *settings)
 {
+    PluginsManager *pluginsManager = PluginsManager::instance();
     // Iterate through all plugins
     for (int i = 0; i < pluginsManager->pluginsCount(); i++) {
         if (pluginsManager->pluginAt(i)->enabled) {
@@ -102,7 +102,7 @@ void PluginsPage::saveSettings(QSettings *settings)
     for (int i = 0; i < m_ui->pluginsList->count(); i++) {
         QListWidgetItem *item = m_ui->pluginsList->item(i);
         // insert into the map value pluginid - checked(bool)
-        plugins.insert(pluginsManager->pluginAt(i)->pluginID,
+        plugins.insert(PluginsManager::instance()->pluginAt(i)->pluginID,
                        QVariant((item->checkState() == 2)));
     }
     settings->setValue("pluginsEnabled", QVariant(plugins));

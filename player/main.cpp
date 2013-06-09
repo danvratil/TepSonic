@@ -70,13 +70,10 @@ int main(int argc, char *argv[])
     QTextCodec::setCodecForCStrings(QTextCodec::codecForName("UTF-8"));
 
     qRegisterMetaType<Player::MetaData>("Player::MetaData");
-    pluginsManager = new PluginsManager();
+
+    PluginsManager::instance();
+
     MainWindow mainWindow;
-
-    QObject::connect(pluginsManager, SIGNAL(pluginsLoaded()), &mainWindow, SLOT(setupPluginsUIs()));
-    QObject::connect(&mainWindow,SIGNAL(settingsAccepted()),pluginsManager,SIGNAL(settingsAccepted()));
-    pluginsManager->loadPlugins();
-
     mainWindow.show();
 
     Player *player = Player::instance();
@@ -95,8 +92,6 @@ int main(int argc, char *argv[])
     }
 
     int ret = tepsonic.exec();
-
-    delete pluginsManager;
 
     return ret;
 }

@@ -196,7 +196,6 @@ MainWindow::MainWindow():
     bindShortcuts();
 }
 
-
 MainWindow::~MainWindow()
 {
     m_settings->setValue("Window/Geometry", saveGeometry());
@@ -488,24 +487,26 @@ void MainWindow::bindSignals()
 
     connect(m_taskManager, SIGNAL(collectionsRebuilt()),
             m_taskManager, SLOT(populateCollections()));
+
+    // Plugins
+    connect(PluginsManager::instance(), SIGNAL(pluginsLoaded()),
+            this, SLOT(setupPluginsUIs()));
+    connect(this, SIGNAL(settingsAccepted()),
+            PluginsManager::instance(), SIGNAL(settingsAccepted()));
 }
 
 void MainWindow::setupPluginsUIs()
 {
-    extern PluginsManager *pluginsManager;
-
-    if (!pluginsManager) {
-        return;
+    PluginsManager *manager = PluginsManager::instance();
+    // Let plugins install their menus
+    manager->installMenus(m_trayIconMenu, Plugins::TrayMenu);
+    manager->installMenus(m_playlistPopupMenu, Plugins::PlaylistPopup);
+    if (m_collectionModel) {
+        manager->installMenus(m_collectionsPopupMenu, Plugins::CollectionsPopup);
     }
 
-    // Let plugins install their menus
-    pluginsManager->installMenus(m_trayIconMenu, Plugins::TrayMenu);
-    pluginsManager->installMenus(m_playlistPopupMenu, Plugins::PlaylistPopup);
-    if (m_collectionModel)
-        pluginsManager->installMenus(m_collectionsPopupMenu, Plugins::CollectionsPopup);
-
     // Let plugins install their tabs
-    pluginsManager->installPanes(m_ui->mainTabWidget);
+    manager->installPanes(m_ui->mainTabWidget);
 }
 
 void MainWindow::changeEvent(QEvent *e)

@@ -35,9 +35,25 @@
 #include <QtCore/QPluginLoader>
 #include <QtCore/QDebug>
 #include <QtCore/QSettings>
+#include <QtCore/QTimer>
 #include <phonon/mediaobject.h>
 
-PluginsManager::PluginsManager(){}
+PluginsManager* PluginsManager::s_instance = 0;
+
+PluginsManager *PluginsManager::instance()
+{
+    if (s_instance == 0) {
+        s_instance = new PluginsManager();
+    }
+
+    return s_instance;
+}
+
+PluginsManager::PluginsManager():
+    QObject()
+{
+    QMetaObject::invokeMethod(this, "loadPlugins", Qt::QueuedConnection);
+}
 
 PluginsManager::~PluginsManager()
 {
