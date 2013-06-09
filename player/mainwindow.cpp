@@ -150,7 +150,8 @@ MainWindow::MainWindow():
     m_ui->viewsSplitter->restoreState(m_settings->value("Window/ViewsSplit").toByteArray());
 
     // Set up task manager
-    m_taskManager = new TaskManager(m_playlistModel, m_collectionModel);
+    m_taskManager = new TaskManager();
+    m_taskManager->setPlaylistModel(m_playlistModel);
 
     // Enable or disable collections
     if (m_settings->value("Collections/EnableCollections", true).toBool() == true) {
@@ -953,8 +954,8 @@ void MainWindow::setupCollections()
             this, SLOT(collectionBrowserDoubleClick(QModelIndex)));
     connect(m_taskManager, SIGNAL(clearCollectionModel()),
             m_collectionModel, SLOT(clear()));
-    connect(m_taskManager, SIGNAL(insertItemToCollections(QModelIndex, QString, QString, QString, QString, QModelIndex *)),
-            m_collectionModel, SLOT(addItem(QModelIndex, QString, QString, QString, QString, QModelIndex *)));
+    connect(m_taskManager, SIGNAL(insertItemToCollections(QModelIndex, QString, QString, QString, QString, QModelIndex*)),
+            m_collectionModel, SLOT(addItem(QModelIndex, QString, QString, QString, QString, QModelIndex*)));
 
 
     // Since we disabled the Proxy model, no search inputs are needed
@@ -964,6 +965,7 @@ void MainWindow::setupCollections()
 
     m_ui->viewsTab->setTabEnabled(0, true);
 
+    m_taskManager->setCollectionModel(m_collectionModel);
     m_taskManager->populateCollections();
 }
 
@@ -971,9 +973,10 @@ void MainWindow::destroyCollections()
 {
     m_ui->collectionBrowser->setModel(NULL);
     delete m_collectionProxyModel;
-    m_collectionProxyModel = NULL;
+    m_collectionProxyModel = 0;
     delete m_collectionModel;
-    m_collectionModel = NULL;
+    m_collectionModel = 0;
+    m_taskManager->setCollectionModel(0);
 
     m_ui->viewsTab->setTabEnabled(0, false);
 }

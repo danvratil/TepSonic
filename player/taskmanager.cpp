@@ -30,9 +30,9 @@
 #include <QSettings>
 #include <QStringList>
 
-TaskManager::TaskManager(PlaylistModel *playlistModel, CollectionModel *collectionModel):
-    m_playlistModel(playlistModel),
-    m_collectionModel(collectionModel),
+TaskManager::TaskManager():
+    m_playlistModel(0),
+    m_collectionModel(0),
     m_threadPool(new QThreadPool(this)),
     m_collectionsThreadPool(new QThreadPool(this))
 {
@@ -46,6 +46,16 @@ TaskManager::~TaskManager()
     m_collectionsThreadPool->waitForDone();
     delete m_threadPool;
     delete m_collectionsThreadPool;
+}
+
+void TaskManager::setCollectionModel(CollectionModel *model)
+{
+    m_collectionModel = model;
+}
+
+void TaskManager::setPlaylistModel(PlaylistModel *model)
+{
+    m_playlistModel = model;
 }
 
 void TaskManager::addFilesToPlaylist(const QStringList &files, int row)
@@ -98,8 +108,8 @@ void TaskManager::populateCollections()
             this, SIGNAL(collectionsPopulated()));
     connect(collectionPopulator, SIGNAL(clearCollectionModel()),
             this, SIGNAL(clearCollectionModel()));
-    connect(collectionPopulator, SIGNAL(addChild(QModelIndex,QString,QString,QString,QString,QModelIndex&)),
-            this, SIGNAL(insertItemToCollections(QModelIndex,QString,QString,QString,QString,QModelIndex&)),
+    connect(collectionPopulator, SIGNAL(addChild(QModelIndex,QString,QString,QString,QString,QModelIndex*)),
+            this, SIGNAL(insertItemToCollections(QModelIndex,QString,QString,QString,QString,QModelIndex*)),
             Qt::BlockingQueuedConnection);
 
     m_collectionsThreadPool->start(collectionPopulator);

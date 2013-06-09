@@ -241,13 +241,13 @@ QStringList CollectionModel::getItemChildrenTracks(const QModelIndex &parent)
 
 void CollectionModel::addItem(const QModelIndex &parent, const QString &title,
                               const QString &filename, const QString &data1,
-                              const QString &data2, QModelIndex &item)
+                              const QString &data2, QModelIndex *item)
 {
     // Make UI more responsive during populating
     QApplication::processEvents();
 
     QModelIndex newItem = addChild(parent, title, filename, data1, data2);
-    if (item.isValid()) {
-        item = newItem;
+    if (item) {
+        *item = newItem;
     }
 }

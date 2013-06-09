@@ -225,7 +225,7 @@ class CollectionModel : public QAbstractItemModel
 
     void addItem(const QModelIndex &parent, const QString &title,
                  const QString &filename, const QString &data1,
-                 const QString &data2, QModelIndex &item);
+                 const QString &data2, QModelIndex *item);
 
 };
 

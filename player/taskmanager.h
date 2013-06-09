@@ -54,13 +54,16 @@ class TaskManager : public QObject
       \param playlistModel pointer to PlaylistModel
       \param collectionModel pointer to CollectionModel
     */
-    explicit TaskManager(PlaylistModel *playlistModel, CollectionModel *collectionModel);
+    explicit TaskManager();
 
     //! Destructor
     /*!
       Waits until all threads are stopped and terminated
     */
     ~TaskManager();
+
+    void setPlaylistModel(PlaylistModel *model);
+    void setCollectionModel(CollectionModel *model);
 
   Q_SIGNALS:
     //! Emitted when all data in PlaylistPopulator are processed
@@ -71,7 +74,7 @@ class TaskManager : public QObject
 
     void insertItemToCollections(const QModelIndex &parent, const QString &title,
                                  const QString &data1, const QString &data2,
-                                 const QString &length, QModelIndex &item);
+                                 const QString &length, QModelIndex *item);
 
     //! Emitted when the playlist is sucessfully saved
     void playlistSaved();

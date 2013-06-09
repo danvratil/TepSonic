@@ -54,7 +54,7 @@ class CollectionPopulator : public QObject, public QRunnable
 
     void addChild(const QModelIndex &parent, const QString &title,
                   const QString &filename, const QString &data1,
-                  const QString &data2, QModelIndex &item);
+                  const QString &data2, QModelIndex *item);
 
   private:
     //! Pointer to pointer to CollectionModel
