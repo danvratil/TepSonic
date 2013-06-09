@@ -38,6 +38,21 @@ BookmarksManager::BookmarksManager(Ui::MainWindow *ui, QObject *parent):
     m_contextMenu(0),
     m_dontDeleteBookmarksBrowser(false)
 {
+    m_contextMenu = new QMenu();
+    m_contextMenu->addAction(tr("Remove bookmark"), this, SLOT(removeBookmark()));
+
+    loadBookmarks();
+}
+
+BookmarksManager::~BookmarksManager()
+{
+    saveBookmarks();
+
+    delete m_contextMenu;
+}
+
+void BookmarksManager::loadBookmarks()
+{
     const QSettings settings(_CONFIGDIR + QDir::separator() + "bookmarks", QSettings::IniFormat);
 
     const QStringList bookmarks = settings.childGroups();
@@ -46,23 +61,17 @@ BookmarksManager::BookmarksManager(Ui::MainWindow *ui, QObject *parent):
         const QString path = settings.value(bookmark + "/path", QString()).toString();
         m_bookmarks.append(QPair<QString, QString>(title, path));
     }
-
-    m_contextMenu = new QMenu();
-    m_contextMenu->addAction(tr("Remove bookmark"), this, SLOT(removeBookmark()));
 }
 
-BookmarksManager::~BookmarksManager()
+void BookmarksManager::saveBookmarks()
 {
     QSettings settings(_CONFIGDIR + QDir::separator() + "bookmarks", QSettings::IniFormat);
 
     for (int i = 0; i < m_bookmarks.length(); i++) {
-        //no qobject_cast since BookmarksItem is not a QObject
         QPair<QString, QString> pair = m_bookmarks.at(i);
         settings.setValue(QString::number(i) + "/title", pair.first);
         settings.setValue(QString::number(i) + "/path", pair.second);
     }
-
-    delete m_contextMenu;
 }
 
 void BookmarksManager::toggleBookmarks()
@@ -161,6 +170,7 @@ void BookmarksManager::showBookmarksContextMenu(const QPoint &pos) const
 void BookmarksManager::addBookmark(const QString &title, const QString &path)
 {
     m_bookmarks.append(qMakePair(title, path));
+    saveBookmarks();
 }
 
 void BookmarksManager::openBookmarkInFSB(const QModelIndex &bookmark)

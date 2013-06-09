@@ -53,8 +53,10 @@ class BookmarksManager: public QObject
     void showBookmarksContextMenu(const QPoint &pos) const;
     void openBookmarkInFSB(const QModelIndex &index);
 
-
   private:
+    void loadBookmarks();
+    void saveBookmarks();
+
     BookmarksBrowser *m_bookmarksBrowser;
     QLineEdit *m_bookmarksFilterEdit;
     QList< QPair<QString, QString> >  m_bookmarks;
