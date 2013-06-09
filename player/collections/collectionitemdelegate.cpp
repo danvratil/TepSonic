@@ -19,9 +19,9 @@
 
 #include "collectionitemdelegate.h"
 #include "collectionmodel.h"
-#include "collectionitem.h"
 #include "collectionproxymodel.h"
 #include "collectionbrowser.h"
+#include "tools.h"
 
 #include <QApplication>
 #include <QFont>
@@ -49,7 +49,16 @@ void CollectionItemDelegate::paint(QPainter *painter, const QStyleOptionViewItem
     const QModelIndex mappedIndex = index;
 
     CollectionModel *parentModel = const_cast<CollectionModel*>(qobject_cast<const CollectionModel*>(mappedIndex.model()));
-    CollectionItem *item = static_cast<CollectionItem *>(mappedIndex.internalPointer());
+    CollectionModel::NodeType type = static_cast<CollectionModel::NodeType>(index.data(CollectionModel::NodeTypeRole).toUInt());
+
+    QString title;
+    if (type == CollectionModel::ArtistNodeType) {
+        title = index.data(CollectionModel::ArtistNameRole).toString();
+    } else if (type == CollectionModel::AlbumNodeType) {
+        title = index.data(CollectionModel::AlbumNameRole).toString();
+    } else if (type == CollectionModel::TrackNodeType) {
+        title = index.data(CollectionModel::TrackTitleRole).toString();
+    }
 
     // If item is selected or opened
     if ((option.state & QStyle::State_Selected) ||
@@ -73,21 +82,32 @@ void CollectionItemDelegate::paint(QPainter *painter, const QStyleOptionViewItem
         // Draw first row containing the interpret/album/track name
         painter->drawText(QPoint(option.rect.left(),
                                  option.rect.top() + option.fontMetrics.height()),
-                          item->data(0).toString());
+                          title);
 
         painter->setFont(QFont(option.font.family(), 8));
         //bottom line that is height of the first row + height of the second row + some padding
         const int bottomLine = option.rect.top() + option.fontMetrics.height() + painter->fontMetrics().height() + 4;
 
         // Draw number of albums/tracks
+        QString stats;
+        if (type == CollectionModel::ArtistNodeType) {
+            stats = tr("%n album(s)", 0, index.data(CollectionModel::AlbumsCountRole).toInt());
+        } else if (type == CollectionModel::AlbumNodeType) {
+            stats = tr("%n track(s)", 0, index.data(CollectionModel::TrackCountRole).toInt());
+        } else {
+            stats = index.data(CollectionModel::GenreRole).toString();
+        }
         painter->drawText(QPoint(option.rect.left(),
                                  bottomLine),
-                          item->data(2).toString());
+                          stats);
+
         // Draw collection/album/track length
-        const int textLength = painter->fontMetrics().width(item->data(3).toString() + " ");
+        const int d = index.data(CollectionModel::DurationRole).toInt() * 1000;
+        const QString duration = formatMilliseconds(d, type != CollectionModel::TrackNodeType);
+        const int textLength = painter->fontMetrics().width(duration + " ");
         painter->drawText(QPoint((painter->viewport().width() - textLength),
                                  bottomLine),
-                          item->data(3).toString());
+                          duration);
 
 
         // if the item is nor selected or opened then draw it traditional way
@@ -98,7 +118,7 @@ void CollectionItemDelegate::paint(QPainter *painter, const QStyleOptionViewItem
         }
         painter->drawText(QPoint(option.rect.left(),
                                  option.rect.top() + option.fontMetrics.height()),
-                          item->data(0).toString());
+                          title);
     }
 }
 
@@ -119,3 +139,5 @@ QSize CollectionItemDelegate::sizeHint(const QStyleOptionViewItem &option, const
 
     return size;
 }
+
+#include "moc_collectionitemdelegate.cpp"

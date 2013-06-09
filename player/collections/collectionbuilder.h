@@ -42,10 +42,7 @@ class CollectionBuilder : public QObject, public QRunnable
   public:
 
     //! Constructor
-    /*!
-      \param model pointer to a CollectionModel that should be populated
-    */
-    CollectionBuilder(CollectionModel *model);
+    CollectionBuilder();
 
     //! Start the thread
     /*!
@@ -68,9 +65,6 @@ class CollectionBuilder : public QObject, public QRunnable
     void buildingFinished();
 
   private:
-    //! Pointer to pointer to CollectionModel that is populated
-    CollectionModel *m_collectionModel;
-
     //! List of folder to go through
     QStringList m_folders;
 

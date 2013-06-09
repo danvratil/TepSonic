@@ -27,11 +27,9 @@
 #include "player.h"
 
 class PlaylistPopulator;
-class CollectionPopulator;
 class PlaylistWriter;
 class CollectionBuilder;
 class PlaylistModel;
-class CollectionModel;
 
 //! Task manager is object that provides common API for working threads
 /*!
@@ -63,7 +61,6 @@ class TaskManager : public QObject
     ~TaskManager();
 
     void setPlaylistModel(PlaylistModel *model);
-    void setCollectionModel(CollectionModel *model);
 
   Q_SIGNALS:
     //! Emitted when all data in PlaylistPopulator are processed
@@ -72,21 +69,11 @@ class TaskManager : public QObject
     //! Emitted when data from PlaylistPopulator are send
     void insertItemToPlaylist(const Player::MetaData &metadata, int row);
 
-    void insertItemToCollections(const QModelIndex &parent, const QString &title,
-                                 const QString &data1, const QString &data2,
-                                 const QString &length, QModelIndex *item);
-
     //! Emitted when the playlist is sucessfully saved
     void playlistSaved();
 
-    //! Emitted when the CollectionModel is sucessfully populated
-    void collectionsPopulated();
-
     //! Emited when rebuilding collection is finished
     void collectionsRebuilt();
-
-    //! Emitted when collections are rebuild and a change is made (some track is added, updated or removed)
-    void collectionsChanged();
 
     //! Emited when a task is finished
     void taskDone();
@@ -96,8 +83,6 @@ class TaskManager : public QObject
       \param action description of the task
     */
     void taskStarted(const QString &action);
-
-    void clearCollectionModel();
 
   public Q_SLOTS:
     //! Appends given file to playlist
@@ -124,14 +109,6 @@ class TaskManager : public QObject
     */
     void savePlaylistToFile(const QString &filename);
 
-    //! Starts populating the collection browser
-    /*!
-      When called, CollectionPopulator::populate() method is called and
-      the thread is resumed to populate the collection browser by data from
-      database storage backend
-    */
-    void populateCollections();
-
     //! Starts rebuilding the collections in given folder
     /*!
       When called, CollectionBuilder::rebuildFolder() method is called and
@@ -150,9 +127,6 @@ class TaskManager : public QObject
   private:
     //! Pointer to pointer to PlaylistModel
     PlaylistModel *m_playlistModel;
-
-    //! Pointer to pointer to CollectionModel
-    CollectionModel *m_collectionModel;
 
     QThreadPool *m_threadPool;
 

@@ -34,7 +34,6 @@ set(player_SRCS
     settings/shortcutspage.cpp
     settings/changeshortcutdialog.cpp
     settings/playereffectdialog.cpp
-    collections/collectionpopulator.cpp
     collections/collectionbrowser.cpp
     collections/collectionmodel.cpp
     collections/collectionbuilder.cpp

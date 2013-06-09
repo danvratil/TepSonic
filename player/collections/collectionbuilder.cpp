@@ -41,10 +41,9 @@
 #include <QHash>
 #include <QHashIterator>
 
-CollectionBuilder::CollectionBuilder(CollectionModel *collectionModel):
+CollectionBuilder::CollectionBuilder():
     QObject(),
-    QRunnable(),
-    m_collectionModel(collectionModel)
+    QRunnable()
 {
 }
 

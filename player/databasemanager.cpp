@@ -45,8 +45,9 @@ DatabaseManager::DatabaseManager(const QString &connectionName):
     m_password = settings.value("Password", QString()).toString();
     m_db = settings.value("Database", "tepsonic").toString();
     settings.endGroup();
-    settings.endGroup();;
+    settings.endGroup();
 
+    connectToDB();
 }
 
 DatabaseManager::~DatabaseManager()

@@ -19,8 +19,6 @@
 
 #include "taskmanager.h"
 #include "constants.h"
-#include "collections/collectionmodel.h"
-#include "collections/collectionpopulator.h"
 #include "collections/collectionbuilder.h"
 #include "playlist/playlistmodel.h"
 #include "playlist/playlistpopulator.h"
@@ -32,7 +30,6 @@
 
 TaskManager::TaskManager():
     m_playlistModel(0),
-    m_collectionModel(0),
     m_threadPool(new QThreadPool(this)),
     m_collectionsThreadPool(new QThreadPool(this))
 {
@@ -46,11 +43,6 @@ TaskManager::~TaskManager()
     m_collectionsThreadPool->waitForDone();
     delete m_threadPool;
     delete m_collectionsThreadPool;
-}
-
-void TaskManager::setCollectionModel(CollectionModel *model)
-{
-    m_collectionModel = model;
 }
 
 void TaskManager::setPlaylistModel(PlaylistModel *model)
@@ -101,20 +93,6 @@ void TaskManager::savePlaylistToFile(const QString &filename)
     m_threadPool->start(playlistWriter);
 }
 
-void TaskManager::populateCollections()
-{
-    CollectionPopulator *collectionPopulator = new CollectionPopulator(m_collectionModel);
-    connect(collectionPopulator, SIGNAL(collectionsPopulated()),
-            this, SIGNAL(collectionsPopulated()));
-    connect(collectionPopulator, SIGNAL(clearCollectionModel()),
-            this, SIGNAL(clearCollectionModel()));
-    connect(collectionPopulator, SIGNAL(addChild(QModelIndex,QString,QString,QString,QString,QModelIndex*)),
-            this, SIGNAL(insertItemToCollections(QModelIndex,QString,QString,QString,QString,QModelIndex*)),
-            Qt::BlockingQueuedConnection);
-
-    m_collectionsThreadPool->start(collectionPopulator);
-}
-
 void TaskManager::rebuildCollections(const QString &folder)
 {
     QStringList dirs;
@@ -130,7 +108,7 @@ void TaskManager::rebuildCollections(const QString &folder)
     }
 
     if (!dirs.isEmpty()) {
-        CollectionBuilder *collectionBuilder = new CollectionBuilder(m_collectionModel);
+        CollectionBuilder *collectionBuilder = new CollectionBuilder();
         collectionBuilder->rebuildFolder(dirs);
         connect(collectionBuilder,SIGNAL(buildingStarted()),
                 this,SLOT(collectionsRebuildingStarted()));

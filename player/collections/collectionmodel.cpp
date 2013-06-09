@@ -19,30 +19,255 @@
  */
 
 #include "collectionmodel.h"
-#include "collectionitem.h"
+#include "collectionmodel_p.h"
+#include "databasemanager.h"
 
-#include <QApplication>
+#include <QtConcurrentRun>
+#include <QFutureWatcher>
+#include <QFuture>
+
+#include <QSqlDatabase>
 #include <QSqlQuery>
+#include <QSqlError>
 
-CollectionModel::CollectionModel(const QStringList &headers, QObject *parent)
-    : QAbstractItemModel(parent)
+CollectionModel::Private::Private(CollectionModel *parent):
+    root(new Node(0)),
+    q(parent)
 {
-    QVector<QVariant> rootData;
-    Q_FOREACH (QString header, headers) {
-        rootData << header;
+}
+
+CollectionModel::Private::~Private()
+{
+    delete root;
+}
+
+Node* CollectionModel::Private::getNode(const QModelIndex &index) const
+{
+    if (index.isValid()) {
+        Node *node = static_cast<Node*>(index.internalPointer());
+        Q_ASSERT(node);
+        return node;
     }
-m_rootItem = new CollectionItem(rootData);
+
+    return root;
+}
+
+QModelIndex CollectionModel::Private::indexForNode(Node *node) const
+{
+    Node *parent = node->parent;
+    return q->createIndex(parent->children.indexOf(node), 0, node);
+}
+
+void CollectionModel::Private::__k__onArtistsPopulated()
+{
+    // Can't use qobject_cast on templated classes
+    QFutureWatcher<Node::List> *artistsWatcher = static_cast<QFutureWatcher<Node::List>*>(q->sender());
+    Node::List nodes = artistsWatcher->result();
+    qDebug() << "Fetched" << nodes.count() << "artists from collections";
+    q->beginInsertRows(QModelIndex(), 0, nodes.count() - 1);
+    Q_FOREACH (Node *node, nodes) {
+        root->addChild(node);
+        artists.insert(node->internalId, node);
+    }
+    q->endInsertRows();
+
+    artistsWatcher->deleteLater();
+
+    QFutureWatcher<Node::List> *watcher = new QFutureWatcher<Node::List>();
+    QFuture<Node::List> future = QtConcurrent::run<Node::List>(this, &CollectionModel::Private::populateAlbums);
+    watcher->setFuture(future);
+    q->connect(watcher, SIGNAL(finished()),
+               q, SLOT(__k__onAlbumsPopulated()));
+}
+
+void CollectionModel::Private::__k__onAlbumsPopulated()
+{
+    QFutureWatcher<Node::List> *albumsWatcher = static_cast<QFutureWatcher<Node::List>*>(q->sender());
+    Node::List nodes = albumsWatcher->result();
+    qDebug() << "Fetched" << nodes.count() << "albums from collections";
+
+    Q_FOREACH (Node *node, nodes) {
+        Node *artist = artists.value(node->parentId);
+        if (!artist) {
+            qDebug() << "Failed to find artist" << node->parentId << "for album"
+                     << node->internalId << "(" << static_cast<AlbumNode*>(node)->albumName << ")";
+            // FIXME: We need to change the database structure in order to correctly
+            // support various artists etc.
+            //Q_ASSERT(artist);
+            continue;
+        }
+        const int count = artist->children.count();
+        q->beginInsertRows(indexForNode(artist), count, count + 1);
+        artist->addChild(node);
+        albums.insert(node->internalId, node);
+        q->endInsertRows();
+    }
+
+    albumsWatcher->deleteLater();
+
+    QFutureWatcher<Node::List> *watcher = new QFutureWatcher<Node::List>();
+    QFuture<Node::List> future = QtConcurrent::run<Node::List>(this, &CollectionModel::Private::populateTracks);
+    watcher->setFuture(future);
+    q->connect(watcher, SIGNAL(finished()),
+               q, SLOT(__k__onTracksPopulated()));
+}
+
+void CollectionModel::Private::__k__onTracksPopulated()
+{
+    QFutureWatcher<Node::List> *tracksWatcher = static_cast<QFutureWatcher<Node::List>*>(q->sender());
+    Node::List nodes = tracksWatcher->result();
+    qDebug() << "Fetched" << nodes.count() << "tracks from collections";
+
+    Q_FOREACH (Node *node, nodes) {
+        Node *album = albums.value(node->parentId);
+        if (!album) {
+            qDebug() << "Failed to find album" << node->parentId << "for track"
+                     << node->internalId << "(" << static_cast<TrackNode*>(node)->trackTitle << ")";
+            //Q_ASSERT(album);
+            continue;
+        }
+        const int count = album->children.count();
+        q->beginInsertRows(indexForNode(album), count, count + 1);
+        album->addChild(node);
+        q->endInsertRows();
+    }
+
+    tracksWatcher->deleteLater();
+}
+
+QList<Node*> CollectionModel::Private::populateArtists()
+{
+    DatabaseManager dbMgr(QLatin1String("collectionModel"));
+    QSqlDatabase db = dbMgr.sqlDb();
+
+    QSqlQuery vaQuery("SELECT COUNT(album) AS albumsCnt, SUM(totalLength) AS totalLength "
+                      "FROM view_various_artists", db);
+    vaQuery.next();
+
+    Node::List nodes;
+
+    ArtistNode *vaNode = new ArtistNode(0);
+    vaNode->internalId = 0;
+    vaNode->albumsCount = vaQuery.value(0).toInt();
+    vaNode->totalDuration = vaQuery.value(1).toInt();
+    vaNode->artistName = tr("Various Artists");
+    nodes << vaNode;
+
+    QSqlQuery query("SELECT id, interpret, albumsCnt, totalLength "
+                    "FROM interprets "
+                    "WHERE id NOT IN (SELECT interpret FROM tracks "
+                    "                 WHERE album IN (SELECT album "
+                    "                                 FROM view_various_artists) "
+                    "                 ) "
+                    "ORDER BY interpret ASC", db);
+    while (query.next()) {
+        ArtistNode *node = new ArtistNode(0);
+        node->internalId = query.value(0).toInt();
+        node->artistName = query.value(1).toString();
+        node->albumsCount = query.value(2).toInt();
+        node->totalDuration = query.value(3).toInt();
+        nodes << node;
+    }
+
+    return nodes;
+}
+
+QList<Node*> CollectionModel::Private::populateAlbums()
+{
+    DatabaseManager dbMgr(QLatin1String("collectionModel"));
+    QSqlDatabase db = dbMgr.sqlDb();
+
+    Node::List nodes;
+    QSqlQuery vaQuery("SELECT view_various_artists.album AS id, "
+                      "       albums.album, "
+                      "       view_various_artists.tracksCnt, "
+                      "       view_various_artists.totalLength "
+                      "FROM view_various_artists "
+                      "LEFT JOIN albums ON view_various_artists.album = albums.id "
+                      "ORDER BY albums.album ASC", db);
+    while (vaQuery.next()) {
+        AlbumNode *albumNode = new AlbumNode(0);
+        albumNode->internalId = vaQuery.value(0).toInt();
+        albumNode->parentId = 0;
+        albumNode->albumName = vaQuery.value(1).toString();
+        albumNode->tracksCount = vaQuery.value(2).toInt();
+        albumNode->tracksCount = vaQuery.value(3).toInt();
+        nodes << albumNode;
+    }
+
+    QSqlQuery query("SELECT DISTINCT albums.id, "
+                    "       tracks.interpret, "
+                    "       albums.album, "
+                    "       albums.tracksCnt, "
+                    "       albums.totalLength "
+                    "FROM tracks "
+                    "LEFT JOIN albums ON (tracks.album = albums.id) "
+                    "WHERE albums.id NOT IN (SELECT album FROM view_various_artists) "
+                    "ORDER BY albums.album ASC", db);
+    while (query.next()) {
+        AlbumNode *albumNode = new AlbumNode(0);
+        albumNode->internalId = query.value(0).toInt();
+        albumNode->parentId = query.value(1).toInt();
+        albumNode->albumName = query.value(2).toString();
+        albumNode->tracksCount = query.value(3).toInt();
+        albumNode->totalDuration = query.value(4).toInt();
+        nodes << albumNode;
+    }
+
+    return nodes;
+}
+
+QList<Node*> CollectionModel::Private::populateTracks()
+{
+    DatabaseManager dbMgr(QLatin1String("collectionModel"));
+    QSqlDatabase db = dbMgr.sqlDb();
+
+    Node::List nodes;
+
+    QSqlQuery query("SELECT id, albumID, trackname, filename, genre, length "
+                    "FROM view_tracks "
+                    "ORDER BY track ASC", db);
+    while (query.next()) {
+        TrackNode *trackNode = new TrackNode(0);
+        trackNode->internalId = query.value(0).toInt();
+        trackNode->parentId = query.value(1).toInt();
+        trackNode->trackTitle = query.value(2).toString();
+        trackNode->filePath = query.value(3).toString();
+        trackNode->genre = query.value(4).toString();
+        trackNode->duration = query.value(5).toInt();
+        nodes << trackNode;
+    }
+
+    return nodes;
+}
+
+CollectionModel::CollectionModel(QObject *parent):
+    QAbstractItemModel(parent),
+    d(new Private(this))
+{
     setSupportedDragActions(Qt::CopyAction);
+
+    QFutureWatcher<Node::List> *watcher = new QFutureWatcher<Node::List>();
+    QFuture<Node::List> future = QtConcurrent::run(d, &CollectionModel::Private::populateArtists);
+    watcher->setFuture(future);
+    connect(watcher, SIGNAL(finished()),
+            this, SLOT(__k__onArtistsPopulated()));
 }
 
 CollectionModel::~CollectionModel()
 {
-    delete m_rootItem;
+    delete d;
 }
 
 int CollectionModel::columnCount(const QModelIndex & /* parent */) const
 {
-    return m_rootItem->columnCount();
+    return 1;
+}
+
+int CollectionModel::rowCount(const QModelIndex &parent) const
+{
+    Node *node = d->getNode(parent);
+    return node->children.count();
 }
 
 QVariant CollectionModel::data(const QModelIndex &index, int role) const
@@ -51,12 +276,8 @@ QVariant CollectionModel::data(const QModelIndex &index, int role) const
         return QVariant();
     }
 
-    if (role != Qt::DisplayRole && role != Qt::EditRole) {
-        return QVariant();
-    }
-
-    CollectionItem *item = getItem(index);
-    return item->data(index.column());
+    Node *node = d->getNode(index);
+    return node->data(role);
 }
 
 Qt::ItemFlags CollectionModel::flags(const QModelIndex &index) const
@@ -65,26 +286,7 @@ Qt::ItemFlags CollectionModel::flags(const QModelIndex &index) const
         return 0;
     }
 
-    return Qt::ItemIsEditable | Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsDragEnabled;
-}
-
-CollectionItem *CollectionModel::getItem(const QModelIndex &index) const
-{
-    if (index.isValid()) {
-        CollectionItem *item = static_cast<CollectionItem *>(index.internalPointer());
-        if (item) return item;
-    }
-    return m_rootItem;
-}
-
-QVariant CollectionModel::headerData(int section, Qt::Orientation orientation,
-                                     int role) const
-{
-    if (orientation == Qt::Horizontal && role == Qt::DisplayRole) {
-        return m_rootItem->data(section);
-    }
-
-    return QVariant();
+    return Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsDragEnabled;
 }
 
 QModelIndex CollectionModel::index(int row, int column, const QModelIndex &parent) const
@@ -93,30 +295,13 @@ QModelIndex CollectionModel::index(int row, int column, const QModelIndex &paren
         return QModelIndex();
     }
 
-    CollectionItem *parentItem = getItem(parent);
-
-    CollectionItem *childItem = parentItem->child(row);
+    Node *parentNode = d->getNode(parent);
+    Node *childItem = parentNode->children.at(row);
     if (childItem) {
         return createIndex(row, column, childItem);
     } else {
         return QModelIndex();
     }
-}
-
-bool CollectionModel::insertRows(int position, int rows, const QModelIndex &parent)
-{
-    if (position < 0) {
-        return false;
-    }
-
-    CollectionItem *parentItem = getItem(parent);
-    bool success;
-
-    beginInsertRows(parent, position, position + rows - 1);
-    success = parentItem->insertChildren(position, rows, m_rootItem->columnCount());
-    endInsertRows();
-
-    return success;
 }
 
 QModelIndex CollectionModel::parent(const QModelIndex &index) const
@@ -125,88 +310,15 @@ QModelIndex CollectionModel::parent(const QModelIndex &index) const
         return QModelIndex();
     }
 
-    CollectionItem *childItem = getItem(index);
-    CollectionItem *parentItem = childItem->parent();
+    Node *node = d->getNode(index);
+    Node *parentNode = node->parent;
 
-    if (parentItem == m_rootItem) {
+    if (parentNode == d->root) {
         return QModelIndex();
     }
 
-    return createIndex(parentItem->childNumber(), 0, parentItem);
-}
-
-bool CollectionModel::removeRows(int position, int rows, const QModelIndex &parent)
-{
-    CollectionItem *parentItem = getItem(parent);
-    bool success = true;
-
-    beginRemoveRows(parent, position, position + rows - 1);
-    success = parentItem->removeChildren(position, rows);
-    endRemoveRows();
-
-    return success;
-}
-
-int CollectionModel::rowCount(const QModelIndex &parent) const
-{
-
-    CollectionItem *parentItem = getItem(parent);
-
-    return parentItem->childCount();
-}
-
-bool CollectionModel::setData(const QModelIndex &index, const QVariant &value,
-                              int role)
-{
-    if (role != Qt::EditRole) {
-        return false;
-    }
-
-    CollectionItem *item = getItem(index);
-    bool result = item->setData(index.column(), value);
-
-    if (result) {
-        Q_EMIT dataChanged(index, index);
-    }
-
-    return result;
-}
-
-bool CollectionModel::setHeaderData(int section, Qt::Orientation orientation,
-                                    const QVariant &value, int role)
-{
-    if (role != Qt::EditRole || orientation != Qt::Horizontal) {
-        return false;
-    }
-
-    bool result = m_rootItem->setData(section, value);
-
-    if (result) {
-        Q_EMIT headerDataChanged(orientation, section, section);
-    }
-
-    return result;
-}
-
-QModelIndex CollectionModel::addChild(const QModelIndex &parent, const QString &title,
-                                      const QString &filename, const QString &data1,
-                                      const QString &data2)
-{
-
-    if (!insertRow(rowCount(parent), parent)) {
-        return QModelIndex();
-    }
-
-    CollectionItem *item = getItem(parent);
-    int childCount = item->childCount() - 1;
-
-    CollectionItem *child = item->child(childCount);
-    child->setData(0, title);
-    child->setData(1, filename);
-    child->setData(2, data1);
-    child->setData(3, data2);
-
-    return index(rowCount(parent) - 1, 0, parent);
+    Node *parent2Node = parentNode->parent;
+    return createIndex(parent2Node->children.indexOf(parentNode), 0, parentNode);
 }
 
 Qt::DropActions CollectionModel::supportedDropActions() const
@@ -216,38 +328,28 @@ Qt::DropActions CollectionModel::supportedDropActions() const
 
 void CollectionModel::clear()
 {
-    if (rowCount(QModelIndex()) > 0) {
-        removeRows(0, rowCount(QModelIndex()), QModelIndex());
-    }
+    beginResetModel();
+    delete d->root;
+    d->root = new Node(0);
+    endResetModel();
 }
 
 QStringList CollectionModel::getItemChildrenTracks(const QModelIndex &parent)
 {
     QStringList result;
 
-    CollectionItem *item = getItem(parent);
+    Node *node = d->getNode(parent);
 
-    for (int i = 0; i < item->childCount(); i++) {
-
-        if (item->child(i)->data(1).toString().isEmpty()) {
-            result.append(getItemChildrenTracks(index(i, 0, parent)));
+    for (int i = 0; i < node->children.count(); i++)
+    {
+        if (node->data(NodeTypeRole).toUInt() != TrackNodeType) {
+            result << getItemChildrenTracks(index(i, 0, parent));
         } else {
-            result.append(item->child(i)->data(1).toString());
+            result << node->data(FilePathRole).toString();
         }
     }
 
     return result;
 }
 
-void CollectionModel::addItem(const QModelIndex &parent, const QString &title,
-                              const QString &filename, const QString &data1,
-                              const QString &data2, QModelIndex *item)
-{
-    // Make UI more responsive during populating
-    QApplication::processEvents();
-
-    QModelIndex newItem = addChild(parent, title, filename, data1, data2);
-    if (item) {
-        *item = newItem;
-    }
-}
+#include "moc_collectionmodel.cpp"
