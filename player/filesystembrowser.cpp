@@ -18,6 +18,7 @@
  */
 
 #include "filesystembrowser.h"
+#include "constants.h"
 
 #include <QMimeData>
 #include <QByteArray>
@@ -25,6 +26,8 @@
 #include <QDir>
 #include <QDrag>
 #include <QFileSystemModel>
+
+#include <QSettings>
 
 
 FileSystemBrowser::FileSystemBrowser(QWidget *parent):
@@ -41,6 +44,29 @@ FileSystemBrowser::FileSystemBrowser(QWidget *parent):
             this, SLOT(setRootDir(QModelIndex)));
     connect(this, SIGNAL(customContextMenuRequested(QPoint)),
             this, SLOT(showContextMenu(QPoint)));
+
+    connect(this, SIGNAL(pathChanged(QString)),
+            this, SLOT(saveCurrentPath(QString)));
+}
+
+void FileSystemBrowser::setModel(QAbstractItemModel *model)
+{
+    QAbstractItemView::setModel(model);
+
+    QSettings settings(_CONFIGDIR + QDir::separator() + "main.conf", QSettings::IniFormat);
+    settings.beginGroup(QLatin1String("Last Session"));
+    const QString lastPath = settings.value(QLatin1String("LastFSBPath"), QDir::homePath()).toString();
+
+    // Wait until all signals are connected and eventloop is running
+    QMetaObject::invokeMethod(this, "goToDir", Qt::QueuedConnection,
+                              Q_ARG(QString, lastPath));
+}
+
+void FileSystemBrowser::saveCurrentPath(const QString &path)
+{
+    QSettings settings(_CONFIGDIR + QDir::separator() + "main.conf", QSettings::IniFormat);
+    settings.beginGroup(QLatin1String("Last Session"));
+    settings.setValue(QLatin1String("LastFSBPath"), path);
 }
 
 void FileSystemBrowser::startDrag(Qt::DropActions supportedActions)

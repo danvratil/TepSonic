@@ -169,12 +169,6 @@ MainWindow::MainWindow():
     m_fileSystemModel->setNameFilterDisables(false);
     m_ui->filesystemBrowser->setModel(m_fileSystemModel);
     m_ui->filesystemBrowser->setContextMenuPolicy(Qt::CustomContextMenu);
-    const QString fsbpath = m_settings->value("LastSession/LastFSBPath", QDir::homePath()).toString();
-    m_ui->filesystemBrowser->setRootIndex(m_fileSystemModel->index(fsbpath));
-    m_ui->fsbPath->setText(fsbpath);
-    // If the default path is "My Computer" or "/" then disable the "cd up" button
-    if (fsbpath.isEmpty() || fsbpath == QDir::rootPath())
-        m_ui->fsbCdUpBtn->setDisabled(true);
 
     // Create seek slider and volume slider
     m_ui->seekSlider->setMediaObject(Player::instance()->mediaObject());
@@ -211,7 +205,6 @@ MainWindow::~MainWindow()
     m_settings->setValue("Window/PlaylistColumnsStates", playlistColumnsStates);
     m_settings->setValue("Window/PlaylistColumnsWidths", playlistColumnsWidths);
 
-    m_settings->setValue("LastSession/LastFSBPath", m_fileSystemModel->filePath(m_ui->filesystemBrowser->rootIndex()));
     if (m_settings->value("Preferences/RestoreSession", true).toBool()) {
         m_settings->setValue("LastSession/RepeatMode", int(Player::instance()->repeatMode()));
         m_settings->setValue("LastSession/RandomMode", Player::instance()->randomMode());

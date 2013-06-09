@@ -35,12 +35,15 @@ class FileSystemBrowser : public QListView
 
     void startDrag(Qt::DropActions supportedActions);
 
+    virtual void setModel(QAbstractItemModel *model);
+
   protected:
     void keyPressEvent(QKeyEvent *event);
 
   private Q_SLOTS:
     void setRootDir(const QModelIndex &dir);
     void emitAddBookmark();
+    void saveCurrentPath(const QString &path);
 
   public Q_SLOTS:
     void goBack();
@@ -51,6 +54,7 @@ class FileSystemBrowser : public QListView
     void showContextMenu(const QPoint &pos);
 
   private:
+
     QStringList m_forwardDirs;
     QStringList m_backDirs;
     QMenu *m_contextMenu;
