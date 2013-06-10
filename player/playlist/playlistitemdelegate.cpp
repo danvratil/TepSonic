@@ -21,13 +21,13 @@
 #include "playlistmodel.h"
 #include "playlistbrowser.h"
 #include "playlistproxymodel.h"
-#include "playlistitem.h"
 
 #include <QRect>
 
-PlaylistItemDelegate::PlaylistItemDelegate(QObject *parent, PlaylistModel *playlistModel,
-    PlaylistBrowser *playlistBrowser,
-    PlaylistProxyModel *playlistProxyModel):
+PlaylistItemDelegate::PlaylistItemDelegate(QObject *parent,
+                                           PlaylistModel *playlistModel,
+                                           PlaylistBrowser *playlistBrowser,
+                                           PlaylistProxyModel *playlistProxyModel):
     QStyledItemDelegate(parent),
     m_playlistModel(playlistModel),
     m_playlistBrowser(playlistBrowser),
@@ -46,7 +46,7 @@ void PlaylistItemDelegate::paint(QPainter *painter, const QStyleOptionViewItem &
 
     const QModelIndex mappedIndex = m_playlistProxyModel->mapToSource(index);
 
-    if (m_playlistModel->getStopTrack().row() == mappedIndex.row()) {
+    if (m_playlistModel->stopTrack().row() == mappedIndex.row()) {
         if (mappedIndex.row() == m_playlistModel->currentItem().row()) {
             painter->fillRect(rect, option.palette.link());
         } else {

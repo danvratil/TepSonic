@@ -20,7 +20,6 @@
 #include "playlistbrowser.h"
 #include "playlistmodel.h"
 #include "playlistproxymodel.h"
-#include "playlistitem.h"
 #include "tools.h"
 
 #include <QApplication>
@@ -48,10 +47,12 @@
 PlaylistBrowser::PlaylistBrowser(QWidget *parent):
     QTreeView(parent)
 {
+    setEditTriggers(NoEditTriggers);
     setAcceptDrops(true);
     viewport()->setAcceptDrops(true);
     setDragEnabled(true);
     setDragDropMode(QAbstractItemView::DragDrop);
+    setDropIndicatorShown(true);
     setDefaultDropAction(Qt::MoveAction);
     setWordWrap(false);
     setTextElideMode(Qt::ElideRight);
@@ -120,17 +121,11 @@ void PlaylistBrowser::mouseMoveEvent(QMouseEvent *event)
         return;
     }
 
-    for (int i = 0; i < selection.indexes().size(); i ++) {
-        PlaylistItem *item = model->getItem(selection.indexes().at(i));
-        stream << item->data(PlaylistBrowser::FilenameColumn).toString();
-        stream << item->data(PlaylistBrowser::TrackColumn).toString();
-        stream << item->data(PlaylistBrowser::InterpretColumn).toString();
-        stream << item->data(PlaylistBrowser::TracknameColumn).toString();
-        stream << item->data(PlaylistBrowser::AlbumColumn).toString();
-        stream << item->data(PlaylistBrowser::GenreColumn).toString();
-        stream << item->data(PlaylistBrowser::YearColumn).toString();
-        stream << item->data(PlaylistBrowser::LengthColumn).toString();
-        stream << item->data(PlaylistBrowser::BitrateColumn).toString();
+    for (int i = 0; i < selection.indexes().size(); i++) {
+        const QModelIndex index = selection.indexes().at(i);
+        for (int j = 0; j < PlaylistModel::ColumnCount; j++)  {
+            stream << index.sibling(index.row(), j).data().toString();
+        }
         // Remove the row from view
         model->removeRow(selection.indexes().at(i).row());
     }
@@ -290,10 +285,10 @@ void PlaylistBrowser::shuffle()
     const int rowCount = model()->rowCount();
     for (int row = 0; row < rowCount; row++) {
         qulonglong order = (qulonglong)rand();
-        model()->setData(model()->index(row, PlaylistBrowser::RandomOrderColumn), QVariant(order));
+        model()->setData(model()->index(row, PlaylistModel::RandomOrderColumn), QVariant(order));
     }
 
-    model()->sort(PlaylistBrowser::RandomOrderColumn, Qt::AscendingOrder);
+    model()->sort(PlaylistModel::RandomOrderColumn, Qt::AscendingOrder);
 }
 
 #include "moc_playlistbrowser.cpp"

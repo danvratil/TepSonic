@@ -44,21 +44,6 @@ class PlaylistBrowser : public QTreeView
     //! Destructor
     ~PlaylistBrowser();
 
-    enum Columns {
-        FilenameColumn = 0,
-        TrackColumn = 1,
-        InterpretColumn = 2,
-        TracknameColumn = 3,
-        AlbumColumn = 4,
-        GenreColumn = 5,
-        YearColumn = 6,
-        LengthColumn = 7,
-        BitrateColumn = 8,
-        RandomOrderColumn = 9,
-        ColumnsCount
-    };
-
-
   public Q_SLOTS:
     //! Set "stop-on-this" flag to selected items
     void setStopTrack();

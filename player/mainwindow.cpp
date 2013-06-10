@@ -29,7 +29,6 @@
 #include "playlist/playlistitemdelegate.h"
 #include "playlist/playlistproxymodel.h"
 #include "playlist/playlistmodel.h"
-#include "playlist/playlistitem.h"
 #include "collections/collectionproxymodel.h"
 #include "collections/collectionmodel.h"
 #include "collections/collectionitemdelegate.h"
@@ -96,28 +95,18 @@ MainWindow::MainWindow():
     m_ui->statusBar->addPermanentWidget(m_playlistLengthLabel, 0);
     m_playlistLengthLabel->setText(tr("%n track(s)", "", 0).append(" (00:00)"));
 
-    // Set up playlist browser
-    QStringList headers = QStringList() << tr("Filename")
-                          << tr("Track")
-                          << tr("Interpret")
-                          << tr("Track name")
-                          << tr("Album")
-                          << tr("Genre")
-                          << tr("Year")
-                          << tr("Length")
-                          << tr("Bitrate")
-                          << tr("Order");
+    m_playlistModel = new PlaylistModel(this);
 
     m_playlistProxyModel = new PlaylistProxyModel(this);
-    m_playlistModel = new PlaylistModel(this, headers, m_playlistProxyModel);
-
     m_playlistProxyModel->setSourceModel(m_playlistModel);
     m_playlistProxyModel->setDynamicSortFilter(false);
 
     connect(m_playlistModel, SIGNAL(playlistLengthChanged(int, int)),
             this, SLOT(playlistLengthChanged(int, int)));
 
-    m_playlistItemDelegate = new PlaylistItemDelegate(this, m_playlistModel, m_ui->playlistBrowser, m_playlistProxyModel);
+    m_playlistItemDelegate = new PlaylistItemDelegate(this, m_playlistModel,
+                                                      m_ui->playlistBrowser,
+                                                      m_playlistProxyModel);
 
     m_ui->playlistBrowser->setModel(m_playlistProxyModel);
     m_ui->playlistBrowser->setItemDelegate(m_playlistItemDelegate);
@@ -126,8 +115,8 @@ MainWindow::MainWindow():
     m_ui->playlistBrowser->setAlternatingRowColors(true);
     m_ui->playlistBrowser->sortByColumn(-1);
     // Hide the first column (with filename) and the last one (with order number)
-    m_ui->playlistBrowser->hideColumn(PlaylistBrowser::FilenameColumn);
-    m_ui->playlistBrowser->hideColumn(PlaylistBrowser::RandomOrderColumn);
+    m_ui->playlistBrowser->hideColumn(PlaylistModel::FilenameColumn);
+    m_ui->playlistBrowser->hideColumn(PlaylistModel::RandomOrderColumn);
 
     // Set playlist browser columns widths and visibility
     const QVariantList playlistColumnsStates(m_settings->value("Window/PlaylistColumnsStates").toList());
@@ -450,15 +439,15 @@ void MainWindow::bindSignals()
     connect(m_playlistVisibleColumnContextMenuMapper, SIGNAL(mapped(int)),
             this, SLOT(togglePlaylistColumnVisibility(int)));
     // Map an identifier to each caller
-    m_playlistVisibleColumnContextMenuMapper->setMapping(m_ui->actionFilename, PlaylistBrowser::FilenameColumn);
-    m_playlistVisibleColumnContextMenuMapper->setMapping(m_ui->actionTrack, PlaylistBrowser::TrackColumn);
-    m_playlistVisibleColumnContextMenuMapper->setMapping(m_ui->actionInterpret, PlaylistBrowser::InterpretColumn);
-    m_playlistVisibleColumnContextMenuMapper->setMapping(m_ui->actionTrackname, PlaylistBrowser::TracknameColumn);
-    m_playlistVisibleColumnContextMenuMapper->setMapping(m_ui->actionAlbum, PlaylistBrowser::AlbumColumn);
-    m_playlistVisibleColumnContextMenuMapper->setMapping(m_ui->actionGenre, PlaylistBrowser::GenreColumn);
-    m_playlistVisibleColumnContextMenuMapper->setMapping(m_ui->actionYear, PlaylistBrowser::YearColumn);
-    m_playlistVisibleColumnContextMenuMapper->setMapping(m_ui->actionLength, PlaylistBrowser::LengthColumn);
-    m_playlistVisibleColumnContextMenuMapper->setMapping(m_ui->actionBitrate, PlaylistBrowser::BitrateColumn);
+    m_playlistVisibleColumnContextMenuMapper->setMapping(m_ui->actionFilename, PlaylistModel::FilenameColumn);
+    m_playlistVisibleColumnContextMenuMapper->setMapping(m_ui->actionTrack, PlaylistModel::TrackColumn);
+    m_playlistVisibleColumnContextMenuMapper->setMapping(m_ui->actionInterpret, PlaylistModel::InterpretColumn);
+    m_playlistVisibleColumnContextMenuMapper->setMapping(m_ui->actionTrackname, PlaylistModel::TracknameColumn);
+    m_playlistVisibleColumnContextMenuMapper->setMapping(m_ui->actionAlbum, PlaylistModel::AlbumColumn);
+    m_playlistVisibleColumnContextMenuMapper->setMapping(m_ui->actionGenre, PlaylistModel::GenreColumn);
+    m_playlistVisibleColumnContextMenuMapper->setMapping(m_ui->actionYear, PlaylistModel::YearColumn);
+    m_playlistVisibleColumnContextMenuMapper->setMapping(m_ui->actionLength, PlaylistModel::LengthColumn);
+    m_playlistVisibleColumnContextMenuMapper->setMapping(m_ui->actionBitrate, PlaylistModel::BitrateColumn);
 
 
     // Task manager
@@ -676,7 +665,8 @@ void MainWindow::previousTrack()
     // We must remap the current item to get it's real position in current filter
     const QModelIndex currentItem = m_playlistProxyModel->mapFromSource(m_playlistModel->currentItem());
     if ((currentItem.row() > 0) && (m_playlistModel->rowCount(QModelIndex()) > 0)) {
-        m_playlistModel->setCurrentItem(m_playlistModel->previousItem());
+        const QModelIndex prev = currentItem.sibling(currentItem.row() - 1, currentItem.column());
+        m_playlistModel->setCurrentItem(prev);
         setTrack(m_playlistModel->currentItem().row());
     }
 }
@@ -704,7 +694,7 @@ void MainWindow::nextTrack()
     const QModelIndex currentItem = m_playlistModel->currentItem();
 
     // If the track we just played was "stop-on-this" track then stop playback
-    const QModelIndex stopTrack = m_playlistModel->getStopTrack();
+    const QModelIndex stopTrack = m_playlistModel->stopTrack();
     if (stopTrack.isValid() && stopTrack.row() == currentItem.row()) {
         stopPlayer();
         return;
@@ -716,8 +706,8 @@ void MainWindow::nextTrack()
         int row = rand() % m_playlistModel->rowCount(QModelIndex());
         m_playlistModel->setCurrentItem(m_playlistModel->index(row, 0, QModelIndex()));
         // 2) Not last item?
-    } else if (m_playlistModel->nextItem().isValid()) {
-        m_playlistModel->setCurrentItem(m_playlistModel->nextItem());
+    } else if (currentItem.row() < m_playlistModel->rowCount() + 1) {
+        m_playlistModel->setCurrentItem(currentItem.sibling(currentItem.row() + 1, currentItem.column()));
         // 3) Repeat all playlist?
     } else if (player->repeatMode() == Player::RepeatAll) {
         m_playlistModel->setCurrentItem(m_playlistModel->index(0, 0, QModelIndex()));
@@ -948,9 +938,9 @@ void MainWindow::destroyCollections()
 
 void MainWindow::setTrack(int row)
 {
-    QModelIndex currentItem = m_playlistModel->currentItem();
-    QModelIndex index = m_playlistModel->index(currentItem.row(), 0, QModelIndex());
-    QString filename = m_playlistModel->data(index, 0).toString();
+    const QModelIndex currentItem = m_playlistModel->currentItem();
+    const QModelIndex index = m_playlistModel->index(currentItem.row(), PlaylistModel::FilenameColumn, QModelIndex());
+    const QString filename = index.data().toString();
     Player::instance()->setTrack(filename, true);
 }
 
@@ -966,15 +956,21 @@ void MainWindow::showMetadataEditor()
 
     const QModelIndex currentIndex = m_ui->playlistBrowser->currentIndex();
     const QModelIndex mappedIndex = m_playlistProxyModel->mapToSource(currentIndex);
-    PlaylistItem *item = m_playlistModel->getItem(mappedIndex);
 
-    m_metadataEditor->setFilename(item->data(PlaylistBrowser::FilenameColumn).toString());
-    m_metadataEditor->setTrackTitle(item->data(PlaylistBrowser::TracknameColumn).toString());
-    m_metadataEditor->setAlbum(item->data(PlaylistBrowser::AlbumColumn).toString());
-    m_metadataEditor->setArtist(item->data(PlaylistBrowser::InterpretColumn).toString());
-    m_metadataEditor->setGenre(item->data(PlaylistBrowser::GenreColumn).toString());
-    m_metadataEditor->setYear(item->data(PlaylistBrowser::YearColumn).toInt());
-    m_metadataEditor->setTrackNumber(item->data(PlaylistBrowser::TrackColumn).toInt());
+    QModelIndex idx = mappedIndex.sibling(mappedIndex.row(), PlaylistModel::FilenameColumn);
+    m_metadataEditor->setFilename(idx.data().toString());
+    idx = mappedIndex.sibling(idx.row(), PlaylistModel::TracknameColumn);
+    m_metadataEditor->setTrackTitle(idx.data().toString());
+    idx = mappedIndex.sibling(idx.row(), PlaylistModel::AlbumColumn);
+    m_metadataEditor->setAlbum(idx.data().toString());
+    idx = mappedIndex.sibling(idx.row(), PlaylistModel::InterpretColumn);
+    m_metadataEditor->setArtist(idx.data().toString());
+    idx = mappedIndex.sibling(idx.row(), PlaylistModel::GenreColumn);
+    m_metadataEditor->setGenre(idx.data().toString());
+    idx = mappedIndex.sibling(idx.row(), PlaylistModel::YearColumn);
+    m_metadataEditor->setYear(idx.data().toInt());
+    idx = mappedIndex.sibling(idx.row(), PlaylistModel::TrackColumn);
+    m_metadataEditor->setTrackNumber(idx.data().toInt());
 
     m_metadataEditor->exec();
 }
@@ -1001,14 +997,19 @@ void MainWindow::metadataEditorAccepted()
 
     const QModelIndex currentIndex = m_ui->playlistBrowser->currentIndex();
     const QModelIndex mappedIndex = m_playlistProxyModel->mapToSource(currentIndex);
-    PlaylistItem *item = m_playlistModel->getItem(mappedIndex);
 
-    item->setData(PlaylistBrowser::TracknameColumn, m_metadataEditor->trackTitle());
-    item->setData(PlaylistBrowser::AlbumColumn, m_metadataEditor->album());
-    item->setData(PlaylistBrowser::InterpretColumn, m_metadataEditor->artist());
-    item->setData(PlaylistBrowser::GenreColumn, m_metadataEditor->genre());
-    item->setData(PlaylistBrowser::YearColumn, m_metadataEditor->year());
-    item->setData(PlaylistBrowser::TrackColumn, m_metadataEditor->trackNumber());
+    QModelIndex idx = mappedIndex.sibling(mappedIndex.row(), PlaylistModel::TracknameColumn);
+    m_playlistModel->setData(idx, m_metadataEditor->trackTitle());
+    idx = mappedIndex.sibling(idx.row(), PlaylistModel::AlbumColumn);
+    m_playlistModel->setData(idx, m_metadataEditor->album());
+    idx = mappedIndex.sibling(idx.row(), PlaylistModel::InterpretColumn);
+    m_playlistModel->setData(idx, m_metadataEditor->artist());
+    idx = mappedIndex.sibling(idx.row(), PlaylistModel::GenreColumn);
+    m_playlistModel->setData(idx, m_metadataEditor->genre());
+    idx = mappedIndex.sibling(idx.row(), PlaylistModel::YearColumn);
+    m_playlistModel->setData(idx, m_metadataEditor->year());
+    idx = mappedIndex.sibling(idx.row(), PlaylistModel::TrackColumn);
+    m_playlistModel->setData(idx, m_metadataEditor->trackNumber());
 
     m_taskManager->rebuildCollections(m_metadataEditor->filename());
 

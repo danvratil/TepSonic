@@ -20,7 +20,7 @@
 #include "lastfmscrobblerplugin.h"
 #include "constants.h"
 #include "lastfm.h"
-#include "playlist/playlistbrowser.h"
+#include "playlist/playlistmodel.h"
 #include "player.h"
 
 #include <QObject>
@@ -221,8 +221,8 @@ void LastFmScrobblerPlugin::loveTrack()
         QModelIndex itemIndex = *(QModelIndex*)popupmenu->property("playlistItem").value<void *>();
 
         // From playlist, we can love any track, so we need to get more info about the track
-        QString trackname = itemIndex.sibling(itemIndex.row(), PlaylistBrowser::TracknameColumn).data().toString();
-        QString artist = itemIndex.sibling(itemIndex.row(), PlaylistBrowser::InterpretColumn).data().toString();
+        QString trackname = itemIndex.sibling(itemIndex.row(), PlaylistModel::TracknameColumn).data().toString();
+        QString artist = itemIndex.sibling(itemIndex.row(), PlaylistModel::InterpretColumn).data().toString();
 
         // Now we construct the track
         LastFm::Track *track = new LastFm::Track(m_scrobbler);

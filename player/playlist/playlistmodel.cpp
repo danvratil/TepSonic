@@ -19,37 +19,52 @@
  */
 
 #include "playlistmodel.h"
-#include "playlistitem.h"
 #include "playlistproxymodel.h"
 #include "player.h"
 #include "playlistbrowser.h"
+#include "tools.h"
 
 #include <QtCore/QDebug>
 #include <QtCore/QTime>
 
-PlaylistModel::PlaylistModel(QObject *parent, const QStringList &headers,
-                             PlaylistProxyModel *playlistProxyModel) :
-    QAbstractItemModel(parent),
-    m_totalLength(0),
-    m_dbConnectionAvailable(true),
-    m_proxyModel(playlistProxyModel)
+class PlaylistModel::Node
 {
-    QVector<QVariant> rootData;
-    Q_FOREACH (const QString &header, headers) {
-        rootData << header;
+  public:
+    Node():
+        track(0),
+        year(0),
+        bitrate(0),
+        randomOrder(0)
+    {
     }
 
-    m_rootItem = new PlaylistItem(rootData);
+    QString filename;
+    QString interpret;
+    QString trackname;
+    QString album;
+    QString genre;
+    QString formattedLength;
+    int track;
+    int year;
+    int duration;
+    int bitrate;
+    int randomOrder;
+};
+
+PlaylistModel::PlaylistModel(QObject *parent) :
+    QAbstractItemModel(parent),
+    m_totalLength(0)
+{
 }
 
 PlaylistModel::~PlaylistModel()
 {
-    delete m_rootItem;
+    qDeleteAll(m_items);
 }
 
 int PlaylistModel::columnCount(const QModelIndex & /* parent */) const
 {
-    return m_rootItem->columnCount();
+    return PlaylistModel::ColumnCount;
 }
 
 QVariant PlaylistModel::data(const QModelIndex &index, int role) const
@@ -60,20 +75,62 @@ QVariant PlaylistModel::data(const QModelIndex &index, int role) const
         return QVariant();
     }
 
-    if (role != Qt::DisplayRole && role != Qt::EditRole) {
-        return QVariant();
+    Node *node = m_items.at(index.row());
+
+    if (role == Qt::DisplayRole) {
+        switch (index.column()) {
+            case FilenameColumn:
+                return node->filename;
+            case TrackColumn:
+                return node->track;
+            case InterpretColumn:
+                return node->interpret;
+            case TracknameColumn:
+                return node->trackname;
+            case AlbumColumn:
+                return node->album;
+            case GenreColumn:
+                return node->genre;
+            case YearColumn:
+                return node->year;
+            case LengthColumn:
+                return node->duration;
+            case BitrateColumn:
+                return QString::fromLatin1("%1 kbps").arg(node->bitrate);
+            case RandomOrderColumn:
+                return node->randomOrder;
+        }
     }
 
-    PlaylistItem *item = getItem(index);
-
-    data = item->data(index.column());
-
-    if (index.column() == PlaylistBrowser::BitrateColumn) {
-        return QVariant(data.toString().append(" kbps"));
-    }
-
-    return item->data(index.column());
+    return QVariant();
 }
+
+bool PlaylistModel::setData(const QModelIndex &index, const QVariant &value, int role)
+{
+    Node *node = m_items.at(index.row());
+
+    switch (index.column()) {
+        case FilenameColumn:
+            node->filename = value.toString();
+        case TrackColumn:
+            node->track = value.toInt();
+        case InterpretColumn:
+            node->interpret = value.toString();
+        case TracknameColumn:
+            node->trackname = value.toString();
+        case AlbumColumn:
+            node->album = value.toString();
+        case GenreColumn:
+            node->genre = value.toString();
+        case YearColumn:
+            node->year = value.toInt();
+        case RandomOrderColumn:
+            node->randomOrder = value.toInt();
+    }
+
+    return true;
+}
+
 
 Qt::ItemFlags PlaylistModel::flags(const QModelIndex &index) const
 {
@@ -81,25 +138,33 @@ Qt::ItemFlags PlaylistModel::flags(const QModelIndex &index) const
         return 0;
     }
 
-    return Qt::ItemIsEditable | Qt::ItemIsEnabled | Qt::ItemIsSelectable;
-}
-
-PlaylistItem *PlaylistModel::getItem(const QModelIndex &index) const
-{
-    if (index.isValid()) {
-        PlaylistItem *item = static_cast<PlaylistItem *>(index.internalPointer());
-        if (item) {
-            return item;
-        }
-    }
-    return m_rootItem;
+    return Qt::ItemIsEnabled | Qt::ItemIsSelectable;
 }
 
 QVariant PlaylistModel::headerData(int section, Qt::Orientation orientation,
                                    int role) const
 {
-    if (orientation == Qt::Horizontal && role == Qt::DisplayRole) {
-        return m_rootItem->data(section);
+    switch (section) {
+        case FilenameColumn:
+            return tr("Filename");
+        case TrackColumn:
+            return tr("Track");
+        case InterpretColumn:
+            return tr("Interpret");
+        case TracknameColumn:
+            return tr("Track Name");
+        case AlbumColumn:
+            return tr("Album");
+        case GenreColumn:
+            return tr("Genre");
+        case YearColumn:
+            return tr("Year");
+        case BitrateColumn:
+            return tr("Bitrate");
+        case LengthColumn:
+            return tr("Length");
+        default:
+            QVariant();
     }
 
     return QVariant();
@@ -107,50 +172,14 @@ QVariant PlaylistModel::headerData(int section, Qt::Orientation orientation,
 
 QModelIndex PlaylistModel::index(int row, int column, const QModelIndex &parent) const
 {
-    if (parent.isValid() && parent.column() != 0) {
-        return QModelIndex();
-    }
-
-    PlaylistItem *parentItem = getItem(parent);
-
-    PlaylistItem *childItem = parentItem->child(row);
-    if (childItem) {
-        return createIndex(row, column, childItem);
-    } else {
-        return QModelIndex();
-    }
-}
-
-bool PlaylistModel::insertRows(int position, int rows, const QModelIndex &parent)
-{
-    PlaylistItem *parentItem = getItem(parent);
-    bool success;
-
-    m_mutex.lock();
-
-    beginInsertRows(parent, position, position + rows - 1);
-    success = parentItem->insertChildren(position, rows, m_rootItem->columnCount());
-    endInsertRows();
-
-    m_mutex.unlock();
-
-    return success;
+    return createIndex(row, column);
 }
 
 QModelIndex PlaylistModel::parent(const QModelIndex &index) const
 {
-    if (!index.isValid()) {
-        return QModelIndex();
-    }
+    Q_UNUSED(index);
 
-    PlaylistItem *childItem = getItem(index);
-    PlaylistItem *parentItem = childItem->parent();
-
-    if (parentItem == m_rootItem) {
-        return QModelIndex();
-    }
-
-    return createIndex(parentItem->childNumber(), 0, parentItem);
+    return QModelIndex();
 }
 
 bool PlaylistModel::removeRows(int position, int rows, const QModelIndex &parent)
@@ -159,115 +188,58 @@ bool PlaylistModel::removeRows(int position, int rows, const QModelIndex &parent
         return true;
     }
 
-    bool success = true;
+    if (m_stopTrack.row() >= position && m_stopTrack.row() < position + rows) {
+        m_stopTrack = QModelIndex();
+    }
+    if (m_currentItem.row() >= position && m_currentItem.row() < position + rows) {
+        m_currentItem = QModelIndex();
+    }
 
     int totalRemoveTime = 0;
-    for (int i = position; i < position + rows; i++) {
-        QString trackLength = index(i, PlaylistBrowser::LengthColumn, QModelIndex()).data().toString();
-        if (trackLength.length() == 5) {
-            trackLength.prepend("00:");
-        }
-        QTime tl(0, 0, 0, 0);
-        totalRemoveTime += tl.secsTo(QTime::fromString(trackLength, "hh:mm:ss"));
-
-        if (i == m_stopTrack.row()) {
-            m_stopTrack = QModelIndex();
-        }
-
-        if (i == m_currentItem.row()) {
-            m_currentItem = QModelIndex();
-        }
-    }
-
-    m_mutex.lock();
-
     beginRemoveRows(parent, position, position + rows - 1);
-    success = m_rootItem->removeChildren(position, rows);
+    for (int i = 0; i < rows; i++) {
+        Node *node = m_items.takeAt(position);
+        totalRemoveTime += node->duration / 1000;
+        delete node;
+    }
     endRemoveRows();
 
-    m_mutex.unlock();
+    // Decrease total length of the playlist by total length of removed tracks
+    m_totalLength -= totalRemoveTime;
+    Q_EMIT playlistLengthChanged(m_totalLength, rowCount(QModelIndex()));
 
-    if (success) {
-        // Decrease total length of the playlist by total length of removed tracks
-        m_totalLength -= totalRemoveTime;
-        Q_EMIT playlistLengthChanged(m_totalLength, rowCount(QModelIndex()));
-    }
-
-    return success;
+    return true;
 }
 
 int PlaylistModel::rowCount(const QModelIndex &parent) const
 {
-    PlaylistItem *parentItem = getItem(parent);
-
-    return parentItem->childCount();
+    return m_items.count();
 }
 
-bool PlaylistModel::setData(const QModelIndex &index, const QVariant &value,
-                            int role)
-{
-    if (role != Qt::EditRole) {
-        return false;
-    }
-
-    PlaylistItem *item = getItem(index);
-
-    m_mutex.lock();
-    const bool result = item->setData(index.column(), value);
-    m_mutex.unlock();
-
-    if (result) {
-        Q_EMIT dataChanged(index, index);
-    }
-
-    return result;
-}
-
-bool PlaylistModel::setHeaderData(int section, Qt::Orientation orientation,
-                                  const QVariant &value, int role)
-{
-    if (role != Qt::EditRole || orientation != Qt::Horizontal) {
-        return false;
-    }
-
-    m_mutex.lock();
-    const bool result = m_rootItem->setData(section, value);
-    m_mutex.unlock();
-
-    if (result) {
-        Q_EMIT headerDataChanged(orientation, section, section);
-    }
-
-    return result;
-}
-
-bool PlaylistModel::insertItem(const Player::MetaData &metadata, int row)
+void PlaylistModel::insertItem(const Player::MetaData &metadata, int row)
 {
     if (row < 0) {
         row = 0;
     }
 
-    // Insert new row
-    if (!insertRow(row, QModelIndex())) {
-        return false;
-    }
+    Node *node =  new Node();
+    node->filename = metadata.filename;
+    node->track = metadata.trackNumber;
+    node->interpret = metadata.artist;
+    node->trackname = metadata.title;
+    node->album = metadata.album;
+    node->genre = metadata.genre;
+    node->year = metadata.year;
+    node->duration = metadata.length;
+    node->formattedLength = metadata.formattedLength;
+    node->duration = metadata.bitrate;
 
-    PlaylistItem *child = m_rootItem->child(row);
-    child->setData(PlaylistBrowser::FilenameColumn, QVariant(metadata.filename));
-    child->setData(PlaylistBrowser::TrackColumn, QVariant(metadata.trackNumber));
-    child->setData(PlaylistBrowser::InterpretColumn, QVariant(metadata.artist));
-    child->setData(PlaylistBrowser::TracknameColumn, QVariant(metadata.title));
-    child->setData(PlaylistBrowser::AlbumColumn, QVariant(metadata.album));
-    child->setData(PlaylistBrowser::GenreColumn, QVariant(metadata.genre));
-    child->setData(PlaylistBrowser::YearColumn, QVariant(metadata.year));
-    child->setData(PlaylistBrowser::LengthColumn, QVariant(metadata.formattedLength));
-    // the "kbps" string is appended in PlaylistItemDelegate while drawing
-    child->setData(PlaylistBrowser::BitrateColumn, QVariant(QString::number(metadata.bitrate)));
+    beginInsertRows(QModelIndex(), row, row);
+    m_items.insert(row, node);
+    endInsertRows();
 
     m_totalLength += (metadata.length / 1000);
     Q_EMIT playlistLengthChanged(m_totalLength, rowCount(QModelIndex()));
-
-    return true;
 }
 
 QModelIndex PlaylistModel::currentItem() const
@@ -277,74 +249,37 @@ QModelIndex PlaylistModel::currentItem() const
 
 void PlaylistModel::setCurrentItem(const QModelIndex &currentIndex)
 {
-    Q_EMIT layoutAboutToBeChanged();
+    Q_ASSERT(currentIndex.model() == this);
+
     m_currentItem = currentIndex;
     Q_EMIT layoutChanged();
 }
 
-QModelIndex PlaylistModel::nextItem(const QModelIndex &index) const
-{
-    if (rowCount() == 0) {
-        return QModelIndex();
-    }
-
-    if (!index.isValid() && !m_currentItem.isValid()) {
-        return this->index(0, 0);
-    }
-
-    const QModelIndex current = m_currentItem;
-    const QModelIndex mappedIndex = m_proxyModel->mapFromSource(current);
-    const QModelIndex sibling = mappedIndex.sibling(mappedIndex.row() + 1, 0);
-    if (sibling.isValid()) {
-        return m_proxyModel->mapToSource(sibling);
-    }
-
-    return QModelIndex();
-}
-
-QModelIndex PlaylistModel::previousItem(const QModelIndex &index) const
-{
-    if (rowCount(QModelIndex()) == 0) {
-        return QModelIndex();
-    }
-
-    if (!index.isValid() && !m_currentItem.isValid()) {
-        return this->index(0, 0);
-    }
-
-    const QModelIndex current = m_currentItem;
-    const QModelIndex mappedIndex = m_proxyModel->mapFromSource(index);
-    const QModelIndex sibling = mappedIndex.sibling(mappedIndex.row() - 1, 0);
-    if (sibling.isValid()) {
-        return m_proxyModel->mapToSource(sibling);
-    }
-
-    return QModelIndex();
-}
-
 void PlaylistModel::setStopTrack(const QModelIndex &track)
 {
-    const QModelIndex mappedTrack = m_proxyModel->mapToSource(track);
+    Q_ASSERT(track.model() == this);
 
     // if the current stop-on-this track is the same as the new one, toggle it
-    if (mappedTrack == m_stopTrack) {
+    if (track == m_stopTrack) {
         m_stopTrack = QModelIndex();
         return;
     }
 
-    m_stopTrack = mappedTrack;
+    m_stopTrack = track;
 }
 
-QModelIndex PlaylistModel::getStopTrack() const
+QModelIndex PlaylistModel::stopTrack() const
 {
     return m_stopTrack;
 }
 
 void PlaylistModel::clear()
 {
-    removeRows(0, rowCount(QModelIndex()), QModelIndex());
+    beginResetModel();
+    qDeleteAll(m_items);
     m_stopTrack = QModelIndex();
     m_currentItem = QModelIndex();
+    endResetModel();
 }
 
 #include "moc_playlistmodel.cpp"

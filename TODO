@@ -1,3 +1,16 @@
- - simplify models
+ - simplify PlaylistModel (CollectionsModel is finished)
+    - convert StopTrack and currentItem (=>NowPlayingTrack) to be Roles of PlaylistModel
+    - try to avoid using mapToSource/mapFromSource as much as possible
+
  - looks like collections are broken now
+    - D&D from Collections to Playlist crashes TS (not sure whether it's because
+        of changes in CollectionModel or Playlistmodel)
+    - CollectionsModel is not updated when CollectionBuilder finishes
+    - essentially we ignore half of the artists and albums, because they are
+      in VA.
+        IDEA: When populating interprets, we now skip all interprets that have
+        at least one album in VA. However we should only skip interprets that
+        have all their albums in VA. If there interpret has at least one album
+        that is not in VA, the interpret should not be ignored
+
  - store UI settings immediately after change, so that they are preserved when TS crashes
