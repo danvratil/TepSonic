@@ -1,6 +1,6 @@
 /*
  * TEPSONIC
- * Copyright 2009 Dan Vratil <vratil@progdansoft.com>
+ * Copyright 2013 Daniel Vrátil <dan@progdan.cz>
  * Copyright 2009 Petr Los <petr_los@centrum.cz>
  *
  * This program is free software; you can redistribute it and/or
@@ -17,6 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Cambridge, MA 02110-1301, USA.
  */
+
 
 #include "playlistmodel.h"
 #include "playlistproxymodel.h"
