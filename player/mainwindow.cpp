@@ -703,14 +703,14 @@ void MainWindow::nextTrack()
     Player *player = Player::instance();
     // 1) Random playback?
     if (player->randomMode()) {
-        int row = rand() % m_playlistModel->rowCount(QModelIndex());
-        m_playlistModel->setCurrentItem(m_playlistModel->index(row, 0, QModelIndex()));
+        int row = rand() % m_playlistModel->rowCount();
+        m_playlistModel->setCurrentItem(m_playlistModel->index(row, 0));
         // 2) Not last item?
-    } else if (currentItem.row() < m_playlistModel->rowCount() + 1) {
+    } else if (currentItem.row() < m_playlistModel->rowCount() - 1) {
         m_playlistModel->setCurrentItem(currentItem.sibling(currentItem.row() + 1, currentItem.column()));
         // 3) Repeat all playlist?
     } else if (player->repeatMode() == Player::RepeatAll) {
-        m_playlistModel->setCurrentItem(m_playlistModel->index(0, 0, QModelIndex()));
+        m_playlistModel->setCurrentItem(m_playlistModel->index(0, 0));
         // 4) Stop, there's nothing else to play
     } else {
         return;
