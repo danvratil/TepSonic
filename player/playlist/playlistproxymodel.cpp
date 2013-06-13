@@ -18,24 +18,25 @@
  */
 
 #include "playlistproxymodel.h"
+#include "playlistmodel.h"
 
 PlaylistProxyModel::PlaylistProxyModel(QObject *parent):
     QSortFilterProxyModel(parent)
 {
-    setFilterRole(Qt::EditRole);
+    setFilterRole(Qt::DisplayRole);
     setFilterCaseSensitivity(Qt::CaseInsensitive);
     setDynamicSortFilter(false);
 }
 
-bool PlaylistProxyModel::filterAcceptsRow(int sourceRow,
-        const QModelIndex &sourceParent) const
+bool PlaylistProxyModel::filterAcceptsRow(int sourceRow, const QModelIndex &sourceParent) const
 {
-    for (int col = 1; col <= 6; col++) {
+    for (int col = PlaylistModel::TrackColumn; col <= PlaylistModel::YearColumn; col++) {
         const QModelIndex index = sourceModel()->index(sourceRow, col, sourceParent);
         if (sourceModel()->data(index).toString().contains(filterRegExp())) {
             return true;
         }
     }
+
     return false;
 }
 
