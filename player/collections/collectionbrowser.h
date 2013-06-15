@@ -50,6 +50,9 @@ class CollectionBrowser : public QTreeView
     */
     void keyPressEvent(QKeyEvent *event);
 
+  private:
+    void loadAlbum(const QModelIndex &album, QDataStream &stream) const;
+
 };
 
 #endif // COLLECTIONBROWSER_H

@@ -19,6 +19,7 @@
 
 #include "collectionbrowser.h"
 #include "collectionproxymodel.h"
+#include "collectionmodel.h"
 
 #include <QDebug>
 #include <QList>
@@ -52,36 +53,21 @@ void CollectionBrowser::startDrag(Qt::DropActions actions)
     QByteArray encodedData;
     QDataStream stream(&encodedData, QIODevice::WriteOnly);;
 
-    for (int i = 0; i < indexes.count(); i++) {
-        const QModelIndex index = indexes.at(i).sibling(indexes.at(i).row(), 1);
-        if (index.data().toString().isEmpty()) {
-            // Artist(s) is being dragged (child of the dragged item is empty)
-            if (index.sibling(index.row(), 0).child(0, 1).data().toString().isEmpty()) {
-                int album = 0;
-                const QModelIndex artistIndex = index.sibling(index.row(), 0);
-                const QModelIndex albumIndex = artistIndex.child(album, 0);
-                while (albumIndex.sibling(album, 0).isValid()) {
-                    const QModelIndex trackIndex = albumIndex.sibling(album, 0).child(0, 0);
-                    int row = 0;
-                    while (trackIndex.sibling(row, 0).isValid()) {
-                        stream << trackIndex.sibling(row, 1).data().toString();
-                        row++;
-                    }
-                    album++;
-                }
-                // Album(s) is being dragged
-            } else {
-                const QModelIndex albumIndex = index.sibling(index.row(), 0);
-                const QModelIndex trackIndex = albumIndex.child(0, 0);
-                int row = 0;
-                while (trackIndex.sibling(row, 0).isValid()) {
-                    stream << trackIndex.sibling(row, 1).data().toString();
-                    row++;
-                }
+    Q_FOREACH (const QModelIndex &index, indexes) {
+        CollectionModel::NodeType nodeType
+            = static_cast<CollectionModel::NodeType>(index.data(CollectionModel::NodeTypeRole).toUInt());
+        if (nodeType == CollectionModel::TrackNodeType) {
+            stream << index.data(CollectionModel::FilePathRole).toString();
+        } else if (nodeType == CollectionModel::AlbumNodeType) {
+            loadAlbum(index, stream);
+        } else if (nodeType == CollectionModel::ArtistNodeType) {
+            const int albumsCount = model()->rowCount(index);
+            for (int i = 0; i < albumsCount; ++i) {
+                const QModelIndex album = index.child(i, 0);
+                loadAlbum(album, stream);
             }
-            // Single track/s is being dragged
         } else {
-            stream << index.data().toString();
+            Q_ASSERT(!"Invalid nodeType");
         }
     }
 
@@ -91,16 +77,21 @@ void CollectionBrowser::startDrag(Qt::DropActions actions)
     drag->exec(Qt::CopyAction);
 }
 
+void CollectionBrowser::loadAlbum(const QModelIndex &album, QDataStream &stream) const
+{
+    const int childrenCount = model()->rowCount(album);
+    for (int i = 0; i < childrenCount; ++i) {
+        const QModelIndex child = album.child(i, 0);
+        stream << child.data(CollectionModel::FilePathRole).toString();
+    }
+}
 
 void CollectionBrowser::keyPressEvent(QKeyEvent* event)
 {
     // When 'delete' pressed, remove selected row from collections
     if (event->matches(QKeySequence::Delete)) {
-        const QModelIndex index = selectionModel()->currentIndex();
-        CollectionProxyModel *collectionProxy = qobject_cast<CollectionProxyModel*>(model());
-        QAbstractItemModel *sourceModel = collectionProxy->sourceModel();
-        sourceModel->removeRow(selectionModel()->currentIndex().row(),
-                               selectionModel()->currentIndex().parent());
+        model()->removeRow(selectionModel()->currentIndex().row(),
+                           selectionModel()->currentIndex().parent());
     }
 }
 
