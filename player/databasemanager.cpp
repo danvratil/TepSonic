@@ -224,7 +224,7 @@ void DatabaseManager::initDb()
 
         query.exec("DROP TABLE IF EXISTS `albums`;");
         query.exec("DROP TABLE IF EXISTS `genres`;");
-        query.exec("DROP TABLE IF EXISTS ``interprets`;");
+        query.exec("DROP TABLE IF EXISTS `interprets`;");
         query.exec("DROP TABLE IF EXISTS `tracks`;");
         query.exec("DROP TABLE IF EXISTS `years`;");
         query.exec("DROP TABLE IF EXISTS `db_rev`;");
