@@ -137,11 +137,9 @@ void CollectionModel::Private::__k__onTracksPopulated()
 
 QList<Node*> CollectionModel::Private::populateArtists()
 {
-    DatabaseManager dbMgr(QLatin1String("collectionModel"));
-    QSqlDatabase db = dbMgr.sqlDb();
-
     QSqlQuery vaQuery("SELECT COUNT(album) AS albumsCnt, SUM(totalLength) AS totalLength "
-                      "FROM view_various_artists", db);
+                      "FROM view_various_artists",
+                      DatabaseManager::instance()->sqlDb());
     vaQuery.next();
 
     Node::List nodes;
@@ -159,7 +157,9 @@ QList<Node*> CollectionModel::Private::populateArtists()
                     "                 WHERE album IN (SELECT album "
                     "                                 FROM view_various_artists) "
                     "                 ) "
-                    "ORDER BY interpret ASC", db);
+                    "ORDER BY interpret ASC",
+                    DatabaseManager::instance()->sqlDb());
+
     while (query.next()) {
         ArtistNode *node = new ArtistNode(0);
         node->internalId = query.value(0).toInt();
@@ -174,9 +174,6 @@ QList<Node*> CollectionModel::Private::populateArtists()
 
 QList<Node*> CollectionModel::Private::populateAlbums()
 {
-    DatabaseManager dbMgr(QLatin1String("collectionModel"));
-    QSqlDatabase db = dbMgr.sqlDb();
-
     Node::List nodes;
     QSqlQuery vaQuery("SELECT view_various_artists.album AS id, "
                       "       albums.album, "
@@ -184,7 +181,9 @@ QList<Node*> CollectionModel::Private::populateAlbums()
                       "       view_various_artists.totalLength "
                       "FROM view_various_artists "
                       "LEFT JOIN albums ON view_various_artists.album = albums.id "
-                      "ORDER BY albums.album ASC", db);
+                      "ORDER BY albums.album ASC",
+                      DatabaseManager::instance()->sqlDb());
+
     while (vaQuery.next()) {
         AlbumNode *albumNode = new AlbumNode(0);
         albumNode->internalId = vaQuery.value(0).toInt();
@@ -203,7 +202,8 @@ QList<Node*> CollectionModel::Private::populateAlbums()
                     "FROM tracks "
                     "LEFT JOIN albums ON (tracks.album = albums.id) "
                     "WHERE albums.id NOT IN (SELECT album FROM view_various_artists) "
-                    "ORDER BY albums.album ASC", db);
+                    "ORDER BY albums.album ASC",
+                    DatabaseManager::instance()->sqlDb());
     while (query.next()) {
         AlbumNode *albumNode = new AlbumNode(0);
         albumNode->internalId = query.value(0).toInt();
@@ -219,14 +219,12 @@ QList<Node*> CollectionModel::Private::populateAlbums()
 
 QList<Node*> CollectionModel::Private::populateTracks()
 {
-    DatabaseManager dbMgr(QLatin1String("collectionModel"));
-    QSqlDatabase db = dbMgr.sqlDb();
-
     Node::List nodes;
 
     QSqlQuery query("SELECT id, albumID, trackname, filename, genre, length "
                     "FROM view_tracks "
-                    "ORDER BY track ASC", db);
+                    "ORDER BY track ASC",
+                    DatabaseManager::instance()->sqlDb());
     while (query.next()) {
         TrackNode *trackNode = new TrackNode(0);
         trackNode->internalId = query.value(0).toInt();

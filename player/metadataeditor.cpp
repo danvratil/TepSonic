@@ -35,13 +35,13 @@ MetadataEditor::MetadataEditor(QWidget *parent) :
 {
     m_ui->setupUi(this);
 
-    DatabaseManager dbManager("metadataEditorConnection");
-    if (DatabaseManager::connectionAvailable() || dbManager.connectToDB()) {
+    DatabaseManager *dbManager = DatabaseManager::instance();
+    if (dbManager->connectionAvailable() || dbManager->connectToDB()) {
 
         QStringList list;
 
         {
-            QSqlQuery query("SELECT interpret FROM interprets ORDER BY interpret ASC;", dbManager.sqlDb());
+            QSqlQuery query("SELECT interpret FROM interprets ORDER BY interpret ASC;", dbManager->sqlDb());
             while (query.next())
                 list.append(query.value(0).toString());
         }
@@ -51,7 +51,7 @@ MetadataEditor::MetadataEditor(QWidget *parent) :
         list.clear();
 
         {
-            QSqlQuery query("SELECT album FROM albums ORDER BY album ASC;", dbManager.sqlDb());
+            QSqlQuery query("SELECT album FROM albums ORDER BY album ASC;", dbManager->sqlDb());
             while (query.next())
                 list.append(query.value(0).toString());
         }
@@ -61,7 +61,7 @@ MetadataEditor::MetadataEditor(QWidget *parent) :
         list.clear();
 
         {
-            QSqlQuery query("SELECT genre FROM genres ORDER BY genre ASC;", dbManager.sqlDb());
+            QSqlQuery query("SELECT genre FROM genres ORDER BY genre ASC;", dbManager->sqlDb());
             while (query.next())
                 list.append(query.value(0).toString());
         }

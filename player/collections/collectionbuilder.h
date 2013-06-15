@@ -73,27 +73,27 @@ class CollectionBuilder : public QObject, public QRunnable
       \param filename File to process
       \param    sqlDb Pointer to SQL connection to be used
     */
-    void insertTrack(const QString &filename, QSqlDatabase sqlDb);
+    void insertTrack(const QString &filename);
 
     //! Load new informations about given file and update the database
     /*!
       \param filename File to process
       \param sqlDb Pointer to SQL connection to be used
     */
-    void updateTrack(const QString &filename, QSqlDatabase sqlDb);
+    void updateTrack(const QString &filename);
 
     //! Remove given track from database
     /*!
       \param filename File to process
       \param sqlDb Pointer to SQL connection to be used
     */
-    void removeTrack(const QString &filename, QSqlDatabase sqlDb);
+    void removeTrack(const QString &filename);
 
     //! Check for interprets/albums/genres...that are not used anymore
     /*!
       \param sqlDb Pointer to SQL connection to be used
     */
-    void cleanUpDatabase(QSqlDatabase sqlDb);
+    void cleanUpDatabase();
 };
 
 #endif // COLLECTIONBUILDER_H

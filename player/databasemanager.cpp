@@ -24,17 +24,29 @@
 #include <QDir>
 #include <QFile>
 #include <QSettings>
+#include <QMutex>
 
 #include <QSqlDatabase>
 #include <QSqlError>
 #include <QSqlQuery>
 
 
-bool DatabaseManager::m_static_connectionAvailable = false;
+DatabaseManager* DatabaseManager::s_instance = 0;
 
-DatabaseManager::DatabaseManager(const QString &connectionName):
-    QObject(),
-    m_connectionName(connectionName)
+DatabaseManager *DatabaseManager::instance()
+{
+    static QMutex dbLock;
+
+    QMutexLocker locker(&dbLock);
+    if (s_instance == 0) {
+        s_instance = new DatabaseManager();
+    }
+
+    return s_instance;
+}
+
+
+DatabaseManager::DatabaseManager()
 {
     QSettings settings(QString(_CONFIGDIR).append("/main.conf"), QSettings::IniFormat);
     m_driverType = (DriverTypes)settings.value("Collections/StorageEngine", 0).toInt();
@@ -50,22 +62,11 @@ DatabaseManager::DatabaseManager(const QString &connectionName):
     connectToDB();
 }
 
-DatabaseManager::~DatabaseManager()
-{
-    QSqlDatabase::removeDatabase(m_connectionName);
-}
-
 bool DatabaseManager::connectToDB()
 {
-    if (QSqlDatabase::contains(m_connectionName)) {
-        qDebug() << "Connection with name " << m_connectionName << " exists.";
-        m_static_connectionAvailable = true;
-        return true;
-    }
-
     switch (m_driverType) {
     case MySQL: {
-        m_sqlDb = QSqlDatabase::addDatabase("QMYSQL", m_connectionName);
+        m_sqlDb = QSqlDatabase::addDatabase("QMYSQL");
         m_sqlDb.setHostName(m_server);
         m_sqlDb.setUserName(m_username);
         m_sqlDb.setPassword(m_password);
@@ -73,7 +74,7 @@ bool DatabaseManager::connectToDB()
     }
     break;
     case SQLite: {
-        m_sqlDb = QSqlDatabase::addDatabase("QSQLITE", m_connectionName);
+        m_sqlDb = QSqlDatabase::addDatabase("QSQLITE");
         // If the DB file does not exist, try to create it
         if (!QFile::exists(QString(_CONFIGDIR) + QDir::separator() + "collection.db")) {
             // First check, if ~/.config/tepsonic exists, eventually create it
@@ -95,7 +96,7 @@ bool DatabaseManager::connectToDB()
     if (!m_sqlDb.open()) {
         qDebug() << "Failed to establish '" << m_sqlDb.connectionName() << "' connection to database!";
         qDebug() << "Reason: " << m_sqlDb.lastError().text();
-        m_static_connectionAvailable = false;
+        m_connectionAvailable = false;
         return false;
     }
 
@@ -124,7 +125,7 @@ bool DatabaseManager::connectToDB()
         initDb();
     }
 
-    m_static_connectionAvailable = true;
+    m_connectionAvailable = true;
     return true;
 }
 

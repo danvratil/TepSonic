@@ -54,8 +54,8 @@ void CollectionBuilder::run()
 
         bool collectionsChanged = false;
 
-        DatabaseManager dbManager("collectionsUpdateConnection");
-        if (dbManager.connectToDB()) {
+        DatabaseManager *dbManager=  DatabaseManager::instance();
+        if (dbManager->connectionAvailable() || dbManager->connectToDB()) {
             qDebug() << "Starting collections update...";
 
             QFileInfo fileInfo;
@@ -64,7 +64,8 @@ void CollectionBuilder::run()
             const QStringList filters = SupportedFormats::getExtensionList();
             {
                 // Populate dbFiles map by ALL tracks from db
-                QSqlQuery query("SELECT filename, mtime FROM tracks WHERE filename LIKE '" + m_folders.first() + "%';", dbManager.sqlDb());
+                QSqlQuery query("SELECT filename, mtime FROM tracks WHERE filename LIKE '" + m_folders.first() + "%';",
+                                dbManager->sqlDb());
                 while (query.next()) {
                     dbFiles.insert(query.value(0).toString(), query.value(1).toUInt());
                 }
@@ -75,9 +76,9 @@ void CollectionBuilder::run()
                every INSERT individually and that makes ~60 commits per second (depends on the
                speed of harddrive) meanwhile having everything in one transaction does only one
                disk write and therefore writing data into the SQLite database takes < 1 second
-               (with separate transactions it takes tens of minites...) */
-            if (dbManager.driverType() == DatabaseManager::SQLite) {
-                QSqlQuery("BEGIN TRANSACTION;", dbManager.sqlDb());
+               (with separate transactions it takes tens of minutes...) */
+            if (dbManager->driverType() == DatabaseManager::SQLite) {
+                QSqlQuery("BEGIN TRANSACTION;", dbManager->sqlDb());
             }
 
             do {
@@ -91,7 +92,7 @@ void CollectionBuilder::run()
                     if (fileInfo.isFile()) {
                         // If the file is not in database then insert
                         if (!dbFiles.contains(fileInfo.filePath().toUtf8())) {
-                            insertTrack(fileInfo.absoluteFilePath(), dbManager.sqlDb());
+                            insertTrack(fileInfo.absoluteFilePath());
                             dbFiles.remove(fileInfo.filePath().toUtf8());
                             collectionsChanged = true;
                         }
@@ -99,7 +100,7 @@ void CollectionBuilder::run()
                         // If the file is in database but has another mtime then update it
                         if ((dbFiles.contains(fileInfo.filePath().toUtf8())) &&
                                 (dbFiles[fileInfo.filePath().toUtf8()] != fileInfo.lastModified().toTime_t())) {
-                            updateTrack(fileInfo.absoluteFilePath(), dbManager.sqlDb());
+                            updateTrack(fileInfo.absoluteFilePath());
                             dbFiles.remove(fileInfo.filePath().toUtf8());
                             collectionsChanged = true;
                         }
@@ -120,17 +121,17 @@ void CollectionBuilder::run()
             QHashIterator<QString, uint> i(dbFiles);
             while (i.hasNext()) {
                 i.next();
-                removeTrack(i.key(), dbManager.sqlDb());
+                removeTrack(i.key());
                 collectionsChanged = true;
             }
             dbFiles.clear();
 
             // Check for interprets/albums/genres... that are not used anymore
-            cleanUpDatabase(dbManager.sqlDb());
+            cleanUpDatabase();
 
             // Now write all data to the disk
-            if (dbManager.driverType() == DatabaseManager::SQLite) {
-                QSqlQuery("COMMIT TRANSACTION;", dbManager.sqlDb());
+            if (dbManager->driverType() == DatabaseManager::SQLite) {
+                QSqlQuery("COMMIT TRANSACTION;", dbManager->sqlDb());
             }
 
             /* If anything has changed in collections, this signal will
@@ -152,7 +153,7 @@ void CollectionBuilder::rebuildFolder(const QStringList &folder)
     m_folders.append(folder);
 }
 
-void CollectionBuilder::insertTrack(const QString &filename, QSqlDatabase sqlDB)
+void CollectionBuilder::insertTrack(const QString &filename)
 {
     const QFileInfo fileInfo(filename);
     const QString fname = fileInfo.filePath().toUtf8();
@@ -190,41 +191,48 @@ void CollectionBuilder::insertTrack(const QString &filename, QSqlDatabase sqlDB)
     QSqlField data("col", QVariant::String);
     {
         data.setValue(album);
-        album = sqlDB.driver()->formatValue(data, false);
-        QSqlQuery query("SELECT `id` FROM `albums` WHERE `album`=" + album + ";", sqlDB);
+        album = DatabaseManager::instance()->sqlDb().driver()->formatValue(data, false);
+        QSqlQuery query("SELECT `id` FROM `albums` WHERE `album`=" + album + ";",
+                        DatabaseManager::instance()->sqlDb());
         query.next();
         if (!query.isValid()) {
             QSqlQuery query("INSERT INTO `albums`(`album`,`tracksCnt`,`totalLength`) "
-                            "VALUES(" + album + ",1," + QString::number(length) + ");", sqlDB);
+                            "VALUES(" + album + ",1," + QString::number(length) + ");",
+                            DatabaseManager::instance()->sqlDb());
             albumInserted = true;
         } else {
             data.setValue(query.value(0).toString());
-            const QString albumID = sqlDB.driver()->formatValue(data, false);
+            const QString albumID = DatabaseManager::instance()->sqlDb().driver()->formatValue(data, false);
             QSqlQuery query("UPDATE `albums` "
                             "SET `tracksCnt`=`tracksCnt`+1,"
                             "    `totalLength`=`totalLength`+" + QString::number(length) + " "
-                            "WHERE `id`=" + albumID + ";", sqlDB);
+                            "WHERE `id`=" + albumID + ";",
+                            DatabaseManager::instance()->sqlDb());
         }
     }
 
     {
         data.setValue(genre);
-        genre = sqlDB.driver()->formatValue(data, false);
-        QSqlQuery query("SELECT COUNT(*) FROM `genres` WHERE `genre`=" + genre + ";", sqlDB);
+        genre = DatabaseManager::instance()->sqlDb().driver()->formatValue(data, false);
+        QSqlQuery query("SELECT COUNT(*) FROM `genres` WHERE `genre`=" + genre + ";",
+                        DatabaseManager::instance()->sqlDb());
         query.next();
         if (query.value(0).toInt() == 0) {
-            QSqlQuery query("INSERT INTO `genres`(`genre`) VALUES(" + genre + ");", sqlDB);
+            QSqlQuery query("INSERT INTO `genres`(`genre`) VALUES(" + genre + ");",
+                            DatabaseManager::instance()->sqlDb());
         }
     }
 
     {
         data.setValue(interpret);
-        interpret = sqlDB.driver()->formatValue(data, false);
-        QSqlQuery query("SELECT `id` FROM `interprets` WHERE `interpret`=" + interpret + ";", sqlDB);
+        interpret = DatabaseManager::instance()->sqlDb().driver()->formatValue(data, false);
+        QSqlQuery query("SELECT `id` FROM `interprets` WHERE `interpret`=" + interpret + ";",
+                        DatabaseManager::instance()->sqlDb());
         query.next();
         if (!query.isValid()) {
             QSqlQuery query("INSERT INTO `interprets`(`interpret`,`albumsCnt`,`totalLength`) "
-                            "VALUES(" + interpret + ",1," + QString::number(length) + ");", sqlDB);
+                            "VALUES(" + interpret + ",1," + QString::number(length) + ");",
+                            DatabaseManager::instance()->sqlDb());
         } else {
             QString albumsCntQuery;
             if (albumInserted) {
@@ -234,27 +242,30 @@ void CollectionBuilder::insertTrack(const QString &filename, QSqlDatabase sqlDB)
             }
 
             data.setValue(query.value(0).toString());
-            const QString interpretID = sqlDB.driver()->formatValue(data, false);
+            const QString interpretID = DatabaseManager::instance()->sqlDb().driver()->formatValue(data, false);
             QSqlQuery query("UPDATE `interprets` "
                             "SET " + albumsCntQuery +
                             "    `totalLength`=`totalLength`+" + QString::number(length) + " "
-                            "WHERE `id`=" + interpretID + ";", sqlDB);
+                            "WHERE `id`=" + interpretID + ";",
+                            DatabaseManager::instance()->sqlDb());
         }
     }
 
     QString s_year;
     {
         data.setValue(year);
-        s_year = sqlDB.driver()->formatValue(data, false);
-        QSqlQuery query("SELECT COUNT(*) FROM `years` WHERE `year`=" + s_year + ";", sqlDB);
+        s_year = DatabaseManager::instance()->sqlDb().driver()->formatValue(data, false);
+        QSqlQuery query("SELECT COUNT(*) FROM `years` WHERE `year`=" + s_year + ";",
+                        DatabaseManager::instance()->sqlDb());
         query.next();
         if (query.value(0).toInt() == 0) {
-            QSqlQuery query("INSERT INTO `years`(`year`) VALUES(" + s_year + ");", sqlDB);
+            QSqlQuery query("INSERT INTO `years`(`year`) VALUES(" + s_year + ");",
+                            DatabaseManager::instance()->sqlDb());
         }
     }
 
     {
-        QSqlQuery query(sqlDB);
+        QSqlQuery query(DatabaseManager::instance()->sqlDb());
         query.prepare("INSERT INTO `tracks`(`filename`,`trackname`,`track`,`length`,`interpret`,`album`,`year`,`genre`,`mtime`,`bitrate`)"
                       "VALUES(?,"
                       "       ?,"
@@ -277,40 +288,45 @@ void CollectionBuilder::insertTrack(const QString &filename, QSqlDatabase sqlDB)
 
 }
 
-void CollectionBuilder::updateTrack(const QString &filename, QSqlDatabase sqlDb)
+void CollectionBuilder::updateTrack(const QString &filename)
 {
     // Do you know any faster way to do it? :-)
-    removeTrack(filename, sqlDb);
-    insertTrack(filename, sqlDb);
+    removeTrack(filename);
+    insertTrack(filename);
 }
 
-void CollectionBuilder::removeTrack(const QString &filename, QSqlDatabase sqlDb)
+void CollectionBuilder::removeTrack(const QString &filename)
 {
     const QFileInfo fileInfo(filename);
     QString fname = fileInfo.filePath().toUtf8();
 
     QSqlField data("col", QVariant::String);
     data.setValue(fname);
-    fname = sqlDb.driver()->formatValue(data, false);
-    QSqlQuery query("DELETE FROM `tracks` WHERE `filename`=" + fname + ";", sqlDb);
+    fname = DatabaseManager::instance()->sqlDb().driver()->formatValue(data, false);
+    QSqlQuery query("DELETE FROM `tracks` WHERE `filename`=" + fname + ";",
+                    DatabaseManager::instance()->sqlDb());
 }
 
-void CollectionBuilder::cleanUpDatabase(QSqlDatabase sqlDb)
+void CollectionBuilder::cleanUpDatabase()
 {
     {
-        QSqlQuery query("DELETE FROM `albums` WHERE `id` NOT IN (SELECT `album` FROM `tracks` GROUP BY `album`);", sqlDb);
+        QSqlQuery query("DELETE FROM `albums` WHERE `id` NOT IN (SELECT `album` FROM `tracks` GROUP BY `album`);",
+                        DatabaseManager::instance()->sqlDb());
     }
 
     {
-        QSqlQuery query("DELETE FROM `genres` WHERE `id` NOT IN (SELECT `genre` FROM `tracks` GROUP BY `genre`);", sqlDb);
+        QSqlQuery query("DELETE FROM `genres` WHERE `id` NOT IN (SELECT `genre` FROM `tracks` GROUP BY `genre`);",
+                        DatabaseManager::instance()->sqlDb());
     }
 
     {
-        QSqlQuery query("DELETE FROM `interprets` WHERE `id` NOT IN (SELECT `interpret` FROM `tracks` GROUP BY `interpret`);", sqlDb);
+        QSqlQuery query("DELETE FROM `interprets` WHERE `id` NOT IN (SELECT `interpret` FROM `tracks` GROUP BY `interpret`);",
+                        DatabaseManager::instance()->sqlDb());
     }
 
     {
-        QSqlQuery query("DELETE FROM `years` WHERE `id` NOT IN (SELECT `year` FROM `tracks` GROUP BY `year`);", sqlDb);
+        QSqlQuery query("DELETE FROM `years` WHERE `id` NOT IN (SELECT `year` FROM `tracks` GROUP BY `year`);",
+                        DatabaseManager::instance()->sqlDb());
     }
 }
 

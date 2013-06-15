@@ -124,40 +124,37 @@ Player::MetaData PlaylistPopulator::getFileMetaData(const QString &file)
     }
 
     // Just a harmless check wheter the file is in DB - reading data from DB will be faster then from file
-    DatabaseManager dbManager("playlistPopulatorConnection");
+    DatabaseManager *dbManager = DatabaseManager::instance();
+
     /* Don't try to connect when connection was not available previously - attempts to connect are
       just slowing everything down */
-    if (DatabaseManager::connectionAvailable()) {
-        if (dbManager.connectToDB()) {
-            QSqlField data("col", QVariant::String);
-            data.setValue(file);
-            QString fname = dbManager.sqlDb().driver()->formatValue(data, false);
-            QSqlQuery query("SELECT `filename`,"
-                            "       `trackname`,"
-                            "       `track`,"
-                            "       `length`,"
-                            "       `interpret`,"
-                            "       `genre`,"
-                            "       `album`,"
-                            "       `year`,"
-                            "       `bitrate` "
-                            "FROM `view_tracks` "
-                            "WHERE `filename`=" + fname +
-                            "LIMIT 1;",
-                            dbManager.sqlDb());
-            if (query.first()) {
-                metadata.filename = query.value(0).toString();
-                metadata.title = query.value(1).toString();
-                metadata.trackNumber = query.value(2).toUInt();
-                metadata.length = query.value(3).toUInt();
-                metadata.artist = query.value(4).toString();
-                metadata.genre = query.value(5).toString();
-                metadata.album = query.value(6).toString();
-                metadata.year = query.value(7).toUInt();
-                metadata.bitrate = query.value(8).toInt();
-            }
-        } else {
-            qDebug() << "PlaylistPopulator: Disabling connection to DB for this session";
+    if (dbManager->connectionAvailable() || dbManager->connectToDB()) {
+        QSqlField data("col", QVariant::String);
+        data.setValue(file);
+        QString fname = dbManager->sqlDb().driver()->formatValue(data, false);
+        QSqlQuery query("SELECT `filename`,"
+                        "       `trackname`,"
+                        "       `track`,"
+                        "       `length`,"
+                        "       `interpret`,"
+                        "       `genre`,"
+                        "       `album`,"
+                        "       `year`,"
+                        "       `bitrate` "
+                        "FROM `view_tracks` "
+                        "WHERE `filename`=" + fname +
+                        "LIMIT 1;",
+                        dbManager->sqlDb());
+        if (query.first()) {
+            metadata.filename = query.value(0).toString();
+            metadata.title = query.value(1).toString();
+            metadata.trackNumber = query.value(2).toUInt();
+            metadata.length = query.value(3).toUInt();
+            metadata.artist = query.value(4).toString();
+            metadata.genre = query.value(5).toString();
+            metadata.album = query.value(6).toString();
+            metadata.year = query.value(7).toUInt();
+            metadata.bitrate = query.value(8).toInt();
         }
     }
 
