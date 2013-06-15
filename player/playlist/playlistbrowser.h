@@ -23,82 +23,44 @@
 #include <QTreeView>
 #include <QStringList>
 
-//! PlaylistBrowser class is a QTreeView subclass with support for drop events
-/*!
-  PlaylistBrowser class i subclasses from QTreeView and provides support for ending
-  drag&drop operations. Dropped items are passed to PlaylistManager which loads them into
-  the PlaylistModel from separate thread without freezing the UI
-*/
 class PlaylistBrowser : public QTreeView
 {
+
     Q_OBJECT
-    Q_ENUMS(Columns)
 
   public:
-    //! Constructor
-    /*!
-      \param parent pointer to parent QWidget
-    */
     PlaylistBrowser(QWidget *parent = 0);
 
-    //! Destructor
     ~PlaylistBrowser();
 
-  public Q_SLOTS:
-    //! Set "stop-on-this" flag to selected items
-    void setStopTrack();
+    QModelIndex nowPlaying() const;
+    void setNowPlaying(const QModelIndex &index);
 
+    QModelIndex stopTrack() const;
+    void setStopTrack(const QModelIndex &index);
+    void clearStopTrack();
+
+  public Q_SLOTS:
     void shuffle();
 
   protected:
-    //! Called when items are dropped on the browser
-    /*!
-      When drag&drop action is finished by dropping items into PlaylistBrowser the items are read
-      from \p dropEvent and passed to PlaylistManager which loads the files into the PlaylistModel
-      \param dropEvent provides more informations about the event
-    */
     void dropEvent(QDropEvent *dropEvent);
-
-    //! Called when items are dragged into the PlaylistBrowser
-    /*!
-      \param dragEnterEvent provides more informations about the event
-    */
     void dragEnterEvent(QDragEnterEvent *dragEnterEvent);
-
-    //! Called when items are moved within the PlaylistBrowser
-    /*!
-      Currently the action is just accepted without any response
-      \todo move items within PlaylistBrowser by dragging them from place to place
-      \param dragMoveEvent provides more informations about the event
-    */
     void dragMoveEvent(QDragMoveEvent *dragMoveEvent);
-
-    //! Called when a key is pressed when the PlaylistBrowser has focus
-    /*!
-      Removes selected items from PlaylistModel
-      \param keyEvent provides more informations about the event
-    */
     void keyPressEvent(QKeyEvent *keyEvent);
-
     void mousePressEvent(QMouseEvent *event);
-
     void mouseMoveEvent(QMouseEvent *event);
 
   Q_SIGNALS:
-    /** Passes list of dropped files
-     * \param files list of files to insert
-     * \param row where files should be inserted
-     */
     void addedFiles(const QStringList &files, int row);
 
-    /**
-     * Passes number of row that was selected
-     * \param row selected row
-     */
-    void setTrack(int row);
-
   private:
+    void invalidateIndex(const QModelIndex &index);
+
     QPoint m_dragStartPosition;
+
+    QModelIndex m_nowPlaying;
+    QModelIndex m_stopTrack;
 
 };
 

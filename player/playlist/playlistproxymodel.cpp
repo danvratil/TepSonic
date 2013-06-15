@@ -32,7 +32,7 @@ bool PlaylistProxyModel::filterAcceptsRow(int sourceRow, const QModelIndex &sour
 {
     for (int col = PlaylistModel::TrackColumn; col <= PlaylistModel::YearColumn; col++) {
         const QModelIndex index = sourceModel()->index(sourceRow, col, sourceParent);
-        if (sourceModel()->data(index).toString().contains(filterRegExp())) {
+        if (index.data().toString().contains(filterRegExp())) {
             return true;
         }
     }

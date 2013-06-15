@@ -1,7 +1,3 @@
- - simplify PlaylistModel (CollectionsModel is finished)
-    - convert StopTrack and currentItem (=>NowPlayingTrack) to be Roles of PlaylistModel
-    - try to avoid using mapToSource/mapFromSource as much as possible
-
  - looks like collections are broken now
     - D&D from Collections to Playlist crashes TS (not sure whether it's because
         of changes in CollectionModel or Playlistmodel)

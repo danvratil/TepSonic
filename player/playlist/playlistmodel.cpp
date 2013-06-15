@@ -63,14 +63,17 @@ PlaylistModel::~PlaylistModel()
     qDeleteAll(m_items);
 }
 
-int PlaylistModel::columnCount(const QModelIndex & /* parent */) const
+int PlaylistModel::columnCount(const QModelIndex &parent) const
 {
+    Q_UNUSED(parent);
+
     return PlaylistModel::ColumnCount;
 }
 
 QVariant PlaylistModel::data(const QModelIndex &index, int role) const
 {
-    QVariant data;
+    Q_ASSERT(index.model() == this);
+    Q_ASSERT(index.column() < PlaylistModel::ColumnCount);
 
     if (!index.isValid()) {
         return QVariant();
@@ -108,6 +111,8 @@ QVariant PlaylistModel::data(const QModelIndex &index, int role) const
 
 bool PlaylistModel::setData(const QModelIndex &index, const QVariant &value, int role)
 {
+    Q_ASSERT(index.model() == this);
+
     Node *node = m_items.at(index.row());
 
     switch (index.column()) {
@@ -135,6 +140,8 @@ bool PlaylistModel::setData(const QModelIndex &index, const QVariant &value, int
 
 Qt::ItemFlags PlaylistModel::flags(const QModelIndex &index) const
 {
+    Q_ASSERT(index.model() == this);
+
     if (!index.isValid()) {
         return 0;
     }
@@ -173,6 +180,8 @@ QVariant PlaylistModel::headerData(int section, Qt::Orientation orientation,
 
 QModelIndex PlaylistModel::index(int row, int column, const QModelIndex &parent) const
 {
+    Q_UNUSED(parent);
+
     return createIndex(row, column);
 }
 
@@ -187,13 +196,6 @@ bool PlaylistModel::removeRows(int position, int rows, const QModelIndex &parent
 {
     if (rows == 0) {
         return true;
-    }
-
-    if (m_stopTrack.row() >= position && m_stopTrack.row() < position + rows) {
-        m_stopTrack = QModelIndex();
-    }
-    if (m_currentItem.row() >= position && m_currentItem.row() < position + rows) {
-        m_currentItem = QModelIndex();
     }
 
     int totalRemoveTime = 0;
@@ -247,43 +249,11 @@ void PlaylistModel::insertItem(const Player::MetaData &metadata, int row)
     Q_EMIT playlistLengthChanged(m_totalLength, rowCount(QModelIndex()));
 }
 
-QModelIndex PlaylistModel::currentItem() const
-{
-    return m_currentItem;
-}
-
-void PlaylistModel::setCurrentItem(const QModelIndex &currentIndex)
-{
-    Q_ASSERT(currentIndex.model() == this);
-
-    m_currentItem = currentIndex;
-    Q_EMIT layoutChanged();
-}
-
-void PlaylistModel::setStopTrack(const QModelIndex &track)
-{
-    Q_ASSERT(track.model() == this);
-
-    // if the current stop-on-this track is the same as the new one, toggle it
-    if (track == m_stopTrack) {
-        m_stopTrack = QModelIndex();
-        return;
-    }
-
-    m_stopTrack = track;
-}
-
-QModelIndex PlaylistModel::stopTrack() const
-{
-    return m_stopTrack;
-}
-
 void PlaylistModel::clear()
 {
     beginResetModel();
     qDeleteAll(m_items);
-    m_stopTrack = QModelIndex();
-    m_currentItem = QModelIndex();
+    m_items.clear();
     endResetModel();
 }
 

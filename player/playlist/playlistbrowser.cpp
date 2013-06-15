@@ -64,6 +64,45 @@ PlaylistBrowser::~PlaylistBrowser()
 {
 }
 
+QModelIndex PlaylistBrowser::nowPlaying() const
+{
+    return m_nowPlaying;
+}
+
+void PlaylistBrowser::setNowPlaying(const QModelIndex &index)
+{
+    invalidateIndex(m_nowPlaying);
+    m_nowPlaying = index;
+    invalidateIndex(m_nowPlaying);
+}
+
+void PlaylistBrowser::setStopTrack(const QModelIndex &index)
+{
+    invalidateIndex(m_stopTrack);
+    m_stopTrack = index;
+    invalidateIndex(m_stopTrack);
+}
+
+QModelIndex PlaylistBrowser::stopTrack() const
+{
+    return m_stopTrack;
+}
+
+void PlaylistBrowser::clearStopTrack()
+{
+    invalidateIndex(m_stopTrack);
+    m_stopTrack = QModelIndex();
+}
+
+void PlaylistBrowser::invalidateIndex(const QModelIndex &index)
+{
+    if (index.isValid()) {
+        const QModelIndex left = index.sibling(index.row(), 0);
+        const QModelIndex right = index.sibling(index.row(), model()->columnCount() - 1);
+        emit dataChanged(left, right);
+    }
+}
+
 // Event: item is dragged over the widget
 void PlaylistBrowser::dragEnterEvent(QDragEnterEvent *event)
 {
@@ -86,7 +125,7 @@ void PlaylistBrowser::mousePressEvent(QMouseEvent *event)
     }
 
     // Handle all the default actions
-    QAbstractItemView::mousePressEvent(event);
+    QTreeView::mousePressEvent(event);
 }
 
 void PlaylistBrowser::mouseMoveEvent(QMouseEvent *event)
@@ -251,32 +290,13 @@ void PlaylistBrowser::keyPressEvent(QKeyEvent *event)
     break;
     case Qt::Key_Enter:  // key ENTER (on numeric keypad)
     case Qt::Key_Return: { // Key ENTER
-        PlaylistProxyModel *ppmodel = qobject_cast<PlaylistProxyModel *>(model());
-        if (!ppmodel) return;
-        PlaylistModel *pmodel = qobject_cast<PlaylistModel *>(ppmodel->sourceModel());
-        if (!pmodel) return;
-        pmodel->setCurrentItem(currentIndex());
-        emit setTrack(currentIndex().row());
+        setNowPlaying(currentIndex());
+        emit doubleClicked(currentIndex());
     }
     break;
     }
     event->accept();
 
-}
-
-void PlaylistBrowser::setStopTrack()
-{
-    PlaylistProxyModel *ppmodel = qobject_cast<PlaylistProxyModel *>(model());
-    if (!ppmodel) {
-        return;
-    }
-
-    PlaylistModel *pmodel = qobject_cast<PlaylistModel *>(ppmodel->sourceModel());
-    if (!pmodel) {
-        return;
-    }
-
-    pmodel->setStopTrack(selectedIndexes().first());
 }
 
 void PlaylistBrowser::shuffle()

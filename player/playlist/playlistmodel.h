@@ -71,13 +71,6 @@ class PlaylistModel : public QAbstractItemModel
                  int role = Qt::EditRole);
     QVariant data(const QModelIndex &index, int role) const;
 
-    //! Returns QModelIndex of currently played item
-    QModelIndex currentItem() const;
-    void setCurrentItem(const QModelIndex &currentIndex);
-
-    void setStopTrack(const QModelIndex &track);
-    QModelIndex stopTrack() const;
-
   public Q_SLOTS:
     void insertItem(const Player::MetaData &metadata, int row);
 
@@ -90,9 +83,6 @@ class PlaylistModel : public QAbstractItemModel
 
     // total length in seconds
     int m_totalLength;
-
-    QModelIndex m_currentItem;
-    QModelIndex m_stopTrack;
 
   Q_SIGNALS:
     void playlistLengthChanged(int totalLength, int tracksCount);

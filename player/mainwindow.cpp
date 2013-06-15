@@ -62,6 +62,8 @@
 
 #include <QDebug>
 
+Q_DECLARE_METATYPE(QModelIndex)
+
 MainWindow::MainWindow():
     m_collectionModel(0),
     m_collectionProxyModel(0),
@@ -104,15 +106,14 @@ MainWindow::MainWindow():
     connect(m_playlistModel, SIGNAL(playlistLengthChanged(int, int)),
             this, SLOT(playlistLengthChanged(int, int)));
 
-    m_playlistItemDelegate = new PlaylistItemDelegate(this, m_playlistModel,
-                                                      m_ui->playlistBrowser,
-                                                      m_playlistProxyModel);
+    m_playlistItemDelegate = new PlaylistItemDelegate(m_ui->playlistBrowser);
 
     m_ui->playlistBrowser->setModel(m_playlistProxyModel);
     m_ui->playlistBrowser->setItemDelegate(m_playlistItemDelegate);
     m_ui->playlistBrowser->setDropIndicatorShown(true);
     m_ui->playlistBrowser->header()->setContextMenuPolicy(Qt::CustomContextMenu);
     m_ui->playlistBrowser->setAlternatingRowColors(true);
+    m_ui->playlistBrowser->setEditTriggers(QAbstractItemView::NoEditTriggers);
     m_ui->playlistBrowser->sortByColumn(-1);
     // Hide the first column (with filename) and the last one (with order number)
     m_ui->playlistBrowser->hideColumn(PlaylistModel::FilenameColumn);
@@ -255,7 +256,7 @@ void MainWindow::createMenus()
 
     // Create playlist popup menu
     m_playlistPopupMenu = new QMenu(this);
-    m_playlistPopupMenu->addAction(tr("&Stop after this track"), m_ui->playlistBrowser, SLOT(setStopTrack()));
+    m_playlistPopupMenu->addAction(tr("&Stop after this track"), this, SLOT(setStopTrackClicked()));
     m_playlistPopupMenu->addAction(tr("&Edit metadata"), this, SLOT(showMetadataEditor()));
     m_ui->playlistBrowser->setContextMenuPolicy(Qt::CustomContextMenu);
 }
@@ -300,7 +301,7 @@ void MainWindow::bindSignals()
 
     // Playlist stuff
     connect(m_ui->playlistBrowser, SIGNAL(doubleClicked(QModelIndex)),
-            this, SLOT(playlistBrowserDoubleClick(QModelIndex)));
+            this, SLOT(setCurrentTrack(QModelIndex)));
     connect(m_ui->clearPlaylistSearch, SIGNAL(clicked()),
             this, SLOT(clearPlaylistSearch()));
     connect(m_ui->playlistBrowser->header(), SIGNAL(customContextMenuRequested(QPoint)),
@@ -309,8 +310,6 @@ void MainWindow::bindSignals()
             m_playlistProxyModel, SLOT(setFilterRegExp(QString)));
     connect(m_ui->playlistBrowser, SIGNAL(customContextMenuRequested(QPoint)),
             this, SLOT(showPlaylistContextMenu(QPoint)));
-    connect(m_ui->playlistBrowser, SIGNAL(setTrack(int)),
-            this, SLOT(setTrack(int)));
 
     // Filesystem browser
     connect(m_ui->fsbBackBtn, SIGNAL(clicked()),
@@ -597,12 +596,15 @@ void MainWindow::updatePlayerTrack()
     }
 }
 
-void MainWindow::playlistBrowserDoubleClick(const QModelIndex &index)
+void MainWindow::setCurrentTrack(const QModelIndex &index)
 {
-    const QModelIndex mappedIndex = m_playlistProxyModel->mapToSource(index);
-    // Play item on row double click
-    m_playlistModel->setCurrentItem(m_playlistModel->index(mappedIndex.row(), 0, QModelIndex()));
-    setTrack(mappedIndex.row());
+    Q_ASSERT(index.isValid());
+
+    m_ui->playlistBrowser->setNowPlaying(index);
+
+    const QModelIndex sibling = index.sibling(index.row(), PlaylistModel::FilenameColumn);
+    const QString filename = sibling.data().toString();
+    Player::instance()->setTrack(filename, true);
 }
 
 void MainWindow::playerStatusChanged(Phonon::State newState, Phonon::State oldState)
@@ -662,12 +664,10 @@ void MainWindow::playerStatusChanged(Phonon::State newState, Phonon::State oldSt
 
 void MainWindow::previousTrack()
 {
-    // We must remap the current item to get it's real position in current filter
-    const QModelIndex currentItem = m_playlistProxyModel->mapFromSource(m_playlistModel->currentItem());
-    if ((currentItem.row() > 0) && (m_playlistModel->rowCount(QModelIndex()) > 0)) {
-        const QModelIndex prev = currentItem.sibling(currentItem.row() - 1, currentItem.column());
-        m_playlistModel->setCurrentItem(prev);
-        setTrack(m_playlistModel->currentItem().row());
+    const QModelIndex current = m_ui->playlistBrowser->nowPlaying();
+    if (current.row() > 0 && m_ui->playlistBrowser->model()->rowCount() > 0) {
+        const QModelIndex prev = current.sibling(current.row() - 1, 0);
+        setCurrentTrack(prev);
     }
 }
 
@@ -679,23 +679,22 @@ void MainWindow::playPause()
     } else {
         /* When the source is empty there are some files in playlist, select the
            first row and load it as current source */
-        if ((player->currentSource().fileName().isEmpty()) &&
-                (m_playlistModel->rowCount() > 0)) {
-            m_playlistModel->setCurrentItem(m_playlistModel->index(0, 0, QModelIndex()));
-            setTrack(0);
+        if ((player->currentSource().fileName().isEmpty()) && (m_playlistModel->rowCount() > 0)) {
+            const QModelIndex nowPlaying = m_ui->playlistBrowser->model()->index(0, 0);
+            setCurrentTrack(nowPlaying);
         }
+
         player->play();
     }
 }
 
 void MainWindow::nextTrack()
 {
-    // unmapped!!! index
-    const QModelIndex currentItem = m_playlistModel->currentItem();
+    const QModelIndex current = m_ui->playlistBrowser->nowPlaying();
 
     // If the track we just played was "stop-on-this" track then stop playback
-    const QModelIndex stopTrack = m_playlistModel->stopTrack();
-    if (stopTrack.isValid() && stopTrack.row() == currentItem.row()) {
+    const QModelIndex stopTrack = m_ui->playlistBrowser->stopTrack();
+    if (stopTrack.isValid() && stopTrack.row() == current.row()) {
         stopPlayer();
         return;
     }
@@ -704,19 +703,19 @@ void MainWindow::nextTrack()
     // 1) Random playback?
     if (player->randomMode()) {
         int row = rand() % m_playlistModel->rowCount();
-        m_playlistModel->setCurrentItem(m_playlistModel->index(row, 0));
+        setCurrentTrack(m_ui->playlistBrowser->model()->index(row, 0));
+
         // 2) Not last item?
-    } else if (currentItem.row() < m_playlistModel->rowCount() - 1) {
-        m_playlistModel->setCurrentItem(currentItem.sibling(currentItem.row() + 1, currentItem.column()));
+    } else if (m_ui->playlistBrowser->indexBelow(current).isValid()) {
+        setCurrentTrack(m_ui->playlistBrowser->indexBelow(current));
+
         // 3) Repeat all playlist?
     } else if (player->repeatMode() == Player::RepeatAll) {
-        m_playlistModel->setCurrentItem(m_playlistModel->index(0, 0));
+        setCurrentTrack(m_ui->playlistBrowser->model()->index(0, 0));
         // 4) Stop, there's nothing else to play
     } else {
         return;
     }
-
-    setTrack(m_playlistModel->currentItem().row());
 }
 
 void MainWindow::addPlaylistItem(const QString &filename)
@@ -823,18 +822,9 @@ void MainWindow::showPlaylistContextMenu(const QPoint &pos)
     const bool valid = (m_ui->playlistBrowser->currentIndex().isValid() ||
                   m_ui->playlistBrowser->indexAt(pos).isValid());
 
-    for (int i = 0; i < m_playlistPopupMenu->actions().count(); i++)
+    for (int i = 0; i < m_playlistPopupMenu->actions().count(); i++) {
         m_playlistPopupMenu->actions().at(i)->setEnabled(valid);
-
-    // Store pointer to playlist item's index
-    QModelIndex *index;
-    if (!m_ui->playlistBrowser->indexAt(pos).isValid())
-        index = new QModelIndex(m_ui->playlistBrowser->currentIndex());
-    else
-        index = new QModelIndex(m_ui->playlistBrowser->indexAt(pos));
-
-    const QVariant pitem = qVariantFromValue((void *) index);
-    m_playlistPopupMenu->setProperty("playlistItem", pitem);
+    }
 
     m_playlistPopupMenu->popup(m_ui->playlistBrowser->mapToGlobal(pos));
 }
@@ -842,8 +832,8 @@ void MainWindow::showPlaylistContextMenu(const QPoint &pos)
 
 void MainWindow::removeFileFromDisk()
 {
-    qDebug() << m_ui->collectionBrowser->mapFromGlobal(m_collectionsPopupMenu->pos());
-    const QModelIndex item = m_ui->collectionBrowser->indexAt(m_ui->collectionBrowser->mapFromGlobal(m_collectionsPopupMenu->pos()));
+    const QPoint pos =m_ui->collectionBrowser->mapFromGlobal(m_collectionsPopupMenu->pos());
+    const QModelIndex item = m_ui->collectionBrowser->indexAt(pos);
     const QString itemName = item.data().toString();
     const QString file = item.sibling(item.row(), 1).data().toString();
 
@@ -936,14 +926,6 @@ void MainWindow::destroyCollections()
     m_ui->viewsTab->setTabEnabled(0, false);
 }
 
-void MainWindow::setTrack(int row)
-{
-    const QModelIndex currentItem = m_playlistModel->currentItem();
-    const QModelIndex index = m_playlistModel->index(currentItem.row(), PlaylistModel::FilenameColumn, QModelIndex());
-    const QString filename = index.data().toString();
-    Player::instance()->setTrack(filename, true);
-}
-
 void MainWindow::showMetadataEditor()
 {
     if (!m_metadataEditor) {
@@ -955,21 +937,19 @@ void MainWindow::showMetadataEditor()
     }
 
     const QModelIndex currentIndex = m_ui->playlistBrowser->currentIndex();
-    const QModelIndex mappedIndex = m_playlistProxyModel->mapToSource(currentIndex);
-
-    QModelIndex idx = mappedIndex.sibling(mappedIndex.row(), PlaylistModel::FilenameColumn);
+    QModelIndex idx = currentIndex.sibling(currentIndex.row(), PlaylistModel::FilenameColumn);
     m_metadataEditor->setFilename(idx.data().toString());
-    idx = mappedIndex.sibling(idx.row(), PlaylistModel::TracknameColumn);
+    idx = idx.sibling(idx.row(), PlaylistModel::TracknameColumn);
     m_metadataEditor->setTrackTitle(idx.data().toString());
-    idx = mappedIndex.sibling(idx.row(), PlaylistModel::AlbumColumn);
+    idx = idx.sibling(idx.row(), PlaylistModel::AlbumColumn);
     m_metadataEditor->setAlbum(idx.data().toString());
-    idx = mappedIndex.sibling(idx.row(), PlaylistModel::InterpretColumn);
+    idx = idx.sibling(idx.row(), PlaylistModel::InterpretColumn);
     m_metadataEditor->setArtist(idx.data().toString());
-    idx = mappedIndex.sibling(idx.row(), PlaylistModel::GenreColumn);
+    idx = idx.sibling(idx.row(), PlaylistModel::GenreColumn);
     m_metadataEditor->setGenre(idx.data().toString());
-    idx = mappedIndex.sibling(idx.row(), PlaylistModel::YearColumn);
+    idx = idx.sibling(idx.row(), PlaylistModel::YearColumn);
     m_metadataEditor->setYear(idx.data().toInt());
-    idx = mappedIndex.sibling(idx.row(), PlaylistModel::TrackColumn);
+    idx = idx.sibling(idx.row(), PlaylistModel::TrackColumn);
     m_metadataEditor->setTrackNumber(idx.data().toInt());
 
     m_metadataEditor->exec();
@@ -982,7 +962,7 @@ void MainWindow::metadataEditorAccepted()
     }
 
     TagLib::FileRef f(m_metadataEditor->filename().toLocal8Bit().constData());
-    // FileRef::isNull() is not enough sometimes. Let's check the tag() too...
+//     // FileRef::isNull() is not enough sometimes. Let's check the tag() too...
     if (f.isNull() || !f.tag()) {
         return;
     }
@@ -996,24 +976,32 @@ void MainWindow::metadataEditorAccepted()
     f.save();
 
     const QModelIndex currentIndex = m_ui->playlistBrowser->currentIndex();
-    const QModelIndex mappedIndex = m_playlistProxyModel->mapToSource(currentIndex);
-
-    QModelIndex idx = mappedIndex.sibling(mappedIndex.row(), PlaylistModel::TracknameColumn);
+    QModelIndex idx = currentIndex.sibling(currentIndex.row(), PlaylistModel::TracknameColumn);
     m_playlistModel->setData(idx, m_metadataEditor->trackTitle());
-    idx = mappedIndex.sibling(idx.row(), PlaylistModel::AlbumColumn);
+    idx = idx.sibling(idx.row(), PlaylistModel::AlbumColumn);
     m_playlistModel->setData(idx, m_metadataEditor->album());
-    idx = mappedIndex.sibling(idx.row(), PlaylistModel::InterpretColumn);
+    idx = idx.sibling(idx.row(), PlaylistModel::InterpretColumn);
     m_playlistModel->setData(idx, m_metadataEditor->artist());
-    idx = mappedIndex.sibling(idx.row(), PlaylistModel::GenreColumn);
+    idx = idx.sibling(idx.row(), PlaylistModel::GenreColumn);
     m_playlistModel->setData(idx, m_metadataEditor->genre());
-    idx = mappedIndex.sibling(idx.row(), PlaylistModel::YearColumn);
+    idx = idx.sibling(idx.row(), PlaylistModel::YearColumn);
     m_playlistModel->setData(idx, m_metadataEditor->year());
-    idx = mappedIndex.sibling(idx.row(), PlaylistModel::TrackColumn);
+    idx = idx.sibling(idx.row(), PlaylistModel::TrackColumn);
     m_playlistModel->setData(idx, m_metadataEditor->trackNumber());
 
     m_taskManager->rebuildCollections(m_metadataEditor->filename());
 
     delete m_metadataEditor;
+}
+
+void MainWindow::setStopTrackClicked()
+{
+    const QModelIndex index = m_ui->playlistBrowser->currentIndex();
+    if (index.row() == m_ui->playlistBrowser->stopTrack().row()) {
+        m_ui->playlistBrowser->clearStopTrack();
+    } else {
+        m_ui->playlistBrowser->setStopTrack(index);
+    }
 }
 
 #include "moc_mainwindow.cpp"

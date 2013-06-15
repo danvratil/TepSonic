@@ -34,15 +34,9 @@ class PlaylistItemDelegate : public QStyledItemDelegate
     Q_OBJECT
 
   public:
-    explicit PlaylistItemDelegate(QObject *parent = 0, PlaylistModel *playlistModel = 0,
-                                  PlaylistBrowser *playlistBrowser = 0,
-                                  PlaylistProxyModel *playlistProxyModel = 0);
+    explicit PlaylistItemDelegate(PlaylistBrowser *parent);
     void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const;
 
-  private:
-    PlaylistModel *m_playlistModel;
-    PlaylistBrowser *m_playlistBrowser;
-    PlaylistProxyModel *m_playlistProxyModel;
 };
 
 #endif // PLAYLISTITEMDELEGATE_H

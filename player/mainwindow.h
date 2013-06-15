@@ -231,12 +231,6 @@ class MainWindow : public QMainWindow
     */
     void addPlaylistItem(const QString &filename);
 
-    //! Set as current track the track on given row in playlist
-    /*!
-      \param row location of the new track in playlist
-    */
-    void setTrack(int row);
-
     //! When plugins are loaded, this method setups plugins menus and panes
     void setupPluginsUIs();
 
@@ -335,7 +329,7 @@ class MainWindow : public QMainWindow
       Passed index points to clicked item. This item is set as current player source and playback is started.
       \sa on_actionPlay_pause_triggered()
     */
-    void playlistBrowserDoubleClick(const QModelIndex &index);
+    void setCurrentTrack(const QModelIndex &index);
 
     //! Removes all items from playlist
     void clearPlaylist() {
@@ -412,6 +406,8 @@ class MainWindow : public QMainWindow
 
     //! Called when metadata editor is accepted
     void metadataEditorAccepted();
+
+    void setStopTrackClicked();
 
   Q_SIGNALS:
     void settingsAccepted();

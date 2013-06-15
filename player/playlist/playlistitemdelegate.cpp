@@ -18,42 +18,36 @@
  */
 
 #include "playlistitemdelegate.h"
-#include "playlistmodel.h"
 #include "playlistbrowser.h"
-#include "playlistproxymodel.h"
 
 #include <QRect>
 
-PlaylistItemDelegate::PlaylistItemDelegate(QObject *parent,
-                                           PlaylistModel *playlistModel,
-                                           PlaylistBrowser *playlistBrowser,
-                                           PlaylistProxyModel *playlistProxyModel):
-    QStyledItemDelegate(parent),
-    m_playlistModel(playlistModel),
-    m_playlistBrowser(playlistBrowser),
-    m_playlistProxyModel(playlistProxyModel)
+PlaylistItemDelegate::PlaylistItemDelegate(PlaylistBrowser *parent):
+    QStyledItemDelegate(parent)
 {
 }
 
 void PlaylistItemDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option,
                                  const QModelIndex &index) const
 {
+    PlaylistBrowser *browser = qobject_cast<PlaylistBrowser*>(parent());
+
     QRect rect(option.rect);
     rect.setLeft(rect.left() - 3);
 
     painter->setFont(option.font);
     painter->setPen(option.palette.text().color());
 
-    const QModelIndex mappedIndex = m_playlistProxyModel->mapToSource(index);
+    const QModelIndex nowPlaying = browser->nowPlaying();
 
-    if (m_playlistModel->stopTrack().row() == mappedIndex.row()) {
-        if (mappedIndex.row() == m_playlistModel->currentItem().row()) {
+    if (index.row() == browser->stopTrack().row()) {
+        if (index.row() == browser->nowPlaying().row()) {
             painter->fillRect(rect, option.palette.link());
         } else {
             painter->fillRect(rect, option.palette.dark().color());
         }
         painter->setPen(option.palette.light().color());
-    } else if (m_playlistModel->currentItem().isValid() && mappedIndex.row() == m_playlistModel->currentItem().row()) {
+    } else if (nowPlaying.isValid() && index.row() == nowPlaying.row()) {
         painter->fillRect(rect, option.palette.link());
         painter->setPen(option.palette.highlightedText().color());
     } else if (option.state & QStyle::State_Selected) {
@@ -62,11 +56,11 @@ void PlaylistItemDelegate::paint(QPainter *painter, const QStyleOptionViewItem &
 
     painter->drawText(QRect(option.rect.left(),
                             option.rect.top(),
-                            m_playlistBrowser->columnWidth(index.column()),
+                            browser->columnWidth(index.column()),
                             option.rect.bottom()),
-                      option.fontMetrics.elidedText(mappedIndex.data().toString(),
+                      option.fontMetrics.elidedText(index.data().toString(),
                               Qt::ElideRight,
-                              m_playlistBrowser->columnWidth(mappedIndex.column()))
+                              browser->columnWidth(index.column()))
                      );
 
 }
