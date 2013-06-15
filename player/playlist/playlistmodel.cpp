@@ -214,7 +214,11 @@ bool PlaylistModel::removeRows(int position, int rows, const QModelIndex &parent
 
 int PlaylistModel::rowCount(const QModelIndex &parent) const
 {
-    return m_items.count();
+    if (!parent.isValid()) {
+        return m_items.count();
+    }
+
+    return 0;
 }
 
 void PlaylistModel::insertItem(const Player::MetaData &metadata, int row)
