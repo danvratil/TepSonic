@@ -196,8 +196,10 @@ void PluginsManager::enablePlugin(Plugin *plugin)
     aplg->init();
 
     // Now we can connect all the signals/slots to the plugin
-    connect(this,SIGNAL(settingsAccepted()),aplg,SLOT(settingsAccepted()));
-    connect(aplg,SIGNAL(error(QString)),this,SIGNAL(error(QString)));
+    connect(this, SIGNAL(settingsAccepted()),
+            aplg, SLOT(settingsAccepted()));
+    connect(aplg, SIGNAL(error(QString)),
+            this, SIGNAL(error(QString)));
 
     plugin->isEnabled = true;
 

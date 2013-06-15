@@ -89,6 +89,8 @@ class PluginsManager : public QObject
     // PluginsManager's own signals
     void pluginsLoaded();
 
+    void error(const QString &error);
+
 };
 
 #endif // PLUGINSMANAGER_H
