@@ -1,6 +1,4 @@
  - looks like collections are broken now
-    - D&D from Collections to Playlist crashes TS (not sure whether it's because
-        of changes in CollectionModel or Playlistmodel)
     - CollectionsModel is not updated when CollectionBuilder finishes
     - essentially we ignore half of the artists and albums, because they are
       in VA.
