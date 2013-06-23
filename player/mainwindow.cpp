@@ -273,7 +273,7 @@ void MainWindow::bindShortcuts()
     QxtGlobalShortcut *sc2 = new QxtGlobalShortcut(this);
     sc2->setShortcut(QKeySequence::fromString(m_settings->value("Stop", "Meta+S").toString()));
     connect(sc2, SIGNAL(activated()),
-            this, SLOT(stopPlayer()));
+            Player::instance(), SLOT(stop()));
 
     QxtGlobalShortcut *sc3 = new QxtGlobalShortcut(this);
     sc3->setShortcut(QKeySequence::fromString(m_settings->value("PrevTrack", "Meta+B").toString()));
@@ -346,7 +346,7 @@ void MainWindow::bindSignals()
     connect(m_ui->actionPlay_pause, SIGNAL(triggered(bool)),
             this, SLOT(playPause()));
     connect(m_ui->actionStop, SIGNAL(triggered(bool)),
-            this, SLOT(stopPlayer()));
+            Player::instance(), SLOT(stop()));
 
     // Menu 'Player -> Repeat mode'
     connect(m_ui->actionRepeat_OFF, SIGNAL(triggered(bool)),
@@ -702,7 +702,7 @@ void MainWindow::nextTrack()
     // If the track we just played was "stop-on-this" track then stop playback
     const QModelIndex stopTrack = m_ui->playlistBrowser->stopTrack();
     if (stopTrack.isValid() && stopTrack.row() == current.row()) {
-        stopPlayer();
+        Player::instance()->stop();
         return;
     }
 
