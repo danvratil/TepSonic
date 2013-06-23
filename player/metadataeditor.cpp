@@ -36,7 +36,7 @@ MetadataEditor::MetadataEditor(QWidget *parent) :
     m_ui->setupUi(this);
 
     DatabaseManager *dbManager = DatabaseManager::instance();
-    if (dbManager->connectionAvailable() || dbManager->connectToDB()) {
+    if (dbManager->connectionAvailable()) {
 
         QStringList list;
 

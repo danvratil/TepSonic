@@ -128,7 +128,7 @@ Player::MetaData PlaylistPopulator::getFileMetaData(const QString &file)
 
     /* Don't try to connect when connection was not available previously - attempts to connect are
       just slowing everything down */
-    if (dbManager->connectionAvailable() || dbManager->connectToDB()) {
+    if (dbManager->connectionAvailable()) {
         QSqlField data("col", QVariant::String);
         data.setValue(file);
         QString fname = dbManager->sqlDb().driver()->formatValue(data, false);

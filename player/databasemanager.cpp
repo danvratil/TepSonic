@@ -62,7 +62,7 @@ DatabaseManager::DatabaseManager()
     connectToDB();
 }
 
-bool DatabaseManager::connectToDB()
+void DatabaseManager::connectToDB()
 {
     switch (m_driverType) {
     case MySQL: {
@@ -85,7 +85,7 @@ bool DatabaseManager::connectToDB()
             QFile file(QString(_CONFIGDIR) + QDir::separator() + "collection.db");
             if (!file.open(QIODevice::WriteOnly)) {
                 qDebug() << "Failed to create new database file!";
-                return false;
+                return;
             }
         }
         m_sqlDb.setDatabaseName(QString(_CONFIGDIR) + QDir::separator() + "collection.db");
@@ -97,7 +97,7 @@ bool DatabaseManager::connectToDB()
         qDebug() << "Failed to establish '" << m_sqlDb.connectionName() << "' connection to database!";
         qDebug() << "Reason: " << m_sqlDb.lastError().text();
         m_connectionAvailable = false;
-        return false;
+        return;
     }
 
     // We want to use UTF8!!!
@@ -126,7 +126,7 @@ bool DatabaseManager::connectToDB()
     }
 
     m_connectionAvailable = true;
-    return true;
+    return;
 }
 
 void DatabaseManager::initDb()
@@ -301,5 +301,3 @@ void DatabaseManager::initDb()
     break;
     }
 }
-
-#include "moc_databasemanager.cpp"

@@ -41,7 +41,6 @@ class DatabaseManager
     ~DatabaseManager();
 
 
-    bool connectToDB();
 
     DriverTypes driverType() const  {
         return m_driverType;
@@ -64,6 +63,7 @@ class DatabaseManager
     static DatabaseManager *s_instance;
 
     void initDb();
+    void connectToDB();
 
     DriverTypes m_driverType;
 
