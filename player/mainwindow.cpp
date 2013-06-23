@@ -607,6 +607,13 @@ void MainWindow::setCurrentTrack(const QModelIndex &index)
     Player::instance()->setTrack(filename, true);
 }
 
+void MainWindow::clearPlaylist()
+{
+    m_playlistModel->clear();
+    m_ui->playlistBrowser->setNowPlaying(QModelIndex());
+    m_ui->playlistBrowser->setStopTrack(QModelIndex());
+}
+
 void MainWindow::playerStatusChanged(Phonon::State newState, Phonon::State oldState)
 {
     Q_UNUSED(oldState);

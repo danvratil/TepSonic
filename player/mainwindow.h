@@ -331,10 +331,7 @@ class MainWindow : public QMainWindow
     */
     void setCurrentTrack(const QModelIndex &index);
 
-    //! Removes all items from playlist
-    void clearPlaylist() {
-        m_playlistModel->clear();
-    }
+    void clearPlaylist();
 
     //! Opens settings dialog
     void openSettingsDialog();
