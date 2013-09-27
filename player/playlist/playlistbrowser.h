@@ -54,6 +54,9 @@ class PlaylistBrowser : public QTreeView
   Q_SIGNALS:
     void addedFiles(const QStringList &files, int row);
 
+  private Q_SLOTS:
+    void slotSortIndicatorChanged(int column, Qt::SortOrder order);
+
   private:
     void invalidateIndex(const QModelIndex &index);
 

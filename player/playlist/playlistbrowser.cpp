@@ -26,6 +26,7 @@
 #include <QDropEvent>
 #include <QItemSelectionRange>
 #include <QDrag>
+#include <QHeaderView>
 #include <QDir>
 #include <QDebug>
 #include <QList>
@@ -58,6 +59,11 @@ PlaylistBrowser::PlaylistBrowser(QWidget *parent):
     setTextElideMode(Qt::ElideRight);
     setSelectionMode(QAbstractItemView::ExtendedSelection);
     setSelectionBehavior(QAbstractItemView::SelectRows);
+    header()->setSortIndicatorShown(true);
+    header()->setClickable(true);
+
+    connect(header(), SIGNAL(sortIndicatorChanged(int,Qt::SortOrder)),
+            this, SLOT(slotSortIndicatorChanged(int,Qt::SortOrder)));
 }
 
 PlaylistBrowser::~PlaylistBrowser()
@@ -301,6 +307,8 @@ void PlaylistBrowser::keyPressEvent(QKeyEvent *event)
 
 void PlaylistBrowser::shuffle()
 {
+    header()->setSortIndicator(-1, Qt::AscendingOrder);
+
     srand(time(0)); // We needs microseconds
     const int rowCount = model()->rowCount();
     for (int row = 0; row < rowCount; row++) {
@@ -310,5 +318,11 @@ void PlaylistBrowser::shuffle()
 
     model()->sort(PlaylistModel::RandomOrderColumn, Qt::AscendingOrder);
 }
+
+void PlaylistBrowser::slotSortIndicatorChanged(int column, Qt::SortOrder order)
+{
+    model()->sort(column, order);
+}
+
 
 #include "moc_playlistbrowser.cpp"
