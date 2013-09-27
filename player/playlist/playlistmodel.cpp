@@ -152,30 +152,30 @@ Qt::ItemFlags PlaylistModel::flags(const QModelIndex &index) const
 QVariant PlaylistModel::headerData(int section, Qt::Orientation orientation,
                                    int role) const
 {
-    switch (section) {
-        case FilenameColumn:
-            return tr("Filename");
-        case TrackColumn:
-            return tr("Track");
-        case InterpretColumn:
-            return tr("Interpret");
-        case TracknameColumn:
-            return tr("Track Name");
-        case AlbumColumn:
-            return tr("Album");
-        case GenreColumn:
-            return tr("Genre");
-        case YearColumn:
-            return tr("Year");
-        case BitrateColumn:
-            return tr("Bitrate");
-        case LengthColumn:
-            return tr("Length");
-        default:
-            QVariant();
+    if (role == Qt::DisplayRole) {
+        switch (section) {
+            case FilenameColumn:
+                return tr("Filename");
+            case TrackColumn:
+                return tr("Track");
+            case InterpretColumn:
+                return tr("Interpret");
+            case TracknameColumn:
+                return tr("Track Name");
+            case AlbumColumn:
+                return tr("Album");
+            case GenreColumn:
+                return tr("Genre");
+            case YearColumn:
+                return tr("Year");
+            case BitrateColumn:
+                return tr("Bitrate");
+            case LengthColumn:
+                return tr("Length");
+        }
     }
 
-    return QVariant();
+    return QAbstractItemModel::headerData(section, orientation, role);
 }
 
 QModelIndex PlaylistModel::index(int row, int column, const QModelIndex &parent) const
