@@ -96,21 +96,18 @@ void PlaylistPopulator::expandPlaylist(const QString &filename)
 
     QStringList files;
 
-    char buf[1024];
     qint64 lineLength;
-    do {
-        lineLength = file.readLine(buf, sizeof(buf));
-        if (lineLength != -1) {
-            QString filepath = playlistDir.absoluteFilePath(buf).remove("\n", Qt::CaseInsensitive);
-            if (filepath.length() > 0)
-                files << filepath;
+    while (!file.atEnd()) {
+        const QByteArray line = file.readLine();
+        const QString filepath = playlistDir.absoluteFilePath(line).remove("\n", Qt::CaseInsensitive);
+        if (!filepath.isEmpty()) {
+            files << filepath;
         }
-    } while (lineLength > -1);
+    }
 
     file.close();
 
-    files.append(m_files);
-    m_files = files;
+    m_files.prepend(files);
 }
 
 Player::MetaData PlaylistPopulator::getFileMetaData(const QString &file)
