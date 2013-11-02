@@ -34,6 +34,7 @@ class PlaylistModel::Node
     Node():
         track(0),
         year(0),
+        duration(0),
         bitrate(0),
         randomOrder(0)
     {
@@ -98,7 +99,7 @@ QVariant PlaylistModel::data(const QModelIndex &index, int role) const
             case YearColumn:
                 return node->year;
             case LengthColumn:
-                return node->duration;
+                return node->formattedLength;
             case BitrateColumn:
                 return QString::fromLatin1("%1 kbps").arg(node->bitrate);
             case RandomOrderColumn:
@@ -118,20 +119,34 @@ bool PlaylistModel::setData(const QModelIndex &index, const QVariant &value, int
     switch (index.column()) {
         case FilenameColumn:
             node->filename = value.toString();
+            break;
         case TrackColumn:
             node->track = value.toInt();
+            break;
         case InterpretColumn:
             node->interpret = value.toString();
+            break;
         case TracknameColumn:
             node->trackname = value.toString();
+            break;
         case AlbumColumn:
             node->album = value.toString();
+            break;
         case GenreColumn:
             node->genre = value.toString();
+            break;
         case YearColumn:
             node->year = value.toInt();
+            break;
+        case LengthColumn:
+            node->duration = value.toInt();
+            break;
+        case BitrateColumn:
+            node->bitrate = value.toInt();
+            break;
         case RandomOrderColumn:
             node->randomOrder = value.toInt();
+            break;
     }
 
     return true;

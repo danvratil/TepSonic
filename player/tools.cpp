@@ -22,45 +22,31 @@
 
 #include "tools.h"
 
-QString formatTimestamp(qint64 time)
+QString formatTimestamp(qint64 time, bool omitHour)
 {
     int weeks = time / 604800;
-    int days = (time - (weeks*604800))/ 86400;
-    int hours = (time - (weeks*604800) - (days*86400))/ 3600;
-    int mins = (time - (weeks*604800) - (days*86400) - (hours*3600))/60;
+    int days = (time - (weeks*604800)) / 86400;
+    int hours = (time - (weeks*604800) - (days*86400)) / 3600;
+    int mins = (time - (weeks*604800) - (days*86400) - (hours*3600)) / 60;
     int secs = time - (weeks*604800) - (days*86400) - (hours*3600) - (mins*60);
 
-    QString sWeeks;
-    QString sDays;
-    QString sHours;
-    QString sMins;
-    QString sSecs;
+    QString string;
 
     if (weeks > 0) {
-        sWeeks = QObject::tr("%n week(s)","",weeks).append(" ");
+        string += QObject::tr("%n week(s)","",weeks).append(" ");
     }
     if (days > 0) {
-        sDays = QObject::tr("%n day(s)","",days).append(" ");
+        string += QObject::tr("%n day(s)","",days).append(" ");
     }
 
-    if (hours<10) {
-        sHours = QString("0").append(QString::number(hours));
-    } else {
-        sHours = QString::number(hours);
-    }
-    if (hours == 0) sHours = QString("00");
-    if (mins<10) {
-        sMins = QString("0").append(QString::number(mins));
-    } else {
-        sMins = QString::number(mins);
-    }
-    if (secs<10) {
-        sSecs = QString("0").append(QString::number(secs));
-    } else {
-        sSecs = QString::number(secs);
+    if (!omitHour) {
+        string += QString::fromLatin1("%1:").arg(hours, 2, 10, QLatin1Char('0'));
     }
 
-    return sWeeks+sDays+sHours+":"+sMins+":"+sSecs;
+    string += QString::fromLatin1("%1:").arg(mins, 2, 10, QLatin1Char('0'));
+    string += QString::fromLatin1("%1").arg(secs, 2, 10, QLatin1Char('0'));
+
+    return string;
 }
 
 QString formatMilliseconds(qint64 msecs, bool forceHours)

@@ -28,7 +28,7 @@
   \param time timestamp to parse
   \return Returns formatted time
 */
-QString formatTimestamp(qint64 time);
+QString formatTimestamp(qint64 time, bool omitHour = false);
 
 
 //! Parses given time in milliseconds
