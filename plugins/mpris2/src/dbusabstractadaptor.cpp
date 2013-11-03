@@ -69,7 +69,7 @@ void DBusAbstractAdaptor::_m_emitPropertiesChanged()
         QDBusMessage signal = QDBusMessage::createSignal(QLatin1String("/org/mpris/MediaPlayer2"),
                                 QLatin1String("org.freedesktop.DBus.Properties"),
                                 QLatin1String("PropertiesChanged"));
-        signal << metaObject()->classInfo(ifaceIndex).value();
+        signal << QLatin1String(metaObject()->classInfo(ifaceIndex).value());
         signal << m_updatedProperties;
         signal << m_invalidatedProperties;
         QDBusConnection::sessionBus().send(signal);

@@ -40,12 +40,12 @@ MPRIS2Plugin::~MPRIS2Plugin()
 
 void MPRIS2Plugin::init()
 {
-    QString serviceName("org.mpris.MediaPlayer2.TepSonic");
+    QString serviceName = QString::fromLatin1("org.mpris.MediaPlayer2.TepSonic");
 
     bool success = QDBusConnection::sessionBus().registerService(serviceName);
 
     if (!success) {
-        serviceName = serviceName + ".instance" + QString::number(getpid());
+        serviceName = serviceName + QLatin1String(".instance") + QString::number(getpid());
         success = QDBusConnection::sessionBus().registerService(serviceName);
     }
 

@@ -39,15 +39,12 @@
 
 
 namespace LastFm {
-
     namespace Global {
-
         QString api_key;
         QString session_key;
         QString secret_key;
         QString token;
         QString username;
-
     }
 }
 
@@ -68,7 +65,6 @@ LastFm::Scrobbler::Scrobbler():
         m_auth->getSession();
 }
 
-
 LastFm::Scrobbler::~Scrobbler()
 {
     m_ready = false;
@@ -77,7 +73,6 @@ LastFm::Scrobbler::~Scrobbler()
     delete m_auth;
 }
 
-
 void LastFm::Scrobbler::setSession(QString key, QString username)
 {
     LastFm::Global::session_key = key;
@@ -85,31 +80,27 @@ void LastFm::Scrobbler::setSession(QString key, QString username)
     m_ready = true;
 }
 
-
 void LastFm::Scrobbler::scrobble()
 {
-    if (m_currentTrack)
+    if (m_currentTrack) {
         m_currentTrack->scrobble();
-    else
+    } else {
         m_cache->submit();
+    }
 }
-
 
 void LastFm::Scrobbler::scrobble(LastFm::Track *track)
 {
     track->scrobble();
 }
 
-
-
 void LastFm::Scrobbler::nowPlaying(LastFm::Track *track)
 {
     m_currentTrack = track;
-    if (track)
+    if (track) {
         track->nowPlaying();
+    }
 }
-
-
 
 void LastFm::Scrobbler::raiseError(int code)
 {
@@ -127,23 +118,23 @@ void LastFm::Scrobbler::raiseError(int code)
         errmsg = tr("Invalid server response");
         break;
     case 2:
-        errmsg = "Invalid service - This service does not exist";
+        errmsg = QLatin1String("Invalid service - This service does not exist");
         break;
     case 3:
-        errmsg = "Invalid Method - No method with that name in this package";
+        errmsg = QLatin1String("Invalid Method - No method with that name in this package");
         break;
     case 4:
         //errmsg = "Authentication Failed - You do not have permissions to access the service";
         errmsg = tr("Authentication Failed - Please try to obtain a new token in TepSonic -> Settings -> Plugins -> Last.Fm");
         break;
     case 5:
-        errmsg = "Invalid format - This service doesn't exist in that format";
+        errmsg = QLatin1String("Invalid format - This service doesn't exist in that format");
         break;
     case 6:
-        errmsg = "Invalid parameters - Your request is missing a required parameter";
+        errmsg = QLatin1String("Invalid parameters - Your request is missing a required parameter");
         break;
     case 7:
-        errmsg = "Invalid resource specified";
+        errmsg = QLatin1String("Invalid resource specified");
         break;
     case 9:
         // Don't tell anything about this, try to re-authenticate
@@ -152,7 +143,7 @@ void LastFm::Scrobbler::raiseError(int code)
         return;
         break;
     case 10:
-        errmsg = "Invalid API key - You must be granted a valid key by last.fm";
+        errmsg = QLatin1String("Invalid API key - You must be granted a valid key by last.fm");
         break;
     case 11: // Service Offline - This service is temporarily offline. Try again later.
     case 16: // There was a temporary error processing your request. Please try again
@@ -160,17 +151,15 @@ void LastFm::Scrobbler::raiseError(int code)
         return;
         break;
     case 13:
-        errmsg = "Invalid method signature supplied";
+        errmsg = QLatin1String("Invalid method signature supplied");
         break;
     case 26:
-        errmsg = "Suspended API key - Access for your account has been suspended, please contact Last.fm";
+        errmsg = QLatin1String("Suspended API key - Access for your account has been suspended, please contact Last.fm");
         break;
     }
 
     emit error(errmsg, code);
-
 }
-
 
 QString LastFm::Scrobbler::getRequestSignature(QUrl request)
 {
@@ -182,24 +171,20 @@ QString LastFm::Scrobbler::getRequestSignature(QUrl request)
     url.setQueryItems(list);
     // convert name1=value1&name2=value2... to name1value1name2value2
     QString str = url.toString();
-    str.remove(url.queryPairDelimiter());
-    str.remove(url.queryValueDelimiter());
-    str.remove(0,1); // remove trailing "?"
+    str.remove(QLatin1Char(url.queryPairDelimiter()));
+    str.remove(QLatin1Char(url.queryValueDelimiter()));
+    str.remove(0, 1); // remove trailing "?"
     str.append(LastFm::Global::secret_key);
     QByteArray ba;
-    ba.append(str);
+    ba.append(str.toLatin1());
 
-    return QString(QCryptographicHash::hash(ba, QCryptographicHash::Md5).toHex());
-
+    return QString::fromLatin1(QCryptographicHash::hash(ba, QCryptographicHash::Md5).toHex());
 }
-
-
 
 LastFm::Auth::Auth(LastFm::Scrobbler *scrobbler):
         m_scrobbler(scrobbler)
 {
 }
-
 
 /** Documentation: http://www.last.fm/api/show?service=265 */
 void LastFm::Auth::getToken()
@@ -207,10 +192,10 @@ void LastFm::Auth::getToken()
     QNetworkRequest request;
     QUrl url;
 
-    url.setUrl("http://ws.audioscrobbler.com/2.0/");
-    url.addQueryItem("api_key", LastFm::Global::api_key);
-    url.addQueryItem("method", "auth.getToken");
-    url.addQueryItem("api_sig", LastFm::Scrobbler::getRequestSignature(url));
+    url.setUrl(QLatin1String("http://ws.audioscrobbler.com/2.0/"));
+    url.addQueryItem(QLatin1String("api_key"), LastFm::Global::api_key);
+    url.addQueryItem(QLatin1String("method"), QLatin1String("auth.getToken"));
+    url.addQueryItem(QLatin1String("api_sig"), LastFm::Scrobbler::getRequestSignature(url));
     request.setUrl(url.toString());
 
     QNetworkAccessManager *nam = new QNetworkAccessManager();
@@ -223,10 +208,9 @@ void LastFm::Auth::getToken()
     qDebug() << "Requesting new token...";
 }
 
-
 void LastFm::Auth::slotGotToken(QNetworkReply *reply)
 {
-    int status = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+    const int status = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
     if (status != 200)
     {
         qDebug() << "Token request failed, http error" << status;
@@ -234,43 +218,39 @@ void LastFm::Auth::slotGotToken(QNetworkReply *reply)
         return;
     }
 
-
     // Read the XML document
     QDomDocument document;
     document.setContent(reply->readAll());
 
     // <lfm status="ok/failed">
-    QDomElement lfm = document.documentElement();
-    if (lfm.attribute("status", "") == "ok") {
-
-        QDomElement token = lfm.childNodes().at(0).toElement();
-        if (token.tagName() == "token")
+    const QDomElement lfm = document.documentElement();
+    if (lfm.attribute(QLatin1String("status")) == QLatin1String("ok")) {
+        const QDomElement token = lfm.childNodes().at(0).toElement();
+        if (token.tagName() == QLatin1String("token")) {
             emit gotToken(token.childNodes().at(0).nodeValue());
-
+        }
         qDebug() << "Successfully recieved new token";
-
     } else {
-
         // <error code="errCode">
-        QDomElement error = lfm.childNodes().at(0).toElement();
-        if (error.tagName() == "error")
-            m_scrobbler->raiseError(error.attribute("code", 0).toInt());
+        const QDomElement error = lfm.childNodes().at(0).toElement();
+        if (error.tagName() == QLatin1String("error")) {
+            m_scrobbler->raiseError(error.attribute(QLatin1String("code")).toInt());
+        }
 
         qDebug() << "Failed to obtain new token: " << error.nodeValue();
     }
 }
-
 
 void LastFm::Auth::getSession()
 {
     QNetworkRequest request;
     QUrl url;
 
-    url.setUrl("http://ws.audioscrobbler.com/2.0/");
-    url.addQueryItem("api_key", LastFm::Global::api_key);
-    url.addQueryItem("method", "auth.getSession");
-    url.addQueryItem("token", LastFm::Global::token);
-    url.addQueryItem("api_sig", LastFm::Scrobbler::getRequestSignature(url));
+    url.setUrl(QLatin1String("http://ws.audioscrobbler.com/2.0/"));
+    url.addQueryItem(QLatin1String("api_key"), LastFm::Global::api_key);
+    url.addQueryItem(QLatin1String("method"), QLatin1String("auth.getSession"));
+    url.addQueryItem(QLatin1String("token"), LastFm::Global::token);
+    url.addQueryItem(QLatin1String("api_sig"), LastFm::Scrobbler::getRequestSignature(url));
     request.setUrl(url.toString());
 
     QNetworkAccessManager *nam = new QNetworkAccessManager(this);
@@ -283,10 +263,9 @@ void LastFm::Auth::getSession()
     qDebug() << "Requesting new session key...";
 }
 
-
 void LastFm::Auth::slotGotSession(QNetworkReply *reply)
 {
-    int status = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+    const int status = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
     if (status != 200)
     {
         qDebug() << "Session key request failed, http error" << status;
@@ -299,13 +278,12 @@ void LastFm::Auth::slotGotSession(QNetworkReply *reply)
     QDomDocument document;
     document.setContent(reply->readAll());
 
-
     // <lfm status="ok/failed">
-    QDomElement lfm = document.documentElement();
-    if (lfm.attribute("status","") == "ok") {
+    const QDomElement lfm = document.documentElement();
+    if (lfm.attribute(QLatin1String("status")) == QLatin1String("ok")) {
 
-        QDomElement key = lfm.elementsByTagName("key").at(0).toElement();
-        QDomElement name = lfm.elementsByTagName("name").at(0).toElement();
+        const QDomElement key = lfm.elementsByTagName(QLatin1String("key")).at(0).toElement();
+        const QDomElement name = lfm.elementsByTagName(QLatin1String("name")).at(0).toElement();
         emit gotSession(key.childNodes().at(0).nodeValue(),
                         name.childNodes().at(0).nodeValue());
         LastFm::Global::session_key = key.childNodes().at(0).nodeValue();
@@ -315,15 +293,13 @@ void LastFm::Auth::slotGotSession(QNetworkReply *reply)
     } else {
 
         // <error code="errCode">
-        QDomElement error = lfm.elementsByTagName("error").at(0).toElement();
-        m_scrobbler->raiseError(error.attribute("code").toInt());
+        const QDomElement error = lfm.elementsByTagName(QLatin1String("error")).at(0).toElement();
+        m_scrobbler->raiseError(error.attribute(QLatin1String("code")).toInt());
 
         qDebug() << "Failed to obtain new session key:" << error.nodeValue();
 
     }
 }
-
-
 
 LastFm::Track::Track(LastFm::Scrobbler *scrobbler, QString artist, QString trackTitle,
                      QString album, int trackLength, QString genre, int trackNumber,
@@ -338,7 +314,6 @@ LastFm::Track::Track(LastFm::Scrobbler *scrobbler, QString artist, QString track
         m_playbackStart(playbackStart)
 {
 }
-
 
 void LastFm::Track::scrobble()
 {
@@ -355,37 +330,37 @@ void LastFm::Track::scrobble()
     m_scrobbler->setCurrentTrack(0);
 
     // Add itself to the cache
-    if (!m_scrobbler->cache())
+    if (!m_scrobbler->cache()) {
         return;
+    }
 
     m_scrobbler->cache()->add(this);
     m_scrobbler->cache()->submit();
 }
 
-
 void LastFm::Track::nowPlaying()
 {
     QNetworkRequest request;
 
-    QUrl requestUrl("http://ws.audioscrobbler.com/2.0/");
-    requestUrl.addQueryItem("method", "track.updateNowPlaying");
-    requestUrl.addQueryItem("track", m_trackTitle);
+    QUrl requestUrl(QLatin1String("http://ws.audioscrobbler.com/2.0/"));
+    requestUrl.addQueryItem(QLatin1String("method"), QLatin1String("track.updateNowPlaying"));
+    requestUrl.addQueryItem(QLatin1String("track"), m_trackTitle);
     request.setUrl(requestUrl);
 
     QByteArray data;
     QUrl params;
-    params.addQueryItem("album", m_album);
-    params.addQueryItem("api_key", LastFm::Global::api_key);
-    params.addQueryItem("artist", m_artist);
-    params.addQueryItem("duration", QString::number(m_trackLength));
-    params.addQueryItem("method", "track.updateNowPlaying");
-    params.addQueryItem("sk", LastFm::Global::session_key);
-    params.addQueryItem("token", LastFm::Global::token);
-    params.addQueryItem("track", m_trackTitle);
-    params.addQueryItem("trackNumber", QString::number(m_trackNumber));
-    params.addQueryItem("api_sig", LastFm::Scrobbler::getRequestSignature(params));
+    params.addQueryItem(QLatin1String("album"), m_album);
+    params.addQueryItem(QLatin1String("api_key"), LastFm::Global::api_key);
+    params.addQueryItem(QLatin1String("artist"), m_artist);
+    params.addQueryItem(QLatin1String("duration"), QString::number(m_trackLength));
+    params.addQueryItem(QLatin1String("method"), QLatin1String("track.updateNowPlaying"));
+    params.addQueryItem(QLatin1String("sk"), LastFm::Global::session_key);
+    params.addQueryItem(QLatin1String("token"), LastFm::Global::token);
+    params.addQueryItem(QLatin1String("track"), m_trackTitle);
+    params.addQueryItem(QLatin1String("trackNumber"), QString::number(m_trackNumber));
+    params.addQueryItem(QLatin1String("api_sig"), LastFm::Scrobbler::getRequestSignature(params));
     // Remove the trailing "?" from the params, since we are doing POST
-    data.append(params.toString().remove(0,1));
+    data.append(params.toString().remove(0, 1).toLatin1());
 
     QNetworkAccessManager *nam = new QNetworkAccessManager();
     connect(nam, SIGNAL(finished(QNetworkReply*)),
@@ -403,25 +378,24 @@ void LastFm::Track::nowPlaying()
     m_unpauseTime = m_playbackStart;
 }
 
-
 void LastFm::Track::love()
 {
     QNetworkRequest request;
-    QUrl requestUrl("http://ws.audioscrobbler.com/2.0/");
-    requestUrl.addQueryItem("method", "track.love");
-    requestUrl.addQueryItem("track", m_trackTitle);
+    QUrl requestUrl(QLatin1String("http://ws.audioscrobbler.com/2.0/"));
+    requestUrl.addQueryItem(QLatin1String("method"), QLatin1String("track.love"));
+    requestUrl.addQueryItem(QLatin1String("track"), m_trackTitle);
     request.setUrl(requestUrl);
 
     QByteArray data;
     QUrl params;
-    params.addQueryItem("api_key", LastFm::Global::api_key);
-    params.addQueryItem("artist", m_artist);
-    params.addQueryItem("method", "track.love");
-    params.addQueryItem("sk", LastFm::Global::session_key);
-    params.addQueryItem("token", LastFm::Global::token);
-    params.addQueryItem("track", m_trackTitle);
-    params.addQueryItem("api_sig", LastFm::Scrobbler::getRequestSignature(params));
-    data.append(params.toString().remove(0,1));
+    params.addQueryItem(QLatin1String("api_key"), LastFm::Global::api_key);
+    params.addQueryItem(QLatin1String("artist"), m_artist);
+    params.addQueryItem(QLatin1String("method"), QLatin1String("track.love"));
+    params.addQueryItem(QLatin1String("sk"), LastFm::Global::session_key);
+    params.addQueryItem(QLatin1String("token"), LastFm::Global::token);
+    params.addQueryItem(QLatin1String("track"), m_trackTitle);
+    params.addQueryItem(QLatin1String("api_sig"), LastFm::Scrobbler::getRequestSignature(params));
+    data.append(params.toString().remove(0, 1).toLatin1());
 
     QNetworkAccessManager *nam = new QNetworkAccessManager();
     connect(nam, SIGNAL(finished(QNetworkReply*)),
@@ -433,7 +407,6 @@ void LastFm::Track::love()
 
 }
 
-
 void LastFm::Track::pause(bool pause)
 {
     if (pause) {
@@ -443,34 +416,29 @@ void LastFm::Track::pause(bool pause)
     }
 }
 
-
 void LastFm::Track::scrobbled(QNetworkReply *reply)
 {
     QDomDocument document;
     document.setContent(reply->readAll());
 
+    const QString method = reply->request().url().queryItemValue(QLatin1String("method"));
 
-    QString method = reply->request().url().queryItemValue("method");
-
-    QDomElement lfm = document.documentElement();
-    if (lfm.attribute("status", "") == "ok") {
-        qDebug() << method << "for" << reply->request().url().queryItemValue("track") << "successfull";
-        if (method == "track.love")
+    const QDomElement lfm = document.documentElement();
+    if (lfm.attribute(QLatin1String("status")) == QLatin1String("ok")) {
+        qDebug() << method << "for" << reply->request().url().queryItemValue(QLatin1String("track")) << "successfull";
+        if (method == QLatin1String("track.love")) {
             emit loved();
-        else
+        } else {
             emit scrobbled();
-
+        }
     } else {
-        qDebug() << method << "for" << reply->request().url().queryItemValue("track") << "failed:";
+        qDebug() << method << "for" << reply->request().url().queryItemValue(QLatin1String("track")) << "failed:";
         QDomElement err = lfm.childNodes().at(0).toElement();
         qDebug() << err.childNodes().at(0).nodeValue();
 
-        m_scrobbler->raiseError(err.attribute("code", 0).toInt());
+        m_scrobbler->raiseError(err.attribute(QLatin1String("code")).toInt());
     }
 }
-
-
-
 
 LastFm::Cache::Cache(LastFm::Scrobbler *scrobbler):
         m_scrobbler(scrobbler),
@@ -479,34 +447,34 @@ LastFm::Cache::Cache(LastFm::Scrobbler *scrobbler):
     loadCache();
 }
 
-
 LastFm::Cache::~Cache()
 {
     // Submit entire cache
     submit();
 
     // Save what's left
-    QFile file(QString(_CONFIGDIR) + QDir::separator() + "lastfmcache.xml");
-    if (!file.open(QIODevice::WriteOnly))
+    QFile file(QString(_CONFIGDIR) + QDir::separator() + QLatin1String("lastfmcache.xml"));
+    if (!file.open(QIODevice::WriteOnly)) {
         return;
+    }
 
     QDomDocument document;
 
-    QDomElement rootElement = document.createElement("tracks");
+    QDomElement rootElement = document.createElement(QLatin1String("tracks"));
     document.appendChild(rootElement);
 
     for (int i = 0; i < m_cache.size(); i++)
     {
-        QDomElement trackElement = document.createElement("track");
+        QDomElement trackElement = document.createElement(QLatin1String("track"));
 
         LastFm::Track *track = m_cache.at(i);
-        trackElement.setAttribute("track", track->trackTitle());
-        trackElement.setAttribute("artist", track->artist());
-        trackElement.setAttribute("album", track->album());
-        trackElement.setAttribute("genre", track->genre());
-        trackElement.setAttribute("length", track->trackLength());
-        trackElement.setAttribute("trackNumber", track->trackNumber());
-        trackElement.setAttribute("playbackStart", track->playbackStart());
+        trackElement.setAttribute(QLatin1String("track"), track->trackTitle());
+        trackElement.setAttribute(QLatin1String("artist"), track->artist());
+        trackElement.setAttribute(QLatin1String("album"), track->album());
+        trackElement.setAttribute(QLatin1String("genre"), track->genre());
+        trackElement.setAttribute(QLatin1String("length"), track->trackLength());
+        trackElement.setAttribute(QLatin1String("trackNumber"), track->trackNumber());
+        trackElement.setAttribute(QLatin1String("playbackStart"), track->playbackStart());
 
         rootElement.appendChild(trackElement);
     }
@@ -518,57 +486,51 @@ LastFm::Cache::~Cache()
     // Delete all tracks in cache
     qDeleteAll(m_cache);
 
-    if (m_resubmitTimer)
+    if (m_resubmitTimer) {
         delete m_resubmitTimer;
+    }
 }
-
 
 void LastFm::Cache::add(LastFm::Track *track)
 {
     qDebug() << "Adding track" << track->trackTitle() << "to cache";
-    if (track)
+    if (track) {
         m_cache.append(track);
-
+    }
 }
-
 
 void LastFm::Cache::submit()
 {
     QNetworkRequest request;
-    QUrl requestUrl("http://ws.audioscrobbler.com/2.0/");
-    requestUrl.addQueryItem("method", "track.scrobble");
+    QUrl requestUrl(QLatin1String("http://ws.audioscrobbler.com/2.0/"));
+    requestUrl.addQueryItem(QLatin1String("method"), QLatin1String("track.scrobble"));
     request.setUrl(requestUrl);
     QByteArray data;
     QUrl params;
-    int items_count;
 
-    if (m_cache.size() > 40)
-        items_count = 40;
-    else
-        items_count = m_cache.size();
+    const int items_count = qMin(m_cache.size(), 40);
 
     qDebug() << "Scrobbling " << items_count << " tracks";
 
-    params.addQueryItem("api_key", LastFm::Global::api_key);
-    params.addQueryItem("method", "track.scrobble");
-    params.addQueryItem("sk", LastFm::Global::session_key);
-    params.addQueryItem("token", LastFm::Global::token);
+    params.addQueryItem(QLatin1String("api_key"), LastFm::Global::api_key);
+    params.addQueryItem(QLatin1String("method"), QLatin1String("track.scrobble"));
+    params.addQueryItem(QLatin1String("sk"), LastFm::Global::session_key);
+    params.addQueryItem(QLatin1String("token"), LastFm::Global::token);
     for (int i = 0; i <= items_count; i++)
     {
         if (m_cache.at(i)) {
-            params.addQueryItem("album["+QString::number(i)+"]", m_cache.at(i)->album());
-            params.addQueryItem("artist["+QString::number(i)+"]", m_cache.at(i)->artist());
-            params.addQueryItem("duration["+QString::number(i)+"]", QString::number(m_cache.at(i)->trackLength()));
-            params.addQueryItem("timestamp["+QString::number(i)+"]", QString::number(m_cache.at(i)->playbackStart()));
-            params.addQueryItem("track["+QString::number(i)+"]", m_cache.at(i)->trackTitle());
-            params.addQueryItem("trackNumber["+QString::number(i)+"]", QString::number(m_cache.at(i)->trackNumber()));
+            params.addQueryItem(QString::fromLatin1("album[%1]").arg(i), m_cache.at(i)->album());
+            params.addQueryItem(QString::fromLatin1("artist[%1]").arg(i), m_cache.at(i)->artist());
+            params.addQueryItem(QString::fromLatin1("duration[%1]").arg(i), QString::number(m_cache.at(i)->trackLength()));
+            params.addQueryItem(QString::fromLatin1("timestamp[%1]").arg(i), QString::number(m_cache.at(i)->playbackStart()));
+            params.addQueryItem(QString::fromLatin1("track[%1]").arg(i), m_cache.at(i)->trackTitle());
+            params.addQueryItem(QString::fromLatin1("trackNumber[%1]").arg(i), QString::number(m_cache.at(i)->trackNumber()));
         }
     }
-    params.addQueryItem("api_sig", LastFm::Scrobbler::getRequestSignature(params));
+    params.addQueryItem(QLatin1String("api_sig"), LastFm::Scrobbler::getRequestSignature(params));
     request.setAttribute(QNetworkRequest::User, QVariant(items_count));
 
-
-    data.append(params.toString().remove(0, 1));
+    data.append(params.toString().remove(0, 1).toLatin1());
 
     QNetworkAccessManager *nam = new QNetworkAccessManager();
     // When request is done, destroy the QNetworkAccessManager
@@ -579,21 +541,18 @@ void LastFm::Cache::submit()
 
     // Send the date
     nam->post(request, data);
-
 }
-
 
 void LastFm::Cache::submitted(QNetworkReply *reply)
 {
     QDomDocument document;
     document.setContent(reply->readAll());
 
-    QString method = reply->request().url().queryItemValue("method");
-
-    QDomElement lfm = document.documentElement();
-    if (lfm.attribute("status", "") == "ok") {
+    const QString method = reply->request().url().queryItemValue(QLatin1String("method"));
+    const QDomElement lfm = document.documentElement();
+    if (lfm.attribute(QLatin1String("status")) == QLatin1String("ok")) {
         qDebug() << method << "for tracks in cache successfull, removing them from cache";
-        int items_count = reply->request().attribute(QNetworkRequest::User).toInt();
+        const int items_count = reply->request().attribute(QNetworkRequest::User).toInt();
         for (int i = 0; i < items_count; i++) {
             delete m_cache.at(i);
             m_cache.removeAt(i);
@@ -604,7 +563,7 @@ void LastFm::Cache::submitted(QNetworkReply *reply)
         // destroy the timer so that it won't tick anymore
         if (m_resubmitTimer) {
             delete m_resubmitTimer;
-            m_resubmitTimer = NULL;
+            m_resubmitTimer = 0;
         }
 
     } else {
@@ -612,7 +571,7 @@ void LastFm::Cache::submitted(QNetworkReply *reply)
         QDomElement err = lfm.childNodes().at(0).toElement();
         qDebug() << err.childNodes().at(0).nodeValue();
 
-        m_scrobbler->raiseError(err.attribute("code", 0).toInt());
+        m_scrobbler->raiseError(err.attribute(QLatin1String("code")).toInt());
 
         m_resubmitTimer = new QTimer();
         // let's try again in 2 minutes
@@ -624,24 +583,25 @@ void LastFm::Cache::submitted(QNetworkReply *reply)
     }
 }
 
-
 void LastFm::Cache::loadCache()
 {
     m_cache.clear();
 
-    QFile file(QString(_CONFIGDIR) + QDir::separator() + "lastfmcache.xml");
-    if (!file.open(QIODevice::ReadOnly))
+    QFile file(QString(_CONFIGDIR) + QDir::separator() + QLatin1String("lastfmcache.xml"));
+    if (!file.open(QIODevice::ReadOnly)) {
         return;
+    }
 
     QDomDocument document;
     document.setContent(&file);
 
-    QDomElement rootElement = document.documentElement();
+    const QDomElement rootElement = document.documentElement();
     LastFm::Track *track;
 
     // Is the root element <tracks> ?
-    if (rootElement.tagName() != "tracks")
+    if (rootElement.tagName() != QLatin1String("tracks")) {
         return;
+    }
 
     QDomNode trackNode = rootElement.firstChild();
     while ( !trackNode.isNull() )
@@ -655,19 +615,19 @@ void LastFm::Cache::loadCache()
         }
 
         // Is it a <track> element?
-        if (trackEl.tagName() != "track") {
+        if (trackEl.tagName() != QLatin1String("track")) {
             trackNode = trackNode.nextSibling();
             continue;
         }
 
         track = new LastFm::Track(m_scrobbler,
-                                  trackEl.attribute("artist", ""),
-                                  trackEl.attribute("track", ""),
-                                  trackEl.attribute("album", ""),
-                                  trackEl.attribute("length", 0).toInt(),
-                                  trackEl.attribute("genre", ""),
-                                  trackEl.attribute("trackNumber", 0).toInt(),
-                                  trackEl.attribute("playbackStart", 0).toInt());
+                                  trackEl.attribute(QLatin1String("artist")),
+                                  trackEl.attribute(QLatin1String("track")),
+                                  trackEl.attribute(QLatin1String("album")),
+                                  trackEl.attribute(QLatin1String("length")).toInt(),
+                                  trackEl.attribute(QLatin1String("genre")),
+                                  trackEl.attribute(QLatin1String("trackNumber")).toInt(),
+                                  trackEl.attribute(QLatin1String("playbackStart")).toInt());
         if (track->artist().isEmpty() || track->trackTitle().isEmpty()
             || track->album().isEmpty() || track->trackLength() == 0
             || track->playbackStart() == 0) {

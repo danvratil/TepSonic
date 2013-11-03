@@ -47,7 +47,7 @@ bool MPRISMediaPlayer2::hasTrackList() const
 
 QString MPRISMediaPlayer2::identity() const
 {
-    return "TepSonic";
+    return QLatin1String("TepSonic");
 }
 
 bool MPRISMediaPlayer2::canSetFullscreen() const
@@ -62,7 +62,7 @@ bool MPRISMediaPlayer2::fullscreen() const
 
 QStringList MPRISMediaPlayer2::supportedUriSchemes() const
 {
-    return QStringList() << "file";
+    return QStringList() << QLatin1String("file");
 }
 
 QStringList MPRISMediaPlayer2::supportedMimeTypes() const

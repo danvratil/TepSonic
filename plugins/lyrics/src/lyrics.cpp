@@ -41,13 +41,16 @@ LyricsPlugin::LyricsPlugin()
 {
     setHasConfigUI(false);
 
-    QString locale = QLocale::system().name();
+    const QString locale = QLocale::system().name();
     _translator = new QTranslator(this);
 
-    QString dataDir = QLatin1String(PKGDATADIR);
-    QString localeDir = dataDir + QDir::separator() + "tepsonic" + QDir::separator() +  "locale" + QDir::separator() + "lyricsplugin";
+    const QString dataDir = QLatin1String(PKGDATADIR);
+    const QString localeDir = dataDir
+            + QDir::separator() + QLatin1String("tepsonic")
+            + QDir::separator() +  QLatin1String("locale")
+            + QDir::separator() + QLatin1String("lyricsplugin");
 
-    _translator->load("lyricsplugin_"+locale,localeDir);
+    _translator->load(QLatin1String("lyricsplugin_") + locale, localeDir);
     qApp->installTranslator(_translator);
 
     connect(Player::instance(), SIGNAL(trackChanged(Player::MetaData)),
@@ -61,7 +64,6 @@ LyricsPlugin::~LyricsPlugin()
 void LyricsPlugin::init()
 {
 }
-
 
 bool LyricsPlugin::setupPane(QWidget *widget, QString &label)
 {
@@ -99,7 +101,9 @@ bool LyricsPlugin::setupPane(QWidget *widget, QString &label)
 
 void LyricsPlugin::trackChanged(const Player::MetaData &trackData)
 {
-    QUrl url("http://webservices.lyrdb.com/lookup.php?q="+trackData.artist+"|"+trackData.title+"&for=match&agent=TepSonic");
+    const QUrl url(QLatin1String("http://webservices.lyrdb.com/lookup.php?q=")
+                    + trackData.artist + QLatin1String("|")
+                    + trackData.title + QLatin1String("&for=match&agent=TepSonic"));
 
     QNetworkRequest req(url);
     QNetworkAccessManager *nam = new QNetworkAccessManager();
@@ -112,14 +116,15 @@ void LyricsPlugin::trackChanged(const Player::MetaData &trackData)
 
 void LyricsPlugin::loadLyrics(const QModelIndex &index)
 {
-    if (!index.isValid())
+    if (!index.isValid()) {
         return;
+    }
 
     m_listWidget->setCurrentIndex(index);
 
-    QString trackID = index.data(Qt::UserRole).toString();
+    const QString trackID = index.data(Qt::UserRole).toString();
 
-    QUrl url("http://webservices.lyrdb.com/getlyr.php?q="+trackID);
+    const QUrl url(QLatin1String("http://webservices.lyrdb.com/getlyr.php?q=") + trackID);
     QNetworkRequest req(url);
     QNetworkAccessManager *nam = new QNetworkAccessManager();
     connect(nam, SIGNAL(finished(QNetworkReply*)),
@@ -129,11 +134,10 @@ void LyricsPlugin::loadLyrics(const QModelIndex &index)
     nam->get(req);
 }
 
-
 void LyricsPlugin::lyricsInfoRetrieved(QNetworkReply *reply)
 {
     // Parse lyrics URL from the reply
-    int status = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+    const int status = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
 
     if (status != 200) {
         setError(status);
@@ -142,15 +146,15 @@ void LyricsPlugin::lyricsInfoRetrieved(QNetworkReply *reply)
 
     m_listWidget->clear();
 
-    QString tracks = reply->readAll();
-    QStringList tracks_list = tracks.split(QChar(10));
+    const QString tracks = QString::fromLatin1(reply->readAll());
+    const QStringList tracks_list = tracks.split(QChar(10));
 
     if ((tracks_list.size() == 0 ||
         (tracks_list.size() == 1 && tracks_list.at(0).isEmpty())) &&
-        reply->url().queryItemValue("for") != "fullt")
+        reply->url().queryItemValue(QLatin1String("for")) != QLatin1String("fullt"))
     {
-        QString track_name = reply->url().queryItemValue("q").replace("|", " - ");
-        QUrl url("http://webservices.lyrdb.com/lookup.php?q="+track_name+"&for=fullt&agent=TepSonic");
+        const QString track_name = reply->url().queryItemValue(QLatin1String("q")).replace(QLatin1Char('|'), QLatin1String(" - "));
+        const QUrl url(QLatin1String("http://webservices.lyrdb.com/lookup.php?q=") + track_name + QLatin1String("&for=fullt&agent=TepSonic"));
 
         qDebug() << url;
 
@@ -166,10 +170,12 @@ void LyricsPlugin::lyricsInfoRetrieved(QNetworkReply *reply)
 
     Q_FOREACH (const QString &track, tracks_list)
     {
-        QStringList info = track.split("\\");
-        if (info.size() != 3) continue;
+        const QStringList info = track.split(QLatin1Char('\\'));
+        if (info.size() != 3) {
+            continue;
+        }
 
-        QListWidgetItem *item = new QListWidgetItem (info.at(2)+" - "+info.at(1), m_listWidget);
+        QListWidgetItem *item = new QListWidgetItem (info.at(2) + QLatin1String(" - ") + info.at(1), m_listWidget);
         item->setData(Qt::UserRole, info.at(0));
         m_listWidget->addItem(item);
     }
@@ -179,17 +185,17 @@ void LyricsPlugin::lyricsInfoRetrieved(QNetworkReply *reply)
 
 void LyricsPlugin::lyricsPageRetrieved(QNetworkReply *reply)
 {
-    int status = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+    const int status = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
 
     if (status != 200) {
         setError(status);
         return;
     }
 
-    QString lyrics = reply->readAll();
-    lyrics.prepend("<h2>"+m_listWidget->currentItem()->text()+"</h2>");
-    lyrics.replace(QChar(10), "<br>");
-    lyrics.append("<br><br><i>Powered by <a href=\"http://www.lyrdb.com\">LYRDB.com</a></i>");
+    QString lyrics = QString::fromLatin1(reply->readAll());
+    lyrics.prepend(QLatin1String("<h2>") + m_listWidget->currentItem()->text() + QLatin1String("</h2>"));
+    lyrics.replace(QChar(10), QLatin1String("<br>"));
+    lyrics.append(QLatin1String("<br><br><i>Powered by <a href=\"http://www.lyrdb.com\">LYRDB.com</a></i>"));
 
     m_label->setText(lyrics);
     m_label->adjustSize();
