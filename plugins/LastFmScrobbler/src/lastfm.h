@@ -123,7 +123,7 @@ namespace LastFm {
             /** Set new current track **/
             void setCurrentTrack(LastFm::Track* track) { m_currentTrack = track; }
 
-        private slots:
+        private Q_SLOTS:
 
             /** Called when LastFm::Auth::gotSession() is emitted */
             void setSession(QString key, QString username);
@@ -134,7 +134,7 @@ namespace LastFm {
             bool m_ready;
             LastFm::Track *m_currentTrack;
 
-        signals:
+        Q_SIGNALS:
 
             void error(QString message, int code);
 
@@ -159,7 +159,7 @@ namespace LastFm {
 
             ~Auth() {}
 
-        public slots:
+        public Q_SLOTS:
 
             /** Requests a new token. This token is valid until revoked or replaced. Use this method,
               * to request the token. When token is recieved, gotToken() signal is emitted passing the
@@ -173,7 +173,7 @@ namespace LastFm {
               */
             void getSession();
 
-        private slots:
+        private Q_SLOTS:
             void slotGotToken(QNetworkReply*);
 
             void slotGotSession(QNetworkReply*);
@@ -181,7 +181,7 @@ namespace LastFm {
         private:
             LastFm::Scrobbler *m_scrobbler;
 
-        signals:
+        Q_SIGNALS:
 
             /** Emitted when a new token is recieved. */
             void gotToken(QString token);
@@ -236,7 +236,7 @@ namespace LastFm {
 
 
 
-        public slots:
+        public Q_SLOTS:
 
             /** Scrobble the track to Last.fm. When scrobbling fails, the item is held in cache
               * and is submitted after some time.
@@ -263,7 +263,7 @@ namespace LastFm {
             void pause(bool pause);
 
 
-        signals:
+        Q_SIGNALS:
             /** This signal is emitted when the track is scrobbled */
             void scrobbled();
 
@@ -288,7 +288,7 @@ namespace LastFm {
             uint m_unpauseTime;
 
 
-        private slots:
+        private Q_SLOTS:
 
             void scrobbled(QNetworkReply*);
 
@@ -313,7 +313,7 @@ namespace LastFm {
 
             ~Cache();
 
-        public slots:
+        public Q_SLOTS:
 
             /** Add a track to the cache. */
             void add(LastFm::Track *track);

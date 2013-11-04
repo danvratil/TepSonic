@@ -142,10 +142,10 @@ void CollectionBuilder::run()
     /* If anything has changed in collections, this signal will
         cause CollectionBrowser to be repopulated */
     if (collectionsChanged) {
-        emit collectionChanged();
+        Q_EMIT collectionChanged();
     }
 
-    emit buildingFinished();
+    Q_EMIT buildingFinished();
 }
 
 void CollectionBuilder::rebuildFolder(const QStringList &folder)

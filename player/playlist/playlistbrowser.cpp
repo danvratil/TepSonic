@@ -105,7 +105,7 @@ void PlaylistBrowser::invalidateIndex(const QModelIndex &index)
     if (index.isValid()) {
         const QModelIndex left = index.sibling(index.row(), 0);
         const QModelIndex right = index.sibling(index.row(), model()->columnCount() - 1);
-        emit dataChanged(left, right);
+        Q_EMIT dataChanged(left, right);
     }
 }
 
@@ -293,7 +293,7 @@ void PlaylistBrowser::keyPressEvent(QKeyEvent *event)
         case Qt::Key_Enter:  // key ENTER (on numeric keypad)
         case Qt::Key_Return: { // Key ENTER
             setNowPlaying(currentIndex());
-            emit doubleClicked(currentIndex());
+            Q_EMIT doubleClicked(currentIndex());
             event->accept();
             return;
         }

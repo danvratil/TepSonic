@@ -158,7 +158,7 @@ void LastFm::Scrobbler::raiseError(int code)
         break;
     }
 
-    emit error(errmsg, code);
+    Q_EMIT error(errmsg, code);
 }
 
 QString LastFm::Scrobbler::getRequestSignature(QUrl request)
@@ -227,7 +227,7 @@ void LastFm::Auth::slotGotToken(QNetworkReply *reply)
     if (lfm.attribute(QLatin1String("status")) == QLatin1String("ok")) {
         const QDomElement token = lfm.childNodes().at(0).toElement();
         if (token.tagName() == QLatin1String("token")) {
-            emit gotToken(token.childNodes().at(0).nodeValue());
+            Q_EMIT gotToken(token.childNodes().at(0).nodeValue());
         }
         qDebug() << "Successfully recieved new token";
     } else {
@@ -284,7 +284,7 @@ void LastFm::Auth::slotGotSession(QNetworkReply *reply)
 
         const QDomElement key = lfm.elementsByTagName(QLatin1String("key")).at(0).toElement();
         const QDomElement name = lfm.elementsByTagName(QLatin1String("name")).at(0).toElement();
-        emit gotSession(key.childNodes().at(0).nodeValue(),
+        Q_EMIT gotSession(key.childNodes().at(0).nodeValue(),
                         name.childNodes().at(0).nodeValue());
         LastFm::Global::session_key = key.childNodes().at(0).nodeValue();
 
@@ -427,9 +427,9 @@ void LastFm::Track::scrobbled(QNetworkReply *reply)
     if (lfm.attribute(QLatin1String("status")) == QLatin1String("ok")) {
         qDebug() << method << "for" << reply->request().url().queryItemValue(QLatin1String("track")) << "successfull";
         if (method == QLatin1String("track.love")) {
-            emit loved();
+            Q_EMIT loved();
         } else {
-            emit scrobbled();
+            Q_EMIT scrobbled();
         }
     } else {
         qDebug() << method << "for" << reply->request().url().queryItemValue(QLatin1String("track")) << "failed:";

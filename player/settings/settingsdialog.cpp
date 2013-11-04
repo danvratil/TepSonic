@@ -64,7 +64,7 @@ SettingsDialog::SettingsDialog(MainWindow *parent):
     m_pages.insert(SHORTCUTS_PAGE, new SettingsPages::ShortcutsPage);
 
     QSettings settings(QString(_CONFIGDIR) + QLatin1String("/main.conf"), QSettings::IniFormat, this);
-    foreach (SettingsPage * page, m_pages) {
+    Q_FOREACH (SettingsPage * page, m_pages) {
         m_ui->pages->addWidget(page);
         page->loadSettings(&settings);
     }

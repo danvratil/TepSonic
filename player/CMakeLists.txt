@@ -49,7 +49,6 @@ set(player_SRCS
     bookmarks/bookmarksitem.cpp
     bookmarks/bookmarksmanager.cpp
     bookmarks/addbookmarkdlg.cpp
-    ${QXT_SOURCES}
 )
 
 set(player_QUIS
