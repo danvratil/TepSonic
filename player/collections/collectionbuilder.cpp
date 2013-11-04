@@ -49,103 +49,103 @@ CollectionBuilder::CollectionBuilder():
 
 void CollectionBuilder::run()
 {
-    if (!m_folders.isEmpty()) {
-        Q_EMIT buildingStarted();
+    DatabaseManager *dbManager = DatabaseManager::instance();
+    if (m_folders.isEmpty() || !dbManager->connectionAvailable()) {
+        Q_EMIT buildingFinished();
+        return;
+    }
 
-        bool collectionsChanged = false;
+    Q_EMIT buildingStarted();
 
-        DatabaseManager *dbManager=  DatabaseManager::instance();
-        if (dbManager->connectionAvailable() || dbManager->connectToDB()) {
-            qDebug() << "Starting collections update...";
+    bool collectionsChanged = false;
+    qDebug() << "Starting collections update...";
 
-            QFileInfo fileInfo;
-            // List of files in database
-            QHash<QString, uint> dbFiles;
-            const QStringList filters = SupportedFormats::getExtensionList();
-            {
-                // Populate dbFiles map by ALL tracks from db
-                QSqlQuery query("SELECT filename, mtime FROM tracks WHERE filename LIKE '" + m_folders.first() + "%';",
-                                dbManager->sqlDb());
-                while (query.next()) {
-                    dbFiles.insert(query.value(0).toString(), query.value(1).toUInt());
+    QFileInfo fileInfo;
+    // List of files in database
+    QHash<QString, uint> dbFiles;
+    const QStringList filters = SupportedFormats::getExtensionList();
+    {
+        // Populate dbFiles map by ALL tracks from db
+        QSqlQuery query(dbManager->sqlDb());
+        query.prepare(QLatin1String("SELECT filename, mtime FROM tracks WHERE filename LIKE :folder"));
+        query.bindValue(QLatin1String(":folder"), m_folders.first() + QLatin1Char('%'));
+        query.exec();
+        while (query.next()) {
+            dbFiles.insert(query.value(0).toString(), query.value(1).toUInt());
+        }
+    }
+
+    /* We don't need to do transaction on MySQL.
+       On SQLite it makes it MUCH faster because otherwise SQLite will commit
+       every INSERT individually and that makes ~60 commits per second (depends on the
+       speed of harddrive) meanwhile having everything in one transaction does only one
+       disk write and therefore writing data into the SQLite database takes < 1 second
+       (with separate transactions it takes tens of minutes...) */
+    if (dbManager->driverType() == DatabaseManager::SQLite) {
+        QSqlQuery(QLatin1String("BEGIN TRANSACTION;"), dbManager->sqlDb());
+    }
+
+    QHash<QString, int> atirts;
+    do {
+        QDir dirlist(m_folders.takeFirst());
+        dirlist.setNameFilters(filters);
+
+        QDirIterator dirIterator(dirlist, QDirIterator::Subdirectories);
+        while (dirIterator.hasNext()) {
+            dirIterator.next();
+            fileInfo = dirIterator.fileInfo();
+            if (fileInfo.isFile()) {
+                // If the file is not in database then insert
+                if (!dbFiles.contains(fileInfo.filePath())) {
+                    insertTrack(fileInfo.absoluteFilePath());
+                    dbFiles.remove(fileInfo.filePath());
+                    collectionsChanged = true;
                 }
-            }
 
-            /* We don't need to do transaction on MySQL.
-               On SQLite it makes it MUCH faster because otherwise SQLite will commit
-               every INSERT individually and that makes ~60 commits per second (depends on the
-               speed of harddrive) meanwhile having everything in one transaction does only one
-               disk write and therefore writing data into the SQLite database takes < 1 second
-               (with separate transactions it takes tens of minutes...) */
-            if (dbManager->driverType() == DatabaseManager::SQLite) {
-                QSqlQuery("BEGIN TRANSACTION;", dbManager->sqlDb());
-            }
-
-            do {
-                QDir dirlist(m_folders.takeFirst());
-                dirlist.setNameFilters(filters);
-
-                QDirIterator dirIterator(dirlist, QDirIterator::Subdirectories);
-                while (dirIterator.hasNext()) {
-                    dirIterator.next();
-                    fileInfo = dirIterator.fileInfo();
-                    if (fileInfo.isFile()) {
-                        // If the file is not in database then insert
-                        if (!dbFiles.contains(fileInfo.filePath().toUtf8())) {
-                            insertTrack(fileInfo.absoluteFilePath());
-                            dbFiles.remove(fileInfo.filePath().toUtf8());
-                            collectionsChanged = true;
-                        }
-
-                        // If the file is in database but has another mtime then update it
-                        if ((dbFiles.contains(fileInfo.filePath().toUtf8())) &&
-                                (dbFiles[fileInfo.filePath().toUtf8()] != fileInfo.lastModified().toTime_t())) {
-                            updateTrack(fileInfo.absoluteFilePath());
-                            dbFiles.remove(fileInfo.filePath().toUtf8());
-                            collectionsChanged = true;
-                        }
-
-                        // If the file is in database and was not changed then do nothing and just
-                        // proclaim it processed
-                        if ((dbFiles.contains(fileInfo.filePath().toUtf8())) &&
-                                (dbFiles[fileInfo.filePath().toUtf8()] == fileInfo.lastModified().toTime_t())) {
-                            dbFiles.remove(fileInfo.filePath().toUtf8());
-                        }
-
-                    }
-
+                // If the file is in database but has another mtime then update it
+                if ((dbFiles.contains(fileInfo.filePath())) &&
+                        (dbFiles[fileInfo.filePath()] != fileInfo.lastModified().toTime_t())) {
+                    updateTrack(fileInfo.absoluteFilePath());
+                    dbFiles.remove(fileInfo.filePath());
+                    collectionsChanged = true;
                 }
-            } while (m_folders.size() > 0);
 
-            // Get files that are in DB but not on harddrive
-            QHashIterator<QString, uint> i(dbFiles);
-            while (i.hasNext()) {
-                i.next();
-                removeTrack(i.key());
-                collectionsChanged = true;
-            }
-            dbFiles.clear();
+                // If the file is in database and was not changed then do nothing and just
+                // proclaim it processed
+                if ((dbFiles.contains(fileInfo.filePath())) &&
+                        (dbFiles[fileInfo.filePath()] == fileInfo.lastModified().toTime_t())) {
+                    dbFiles.remove(fileInfo.filePath());
+                }
 
-            // Check for interprets/albums/genres... that are not used anymore
-            cleanUpDatabase();
-
-            // Now write all data to the disk
-            if (dbManager->driverType() == DatabaseManager::SQLite) {
-                QSqlQuery("COMMIT TRANSACTION;", dbManager->sqlDb());
             }
 
-            /* If anything has changed in collections, this signal will
-               cause CollectionBrowser to be repopulated */
-            if (collectionsChanged) {
-                emit collectionChanged();
-            }
+        }
+    } while (m_folders.size() > 0);
 
-        } // if (dbManager.connectToDB())
+    // Get files that are in DB but not on harddrive
+    QHashIterator<QString, uint> i(dbFiles);
+    while (i.hasNext()) {
+        i.next();
+        removeTrack(i.key());
+        collectionsChanged = true;
+    }
+    dbFiles.clear();
 
+    // Check for interprets/albums/genres... that are not used anymore
+    cleanUpDatabase();
+
+    // Now write all data to the disk
+    if (dbManager->driverType() == DatabaseManager::SQLite) {
+        QSqlQuery(QLatin1String("COMMIT TRANSACTION;"), dbManager->sqlDb());
+    }
+
+    /* If anything has changed in collections, this signal will
+        cause CollectionBrowser to be repopulated */
+    if (collectionsChanged) {
+        emit collectionChanged();
     }
 
     emit buildingFinished();
-
 }
 
 void CollectionBuilder::rebuildFolder(const QStringList &folder)
@@ -156,7 +156,7 @@ void CollectionBuilder::rebuildFolder(const QStringList &folder)
 void CollectionBuilder::insertTrack(const QString &filename)
 {
     const QFileInfo fileInfo(filename);
-    const QString fname = fileInfo.filePath().toUtf8();
+    const QString fname = fileInfo.filePath();
     const uint mtime = fileInfo.lastModified().toTime_t();
 
     const TagLib::FileRef f(fname.toLocal8Bit().constData());
@@ -168,11 +168,11 @@ void CollectionBuilder::insertTrack(const QString &filename)
     }
 
     uint trackNo = f.tag()->track();
-    QString interpret = f.tag()->artist().toCString(true);
-    QString album = f.tag()->album().toCString(true);
-    QString title = f.tag()->title().toCString(true);
+    QString interpret = QString::fromLatin1(f.tag()->artist().toCString(true));
+    QString album = QString::fromLatin1(f.tag()->album().toCString(true));
+    QString title = QString::fromLatin1(f.tag()->title().toCString(true));
     uint year = f.tag()->year();
-    QString genre = f.tag()->genre().toCString(true);
+    QString genre = QString::fromLatin1(f.tag()->genre().toCString(true));
     uint length = f.audioProperties()->length();
     int bitrate = f.audioProperties()->bitrate();
 
@@ -188,66 +188,86 @@ void CollectionBuilder::insertTrack(const QString &filename)
 
     bool albumInserted = false;
 
-    QSqlField data("col", QVariant::String);
+    QSqlField data(QLatin1String("col"), QVariant::String);
     {
         data.setValue(album);
         album = DatabaseManager::instance()->sqlDb().driver()->formatValue(data, false);
-        QSqlQuery query("SELECT `id` FROM `albums` WHERE `album`=" + album + ";",
-                        DatabaseManager::instance()->sqlDb());
+        QSqlQuery query(DatabaseManager::instance()->sqlDb());
+        query.prepare(QLatin1String("SELECT `id` FROM `albums` WHERE `album`=:album"));
+        query.bindValue(QLatin1String(":album"), album);
+        query.exec();
         query.next();
         if (!query.isValid()) {
-            QSqlQuery query("INSERT INTO `albums`(`album`,`tracksCnt`,`totalLength`) "
-                            "VALUES(" + album + ",1," + QString::number(length) + ");",
-                            DatabaseManager::instance()->sqlDb());
+            QSqlQuery query(DatabaseManager::instance()->sqlDb());
+            query.prepare(QLatin1String("INSERT INTO `albums`(`album`,`tracksCnt`,`totalLength`) "
+                                        "VALUES(:album, 1, :length)"));
+            query.bindValue(QLatin1String(":album"), album);
+            query.bindValue(QLatin1String(":length"), length);
+            query.exec();
             albumInserted = true;
         } else {
             data.setValue(query.value(0).toString());
             const QString albumID = DatabaseManager::instance()->sqlDb().driver()->formatValue(data, false);
-            QSqlQuery query("UPDATE `albums` "
-                            "SET `tracksCnt`=`tracksCnt`+1,"
-                            "    `totalLength`=`totalLength`+" + QString::number(length) + " "
-                            "WHERE `id`=" + albumID + ";",
-                            DatabaseManager::instance()->sqlDb());
+            QSqlQuery query(DatabaseManager::instance()->sqlDb());
+            query.prepare(QLatin1String("UPDATE `albums` "
+                                        "SET `tracksCnt`=`tracksCnt`+1,"
+                                        "    `totalLength`=`totalLength`+:length "
+                                        "WHERE `id`=:albumId"));
+            query.bindValue(QLatin1String(":length"), length);
+            query.bindValue(QLatin1String(":albumId"), albumID.toInt());
+            query.exec();
         }
     }
 
     {
         data.setValue(genre);
         genre = DatabaseManager::instance()->sqlDb().driver()->formatValue(data, false);
-        QSqlQuery query("SELECT COUNT(*) FROM `genres` WHERE `genre`=" + genre + ";",
-                        DatabaseManager::instance()->sqlDb());
+        QSqlQuery query(DatabaseManager::instance()->sqlDb());
+        query.prepare(QLatin1String("SELECT COUNT(*) FROM `genres` WHERE `genre`=:genre"));
+        query.bindValue(QLatin1String(":genre"), genre);
+        query.exec();
         query.next();
         if (query.value(0).toInt() == 0) {
-            QSqlQuery query("INSERT INTO `genres`(`genre`) VALUES(" + genre + ");",
-                            DatabaseManager::instance()->sqlDb());
+            QSqlQuery query;
+            query.prepare(QLatin1String("INSERT INTO `genres`(`genre`) VALUES(:genre)"));
+            query.bindValue(QLatin1String(":genre"), genre);
+            query.exec();
         }
     }
 
     {
         data.setValue(interpret);
         interpret = DatabaseManager::instance()->sqlDb().driver()->formatValue(data, false);
-        QSqlQuery query("SELECT `id` FROM `interprets` WHERE `interpret`=" + interpret + ";",
-                        DatabaseManager::instance()->sqlDb());
+        QSqlQuery query(DatabaseManager::instance()->sqlDb());
+        query.prepare(QLatin1String("SELECT `id` FROM `interprets` WHERE `interpret`=:interpret"));
+        query.bindValue(QLatin1String(":interpret"), interpret);
+        query.exec();
         query.next();
         if (!query.isValid()) {
-            QSqlQuery query("INSERT INTO `interprets`(`interpret`,`albumsCnt`,`totalLength`) "
-                            "VALUES(" + interpret + ",1," + QString::number(length) + ");",
-                            DatabaseManager::instance()->sqlDb());
+            QSqlQuery query;
+            query.prepare(QLatin1String("INSERT INTO `interprets`(`interpret`,`albumsCnt`,`totalLength`) "
+                                        "VALUES(:interpret, 1, :length)")); 
+            query.bindValue(QLatin1String(":interpret"), interpret);
+            query.bindValue(QLatin1String(":length"), length);
+            query.exec();
         } else {
             QString albumsCntQuery;
             if (albumInserted) {
-                albumsCntQuery = "`albumsCnt`=`albumsCnt`+1,";
+                albumsCntQuery = QLatin1String("`albumsCnt`=`albumsCnt`+1,");
             } else {
-                albumsCntQuery = "";
+                albumsCntQuery = QLatin1String("");
             }
 
             data.setValue(query.value(0).toString());
             const QString interpretID = DatabaseManager::instance()->sqlDb().driver()->formatValue(data, false);
-            QSqlQuery query("UPDATE `interprets` "
-                            "SET " + albumsCntQuery +
-                            "    `totalLength`=`totalLength`+" + QString::number(length) + " "
-                            "WHERE `id`=" + interpretID + ";",
-                            DatabaseManager::instance()->sqlDb());
+            QSqlQuery query(DatabaseManager::instance()->sqlDb());
+            query.prepare(QLatin1String("UPDATE `interprets` "
+                                        "SET ") + albumsCntQuery +
+                                        QLatin1String("    `totalLength`=`totalLength`+:length "
+                                        "WHERE `id`= :interpretID"));
+            query.bindValue(QLatin1String(":length"), length);
+            query.bindValue(QLatin1String(":interpretID"), interpretID);
+            query.exec();
         }
     }
 
@@ -255,34 +275,43 @@ void CollectionBuilder::insertTrack(const QString &filename)
     {
         data.setValue(year);
         s_year = DatabaseManager::instance()->sqlDb().driver()->formatValue(data, false);
-        QSqlQuery query("SELECT COUNT(*) FROM `years` WHERE `year`=" + s_year + ";",
-                        DatabaseManager::instance()->sqlDb());
+        QSqlQuery query(DatabaseManager::instance()->sqlDb());
+        query.prepare(QLatin1String("SELECT COUNT(*) FROM `years` WHERE `year`=:year"));
+        query.bindValue(QLatin1String(":year"), s_year.toInt());
+        query.exec();
         query.next();
         if (query.value(0).toInt() == 0) {
-            QSqlQuery query("INSERT INTO `years`(`year`) VALUES(" + s_year + ");",
-                            DatabaseManager::instance()->sqlDb());
+            QSqlQuery query(DatabaseManager::instance()->sqlDb());
+            query.prepare(QLatin1String("INSERT INTO `years`(`year`) VALUES(:year)"));
+            query.bindValue(QLatin1String(":year"), s_year.toInt());
+            query.exec();
         }
     }
 
     {
         QSqlQuery query(DatabaseManager::instance()->sqlDb());
-        query.prepare("INSERT INTO `tracks`(`filename`,`trackname`,`track`,`length`,`interpret`,`album`,`year`,`genre`,`mtime`,`bitrate`)"
-                      "VALUES(?,"
-                      "       ?,"
-                      "       ?,"
-                      "       ?,"
-                      "       (SELECT `id` FROM `interprets` WHERE `interpret`=" + interpret + "),"
-                      "       (SELECT `id` FROM `albums` WHERE `album`=" + album + "),"
-                      "       (SELECT `id` FROM `years` WHERE `year`=" + s_year + "),"
-                      "       (SELECT `id` FROM `genres` WHERE `genre`=" + genre + "),"
-                      "       ?,"
-                      "       ?);");
-        query.addBindValue(fname);
-        query.addBindValue(title);
-        query.addBindValue(trackNo);
-        query.addBindValue(length);
-        query.addBindValue(mtime);
-        query.addBindValue(bitrate);
+        query.prepare(QLatin1String(
+                     "INSERT INTO `tracks`(`filename`,`trackname`,`track`,`length`,`interpret`,`album`,`year`,`genre`,`mtime`,`bitrate`)"
+                      "VALUES(:filename,"
+                      "       :trackname,"
+                      "       :track,"
+                      "       :length,"
+                      "       (SELECT `id` FROM `interprets` WHERE `interpret`=:interpret),"
+                      "       (SELECT `id` FROM `albums` WHERE `album`=:album),"
+                      "       (SELECT `id` FROM `years` WHERE `year`=:year),"
+                      "       (SELECT `id` FROM `genres` WHERE `genre`=:genre),"
+                      "       :mtime,"
+                      "       :bitrate);"));
+        query.bindValue(QLatin1String(":filename"), fname);
+        query.bindValue(QLatin1String(":tracnkane"), title);
+        query.bindValue(QLatin1String(":track"), trackNo);
+        query.bindValue(QLatin1String(":length"), length);
+        query.bindValue(QLatin1String(":interpret"), interpret);
+        query.bindValue(QLatin1String(":album"), album);
+        query.bindValue(QLatin1String(":year"), year);
+        query.bindValue(QLatin1String(":genre"), genre);
+        query.bindValue(QLatin1String(":mtime"), mtime);
+        query.bindValue(QLatin1String(":bitrate"), bitrate);
         query.exec();
     }
 
@@ -298,34 +327,36 @@ void CollectionBuilder::updateTrack(const QString &filename)
 void CollectionBuilder::removeTrack(const QString &filename)
 {
     const QFileInfo fileInfo(filename);
-    QString fname = fileInfo.filePath().toUtf8();
+    QString fname = fileInfo.filePath();
 
-    QSqlField data("col", QVariant::String);
+    QSqlField data(QLatin1String("col"), QVariant::String);
     data.setValue(fname);
     fname = DatabaseManager::instance()->sqlDb().driver()->formatValue(data, false);
-    QSqlQuery query("DELETE FROM `tracks` WHERE `filename`=" + fname + ";",
-                    DatabaseManager::instance()->sqlDb());
+    QSqlQuery query(DatabaseManager::instance()->sqlDb());
+    query.prepare(QLatin1String("DELETE FROM `tracks` WHERE `filename`=:filename"));
+    query.bindValue(QLatin1String(":filename"), fname);
+    query.exec();
 }
 
 void CollectionBuilder::cleanUpDatabase()
 {
     {
-        QSqlQuery query("DELETE FROM `albums` WHERE `id` NOT IN (SELECT `album` FROM `tracks` GROUP BY `album`);",
+        QSqlQuery query(QLatin1String("DELETE FROM `albums` WHERE `id` NOT IN (SELECT `album` FROM `tracks` GROUP BY `album`);"),
                         DatabaseManager::instance()->sqlDb());
     }
 
     {
-        QSqlQuery query("DELETE FROM `genres` WHERE `id` NOT IN (SELECT `genre` FROM `tracks` GROUP BY `genre`);",
+        QSqlQuery query(QLatin1String("DELETE FROM `genres` WHERE `id` NOT IN (SELECT `genre` FROM `tracks` GROUP BY `genre`);"),
                         DatabaseManager::instance()->sqlDb());
     }
 
     {
-        QSqlQuery query("DELETE FROM `interprets` WHERE `id` NOT IN (SELECT `interpret` FROM `tracks` GROUP BY `interpret`);",
+        QSqlQuery query(QLatin1String("DELETE FROM `interprets` WHERE `id` NOT IN (SELECT `interpret` FROM `tracks` GROUP BY `interpret`);"),
                         DatabaseManager::instance()->sqlDb());
     }
 
     {
-        QSqlQuery query("DELETE FROM `years` WHERE `id` NOT IN (SELECT `year` FROM `tracks` GROUP BY `year`);",
+        QSqlQuery query(QLatin1String("DELETE FROM `years` WHERE `id` NOT IN (SELECT `year` FROM `tracks` GROUP BY `year`);"),
                         DatabaseManager::instance()->sqlDb());
     }
 }

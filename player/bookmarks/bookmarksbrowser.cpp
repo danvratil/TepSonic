@@ -64,7 +64,7 @@ void BookmarksBrowser::startDrag(Qt::DropActions supportedActions)
         stream << m_booksmarkManager->getBookmarkPath(row);
     }
 
-    mimeData->setData("data/tepsonic-tracks", encodedData);
+    mimeData->setData(QLatin1String("data/tepsonic-tracks"), encodedData);
     QDrag *drag = new QDrag(this);
     drag->setMimeData(mimeData);
     drag->exec(Qt::CopyAction);

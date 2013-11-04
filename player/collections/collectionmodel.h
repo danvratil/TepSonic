@@ -36,6 +36,7 @@ class CollectionModel : public QAbstractItemModel
     class Private;
 
     enum NodeType {
+        RootNodeType,
         ArtistNodeType,
         AlbumNodeType,
         TrackNodeType
@@ -69,6 +70,9 @@ class CollectionModel : public QAbstractItemModel
     Qt::ItemFlags flags(const QModelIndex &index) const;
 
     QStringList getItemChildrenTracks(const QModelIndex &parent);
+
+    bool canFetchMore(const QModelIndex &parent) const;
+    void fetchMore(const QModelIndex &parent);
 
   public Q_SLOTS:
     void clear();

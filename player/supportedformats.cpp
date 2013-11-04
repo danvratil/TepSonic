@@ -25,10 +25,13 @@
 QStringList SupportedFormats::getExtensionList()
 {
     const QStringList availableMimeTypes = Phonon::BackendCapabilities::availableMimeTypes();
-    const QString mimes = availableMimeTypes.join(" ");
+    const QString mimes = availableMimeTypes.join(QLatin1String(" "));
 
     QStringList checkList;
-    checkList << "ac3" << "flac" << "mp3" << "mp4" << "ogg" << "wav" << "wma";
+    checkList << QLatin1String("ac3") << QLatin1String("flac")
+              << QLatin1String("mp3") << QLatin1String("mp4")
+              << QLatin1String("ogg") << QLatin1String("wav")
+              << QLatin1String("wma");
 
     //aiff, wavpack, musepack, mpeg2
 
@@ -36,37 +39,38 @@ QStringList SupportedFormats::getExtensionList()
 
     Q_FOREACH(const QString & ext, checkList) {
         if (mimes.contains(ext)) {
-            list << QString("*.%1").arg(ext);
+            list << QString::fromLatin1("*.%1").arg(ext);
         }
     }
 
-    if (mimes.contains("aiff")) {
-        list << "*.aif" << "*.aiff";
+    if (mimes.contains(QLatin1String("aiff"))) {
+        list << QLatin1String("*.aif") << QLatin1String("*.aiff");
     }
 
-    if (mimes.contains("ms-asf")) {
-        list << "*.asf";
+    if (mimes.contains(QLatin1String("ms-asf"))) {
+        list << QLatin1String("*.asf");
     }
 
-    if (mimes.contains("mpeg2")) {
-        list << "*.mp2";
+    if (mimes.contains(QLatin1String("mpeg2"))) {
+        list << QLatin1String("*.mp2");
     }
 
-    if (mimes.contains("musepack")) {
-        list << "*.mpc";
+    if (mimes.contains(QLatin1String("musepack"))) {
+        list << QLatin1String("*.mpc");
     }
 
-    if (mimes.contains("realaudio")) {
-        list << "*.ra" << "*.ram";
+    if (mimes.contains(QLatin1String("realaudio"))) {
+        list << QLatin1String("*.ra") << QLatin1String("*.ram");
     }
 
-    if (mimes.contains("wavpack")) {
-        list << "*.wv";
+    if (mimes.contains(QLatin1String("wavpack"))) {
+        list << QLatin1String("*.wv");
     }
 
     // falback
     if (list.isEmpty()) {
-        list << "*.flac" << "*.mp3" << "*.ogg" << "*.wav";
+        list << QLatin1String("*.flac") << QLatin1String("*.mp3")
+             << QLatin1String("*.ogg") << QLatin1String("*.wav");
     }
 
     return list;

@@ -95,7 +95,7 @@ void PluginsPage::loadSettings(QSettings *settings)
 
 void PluginsPage::saveSettings(QSettings *settings)
 {
-    settings->beginGroup("Plugins");
+    settings->beginGroup(QLatin1String("Plugins"));
 
     // Go through all plugins in the m_ui list
     for (int i = 0; i < m_ui->pluginsList->count(); i++) {

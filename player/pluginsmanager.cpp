@@ -78,9 +78,9 @@ PluginsManager::~PluginsManager()
 
 void PluginsManager::loadPlugins()
 {
-    QSettings settings(QString(_CONFIGDIR).append("/main.conf"),
+    QSettings settings(QString(_CONFIGDIR).append(QLatin1String("/main.conf")),
                        QSettings::IniFormat);
-    settings.beginGroup("Plugins");
+    settings.beginGroup(QLatin1String("Plugins"));
 
     QDir pluginsDir(QLatin1String(PKGDATADIR) + QDir::separator() + QLatin1String("tepsonic") + QDir::separator() + QLatin1String("plugins"));
 
@@ -128,7 +128,7 @@ PluginsManager::Plugin *PluginsManager::parseDesktopFile(const QString &filePath
     }
 
     const QString libraryName = parser.value(QLatin1String("X-TepSonic-Plugin-Library")).toString();
-    const QString extension = ".so";
+    const QString extension = QLatin1String(".so");
 
     const QString libPath = QLatin1String(LIBDIR) + QDir::separator() + libraryName + extension;
     if (!QFile::exists(libPath)) {

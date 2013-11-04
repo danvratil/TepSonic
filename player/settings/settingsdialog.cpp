@@ -63,7 +63,7 @@ SettingsDialog::SettingsDialog(MainWindow *parent):
     m_pages.insert(PLUGINS_PAGE, new SettingsPages::PluginsPage);
     m_pages.insert(SHORTCUTS_PAGE, new SettingsPages::ShortcutsPage);
 
-    QSettings settings(QString(_CONFIGDIR).append("/main.conf"), QSettings::IniFormat, this);
+    QSettings settings(QString(_CONFIGDIR) + QLatin1String("/main.conf"), QSettings::IniFormat, this);
     foreach (SettingsPage * page, m_pages) {
         m_ui->pages->addWidget(page);
         page->loadSettings(&settings);
@@ -95,7 +95,7 @@ void SettingsDialog::changeEvent(QEvent *e)
 
 void SettingsDialog::dialogAccepted()
 {
-    QSettings settings(QString(_CONFIGDIR).append("/main.conf"), QSettings::IniFormat);
+    QSettings settings(QString(_CONFIGDIR) + QLatin1String("/main.conf"), QSettings::IniFormat);
     Q_FOREACH (SettingsPage * page, m_pages) {
         page->saveSettings(&settings);
     }
@@ -123,7 +123,7 @@ void SettingsDialog::emitRebuildCollections()
 {
     // Save current state of collections configurations and emit rebuilding
 
-    QSettings settings(QString(_CONFIGDIR).append("/main.conf"), QSettings::IniFormat);
+    QSettings settings(QString(_CONFIGDIR) + QLatin1String("/main.conf"), QSettings::IniFormat);
     m_pages[COLLECTIONS_PAGE]->saveSettings(&settings);
 
     Q_EMIT rebuildCollections();

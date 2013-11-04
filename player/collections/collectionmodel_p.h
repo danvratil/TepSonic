@@ -22,6 +22,8 @@
 
 #include "collectionmodel.h"
 
+#include <QSet>
+
 class Node
 {
   public:
@@ -51,6 +53,10 @@ class Node
 
     virtual QVariant data(int role) const
     {
+        if (role == CollectionModel::NodeTypeRole) {
+            return CollectionModel::RootNodeType;
+        }
+
         return QVariant();
     }
 
@@ -188,13 +194,18 @@ class CollectionModel::Private
     void __k__onTracksPopulated();
 
     /* Runnables */
-    Node::List populateArtists();
-    Node::List populateAlbums();
-    Node::List populateTracks();
+    void populateArtists();
+    Node::List populateArtistsRunnable();
+    void populateAlbums(Node *parent);
+    Node::List populateAlbumsRunnable(Node *parent);
+    void populateTracks(Node *parent);
+    Node::List populateTracksRunnable(Node *parent);
 
     Node *root;
     QHash<int /* internalId */, Node*> artists;
     QHash<int /* internalId */, Node*> albums;
+    QSet<Node*> populatedNodes;
+    QSet<Node*> pendingNodes;
 
   private:
     CollectionModel * const q;

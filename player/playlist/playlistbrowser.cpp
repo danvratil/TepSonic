@@ -175,7 +175,7 @@ void PlaylistBrowser::mouseMoveEvent(QMouseEvent *event)
         model->removeRow(selection.indexes().at(i).row());
     }
 
-    mimeData->setData("data/tepsonic-playlist-items", encodedData);
+    mimeData->setData(QLatin1String("data/tepsonic-playlist-items"), encodedData);
     drag->setMimeData(mimeData);
 
     drag->exec(Qt::MoveAction);
@@ -186,12 +186,12 @@ void PlaylistBrowser::dropEvent(QDropEvent *event)
 {
     event->acceptProposedAction();
 
-    if (event->mimeData()->hasFormat("data/tepsonic-tracks") || event->mimeData()->hasUrls()) {
+    if (event->mimeData()->hasFormat(QLatin1String("data/tepsonic-tracks")) || event->mimeData()->hasUrls()) {
 
         QStringList files;
         // Drop from CollectionsBrowser
-        if (event->mimeData()->hasFormat("data/tepsonic-tracks")) {
-            QByteArray encodedData = event->mimeData()->data("data/tepsonic-tracks");
+        if (event->mimeData()->hasFormat(QLatin1String("data/tepsonic-tracks"))) {
+            QByteArray encodedData = event->mimeData()->data(QLatin1String("data/tepsonic-tracks"));
             QDataStream stream(&encodedData, QIODevice::ReadOnly);
             QStringList newItems;
 
@@ -220,8 +220,8 @@ void PlaylistBrowser::dropEvent(QDropEvent *event)
     }
 
     // Drop from internal move
-    if (event->mimeData()->hasFormat("data/tepsonic-playlist-items")) {
-        QByteArray encodedData = event->mimeData()->data("data/tepsonic-playlist-items");
+    if (event->mimeData()->hasFormat(QLatin1String("data/tepsonic-playlist-items"))) {
+        QByteArray encodedData = event->mimeData()->data(QLatin1String("data/tepsonic-playlist-items"));
         QDataStream stream(&encodedData, QIODevice::ReadOnly);
 
         // We need the original PlaylistModel

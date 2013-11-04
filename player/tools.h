@@ -46,7 +46,7 @@ QString formatMilliseconds(qint64 msecs, bool forceHours = false);
   \param formattedLength string in format [hh:]mm:ss
   \return Returns length in seconds
 */
-int formattedLengthToSeconds(QString formattedLength);
+int formattedLengthToSeconds(const QString &formattedLength);
 
 
 #endif // TOOLS_H

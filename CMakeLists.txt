@@ -17,8 +17,10 @@ find_package(Phonon REQUIRED)
 
 include(${QT_USE_FILE})
 
-add_definitions(${QT_DEFINITIONS} ${TAGLIB_CFLAGS})
-
+add_definitions(${QT_DEFINITIONS}
+                ${TAGLIB_CFLAGS}
+                -DQT_NO_CAST_FROM_ASCII
+                -DQT_NO_CAST_TO_ASCII)
 
 # Use native libqxt on Linux and patched sources in /3rdparty/qxt on Mac an Win.
 if (NOT FORCE_INBUILD_QXT)

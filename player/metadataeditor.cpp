@@ -41,9 +41,10 @@ MetadataEditor::MetadataEditor(QWidget *parent) :
         QStringList list;
 
         {
-            QSqlQuery query("SELECT interpret FROM interprets ORDER BY interpret ASC;", dbManager->sqlDb());
-            while (query.next())
+            QSqlQuery query(QLatin1String("SELECT interpret FROM interprets ORDER BY interpret ASC;"), dbManager->sqlDb());
+            while (query.next()) {
                 list.append(query.value(0).toString());
+            }
         }
         m_artistCompleter = new QCompleter(list, this);
         m_artistCompleter->setCaseSensitivity(Qt::CaseInsensitive);
@@ -51,9 +52,10 @@ MetadataEditor::MetadataEditor(QWidget *parent) :
         list.clear();
 
         {
-            QSqlQuery query("SELECT album FROM albums ORDER BY album ASC;", dbManager->sqlDb());
-            while (query.next())
+            QSqlQuery query(QLatin1String("SELECT album FROM albums ORDER BY album ASC;"), dbManager->sqlDb());
+            while (query.next()) {
                 list.append(query.value(0).toString());
+            }
         }
         m_albumCompleter = new QCompleter(list, this);
         m_albumCompleter->setCaseSensitivity(Qt::CaseInsensitive);
@@ -61,9 +63,10 @@ MetadataEditor::MetadataEditor(QWidget *parent) :
         list.clear();
 
         {
-            QSqlQuery query("SELECT genre FROM genres ORDER BY genre ASC;", dbManager->sqlDb());
-            while (query.next())
+            QSqlQuery query(QLatin1String("SELECT genre FROM genres ORDER BY genre ASC;"), dbManager->sqlDb());
+            while (query.next()) {
                 list.append(query.value(0).toString());
+            }
         }
         m_genreCompleter = new QCompleter(list, this);
         m_genreCompleter->setCaseSensitivity(Qt::CaseInsensitive);

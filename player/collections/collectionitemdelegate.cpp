@@ -104,7 +104,7 @@ void CollectionItemDelegate::paint(QPainter *painter, const QStyleOptionViewItem
         // Draw collection/album/track length
         const int d = index.data(CollectionModel::DurationRole).toInt() * 1000;
         const QString duration = formatMilliseconds(d, type != CollectionModel::TrackNodeType);
-        const int textLength = painter->fontMetrics().width(duration + " ");
+        const int textLength = painter->fontMetrics().width(duration + QLatin1Char(' '));
         painter->drawText(QPoint((painter->viewport().width() - textLength),
                                  bottomLine),
                           duration);

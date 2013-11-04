@@ -59,7 +59,7 @@ CollectionsPage::~CollectionsPage()
 
 void CollectionsPage::changeEngine(const QString &currEngine)
 {
-    if (currEngine == "SQLite") {
+    if (currEngine == QLatin1String("SQLite")) {
         m_ui->mysqlSettings->setDisabled(true);
     } else {
         m_ui->mysqlSettings->setEnabled(true);
@@ -98,7 +98,7 @@ void CollectionsPage::collectionStateToggled()
     m_ui->autoupdateCollectionsCheckbox->setEnabled(checked);
     m_ui->dbEngineCombo->setEnabled(checked);
     m_ui->rebuildCollectionsButton->setEnabled(checked);
-    if (checked && m_ui->dbEngineCombo->currentText() == "MySQL") {
+    if (checked && m_ui->dbEngineCombo->currentText() == QLatin1String("MySQL")) {
         m_ui->mysqlSettings->setEnabled(true);
     } else {
         m_ui->mysqlSettings->setEnabled(false);
@@ -111,17 +111,17 @@ void CollectionsPage::collectionStateToggled()
 
 void CollectionsPage::loadSettings(QSettings *settings)
 {
-    settings->beginGroup("Collections");
-    m_ui->enableCollectionsCheckbox->setChecked(settings->value("EnableCollections", true).toBool());
-    m_ui->autoupdateCollectionsCheckbox->setChecked(settings->value("AutoRebm_uildAfterStart", true).toBool());
-    m_ui->collectionsPathsList->addItems(settings->value("SourcePaths", QStringList()).toStringList());
-    m_ui->dbEngineCombo->setCurrentIndex(settings->value("StorageEngine", 0).toInt());
+    settings->beginGroup(QLatin1String("Collections"));
+    m_ui->enableCollectionsCheckbox->setChecked(settings->value(QLatin1String("EnableCollections"), true).toBool());
+    m_ui->autoupdateCollectionsCheckbox->setChecked(settings->value(QLatin1String("AutoRebuildAfterStart"), true).toBool());
+    m_ui->collectionsPathsList->addItems(settings->value(QLatin1String("SourcePaths"), QStringList()).toStringList());
+    m_ui->dbEngineCombo->setCurrentIndex(settings->value(QLatin1String("StorageEngine"), 0).toInt());
 
-    settings->beginGroup("MySQL");
-    m_ui->mysqlServerEdit->setText(settings->value("Server", "127.0.0.1").toString());
-    m_ui->mysqlUsernameEdit->setText(settings->value("Username", QString()).toString());
-    m_ui->mysqlPasswordEdit->setText(settings->value("Password", QString()).toString());
-    m_ui->mysqlDatabaseEdit->setText(settings->value("Database", QString()).toString());
+    settings->beginGroup(QLatin1String("MySQL"));
+    m_ui->mysqlServerEdit->setText(settings->value(QLatin1String("Server"), QLatin1String("127.0.0.1")).toString());
+    m_ui->mysqlUsernameEdit->setText(settings->value(QLatin1String("Username")).toString());
+    m_ui->mysqlPasswordEdit->setText(settings->value(QLatin1String("Password")).toString());
+    m_ui->mysqlDatabaseEdit->setText(settings->value(QLatin1String("Database")).toString());
     settings->endGroup();
     settings->endGroup();
 
@@ -130,23 +130,23 @@ void CollectionsPage::loadSettings(QSettings *settings)
 
 void CollectionsPage::saveSettings(QSettings *settings)
 {
-    settings->beginGroup("Collections");
-    settings->setValue("EnableCollections", m_ui->enableCollectionsCheckbox->isChecked());
-    settings->setValue("AutoRebm_uildAfterStart", m_ui->autoupdateCollectionsCheckbox->isChecked());
+    settings->beginGroup(QLatin1String("Collections"));
+    settings->setValue(QLatin1String("EnableCollections"), m_ui->enableCollectionsCheckbox->isChecked());
+    settings->setValue(QLatin1String("AutoRebuildAfterStart"), m_ui->autoupdateCollectionsCheckbox->isChecked());
 
     QStringList items;
     for (int i = 0; i < m_ui->collectionsPathsList->count(); i++) {
         items.append(m_ui->collectionsPathsList->item(i)->text());
     }
-    settings->setValue("SourcePaths", items);
-    settings->setValue("StorageEngine", m_ui->dbEngineCombo->currentIndex());
+    settings->setValue(QLatin1String("SourcePaths"), items);
+    settings->setValue(QLatin1String("StorageEngine"), m_ui->dbEngineCombo->currentIndex());
 
-    settings->beginGroup("MySQL");
-    settings->setValue("Server", m_ui->mysqlServerEdit->text());
-    settings->setValue("Username", m_ui->mysqlUsernameEdit->text());
+    settings->beginGroup(QLatin1String("MySQL"));
+    settings->setValue(QLatin1String("Server"), m_ui->mysqlServerEdit->text());
+    settings->setValue(QLatin1String("Username"), m_ui->mysqlUsernameEdit->text());
     // I'd like to have the password encrypted (but not hashed!) - I don't like passwords in plaintext...
-    settings->setValue("Password", m_ui->mysqlPasswordEdit->text());
-    settings->setValue("Database", m_ui->mysqlDatabaseEdit->text());
+    settings->setValue(QLatin1String("Password"), m_ui->mysqlPasswordEdit->text());
+    settings->setValue(QLatin1String("Database"), m_ui->mysqlDatabaseEdit->text());
     settings->endGroup();
     settings->endGroup();
 }

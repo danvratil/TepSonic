@@ -53,7 +53,7 @@ void FileSystemBrowser::setModel(QAbstractItemModel *model)
 {
     QAbstractItemView::setModel(model);
 
-    QSettings settings(_CONFIGDIR + QDir::separator() + "main.conf", QSettings::IniFormat);
+    QSettings settings(_CONFIGDIR + QDir::separator() + QLatin1String("main.conf"), QSettings::IniFormat);
     settings.beginGroup(QLatin1String("Last Session"));
     const QString lastPath = settings.value(QLatin1String("LastFSBPath"), QDir::homePath()).toString();
 
@@ -64,7 +64,7 @@ void FileSystemBrowser::setModel(QAbstractItemModel *model)
 
 void FileSystemBrowser::saveCurrentPath(const QString &path)
 {
-    QSettings settings(_CONFIGDIR + QDir::separator() + "main.conf", QSettings::IniFormat);
+    QSettings settings(_CONFIGDIR + QDir::separator() + QLatin1String("main.conf"), QSettings::IniFormat);
     settings.beginGroup(QLatin1String("Last Session"));
     settings.setValue(QLatin1String("LastFSBPath"), path);
 }
@@ -81,7 +81,7 @@ void FileSystemBrowser::startDrag(Qt::DropActions supportedActions)
         stream << static_cast<QFileSystemModel *>(model())->filePath(indexes.at(i));
     }
 
-    mimeData->setData("data/tepsonic-tracks", encodedData);
+    mimeData->setData(QLatin1String("data/tepsonic-tracks"), encodedData);
     QDrag *drag = new QDrag(this);
     drag->setMimeData(mimeData);
     drag->exec(Qt::CopyAction);

@@ -40,15 +40,15 @@ PluginsManager *pluginsManager;
 int main(int argc, char *argv[])
 {
     QApplication tepsonic(argc, argv);
-    tepsonic.setApplicationName("TepSonic");
-    tepsonic.setOrganizationName("Dan Vrátil");
-    tepsonic.setApplicationVersion(TEPSONIC_VERSION);
+    tepsonic.setApplicationName(QLatin1String("TepSonic"));
+    tepsonic.setOrganizationName(QLatin1String("Dan Vrátil"));
+    tepsonic.setApplicationVersion(QLatin1String(TEPSONIC_VERSION));
 
     QString locale = QLocale::system().name().left(2);
 
     // Qt translations
     QTranslator qtTranslator;
-    qtTranslator.load("qt_" + locale,
+    qtTranslator.load(QLatin1String("qt_") + locale,
                       QLibraryInfo::location(QLibraryInfo::TranslationsPath));
     tepsonic.installTranslator(&qtTranslator);
 
@@ -57,13 +57,17 @@ int main(int argc, char *argv[])
 
     // standard unix/windows
     QString dataDir = QLatin1String(PKGDATADIR);
-    QString localeDir = dataDir + QDir::separator() + "tepsonic" + QDir::separator() + "locale" + QDir::separator() + "tepsonic";
+    QString localeDir = dataDir + QDir::separator() + QLatin1String("tepsonic")
+                        + QDir::separator() + QLatin1String("locale")
+                        + QDir::separator() + QLatin1String("tepsonic");
     // If app was not "installed" use the app directory
     if (!QFile::exists(localeDir)) {
-        localeDir = qApp->applicationDirPath() + QDir::separator() +  "tepsonic" + QDir::separator() + "locale" + QDir::separator() + "tepsonic";
+        localeDir = qApp->applicationDirPath() + QDir::separator() +  QLatin1String("tepsonic")
+                    + QDir::separator() + QLatin1String("locale")
+                    + QDir::separator() + QLatin1String("tepsonic");
     }
 
-    translator.load("tepsonic_"+locale,localeDir);
+    translator.load(QLatin1String("tepsonic_") + locale,localeDir);
     tepsonic.installTranslator(&translator);
 
     QTextCodec::setCodecForTr(QTextCodec::codecForName("utf8"));

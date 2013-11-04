@@ -116,16 +116,16 @@ void PlayerPage::showEffectSettings(const QModelIndex &effect)
 
 void PlayerPage::loadSettings(QSettings *settings)
 {
-    settings->beginGroup("Preferences");
-    m_ui->restorePreviousSessionCheckBox->setChecked(settings->value("RestoreSession", true).toBool());
-    m_ui->outputDevicesList->setCurrentIndex(getOutputDeviceModelIndex(settings->value("OutputDevice", 0).toInt()));
+    settings->beginGroup(QLatin1String("Preferences"));
+    m_ui->restorePreviousSessionCheckBox->setChecked(settings->value(QLatin1String("RestoreSession"), true).toBool());
+    m_ui->outputDevicesList->setCurrentIndex(getOutputDeviceModelIndex(settings->value(QLatin1String("OutputDevice"), 0).toInt()));
 
-    m_oldOutputDeviceIndex = settings->value("OutputDevice", 0).toInt();
+    m_oldOutputDeviceIndex = settings->value(QLatin1String("OutputDevice"), 0).toInt();
 
     const QList<Phonon::Effect *> effects = Player::instance()->effects();
     for (int i = 0; i < effects.count(); i++) {
         const Phonon::EffectDescription ed = effects.at(i)->description();
-        const bool state = settings->value("Effects/" + ed.name(), false).toBool();
+        const bool state = settings->value(QLatin1String("Effects/") + ed.name(), false).toBool();
         if (state) {
             qobject_cast<QStandardItemModel *>(m_ui->playerEffectsList->model())->item(i, 0)->setCheckState(Qt::Checked);
         }
@@ -135,14 +135,14 @@ void PlayerPage::loadSettings(QSettings *settings)
 
 void PlayerPage::saveSettings(QSettings *settings)
 {
-    settings->beginGroup("Preferences");
-    settings->setValue("RestoreSession", m_ui->restorePreviousSessionCheckBox->isChecked());
-    settings->setValue("OutputDevice", getOutputDeviceIndex(m_ui->outputDevicesList->currentIndex()));
+    settings->beginGroup(QLatin1String("Preferences"));
+    settings->setValue(QLatin1String("RestoreSession"), m_ui->restorePreviousSessionCheckBox->isChecked());
+    settings->setValue(QLatin1String("OutputDevice"), getOutputDeviceIndex(m_ui->outputDevicesList->currentIndex()));
 
     const QList<Phonon::Effect *> effects = Player::instance()->effects();
     for (int i = 0; i < effects.count(); i++) {
         Phonon::EffectDescription ed = effects.at(i)->description();
-        settings->setValue("Effects/" + ed.name(),
+        settings->setValue(QLatin1String("Effects/") + ed.name(),
                            qobject_cast<QStandardItemModel *>(m_ui->playerEffectsList->model())->item(i, 0)->checkState() == Qt::Checked);
         Player::instance()->enableEffect(effects.at(i),
                                          (qobject_cast<QStandardItemModel *>(m_ui->playerEffectsList->model())->item(i, 0)->checkState() == Qt::Checked));

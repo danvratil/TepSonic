@@ -53,24 +53,24 @@ BookmarksManager::~BookmarksManager()
 
 void BookmarksManager::loadBookmarks()
 {
-    const QSettings settings(_CONFIGDIR + QDir::separator() + "bookmarks", QSettings::IniFormat);
+    const QSettings settings(_CONFIGDIR + QDir::separator() + QLatin1String("bookmarks"), QSettings::IniFormat);
 
     const QStringList bookmarks = settings.childGroups();
     Q_FOREACH (const QString &bookmark, bookmarks) {
-        const QString title = settings.value(bookmark + "/title", QString()).toString();
-        const QString path = settings.value(bookmark + "/path", QString()).toString();
+        const QString title = settings.value(bookmark + QLatin1String("/title")).toString();
+        const QString path = settings.value(bookmark + QLatin1String("/path")).toString();
         m_bookmarks.append(QPair<QString, QString>(title, path));
     }
 }
 
 void BookmarksManager::saveBookmarks()
 {
-    QSettings settings(_CONFIGDIR + QDir::separator() + "bookmarks", QSettings::IniFormat);
+    QSettings settings(_CONFIGDIR + QDir::separator() + QLatin1String("bookmarks"), QSettings::IniFormat);
 
     for (int i = 0; i < m_bookmarks.length(); i++) {
         QPair<QString, QString> pair = m_bookmarks.at(i);
-        settings.setValue(QString::number(i) + "/title", pair.first);
-        settings.setValue(QString::number(i) + "/path", pair.second);
+        settings.setValue(QString::number(i) + QLatin1String("/title"), pair.first);
+        settings.setValue(QString::number(i) + QLatin1String("/path"), pair.second);
     }
 }
 
@@ -153,7 +153,7 @@ void BookmarksManager::removeBookmark()
 
     m_bookmarks.removeAt(bmark.row());
     m_bookmarksBrowser->removeAt(bmark.row());
-    QSettings settings(_CONFIGDIR + QDir::separator() + "bookmarks", QSettings::IniFormat);
+    QSettings settings(_CONFIGDIR + QDir::separator() + QLatin1String("bookmarks"), QSettings::IniFormat);
     settings.remove(QString::number(bmark.row()));
 }
 

@@ -40,7 +40,7 @@ void PlaylistWriter::run()
             file.flush();
             for (int i = 0; i < m_playlistModel->rowCount(QModelIndex()); i++) {
                 const QString trackfname = playlistDir.relativeFilePath(m_playlistModel->index(i, 0, QModelIndex()).data().toString());
-                file.write(QByteArray().append(trackfname).append("\n"));
+                file.write(trackfname.toLatin1() + '\n');
             }
         }
         file.close();

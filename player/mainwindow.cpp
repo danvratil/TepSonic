@@ -70,7 +70,7 @@ MainWindow::MainWindow():
     m_metadataEditor(0),
     m_canClose(false)
 {
-    m_settings = new QSettings(_CONFIGDIR + QDir::separator() + "main.conf", QSettings::IniFormat);
+    m_settings = new QSettings(_CONFIGDIR + QDir::separator() + QLatin1String("main.conf"), QSettings::IniFormat);
 
     // Initialize pseudo-random numbers generator
     srand(time(NULL));
@@ -80,7 +80,7 @@ MainWindow::MainWindow():
     m_ui->setupUi(this);
 
     // Set application icon
-    m_appIcon = new QIcon(":/icons/mainIcon");
+    m_appIcon = new QIcon(QLatin1String(":/icons/mainIcon"));
     QApplication::setWindowIcon(*m_appIcon);
 
     // Create menus
@@ -95,7 +95,7 @@ MainWindow::MainWindow():
     // Create label for displaying playlist length
     m_playlistLengthLabel = new QLabel(this);
     m_ui->statusBar->addPermanentWidget(m_playlistLengthLabel, 0);
-    m_playlistLengthLabel->setText(tr("%n track(s)", "", 0).append(" (00:00)"));
+    m_playlistLengthLabel->setText(tr("%n track(s)", "", 0).append(QLatin1String(" (00:00)")));
 
     m_playlistModel = new PlaylistModel(this);
 
@@ -120,8 +120,8 @@ MainWindow::MainWindow():
     m_ui->playlistBrowser->hideColumn(PlaylistModel::RandomOrderColumn);
 
     // Set playlist browser columns widths and visibility
-    const QVariantList playlistColumnsStates(m_settings->value("Window/PlaylistColumnsStates").toList());
-    const QVariantList playlistColumnsWidths(m_settings->value("Window/PlaylistColumnsWidths").toList());
+    const QVariantList playlistColumnsStates(m_settings->value(QLatin1String("Window/PlaylistColumnsStates")).toList());
+    const QVariantList playlistColumnsWidths(m_settings->value(QLatin1String("Window/PlaylistColumnsWidths")).toList());
     for (int i = 0; i < playlistColumnsStates.count() - 1; i++) {
         if (playlistColumnsStates.at(i).toBool()) {
             m_ui->playlistBrowser->showColumn(i);
@@ -134,18 +134,18 @@ MainWindow::MainWindow():
     }
 
     // Restore main window geometry
-    restoreGeometry(m_settings->value("Window/Geometry", saveGeometry()).toByteArray());
-    restoreState(m_settings->value("Window/State", saveState()).toByteArray());
-    m_ui->viewsSplitter->restoreState(m_settings->value("Window/ViewsSplit").toByteArray());
+    restoreGeometry(m_settings->value(QLatin1String("Window/Geometry"), saveGeometry()).toByteArray());
+    restoreState(m_settings->value(QLatin1String("Window/State"), saveState()).toByteArray());
+    m_ui->viewsSplitter->restoreState(m_settings->value(QLatin1String("Window/ViewsSplit")).toByteArray());
 
     // Set up task manager
     m_taskManager = new TaskManager();
     m_taskManager->setPlaylistModel(m_playlistModel);
 
     // Enable or disable collections
-    if (m_settings->value("Collections/EnableCollections", true).toBool() == true) {
+    if (m_settings->value(QLatin1String("Collections/EnableCollections"), true).toBool() == true) {
         setupCollections();
-        if (m_settings->value("Collections/AutoRebuildAfterStart", false).toBool() == true) {
+        if (m_settings->value(QLatin1String("Collections/AutoRebuildAfterStart"), false).toBool() == true) {
             m_taskManager->rebuildCollections();
         }
     } else {
@@ -165,10 +165,10 @@ MainWindow::MainWindow():
     m_ui->volumeSlider->setAudioOutput(Player::instance()->audioOutput());
 
     // Load last playlist
-    if (m_settings->value("Preferences/RestoreSession", true).toBool()) {
-        m_taskManager->addFileToPlaylist(QString(_CONFIGDIR).append("/last.m3u"));
-        randomModeChanged(m_settings->value("LastSession/RandomMode", false).toBool());
-        repeatModeChanged(Player::RepeatMode(m_settings->value("LastSession/RepeatMode", 0).toInt()));
+    if (m_settings->value(QLatin1String("Preferences/RestoreSession"), true).toBool()) {
+        m_taskManager->addFileToPlaylist(QString(_CONFIGDIR).append(QLatin1String("/last.m3u")));
+        randomModeChanged(m_settings->value(QLatin1String("LastSession/RandomMode"), false).toBool());
+        repeatModeChanged(Player::RepeatMode(m_settings->value(QLatin1String("LastSession/RepeatMode"), 0).toInt()));
     }
 
     // Create bookmarks manager
@@ -182,9 +182,9 @@ MainWindow::MainWindow():
 
 MainWindow::~MainWindow()
 {
-    m_settings->setValue("Window/Geometry", saveGeometry());
-    m_settings->setValue("Window/State", saveState());
-    m_settings->setValue("Window/ViewsSplit", m_ui->viewsSplitter->saveState());
+    m_settings->setValue(QLatin1String("Window/Geometry"), saveGeometry());
+    m_settings->setValue(QLatin1String("Window/State"), saveState());
+    m_settings->setValue(QLatin1String("Window/ViewsSplit"), m_ui->viewsSplitter->saveState());
     QList<QVariant> playlistColumnsStates;
     QList<QVariant> playlistColumnsWidths;
     for (int i = 0; i < m_ui->playlistBrowser->model()->columnCount(QModelIndex()); i++) {
@@ -192,16 +192,16 @@ MainWindow::~MainWindow()
         playlistColumnsStates.append(!m_ui->playlistBrowser->isColumnHidden(i));
         playlistColumnsWidths.append(m_ui->playlistBrowser->columnWidth(i));
     }
-    m_settings->setValue("Window/PlaylistColumnsStates", playlistColumnsStates);
-    m_settings->setValue("Window/PlaylistColumnsWidths", playlistColumnsWidths);
+    m_settings->setValue(QLatin1String("Window/PlaylistColumnsStates"), playlistColumnsStates);
+    m_settings->setValue(QLatin1String("Window/PlaylistColumnsWidths"), playlistColumnsWidths);
 
-    if (m_settings->value("Preferences/RestoreSession", true).toBool()) {
-        m_settings->setValue("LastSession/RepeatMode", int(Player::instance()->repeatMode()));
-        m_settings->setValue("LastSession/RandomMode", Player::instance()->randomMode());
+    if (m_settings->value(QLatin1String("Preferences/RestoreSession"), true).toBool()) {
+        m_settings->setValue(QLatin1String("LastSession/RepeatMode"), int(Player::instance()->repeatMode()));
+        m_settings->setValue(QLatin1String("LastSession/RandomMode"), Player::instance()->randomMode());
     }
 
     // Save current playlist to file
-    m_taskManager->savePlaylistToFile(QString(_CONFIGDIR).append("/last.m3u"));
+    m_taskManager->savePlaylistToFile(QString(_CONFIGDIR).append(QLatin1String("/last.m3u")));
 
     delete m_bookmarksManager;
 
@@ -263,30 +263,30 @@ void MainWindow::createMenus()
 
 void MainWindow::bindShortcuts()
 {
-    m_settings->beginGroup("Shortcuts");
+    m_settings->beginGroup(QLatin1String("Shortcuts"));
 
     QxtGlobalShortcut *sc1 = new QxtGlobalShortcut(this);
-    sc1->setShortcut(QKeySequence::fromString(m_settings->value("PlayPause", "Meta+P").toString()));
+    sc1->setShortcut(QKeySequence::fromString(m_settings->value(QLatin1String("PlayPause"), QLatin1String("Meta+P")).toString()));
     connect(sc1, SIGNAL(activated()),
             this, SLOT(playPause()));
 
     QxtGlobalShortcut *sc2 = new QxtGlobalShortcut(this);
-    sc2->setShortcut(QKeySequence::fromString(m_settings->value("Stop", "Meta+S").toString()));
+    sc2->setShortcut(QKeySequence::fromString(m_settings->value(QLatin1String("Stop"), QLatin1String("Meta+S")).toString()));
     connect(sc2, SIGNAL(activated()),
             Player::instance(), SLOT(stop()));
 
     QxtGlobalShortcut *sc3 = new QxtGlobalShortcut(this);
-    sc3->setShortcut(QKeySequence::fromString(m_settings->value("PrevTrack", "Meta+B").toString()));
+    sc3->setShortcut(QKeySequence::fromString(m_settings->value(QLatin1String("PrevTrack"), QLatin1String("Meta+B")).toString()));
     connect(sc3, SIGNAL(activated()),
             this, SLOT(previousTrack()));
 
     QxtGlobalShortcut *sc4 = new QxtGlobalShortcut(this);
-    sc4->setShortcut(QKeySequence::fromString(m_settings->value("NextTrack", "Meta+N").toString()));
+    sc4->setShortcut(QKeySequence::fromString(m_settings->value(QLatin1String("NextTrack"), QLatin1String("Meta+N")).toString()));
     connect(sc4, SIGNAL(activated()),
             this, SLOT(nextTrack()));
 
     QxtGlobalShortcut *sc5 = new QxtGlobalShortcut(this);
-    sc5->setShortcut(QKeySequence::fromString(m_settings->value("ShowHideWin", "Meta+H").toString()));
+    sc5->setShortcut(QKeySequence::fromString(m_settings->value(QLatin1String("ShowHideWin"), QLatin1String("Meta+H")).toString()));
     connect(sc5, SIGNAL(activated()),
             this, SLOT(showHideWindow()));
 
@@ -505,29 +505,31 @@ void MainWindow::aboutTepSonic()
     QMessageBox aboutDlg;
 
     QStringList developers;
-    developers << "Dan Vrátil";
+    developers << QLatin1String("Dan Vrátil");
     QStringList artwork;
-    artwork << "Matěj Zvěřina"
-            << "Michael Ruml";
+    artwork << QLatin1String("Matěj Zvěřina")
+            << QLatin1String("Michael Ruml");
 
-    QString str = "<h1>" + QApplication::applicationName() + "</h1>"
-                  + tr("Version %1").arg(QApplication::applicationVersion()) +
+    const QString str = tr("<h1>%1</h1>"
+                  "Version %2"
                   "<p><a href=\"http://danvratil.github.io/TepSonic/\">http://danvratil.github.io/TepSonic/</a></p>"
                   "<p>This program is free software; you can redistribute it and/or modify it under the terms of "
                   "the GNU General Public License as published by the Free Software Foundation; either version "
                   "2 of the License, or (at your option) any later version.</p>"
-                  "<h2>" + tr("Developers") + ":</h2>"
-                  "<p>" + developers.join(", ") + "</p>"
-                  "<h2>" + tr("Artwork") + ":</h2>"
-                  "<p>" + artwork.join(", ") + "</p>"
-                  "<p>&copy; 2009 - 2013 <a href=\"mailto:dan@progdan.cz\">Dan Vrátil</a></p>";
-    aboutDlg.about(this, tr("About TepSonic"), str.toAscii());
+                  "<h2>Developers:</h2><p>%3</p>"
+                  "<h2>Artwork:</h2><p>%4</p>"
+                  "<p>&copy; 2009 - 2013 <a href=\"mailto:dan@progdan.cz\">Dan Vrátil</a></p>")
+                  .arg(QApplication::applicationName(),
+                       QApplication::applicationVersion(),
+                       developers.join(QLatin1String(", ")),
+                       artwork.join(QLatin1String(", ")));
+    aboutDlg.about(this, tr("About TepSonic"), str);
 }
 
 void MainWindow::showSupportedFormats()
 {
     QMessageBox msBox(tr("Supported formats"),
-                      tr("On this computer TepSonic can play following audio files:") + "\n\n" + SupportedFormats::getExtensionList().join(", "),
+                      tr("On this computer TepSonic can play following audio files:") + QLatin1String("\n\n") + SupportedFormats::getExtensionList().join(QLatin1String(", ")),
                       QMessageBox::Information,
                       QMessageBox::Ok,
                       0, 0);
@@ -536,7 +538,7 @@ void MainWindow::showSupportedFormats()
 
 void MainWindow::reportBug()
 {
-    QDesktopServices::openUrl(QUrl("https://github.com/danvratil/TepSonic/issues", QUrl::TolerantMode));
+    QDesktopServices::openUrl(QUrl(QLatin1String("https://github.com/danvratil/TepSonic/issues"), QUrl::TolerantMode));
 }
 
 void MainWindow::trayClicked(QSystemTrayIcon::ActivationReason reason)
@@ -573,7 +575,7 @@ void MainWindow::openSettingsDialog()
 
 void MainWindow::settingsDialogAccepted()
 {
-    if (m_settings->value("Collections/EnableCollections").toBool()) {
+    if (m_settings->value(QLatin1String("Collections/EnableCollections")).toBool()) {
         /* When collections were enabled in preferences but were not created during program startup,
            create them now otherwise we can expect that collectionBrowser is already displayed and
            working so no action is needed */
@@ -627,30 +629,30 @@ void MainWindow::playerStatusChanged(Phonon::State newState, Phonon::State oldSt
         playing = metadata.title;
     }
     if (!metadata.artist.isEmpty()) {
-        playing = metadata.artist + " - " + playing;
+        playing = metadata.artist + QLatin1String(" - ") + playing;
     }
 
     switch (newState) {
     case Phonon::PlayingState:
-        m_ui->playPauseButton->setIcon(QIcon(":/icons/pause"));
-        m_ui->actionPlay_pause->setIcon(QIcon(":/icons/pause"));
+        m_ui->playPauseButton->setIcon(QIcon(QLatin1String(":/icons/pause")));
+        m_ui->actionPlay_pause->setIcon(QIcon(QLatin1String(":/icons/pause")));
         m_ui->stopButton->setEnabled(true);
         m_ui->actionStop->setEnabled(true);
         m_ui->trackTitleLabel->setText(playing);
-        m_ui->playbackTimeLabel->setText("00:00:00");
+        m_ui->playbackTimeLabel->setText(QLatin1String("00:00:00"));
         m_trayIcon->setToolTip(tr("Playing: ") + playing);
         break;
     case Phonon::PausedState:
-        m_ui->playPauseButton->setIcon(QIcon(":/icons/start"));
-        m_ui->actionPlay_pause->setIcon(QIcon(":/icons/start"));
+        m_ui->playPauseButton->setIcon(QIcon(QLatin1String(":/icons/start")));
+        m_ui->actionPlay_pause->setIcon(QIcon(QLatin1String(":/icons/start")));
         m_ui->stopButton->setEnabled(true);
         m_ui->actionStop->setEnabled(true);
         m_ui->trackTitleLabel->setText(tr("%1 [paused]").arg(m_ui->trackTitleLabel->text()));
         m_trayIcon->setToolTip(tr("%1 [paused]").arg(m_trayIcon->toolTip()));
         break;
     case Phonon::StoppedState:
-        m_ui->playPauseButton->setIcon(QIcon(":/icons/start"));
-        m_ui->actionPlay_pause->setIcon(QIcon(":/icons/start"));
+        m_ui->playPauseButton->setIcon(QIcon(QLatin1String(":/icons/start")));
+        m_ui->actionPlay_pause->setIcon(QIcon(QLatin1String(":/icons/start")));
         m_ui->stopButton->setEnabled(false);
         m_ui->actionStop->setEnabled(false);
         m_ui->trackTitleLabel->setText(tr("Player is stopped"));
@@ -753,17 +755,17 @@ void MainWindow::savePlaylist()
 void MainWindow::playlistLengthChanged(int totalLength, int tracksCount)
 {
     QString time = formatTimestamp(totalLength);
-    m_playlistLengthLabel->setText(tr("%n track(s)", "", tracksCount).append(" (" + time + ")"));
+    m_playlistLengthLabel->setText(tr("%n track(s)", "", tracksCount).append(QLatin1String(" (") + time + QLatin1String(")")));
 }
 
 void MainWindow::clearPlaylistSearch()
 {
-    m_ui->playlistSearchEdit->setText("");
+    m_ui->playlistSearchEdit->setText(QString());
 }
 
 void MainWindow::clearCollectionSearch()
 {
-    m_ui->colectionSearchEdit->setText("");
+    m_ui->colectionSearchEdit->setText(QString());
 }
 
 void MainWindow::showError(const QString &error)

@@ -27,12 +27,12 @@ QString getConfigDir()
 
     QString configdir;
 
-    if (getenv("XDG_CONFIG_HOME")==NULL) {
-        configdir = getenv("HOME");
-        configdir.append("/.config/tepsonic");
+    if (getenv("XDG_CONFIG_HOME") == 0) {
+        configdir = QString::fromLatin1(getenv("HOME"));
+        configdir.append(QLatin1String("/.config/tepsonic"));
     } else {
-        configdir = getenv("XDG_CONFIG_HOME");
-        configdir.append("/tepsonic");
+        configdir = QString::fromLatin1(getenv("XDG_CONFIG_HOME"));
+        configdir.append(QLatin1String("/tepsonic"));
     }
 
     return configdir;

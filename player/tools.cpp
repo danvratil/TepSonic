@@ -19,79 +19,56 @@
 
 #include <QString>
 #include <QStringList>
+#include <QTime>
 
 #include "tools.h"
 
-QString formatTimestamp(qint64 time, bool omitHour)
+QString formatTimestamp(qint64 secs, bool omitHour)
 {
-    int weeks = time / 604800;
-    int days = (time - (weeks*604800)) / 86400;
-    int hours = (time - (weeks*604800) - (days*86400)) / 3600;
-    int mins = (time - (weeks*604800) - (days*86400) - (hours*3600)) / 60;
-    int secs = time - (weeks*604800) - (days*86400) - (hours*3600) - (mins*60);
+    int weeks = secs / 604800;
+    int days = (secs - (weeks * 604800)) / 86400;
 
     QString string;
 
     if (weeks > 0) {
-        string += QObject::tr("%n week(s)","",weeks).append(" ");
+        string += QObject::tr("%n week(s)", "",weeks) + QLatin1Char(' ');
     }
     if (days > 0) {
-        string += QObject::tr("%n day(s)","",days).append(" ");
+        string += QObject::tr("%n day(s)", "",days) + QLatin1Char(' ');
     }
 
-    if (!omitHour) {
-        string += QString::fromLatin1("%1:").arg(hours, 2, 10, QLatin1Char('0'));
-    }
+    QTime time;
+    time = time.addSecs(secs);
 
-    string += QString::fromLatin1("%1:").arg(mins, 2, 10, QLatin1Char('0'));
-    string += QString::fromLatin1("%1").arg(secs, 2, 10, QLatin1Char('0'));
+    if (!omitHour || time.hour() > 0) {
+        return string + time.toString(QLatin1String("hh:mm:ss"));
+    } else {
+        return string + time.toString(QLatin1String("mm:ss"));
+    }
 
     return string;
 }
 
 QString formatMilliseconds(qint64 msecs, bool forceHours)
 {
-    int secs = (int)(msecs/1000);
-    int hours = secs/3600;
-    int mins = (secs - (hours*3600))/60;
-    secs = secs - (hours*3600) - (mins*60);
-
-    QString sHours;
-    QString sMins;
-    QString sSecs;
-
-    if (hours<10) {
-        sHours = QString("0").append(QString::number(hours));
+    QTime time;
+    time = time.addMSecs(msecs);
+    if (forceHours || time.hour() > 0) {
+        return time.toString(QLatin1String("hh:mm:ss"));
     } else {
-        sHours = QString::number(hours);
+        return time.toString(QLatin1String("mm:ss"));
     }
-    if (hours == 0) sHours = QString("00");
-    if (mins<10) {
-        sMins = QString("0").append(QString::number(mins));
-    } else {
-        sMins = QString::number(mins);
-    }
-    if (secs<10) {
-        sSecs = QString("0").append(QString::number(secs));
-    } else {
-        sSecs = QString::number(secs);
-    }
-
-    if ((hours > 0) || (forceHours)) 
-        return sHours+":"+sMins+":"+sSecs;
-
-    return sMins+":"+sSecs;
 }
 
-int formattedLengthToSeconds(QString formattedLength)
+int formattedLengthToSeconds(const QString &formattedLength)
 {
-    int seconds;
-    QStringList time = formattedLength.split(":",QString::SkipEmptyParts);
-    if (time.size() == 3) {
-        seconds = time.at(0).toInt()*3600 + time.at(1).toInt()*60 + time.at(2).toInt();
+    QTime time;
+    const QStringList times = formattedLength.split(QLatin1Char(':'), QString::SkipEmptyParts);
+    if (times.size() == 3) {
+        time = QTime::fromString(formattedLength, QLatin1String("hh:mm:ss"));
     } else {
-        seconds = time.at(0).toInt()*60 + time.at(1).toInt();
+        time = QTime::fromString(formattedLength, QLatin1String("mm:ss"));
     }
 
-    return seconds;
+    return -time.msecsTo(QTime());
 }

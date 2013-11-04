@@ -132,12 +132,12 @@ Player::MetaData Player::currentMetaData() const
     }
 
     TagLib::FileRef f(filename.toUtf8().constData());
-    data.artist = f.tag()->artist().toCString(true);
-    data.title = f.tag()->title().toCString(true);
-    data.album = f.tag()->album().toCString(true);
+    data.artist = QString::fromLatin1(f.tag()->artist().toCString(true));
+    data.title = QString::fromLatin1(f.tag()->title().toCString(true));
+    data.album = QLatin1String(f.tag()->album().toCString(true));
     data.trackNumber = f.tag()->track();
     // Length in msecs
-    data.length = f.audioProperties()->length()*1000;
+    data.length = f.audioProperties()->length() * 1000;
     data.filename = filename;
 
     return data;
@@ -160,8 +160,8 @@ void Player::emitFinished()
 
 void Player::setDefaultOutputDevice()
 {
-    const QSettings settings(QString(_CONFIGDIR).append("/main.conf"),QSettings::IniFormat);
-    const int index = settings.value("Preferences/OutputDevice", 0).toInt();
+    const QSettings settings(QString(_CONFIGDIR).append(QLatin1String("/main.conf")), QSettings::IniFormat);
+    const int index = settings.value(QLatin1String("Preferences/OutputDevice")).toInt();
 
     QList<Phonon::AudioOutputDevice> devices = Phonon::BackendCapabilities::availableAudioOutputDevices();
     for (int i = 0; i < devices.length(); i++)
@@ -173,13 +173,13 @@ void Player::setDefaultOutputDevice()
 
 void Player::loadEffects()
 {
-    const QSettings settings(QString(_CONFIGDIR).append("/main.conf"), QSettings::IniFormat);
+    const QSettings settings(QString(_CONFIGDIR).append(QLatin1String("/main.conf")), QSettings::IniFormat);
     const QList<Phonon::EffectDescription> effects = Phonon::BackendCapabilities::availableAudioEffects();
     for (int i = 0; i < effects.count(); i++)
     {
         Phonon::Effect *effect = new Phonon::Effect(effects.at(i));
         m_effects.append(effect);
-        const bool state = settings.value("Preferences/Effects/"+effects.at(i).name(), 0).toBool();
+        const bool state = settings.value(QLatin1String("Preferences/Effects/") + effects.at(i).name(), 0).toBool();
         if (state) {
             m_phononPath.insertEffect(effect);
         }

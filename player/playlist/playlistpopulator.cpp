@@ -48,7 +48,7 @@ void PlaylistPopulator::run()
                 expandDir(m_files.takeFirst());
             }
             if (m_files.size() > 0) {
-                if (QFileInfo(m_files.first()).suffix().toLower() == "m3u") {
+                if (QFileInfo(m_files.first()).suffix().toLower() == QLatin1String("m3u")) {
                     expandPlaylist(m_files.takeFirst());
                 }
             }
@@ -93,21 +93,15 @@ void PlaylistPopulator::expandPlaylist(const QString &filename)
         qDebug() << "PlaylistManager::addPlaylistFile: Failed to open file " << filename;
         return;
     }
-
-    QStringList files;
-
-    qint64 lineLength;
     while (!file.atEnd()) {
         const QByteArray line = file.readLine();
-        const QString filepath = playlistDir.absoluteFilePath(line).remove("\n", Qt::CaseInsensitive);
+        const QString filepath = playlistDir.absoluteFilePath(QString::fromLatin1(line)).remove(QLatin1Char('\n'), Qt::CaseInsensitive);
         if (!filepath.isEmpty()) {
-            files << filepath;
+            m_files.prepend(filepath);
         }
     }
 
     file.close();
-
-    m_files.prepend(files);
 }
 
 Player::MetaData PlaylistPopulator::getFileMetaData(const QString &file)
@@ -126,10 +120,11 @@ Player::MetaData PlaylistPopulator::getFileMetaData(const QString &file)
     /* Don't try to connect when connection was not available previously - attempts to connect are
       just slowing everything down */
     if (dbManager->connectionAvailable()) {
-        QSqlField data("col", QVariant::String);
+        QSqlField data(QLatin1String("col"), QVariant::String);
         data.setValue(file);
         QString fname = dbManager->sqlDb().driver()->formatValue(data, false);
-        QSqlQuery query("SELECT `filename`,"
+        QSqlQuery query(QLatin1String(
+                        "SELECT `filename`,"
                         "       `trackname`,"
                         "       `track`,"
                         "       `length`,"
@@ -139,8 +134,8 @@ Player::MetaData PlaylistPopulator::getFileMetaData(const QString &file)
                         "       `year`,"
                         "       `bitrate` "
                         "FROM `view_tracks` "
-                        "WHERE `filename`=" + fname +
-                        "LIMIT 1;",
+                        "WHERE `filename`=") + fname +
+                        QLatin1String("LIMIT 1;"),
                         dbManager->sqlDb());
         if (query.first()) {
             metadata.filename = query.value(0).toString();
@@ -160,18 +155,18 @@ Player::MetaData PlaylistPopulator::getFileMetaData(const QString &file)
 
         if (f.isNull() || !f.tag()) {
             qDebug() << file << " failed to be loaded by TagLib.";
-            metadata.filename = file.toUtf8().constData();
+            metadata.filename = file;
             metadata.title = QFileInfo(file).fileName();
             return metadata;
         }
 
-        metadata.filename = file.toUtf8().constData();
-        metadata.title = f.tag()->title().toCString(true);
+        metadata.filename = file;
+        metadata.title = QString::fromLatin1(f.tag()->title().toCString(true));
         metadata.trackNumber = f.tag()->track();
-        metadata.artist = f.tag()->artist().toCString(true);
+        metadata.artist = QString::fromLatin1(f.tag()->artist().toCString(true));
         metadata.length = f.audioProperties()->length() * 1000;
-        metadata.album = f.tag()->album().toCString(true);
-        metadata.genre = f.tag()->genre().toCString(true);
+        metadata.album = QString::fromLatin1(f.tag()->album().toCString(true));
+        metadata.genre = QString::fromLatin1(f.tag()->genre().toCString(true));
         metadata.year = f.tag()->year();
         metadata.bitrate = f.audioProperties()->bitrate();
 
