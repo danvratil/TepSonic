@@ -28,9 +28,8 @@
 #include <QPoint>
 #include <QDebug>
 
-CollectionItemDelegate::CollectionItemDelegate(QObject *parent, CollectionProxyModel *proxyModel):
-    QStyledItemDelegate(parent),
-    m_proxyModel(proxyModel)
+CollectionItemDelegate::CollectionItemDelegate(QObject *parent):
+    QStyledItemDelegate(parent)
 {
 }
 

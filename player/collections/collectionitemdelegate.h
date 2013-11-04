@@ -34,15 +34,13 @@ class CollectionItemDelegate : public QStyledItemDelegate
     Q_OBJECT
 
   public:
-    explicit CollectionItemDelegate(QObject *parent = 0, CollectionProxyModel *proxyModel = 0);
+    explicit CollectionItemDelegate(QObject *parent = 0);
     void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const;
     QSize sizeHint(const QStyleOptionViewItem &option = QStyleOptionViewItem(),
                    const QModelIndex &index = QModelIndex()) const;
 
   private:
     mutable QList<QModelIndex> m_currentIndexes;
-
-    CollectionProxyModel *m_proxyModel;
 };
 
 #endif // COLLECTIONITEMDELEGATE_H
