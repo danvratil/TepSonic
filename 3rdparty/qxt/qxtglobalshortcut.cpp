@@ -28,26 +28,30 @@
 #include <QtDebug>
 
 bool QxtGlobalShortcutPrivate::error = false;
-#ifndef Q_WS_MAC
+#ifndef Q_OS_MAC
 int QxtGlobalShortcutPrivate::ref = 0;
-QAbstractEventDispatcher::EventFilter QxtGlobalShortcutPrivate::prevEventFilter = 0;
-#endif // Q_WS_MAC
+QxtGlobalShortcutNativeFilter *QxtGlobalShortcutPrivate::nativeFilter = 0;
+#endif // Q_OS_MAC
 QHash<QPair<quint32, quint32>, QxtGlobalShortcut*> QxtGlobalShortcutPrivate::shortcuts;
 
 QxtGlobalShortcutPrivate::QxtGlobalShortcutPrivate() : enabled(true), key(Qt::Key(0)), mods(Qt::NoModifier)
 {
-#ifndef Q_WS_MAC
-    if (!ref++)
-        prevEventFilter = QAbstractEventDispatcher::instance()->setEventFilter(eventFilter);
-#endif // Q_WS_MAC
+#ifndef Q_OS_MAC
+    if (!ref++) {
+        nativeFilter = new QxtGlobalShortcutNativeFilter;
+        QAbstractEventDispatcher::instance()->installNativeEventFilter(nativeFilter);
+    }
+#endif // Q_OS_MAC
 }
 
 QxtGlobalShortcutPrivate::~QxtGlobalShortcutPrivate()
 {
-#ifndef Q_WS_MAC
-    if (!--ref)
-        QAbstractEventDispatcher::instance()->setEventFilter(prevEventFilter);
-#endif // Q_WS_MAC
+#ifndef Q_OS_MAC
+    if (!--ref) {
+        QAbstractEventDispatcher::instance()->removeNativeEventFilter(nativeFilter);
+        delete nativeFilter;
+    }
+#endif // Q_OS_MAC
 }
 
 bool QxtGlobalShortcutPrivate::setShortcut(const QKeySequence& shortcut)

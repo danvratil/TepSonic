@@ -49,13 +49,14 @@ static int qxt_x_errhandler(Display* display, XErrorEvent *event)
     }
 }
 
-bool QxtGlobalShortcutPrivate::eventFilter(void* message)
+bool QxtGlobalShortcutNativeFilter::nativeEventFilter(const QByteArray& eventType,
+                                                      void* message, long int* result)
 {
     XEvent* event = static_cast<XEvent*>(message);
     if (event->type == KeyPress)
     {
         XKeyEvent* key = (XKeyEvent*) event;
-        activateShortcut(key->keycode, 
+        QxtGlobalShortcutPrivate::activateShortcut(key->keycode, 
             // Mod1Mask == Alt, Mod4Mask == Meta
             key->state & (ShiftMask | ControlMask | Mod1Mask | Mod4Mask));
     }

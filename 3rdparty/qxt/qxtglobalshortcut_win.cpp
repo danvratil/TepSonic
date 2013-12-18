@@ -25,7 +25,8 @@
 #include "qxtglobalshortcut_p.h"
 #include <qt_windows.h>
 
-bool QxtGlobalShortcutPrivate::eventFilter(void* message)
+bool QxtGlobalShortcutNativeFilter::nativeEventFilter(const QByteArray& eventType,
+                                                      void* message, long int* result)
 {
     MSG* msg = static_cast<MSG*>(message);
     if (msg->message == WM_HOTKEY)
