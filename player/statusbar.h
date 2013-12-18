@@ -24,41 +24,21 @@
 #include <QLabel>
 #include <QProgressBar>
 
-//! StatusBar is displays various informations about state of the application
-/*!
-  StatusBar is subclassed from QStatusBar and displayes information about length
-  of playlist (on right side) and either popups messages (for 5 seconds or so) with
-  an error or information or displays progressbar with action label that are describing
-  a long-time process (like populating playlist or rebuilding collection) and it's progress
-*/
 class StatusBar : public QStatusBar
 {
     Q_OBJECT
 
   public:
-    //! Constructor
-    /*!
-      \param parent pointer to parent object
-    */
     StatusBar(QWidget *parent = 0);
 
-  private:
-    //! Label that describes the action
-    QLabel *m_actionLabel;
-
-    //! Progress bar that shows progress of the action
-    QProgressBar *m_progressBar;
-
   public Q_SLOTS:
-    //! Updates action description and position of progressbar
     void setProgressBar(const QString &action, int progress, int maxPosition = 100);
-
-    //! Hides action label and progressbar
     void cancelAction();
-
-    //! Shows progress bar that is just informing about work, not showing exact progress
     void showWorkingBar(const QString &action);
 
+  private:
+    QLabel *m_actionLabel;
+    QProgressBar *m_progressBar;
 };
 
 #endif // STATUSBAR_H
