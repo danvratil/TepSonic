@@ -63,10 +63,9 @@ SettingsDialog::SettingsDialog(MainWindow *parent):
     m_pages.insert(PLUGINS_PAGE, new SettingsPages::PluginsPage);
     m_pages.insert(SHORTCUTS_PAGE, new SettingsPages::ShortcutsPage);
 
-    QSettings settings(QString(_CONFIGDIR) + QLatin1String("/main.conf"), QSettings::IniFormat, this);
     Q_FOREACH (SettingsPage * page, m_pages) {
         m_ui->pages->addWidget(page);
-        page->loadSettings(&settings);
+        page->loadSettings();
     }
 
     connect(m_pages[COLLECTIONS_PAGE], SIGNAL(rebuildCollections()),
@@ -95,9 +94,8 @@ void SettingsDialog::changeEvent(QEvent *e)
 
 void SettingsDialog::dialogAccepted()
 {
-    QSettings settings(QString(_CONFIGDIR) + QLatin1String("/main.conf"), QSettings::IniFormat);
     Q_FOREACH (SettingsPage * page, m_pages) {
-        page->saveSettings(&settings);
+        page->saveSettings();
     }
 
     if (qobject_cast<SettingsPages::CollectionsPage *>(m_pages[COLLECTIONS_PAGE])->collectionsSourceChanged()) {
@@ -121,10 +119,6 @@ void SettingsDialog::changePage(QListWidgetItem *current, QListWidgetItem *previ
 
 void SettingsDialog::emitRebuildCollections()
 {
-    // Save current state of collections configurations and emit rebuilding
-
-    QSettings settings(QString(_CONFIGDIR) + QLatin1String("/main.conf"), QSettings::IniFormat);
-    m_pages[COLLECTIONS_PAGE]->saveSettings(&settings);
-
+    m_pages[COLLECTIONS_PAGE]->saveSettings();
     Q_EMIT rebuildCollections();
 }

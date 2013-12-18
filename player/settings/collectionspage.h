@@ -44,8 +44,8 @@ class CollectionsPage: public SettingsPage
     }
 
   public Q_SLOTS:
-    void loadSettings(QSettings *settings);
-    void saveSettings(QSettings *settings);
+    void loadSettings();
+    void saveSettings();
 
   private:
     ::Ui::CollectionsPage *m_ui;

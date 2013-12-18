@@ -51,8 +51,8 @@ class PlayerPage : public SettingsPage
     }
 
   public Q_SLOTS:
-    void loadSettings(QSettings *settings);
-    void saveSettings(QSettings *settings);
+    void loadSettings();
+    void saveSettings();
 
   private:
     ::Ui::PlayerPage *m_ui;

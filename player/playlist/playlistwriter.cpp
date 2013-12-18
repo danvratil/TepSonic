@@ -33,6 +33,10 @@ PlaylistWriter::PlaylistWriter(PlaylistModel *playlistModel):
 
 void PlaylistWriter::run()
 {
+    if (!m_playlistModel) {
+        return;
+    }
+
     if (!m_outputFile.isEmpty()) {
         const QDir playlistDir(QFileInfo(m_outputFile).path());
         QFile file(m_outputFile);

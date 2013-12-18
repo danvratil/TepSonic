@@ -19,6 +19,7 @@
 
 #include "pluginspage.h"
 #include "ui_pluginspage.h"
+#include "settings.h"
 
 #include "pluginsmanager.h"
 #include "abstractplugin.h"
@@ -64,7 +65,7 @@ void PluginsPage::pluginsListItemChanged(QListWidgetItem *item)
     }
 }
 
-void PluginsPage::loadSettings(QSettings *settings)
+void PluginsPage::loadSettings()
 {
     PluginsManager *pluginsManager = PluginsManager::instance();
     // Iterate through all plugins
@@ -88,19 +89,17 @@ void PluginsPage::loadSettings(QSettings *settings)
         }
         m_ui->pluginsList->addItem(item);
     }
-
-    // PluginsManager knows better
-    Q_UNUSED(settings);
 }
 
-void PluginsPage::saveSettings(QSettings *settings)
+void PluginsPage::saveSettings()
 {
-    settings->beginGroup(QLatin1String("Plugins"));
-
     // Go through all plugins in the m_ui list
+    QStringList enabledPlugins;
     for (int i = 0; i < m_ui->pluginsList->count(); i++) {
         QListWidgetItem *item = m_ui->pluginsList->item(i);
-        settings->setValue(PluginsManager::instance()->pluginAt(i)->id, QVariant((item->checkState() == 2)));
+        if (item->checkState() == 2) {
+            enabledPlugins << PluginsManager::instance()->pluginAt(i)->id;
+        }
     }
-    settings->endGroup();
+    Settings::instance()->setEnabledPlugins(enabledPlugins);
 }

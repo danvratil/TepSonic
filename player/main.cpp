@@ -33,6 +33,7 @@
 #include "pluginsmanager.h"
 #include "taskmanager.h"
 #include "constants.h"
+#include "settings.h"
 
 
 Player *player;
@@ -76,15 +77,15 @@ int main(int argc, char *argv[])
     PluginsManager::instance();
     TaskManager::instance();
 
-    MainWindow mainWindow;
-    mainWindow.show();
+    MainWindow *mainWindow = new MainWindow;
+    mainWindow->show();
 
     Player *player = Player::instance();
     for (int i=1; i<tepsonic.arguments().count(); i++) {
         qDebug() << tepsonic.arguments().at(i);
         QFileInfo param(tepsonic.arguments().at(i));
         if ((param.isFile()) && (param.exists())) {
-            mainWindow.addPlaylistItem(param.absoluteFilePath());
+            mainWindow->addPlaylistItem(param.absoluteFilePath());
             // If this is a first file added, start playback immediatelly
             if (i==1) {
                 player->setTrack(param.absoluteFilePath());
@@ -96,7 +97,10 @@ int main(int argc, char *argv[])
 
     int ret = tepsonic.exec();
 
+    delete mainWindow;
+
     TaskManager::instance()->destroy();
+    Settings::instance()->destroy();
 
     return ret;
 }

@@ -19,6 +19,7 @@
 
 #include "collectionspage.h"
 #include "ui_collectionspage.h"
+#include "settings.h"
 
 #include <QFileDialog>
 #include <QListWidgetItem>
@@ -109,44 +110,37 @@ void CollectionsPage::collectionStateToggled()
     m_ui->enableCollectionsCheckbox->setEnabled(true);
 }
 
-void CollectionsPage::loadSettings(QSettings *settings)
+void CollectionsPage::loadSettings()
 {
-    settings->beginGroup(QLatin1String("Collections"));
-    m_ui->enableCollectionsCheckbox->setChecked(settings->value(QLatin1String("EnableCollections"), true).toBool());
-    m_ui->autoupdateCollectionsCheckbox->setChecked(settings->value(QLatin1String("AutoRebuildAfterStart"), true).toBool());
-    m_ui->collectionsPathsList->addItems(settings->value(QLatin1String("SourcePaths"), QStringList()).toStringList());
-    m_ui->dbEngineCombo->setCurrentIndex(settings->value(QLatin1String("StorageEngine"), 0).toInt());
+    m_ui->enableCollectionsCheckbox->setChecked(Settings::instance()->collectionsEnabled());
+    m_ui->autoupdateCollectionsCheckbox->setChecked(Settings::instance()->collectionsAutoRebuild());
+    m_ui->collectionsPathsList->addItems(Settings::instance()->collectionsSourcePaths());
+    const int index = m_ui->dbEngineCombo->findData(Settings::instance()->collectionsStorageEngine());
+    m_ui->dbEngineCombo->setCurrentIndex(index);
 
-    settings->beginGroup(QLatin1String("MySQL"));
-    m_ui->mysqlServerEdit->setText(settings->value(QLatin1String("Server"), QLatin1String("127.0.0.1")).toString());
-    m_ui->mysqlUsernameEdit->setText(settings->value(QLatin1String("Username")).toString());
-    m_ui->mysqlPasswordEdit->setText(settings->value(QLatin1String("Password")).toString());
-    m_ui->mysqlDatabaseEdit->setText(settings->value(QLatin1String("Database")).toString());
-    settings->endGroup();
-    settings->endGroup();
+    m_ui->mysqlServerEdit->setText(Settings::instance()->collectionsMySQLServer());
+    m_ui->mysqlUsernameEdit->setText(Settings::instance()->collectionsMySQLUsername());
+    m_ui->mysqlPasswordEdit->setText(Settings::instance()->collectionsMySQLPassword());
+    m_ui->mysqlDatabaseEdit->setText(Settings::instance()->collectionsMySQLDatabase());
 
     collectionStateToggled();
 }
 
-void CollectionsPage::saveSettings(QSettings *settings)
+void CollectionsPage::saveSettings()
 {
-    settings->beginGroup(QLatin1String("Collections"));
-    settings->setValue(QLatin1String("EnableCollections"), m_ui->enableCollectionsCheckbox->isChecked());
-    settings->setValue(QLatin1String("AutoRebuildAfterStart"), m_ui->autoupdateCollectionsCheckbox->isChecked());
+    Settings::instance()->setCollectionsEnabled(m_ui->enableCollectionsCheckbox->isChecked());
+    Settings::instance()->setCollectionsAutoRebuild(m_ui->autoupdateCollectionsCheckbox->isChecked());
 
     QStringList items;
     for (int i = 0; i < m_ui->collectionsPathsList->count(); i++) {
         items.append(m_ui->collectionsPathsList->item(i)->text());
     }
-    settings->setValue(QLatin1String("SourcePaths"), items);
-    settings->setValue(QLatin1String("StorageEngine"), m_ui->dbEngineCombo->currentIndex());
+    Settings::instance()->setCollectionsSourcePaths(items);
+    Settings::instance()->setCollectionsStorageEngine(m_ui->dbEngineCombo->currentData().toString());
 
-    settings->beginGroup(QLatin1String("MySQL"));
-    settings->setValue(QLatin1String("Server"), m_ui->mysqlServerEdit->text());
-    settings->setValue(QLatin1String("Username"), m_ui->mysqlUsernameEdit->text());
-    // I'd like to have the password encrypted (but not hashed!) - I don't like passwords in plaintext...
-    settings->setValue(QLatin1String("Password"), m_ui->mysqlPasswordEdit->text());
-    settings->setValue(QLatin1String("Database"), m_ui->mysqlDatabaseEdit->text());
-    settings->endGroup();
-    settings->endGroup();
+    Settings::instance()->setCollectionsMySQLServer(m_ui->mysqlServerEdit->text());
+    Settings::instance()->setCollectionsMySQLUsername(m_ui->mysqlUsernameEdit->text());
+    // FIXME: Don't store the password in plain text
+    Settings::instance()->setCollectionsMySQLPassword(m_ui->mysqlPasswordEdit->text());
+    Settings::instance()->setCollectionsMySQLDatabase(m_ui->mysqlDatabaseEdit->text());
 }

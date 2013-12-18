@@ -23,7 +23,6 @@
 #include <QMessageBox>
 #include <QMainWindow>
 #include <QActionGroup>
-#include <QSettings>
 #include <QSignalMapper>
 #include <QPointer>
 #include <QLabel>
@@ -154,8 +153,6 @@ class MainWindow : public QMainWindow
 
     QIcon *m_appIcon;
     QLabel *m_playlistLengthLabel;
-
-    QSettings *m_settings;
 
     bool m_canClose;
 

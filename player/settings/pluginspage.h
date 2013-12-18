@@ -41,8 +41,8 @@ class PluginsPage: public SettingsPage
     ~PluginsPage();
 
   public Q_SLOTS:
-    void loadSettings(QSettings *settings);
-    void saveSettings(QSettings *settings);
+    void loadSettings();
+    void saveSettings();
 
   private Q_SLOTS:
     void pluginsListItemChanged(QListWidgetItem *item);

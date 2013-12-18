@@ -19,6 +19,7 @@
 
 #include "playerpage.h"
 #include "ui_playerpage.h"
+#include "settings.h"
 
 #include "playereffectdialog.h"
 #include "player.h"
@@ -114,38 +115,38 @@ void PlayerPage::showEffectSettings(const QModelIndex &effect)
     }
 }
 
-void PlayerPage::loadSettings(QSettings *settings)
+void PlayerPage::loadSettings()
 {
-    settings->beginGroup(QLatin1String("Preferences"));
-    m_ui->restorePreviousSessionCheckBox->setChecked(settings->value(QLatin1String("RestoreSession"), true).toBool());
-    m_ui->outputDevicesList->setCurrentIndex(getOutputDeviceModelIndex(settings->value(QLatin1String("OutputDevice"), 0).toInt()));
+    m_ui->restorePreviousSessionCheckBox->setChecked(Settings::instance()->sessionRestore());
+    m_ui->outputDevicesList->setCurrentIndex(getOutputDeviceModelIndex(Settings::instance()->playerOutputDevice()));
 
-    m_oldOutputDeviceIndex = settings->value(QLatin1String("OutputDevice"), 0).toInt();
+    m_oldOutputDeviceIndex = Settings::instance()->playerOutputDevice();
 
+    const QVariantMap effectsConf = Settings::instance()->playerEffects();
     const QList<Phonon::Effect *> effects = Player::instance()->effects();
     for (int i = 0; i < effects.count(); i++) {
         const Phonon::EffectDescription ed = effects.at(i)->description();
-        const bool state = settings->value(QLatin1String("Effects/") + ed.name(), false).toBool();
+        bool state = false;
+        if (effectsConf.contains(ed.name())) {
+            state = effectsConf.value(ed.name()).toBool();
+        }
         if (state) {
             qobject_cast<QStandardItemModel *>(m_ui->playerEffectsList->model())->item(i, 0)->setCheckState(Qt::Checked);
         }
     }
-    settings->endGroup();
 }
 
-void PlayerPage::saveSettings(QSettings *settings)
+void PlayerPage::saveSettings()
 {
-    settings->beginGroup(QLatin1String("Preferences"));
-    settings->setValue(QLatin1String("RestoreSession"), m_ui->restorePreviousSessionCheckBox->isChecked());
-    settings->setValue(QLatin1String("OutputDevice"), getOutputDeviceIndex(m_ui->outputDevicesList->currentIndex()));
+    Settings::instance()->setSessionRestore(m_ui->restorePreviousSessionCheckBox->isChecked());
+    Settings::instance()->setPlayerOutputDevice(getOutputDeviceIndex(m_ui->outputDevicesList->currentIndex()));
 
     const QList<Phonon::Effect *> effects = Player::instance()->effects();
+    QVariantMap effectsMap;
     for (int i = 0; i < effects.count(); i++) {
-        Phonon::EffectDescription ed = effects.at(i)->description();
-        settings->setValue(QLatin1String("Effects/") + ed.name(),
-                           qobject_cast<QStandardItemModel *>(m_ui->playerEffectsList->model())->item(i, 0)->checkState() == Qt::Checked);
-        Player::instance()->enableEffect(effects.at(i),
-                                         (qobject_cast<QStandardItemModel *>(m_ui->playerEffectsList->model())->item(i, 0)->checkState() == Qt::Checked));
+        const Phonon::EffectDescription ed = effects.at(i)->description();
+        bool enabled = qobject_cast<QStandardItemModel *>(m_ui->playerEffectsList->model())->item(i, 0)->checkState() == Qt::Checked;
+        effectsMap[ed.name()] = enabled;
+        Player::instance()->enableEffect(effects.at(i), enabled);
     }
-    settings->endGroup();
 }

@@ -25,8 +25,6 @@
 #include <QDirModel>
 #include <QTreeWidgetItem>
 #include <QListWidgetItem>
-#include <QPluginLoader>
-#include <QSettings>
 
 #include <phonon/AudioOutputDevice>
 

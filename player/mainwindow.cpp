@@ -34,6 +34,7 @@
 #include "tools.h"
 #include "supportedformats.h"
 #include "metadataeditor.h"
+#include "settings.h"
 
 #include <taglib/fileref.h>
 #include <taglib/tag.h>
@@ -63,8 +64,6 @@ MainWindow::MainWindow():
     m_metadataEditor(0),
     m_canClose(false)
 {
-    m_settings = new QSettings(_CONFIGDIR + QDir::separator() + QLatin1String("main.conf"), QSettings::IniFormat);
-
     // Initialize pseudo-random numbers generator
     srand(time(NULL));
 
@@ -96,8 +95,8 @@ MainWindow::MainWindow():
             this, SLOT(setCurrentTrack(QModelIndex)));
 
     // Set playlist browser columns widths and visibility
-    const QVariantList playlistColumnsStates(m_settings->value(QLatin1String("Window/PlaylistColumnsStates")).toList());
-    const QVariantList playlistColumnsWidths(m_settings->value(QLatin1String("Window/PlaylistColumnsWidths")).toList());
+    const QVariantList playlistColumnsStates = Settings::instance()->playlistColumnsStates();
+    const QVariantList playlistColumnsWidths = Settings::instance()->playlistColumnsWidths();
     for (int i = 0; i < playlistColumnsStates.count() - 1; i++) {
         if (playlistColumnsStates.at(i).toBool()) {
             m_ui->playlistView->showColumn(i);
@@ -110,14 +109,14 @@ MainWindow::MainWindow():
     }
 
     // Restore main window geometry
-    restoreGeometry(m_settings->value(QLatin1String("Window/Geometry"), saveGeometry()).toByteArray());
-    restoreState(m_settings->value(QLatin1String("Window/State"), saveState()).toByteArray());
-    m_ui->viewsSplitter->restoreState(m_settings->value(QLatin1String("Window/ViewsSplit")).toByteArray());
+    restoreGeometry(Settings::instance()->windowGeometry());
+    restoreState(Settings::instance()->windowState());
+    m_ui->viewsSplitter->restoreState(Settings::instance()->windowSplitterState());
 
     // Enable or disable collections
-    if (m_settings->value(QLatin1String("Collections/EnableCollections"), true).toBool() == true) {
+    if (Settings::instance()->collectionsEnabled()) {
         setupCollections();
-        if (m_settings->value(QLatin1String("Collections/AutoRebuildAfterStart"), false).toBool() == true) {
+        if (Settings::instance()->collectionsAutoRebuild()) {
             TaskManager::instance()->rebuildCollections();
         }
     } else {
@@ -137,10 +136,10 @@ MainWindow::MainWindow():
     m_ui->volumeSlider->setAudioOutput(Player::instance()->audioOutput());
 
     // Load last playlist
-    if (m_settings->value(QLatin1String("Preferences/RestoreSession"), true).toBool()) {
+    if (Settings::instance()->sessionRestore()) {
         TaskManager::instance()->addFileToPlaylist(QString(_CONFIGDIR).append(QLatin1String("/last.m3u")));
-        randomModeChanged(m_settings->value(QLatin1String("LastSession/RandomMode"), false).toBool());
-        repeatModeChanged(Player::RepeatMode(m_settings->value(QLatin1String("LastSession/RepeatMode"), 0).toInt()));
+        randomModeChanged(Settings::instance()->playerRandomMode());
+        repeatModeChanged(static_cast<Player::RepeatMode>(Settings::instance()->playerRepeatMode()));
     }
 
     // Create bookmarks manager
@@ -154,22 +153,23 @@ MainWindow::MainWindow():
 
 MainWindow::~MainWindow()
 {
-    m_settings->setValue(QLatin1String("Window/Geometry"), saveGeometry());
-    m_settings->setValue(QLatin1String("Window/State"), saveState());
-    m_settings->setValue(QLatin1String("Window/ViewsSplit"), m_ui->viewsSplitter->saveState());
-    QList<QVariant> playlistColumnsStates;
-    QList<QVariant> playlistColumnsWidths;
+    Settings::instance()->setWindowGeometry(saveGeometry());
+    Settings::instance()->setWindowState(saveState());
+    Settings::instance()->setWindowSplitterState(m_ui->viewsSplitter->saveState());
+
+    QVariantList playlistColumnsStates;
+    QVariantList playlistColumnsWidths;
     for (int i = 0; i < m_ui->playlistView->model()->columnCount(QModelIndex()); i++) {
         // Don't store "isColumnHidden" but "isColumnVisible"
         playlistColumnsStates.append(!m_ui->playlistView->isColumnHidden(i));
         playlistColumnsWidths.append(m_ui->playlistView->columnWidth(i));
     }
-    m_settings->setValue(QLatin1String("Window/PlaylistColumnsStates"), playlistColumnsStates);
-    m_settings->setValue(QLatin1String("Window/PlaylistColumnsWidths"), playlistColumnsWidths);
+    Settings::instance()->setPlaylistColumnsStates(playlistColumnsStates);
+    Settings::instance()->setPlaylistColumnsWidths(playlistColumnsWidths);
 
-    if (m_settings->value(QLatin1String("Preferences/RestoreSession"), true).toBool()) {
-        m_settings->setValue(QLatin1String("LastSession/RepeatMode"), int(Player::instance()->repeatMode()));
-        m_settings->setValue(QLatin1String("LastSession/RandomMode"), Player::instance()->randomMode());
+    if (Settings::instance()->sessionRestore()) {
+        Settings::instance()->setPlayerRepeatMode(Player::instance()->repeatMode());
+        Settings::instance()->setPlayerRandomMode(Player::instance()->randomMode());
     }
 
     // Save current playlist to file
@@ -218,34 +218,30 @@ void MainWindow::createMenus()
 
 void MainWindow::bindShortcuts()
 {
-    m_settings->beginGroup(QLatin1String("Shortcuts"));
-
     QxtGlobalShortcut *sc1 = new QxtGlobalShortcut(this);
-    sc1->setShortcut(QKeySequence::fromString(m_settings->value(QLatin1String("PlayPause"), QLatin1String("Meta+P")).toString()));
+    sc1->setShortcut(QKeySequence::fromString(Settings::instance()->shortcutPlayPause()));
     connect(sc1, SIGNAL(activated()),
             this, SLOT(playPause()));
 
     QxtGlobalShortcut *sc2 = new QxtGlobalShortcut(this);
-    sc2->setShortcut(QKeySequence::fromString(m_settings->value(QLatin1String("Stop"), QLatin1String("Meta+S")).toString()));
+    sc2->setShortcut(QKeySequence::fromString(Settings::instance()->shortcutStop()));
     connect(sc2, SIGNAL(activated()),
             Player::instance(), SLOT(stop()));
 
     QxtGlobalShortcut *sc3 = new QxtGlobalShortcut(this);
-    sc3->setShortcut(QKeySequence::fromString(m_settings->value(QLatin1String("PrevTrack"), QLatin1String("Meta+B")).toString()));
+    sc3->setShortcut(QKeySequence::fromString(Settings::instance()->shortcutPreviousTrack()));
     connect(sc3, SIGNAL(activated()),
             m_ui->playlistView, SLOT(selectPreviousTrack()));
 
     QxtGlobalShortcut *sc4 = new QxtGlobalShortcut(this);
-    sc4->setShortcut(QKeySequence::fromString(m_settings->value(QLatin1String("NextTrack"), QLatin1String("Meta+N")).toString()));
+    sc4->setShortcut(QKeySequence::fromString(Settings::instance()->shortcutNextTrack()));
     connect(sc4, SIGNAL(activated()),
             m_ui->playlistView, SLOT(selectNextTrack()));
 
     QxtGlobalShortcut *sc5 = new QxtGlobalShortcut(this);
-    sc5->setShortcut(QKeySequence::fromString(m_settings->value(QLatin1String("ShowHideWin"), QLatin1String("Meta+H")).toString()));
+    sc5->setShortcut(QKeySequence::fromString(Settings::instance()->shortcutToggleWindow()));
     connect(sc5, SIGNAL(activated()),
             this, SLOT(showHideWindow()));
-
-    m_settings->endGroup();
 }
 
 void MainWindow::bindSignals()
@@ -516,7 +512,7 @@ void MainWindow::openSettingsDialog()
 
 void MainWindow::settingsDialogAccepted()
 {
-    if (m_settings->value(QLatin1String("Collections/EnableCollections")).toBool()) {
+    if (Settings::instance()->collectionsEnabled()) {
         setupCollections();
     } else {
         destroyCollections();
@@ -800,4 +796,3 @@ void MainWindow::setStopTrackClicked()
         m_ui->playlistView->setStopTrack(index);
     }
 }
-

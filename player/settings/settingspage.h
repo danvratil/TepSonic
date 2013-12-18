@@ -31,8 +31,8 @@ class SettingsPage: public QWidget
     explicit SettingsPage(QWidget *parent);
 
   public Q_SLOTS:
-    virtual void loadSettings(QSettings *settings) = 0;
-    virtual void saveSettings(QSettings *settings) = 0;
+    virtual void loadSettings() = 0;
+    virtual void saveSettings() = 0;
 };
 
 #endif // SETTINGSPAGE_H
