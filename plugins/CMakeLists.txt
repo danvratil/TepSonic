@@ -1,16 +1,17 @@
-if (DEFINED WITH_LASTFMSCROBBLER)
-  if (NOT WITH_LASTFMSCROBBLER MATCHES OFF)
-    add_subdirectory(LastFmScrobbler)
-  endif (NOT WITH_LASTFMSCROBBLER MATCHES OFF)
-else (DEFINED WITH_LASTFMSCROBBLER)
+
+option(WITH_LASTFMSCROBBLER_PLUGIN "Enable Last.fm scrobbler plugin" OFF)
+if (WITH_LASTFMSCROBBLER_PLUGIN)
   add_subdirectory(LastFmScrobbler)
-endif (DEFINED WITH_LASTFMSCROBBLER)
+endif ()
 
-if (NOT WITH_LYRICS_PLUGIN MATCHES OFF)
+
+option(WITH_LYRICS_PLUGIN "Enable Lyrics plugin" OFF)
+if (WITH_LYRICS_PLUGIN)
   add_subdirectory(lyrics)
-endif (NOT WITH_LYRICS_PLUGIN MATCHES OFF)
+endif ()
 
 
-if (NOT WITH_MPRIS2_PLUGIN MATCHES OFF)
-    add_subdirectory(mpris2)
+option(WITH_MPRIS2_PLUGIN "Enable MPRIS2 plugin" OFF)
+if (WITH_MPRIS2_PLUGIN)
+  add_subdirectory(mpris2)
 endif ()
