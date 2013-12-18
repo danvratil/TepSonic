@@ -29,9 +29,10 @@ class Node
   public:
     typedef QList<Node*> List;
 
-    explicit Node(Node *parent_):
+    explicit Node(Node *parent_, CollectionModel::NodeType nodeType):
         internalId(-1),
-        parentId(-1)
+        parentId(-1),
+        type(nodeType)
     {
         parent = parent_;
         if (parent) {
@@ -54,7 +55,7 @@ class Node
     virtual QVariant data(int role) const
     {
         if (role == CollectionModel::NodeTypeRole) {
-            return CollectionModel::RootNodeType;
+            return type;
         }
 
         return QVariant();
@@ -62,6 +63,7 @@ class Node
 
     int internalId;
     int parentId;
+    CollectionModel::NodeType type;
 
     QList<Node*> children;
     Node *parent;
@@ -71,7 +73,7 @@ class ArtistNode: public Node
 {
   public:
     explicit ArtistNode(Node *parent):
-        Node(parent),
+        Node(parent, CollectionModel::ArtistNodeType),
         albumsCount(0),
         totalDuration(0)
     {
@@ -84,8 +86,6 @@ class ArtistNode: public Node
     virtual QVariant data(int role) const
     {
         switch (role) {
-            case CollectionModel::NodeTypeRole:
-                return CollectionModel::ArtistNodeType;
             case CollectionModel::ArtistNameRole:
                 return artistName;
             case CollectionModel::AlbumsCountRole:
@@ -95,8 +95,6 @@ class ArtistNode: public Node
             default:
                 return Node::data(role);
         }
-
-        return QVariant();
     }
 
     QString artistName;
@@ -108,7 +106,7 @@ class AlbumNode: public Node
 {
   public:
     explicit AlbumNode(Node *parent):
-        Node(parent),
+        Node(parent, CollectionModel::AlbumNodeType),
         tracksCount(0),
         totalDuration(0)
     {
@@ -121,8 +119,6 @@ class AlbumNode: public Node
     virtual QVariant data(int role) const
     {
         switch (role) {
-            case CollectionModel::NodeTypeRole:
-                return CollectionModel::AlbumNodeType;
             case CollectionModel::AlbumNameRole:
                 return albumName;
             case CollectionModel::TrackCountRole:
@@ -132,8 +128,6 @@ class AlbumNode: public Node
             default:
                 return Node::data(role);
         }
-
-        return QVariant();
     }
 
     QString albumName;
@@ -145,7 +139,7 @@ class TrackNode: public Node
 {
   public:
     explicit TrackNode(Node *parent):
-        Node(parent)
+        Node(parent, CollectionModel::TrackNodeType)
     {
     }
 
@@ -156,8 +150,6 @@ class TrackNode: public Node
     virtual QVariant data(int role) const
     {
         switch (role) {
-            case CollectionModel::NodeTypeRole:
-                return CollectionModel::TrackNodeType;
             case CollectionModel::TrackTitleRole:
                 return trackTitle;
             case CollectionModel::FilePathRole:
@@ -169,8 +161,6 @@ class TrackNode: public Node
             default:
                 return Node::data(role);
         }
-
-        return QVariant();
     }
 
     QString trackTitle;
@@ -179,9 +169,10 @@ class TrackNode: public Node
     int duration;
 };
 
-
-class CollectionModel::Private
+class CollectionModel::Private: public QObject
 {
+    Q_OBJECT
+
   public:
     explicit Private(CollectionModel *parent);
     virtual ~Private();
@@ -189,23 +180,30 @@ class CollectionModel::Private
     QModelIndex indexForNode(Node *node) const;
     Node* getNode(const QModelIndex &index) const;
 
-    void __k__onArtistsPopulated();
-    void __k__onAlbumsPopulated();
-    void __k__onTracksPopulated();
-
-    /* Runnables */
-    void populateArtists();
-    Node::List populateArtistsRunnable();
-    void populateAlbums(Node *parent);
-    Node::List populateAlbumsRunnable(Node *parent);
-    void populateTracks(Node *parent);
-    Node::List populateTracksRunnable(Node *parent);
-
     Node *root;
     QHash<int /* internalId */, Node*> artists;
     QHash<int /* internalId */, Node*> albums;
     QSet<Node*> populatedNodes;
     QSet<Node*> pendingNodes;
+
+    QHash<Node* /* parent node */, Node* /* fake node */> fakeNodes;
+    QHash<Node* /* fake node */, Node* /* parent node */> reverseFakeNodes;
+
+  public Q_SLOTS:
+    void populateArtists();
+    void populateAlbums(Node *parent);
+    void populateTracks(Node *parent);
+
+  private Q_SLOTS:
+    void onArtistsPopulated();
+    void onAlbumsPopulated();
+    void onTracksPopulated();
+
+    /* Runnables */
+  private:
+    Node::List populateArtistsRunnable();
+    Node::List populateAlbumsRunnable(Node *parent);
+    Node::List populateTracksRunnable(Node *parent);
 
   private:
     CollectionModel * const q;

@@ -25,6 +25,8 @@
 #include <QtConcurrentRun>
 #include <QFutureWatcher>
 #include <QFuture>
+#include <qcoreapplication.h>
+#include <QTimer>
 
 #include <QSqlDatabase>
 #include <QSqlQuery>
@@ -33,7 +35,8 @@
 Q_DECLARE_METATYPE(Node*)
 
 CollectionModel::Private::Private(CollectionModel *parent):
-    root(new Node(0)),
+    QObject(),
+    root(new Node(0, RootNodeType)),
     q(parent)
 {
 }
@@ -47,7 +50,6 @@ Node* CollectionModel::Private::getNode(const QModelIndex &index) const
 {
     if (index.isValid()) {
         Node *node = static_cast<Node*>(index.internalPointer());
-        Q_ASSERT(node);
         return node;
     }
 
@@ -66,7 +68,7 @@ void CollectionModel::Private::populateArtists()
     QFutureWatcher<Node::List> *watcher = new QFutureWatcher<Node::List>();
     QFuture<Node::List> future = QtConcurrent::run<Node::List>(this, &CollectionModel::Private::populateArtistsRunnable);
     watcher->setFuture(future);
-    connect(watcher, SIGNAL(finished()), q, SLOT(__k__onArtistsPopulated()));
+    connect(watcher, SIGNAL(finished()), this, SLOT(onArtistsPopulated()));
 }
 
 Node::List CollectionModel::Private::populateArtistsRunnable()
@@ -89,15 +91,18 @@ Node::List CollectionModel::Private::populateArtistsRunnable()
     nodes << vaNode;
     */
 
-    QSqlQuery query(QLatin1String(
+    QSqlQuery query(DatabaseManager::instance()->sqlDb());
+    query.prepare(QLatin1String(
                     "SELECT id, interpret, albumsCnt, totalLength "
                     "FROM interprets "
       /*              "WHERE id NOT IN (SELECT interpret FROM tracks "
                     "                 WHERE album IN (SELECT album "
                     "                                 FROM view_various_artists) "
                     "                 ) "*/
-                    "ORDER BY interpret ASC"),
-                    DatabaseManager::instance()->sqlDb());
+                    "ORDER BY interpret ASC"));
+    if (!query.exec()) {
+        qWarning() << "Failed to execute artists query:" << query.lastError();
+    }
 
     while (query.next()) {
         ArtistNode *node = new ArtistNode(0);
@@ -111,11 +116,11 @@ Node::List CollectionModel::Private::populateArtistsRunnable()
     return nodes;
 }
 
-void CollectionModel::Private::__k__onArtistsPopulated()
+void CollectionModel::Private::onArtistsPopulated()
 {
     // Can't use qobject_cast on templated classes
-    QFutureWatcher<Node::List> *artistsWatcher = static_cast<QFutureWatcher<Node::List>*>(q->sender());
-    Node::List nodes = artistsWatcher->result();
+    QFutureWatcher<Node::List> *artistsWatcher = static_cast<QFutureWatcher<Node::List>*>(sender());
+    const Node::List nodes = artistsWatcher->result();
     qDebug() << "Fetched" << nodes.count() << "artists from collections";
 
     populatedNodes.insert(root);
@@ -128,8 +133,9 @@ void CollectionModel::Private::__k__onArtistsPopulated()
     }
     q->endInsertRows();
 
-    artistsWatcher->deleteLater();
+    delete fakeNodes.take(root);
 
+    artistsWatcher->deleteLater();
 }
 
 void CollectionModel::Private::populateAlbums(Node *parentNode)
@@ -140,7 +146,7 @@ void CollectionModel::Private::populateAlbums(Node *parentNode)
     watcher->setProperty("ParentNode", QVariant::fromValue(parentNode));
     QFuture<Node::List> future = QtConcurrent::run<Node::List>(this, &CollectionModel::Private::populateAlbumsRunnable, parentNode);
     watcher->setFuture(future);
-    connect(watcher, SIGNAL(finished()), q, SLOT(__k__onAlbumsPopulated()));
+    connect(watcher, SIGNAL(finished()), this, SLOT(onAlbumsPopulated()));
 }
 
 Node::List CollectionModel::Private::populateAlbumsRunnable(Node *parentNode)
@@ -176,10 +182,14 @@ Node::List CollectionModel::Private::populateAlbumsRunnable(Node *parentNode)
                   "       albums.totalLength "
                   "FROM tracks "
                   "LEFT JOIN albums ON (tracks.album = albums.id) "
-                  "WHERE albums.id NOT IN (SELECT album FROM view_various_artists) AND tracks.interpret = ? "
+                  //"WHERE albums.id NOT IN (SELECT album FROM view_various_artists) AND tracks.interpret = :interpretId "
+                  "WHERE tracks.interpret = :interpretId "
                   "ORDER BY albums.album ASC"));
-    query.addBindValue(parentNode->internalId);
-    query.exec();
+    query.bindValue(QLatin1String(":interpretId"), parentNode->internalId);
+    if (!query.exec())  {
+        qWarning() << "Failed to execute albums query:" << query.lastError().text();
+        return nodes;
+    }
     while (query.next()) {
         AlbumNode *albumNode = new AlbumNode(0);
         albumNode->internalId = query.value(0).toInt();
@@ -189,13 +199,14 @@ Node::List CollectionModel::Private::populateAlbumsRunnable(Node *parentNode)
         albumNode->totalDuration = query.value(4).toInt();
         nodes << albumNode;
     }
+    query.finish();
 
     return nodes;
 }
 
-void CollectionModel::Private::__k__onAlbumsPopulated()
+void CollectionModel::Private::onAlbumsPopulated()
 {
-    QFutureWatcher<Node::List> *albumsWatcher = static_cast<QFutureWatcher<Node::List>*>(q->sender());
+    QFutureWatcher<Node::List> *albumsWatcher = static_cast<QFutureWatcher<Node::List>*>(sender());
     Node *parentNode = albumsWatcher->property("ParentNode").value<Node*>();
     Node::List nodes = albumsWatcher->result();
     qDebug() << "Fetched" << nodes.count() << "albums for artist" << parentNode->internalId;
@@ -203,22 +214,16 @@ void CollectionModel::Private::__k__onAlbumsPopulated()
     populatedNodes.insert(parentNode);
     pendingNodes.remove(parentNode);
 
+    q->beginInsertRows(indexForNode(parentNode), 0, nodes.count() - 1);
     Q_FOREACH (Node *node, nodes) {
-        Node *artist = artists.value(node->parentId);
-        if (!artist) {
-            qDebug() << "Failed to find artist" << node->parentId << "for album"
-                     << node->internalId << "(" << static_cast<AlbumNode*>(node)->albumName << ")";
-            // FIXME: We need to change the database structure in order to correctly
-            // support various artists etc.
-            //Q_ASSERT(artist);
-            continue;
-        }
-        const int count = artist->children.count();
-        q->beginInsertRows(indexForNode(artist), count, count + 1);
-        artist->addChild(node);
+        parentNode->addChild(node);
         albums.insert(node->internalId, node);
-        q->endInsertRows();
     }
+    q->endInsertRows();
+
+    Node *fakeNode = fakeNodes.value(parentNode);
+    reverseFakeNodes.remove(fakeNode);
+    delete fakeNode;
 
     albumsWatcher->deleteLater();
 }
@@ -231,7 +236,7 @@ void CollectionModel::Private::populateTracks(Node *parentNode)
     watcher->setProperty("ParentNode", QVariant::fromValue(parentNode));
     QFuture<Node::List> future = QtConcurrent::run<Node::List>(this, &CollectionModel::Private::populateTracksRunnable, parentNode);
     watcher->setFuture(future);
-    connect(watcher, SIGNAL(finished()), q, SLOT(__k__onAlbumsPopulated()));
+    connect(watcher, SIGNAL(finished()), this, SLOT(onAlbumsPopulated()));
 }
 
 QList<Node*> CollectionModel::Private::populateTracksRunnable(Node *parentNode)
@@ -242,10 +247,12 @@ QList<Node*> CollectionModel::Private::populateTracksRunnable(Node *parentNode)
     query.prepare(QLatin1String(
                   "SELECT id, albumID, trackname, filename, genre, length "
                   "FROM view_tracks "
-                  "WHERE albumId = ? "
+                  "WHERE albumId = :albumId "
                   "ORDER BY track ASC"));
-    query.addBindValue(parentNode->internalId);
-    query.exec();
+    query.bindValue(QLatin1String(":albumId"), parentNode->internalId);
+    if (!query.exec()) {
+        qWarning() << "Failed to execute tracks query:" << query.lastError().text();
+    }
     while (query.next()) {
         TrackNode *trackNode = new TrackNode(0);
         trackNode->internalId = query.value(0).toInt();
@@ -260,9 +267,9 @@ QList<Node*> CollectionModel::Private::populateTracksRunnable(Node *parentNode)
     return nodes;
 }
 
-void CollectionModel::Private::__k__onTracksPopulated()
+void CollectionModel::Private::onTracksPopulated()
 {
-    QFutureWatcher<Node::List> *tracksWatcher = static_cast<QFutureWatcher<Node::List>*>(q->sender());
+    QFutureWatcher<Node::List> *tracksWatcher = static_cast<QFutureWatcher<Node::List>*>(sender());
     Node *parentNode = tracksWatcher->property("ParentNode").value<Node*>();
     Node::List nodes = tracksWatcher->result();
     qDebug() << "Fetched" << nodes.count() << "tracks for album" << parentNode->internalId;
@@ -270,6 +277,7 @@ void CollectionModel::Private::__k__onTracksPopulated()
     populatedNodes.insert(parentNode);
     pendingNodes.remove(parentNode);
 
+    q->beginInsertRows(indexForNode(parentNode), 0, nodes.count() - 1);
     Q_FOREACH (Node *node, nodes) {
         Node *album = albums.value(node->parentId);
         if (!album) {
@@ -278,11 +286,13 @@ void CollectionModel::Private::__k__onTracksPopulated()
             //Q_ASSERT(album);
             continue;
         }
-        const int count = album->children.count();
-        q->beginInsertRows(indexForNode(album), count, count + 1);
         album->addChild(node);
-        q->endInsertRows();
     }
+    q->endInsertRows();
+
+    Node *fakeNode = fakeNodes.value(parentNode);
+    reverseFakeNodes.remove(fakeNode);
+    delete fakeNode;
 
     tracksWatcher->deleteLater();
 }
@@ -308,23 +318,21 @@ int CollectionModel::columnCount(const QModelIndex & /* parent */) const
 bool CollectionModel::canFetchMore(const QModelIndex &parent) const
 {
     Node *parentNode = d->getNode(parent);
-    NodeType type = static_cast<NodeType>(parentNode->data(NodeTypeRole).toInt());
-    if (type == TrackNodeType) {
+    if (parentNode->type == TrackNodeType) {
         return false;
+    } else {
+        return !d->populatedNodes.contains(parentNode);
     }
-
-    if (d->populatedNodes.contains(parentNode)) {
-        return false;
-    }
-
-    return true;
 }
 
 void CollectionModel::fetchMore(const QModelIndex &parent)
 {
     Node *parentNode = d->getNode(parent);
-    NodeType type = static_cast<NodeType>(parentNode->data(NodeTypeRole).toInt());
-    switch (type) {
+    if (d->pendingNodes.contains(parentNode)) {
+        return;
+    }
+
+    switch (parentNode->type) {
         case CollectionModel::RootNodeType:
             d->populateArtists();
             break;
@@ -345,8 +353,7 @@ int CollectionModel::rowCount(const QModelIndex &parent) const
     if (d->populatedNodes.contains(parentNode)) {
         return parentNode->children.count();
     } else {
-        NodeType type = static_cast<NodeType>(parentNode->data(NodeTypeRole).toInt());
-        switch (type) {
+        switch (parentNode->type) {
             case CollectionModel::ArtistNodeType:
                 return static_cast<ArtistNode*>(parentNode)->albumsCount;
             case CollectionModel::AlbumNodeType:
@@ -355,6 +362,8 @@ int CollectionModel::rowCount(const QModelIndex &parent) const
                 return 0;
         }
     }
+
+    Q_ASSERT(false);
 }
 
 QVariant CollectionModel::data(const QModelIndex &index, int role) const
@@ -364,27 +373,11 @@ QVariant CollectionModel::data(const QModelIndex &index, int role) const
     }
 
     Node *node = d->getNode(index);
-    if (!d->populatedNodes.contains(node)) {
-        if (role == Qt::DisplayRole) {
-            return tr("Fetching data...");
-        } else if (role == CollectionModel::NodeTypeRole) {
-            NodeType parentType = static_cast<NodeType>(node->data(NodeTypeRole).toInt());
-            switch (parentType) {
-                case RootNodeType:
-                    return ArtistNodeType;
-                case ArtistNodeType:
-                    return AlbumNodeType;
-                case AlbumNodeType:
-                    return TrackNodeType;
-                case TrackNodeType:
-                    return QVariant(); // should not happen
-            }
-        }
-
-        return QVariant();
-    } else {
+   if (d->populatedNodes.contains(node->parent)) {
         return node->data(role);
     }
+
+    return QVariant();
 }
 
 Qt::ItemFlags CollectionModel::flags(const QModelIndex &index) const
@@ -404,15 +397,15 @@ QModelIndex CollectionModel::index(int row, int column, const QModelIndex &paren
 
     Node *parentNode = d->getNode(parent);
     if (d->populatedNodes.contains(parentNode)) {
-        Node *childItem = parentNode->children.at(row);
-        if (childItem) {
-            return createIndex(row, column, childItem);
-        } else {
-            // Q_ASSERT?
-            return QModelIndex();
-        }
+        return createIndex(row, column, parentNode->children.at(row));
     } else {
-        return createIndex(row, column, parentNode);
+        Node *fakeNode = d->fakeNodes.value(parentNode);
+        if (!fakeNode) {
+            fakeNode = new Node(0, PendingNodeType);
+            d->fakeNodes.insert(parentNode, fakeNode);
+            d->reverseFakeNodes.insert(fakeNode, parentNode);
+        }
+        return createIndex(row, column, fakeNode);
     }
 }
 
@@ -423,9 +416,9 @@ QModelIndex CollectionModel::parent(const QModelIndex &index) const
     }
 
     Node *node = d->getNode(index);
-    Node *parentNode;
-    if (!d->populatedNodes.contains(node)) {
-        parentNode = node;
+    Node *parentNode = 0;
+    if (node->type == PendingNodeType) {
+        parentNode = d->reverseFakeNodes.value(node);
     } else {
         parentNode = node->parent;
     }
@@ -435,7 +428,9 @@ QModelIndex CollectionModel::parent(const QModelIndex &index) const
     }
 
     Node *parent2Node = parentNode->parent;
-    return createIndex(parent2Node->children.indexOf(parentNode), 0, parentNode);
+    const int row = parent2Node->children.indexOf(parentNode);
+    Q_ASSERT(row >= 0);
+    return createIndex(row, 0, parentNode);
 }
 
 Qt::DropActions CollectionModel::supportedDropActions() const
@@ -447,7 +442,9 @@ void CollectionModel::clear()
 {
     beginResetModel();
     delete d->root;
-    d->root = new Node(0);
+    d->root = new Node(0, RootNodeType);
+    d->pendingNodes.clear();
+    d->populatedNodes.clear();
     endResetModel();
 }
 
@@ -470,3 +467,4 @@ QStringList CollectionModel::getItemChildrenTracks(const QModelIndex &parent)
 }
 
 #include "moc_collectionmodel.cpp"
+#include "moc_collectionmodel_p.cpp"

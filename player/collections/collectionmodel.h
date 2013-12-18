@@ -36,10 +36,12 @@ class CollectionModel : public QAbstractItemModel
     class Private;
 
     enum NodeType {
-        RootNodeType,
-        ArtistNodeType,
-        AlbumNodeType,
-        TrackNodeType
+        RootNodeType = 0,
+        ArtistNodeType = 1,
+        AlbumNodeType = 2,
+        TrackNodeType = 3,
+
+        PendingNodeType = 100 //< Internal node type
     };
 
     enum Roles {
@@ -87,10 +89,6 @@ class CollectionModel : public QAbstractItemModel
   private:
     Private * const d;
     friend class Private;
-
-    Q_PRIVATE_SLOT(d, void __k__onArtistsPopulated());
-    Q_PRIVATE_SLOT(d, void __k__onAlbumsPopulated());
-    Q_PRIVATE_SLOT(d, void __k__onTracksPopulated());
 };
 
 
