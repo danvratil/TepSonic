@@ -33,7 +33,7 @@
 <h2>
 <a name="about" class="anchor" href="#about"><span class="octicon octicon-link"></span></a>About</h2>
 
-<p>TepSonic is just yet another audio player. It's based on Qt, it's simple, fast, lightweight, but it has various features that one can expect to find in application like this. The goal is to provide a audio player that will fit daily needs of average users, without growing to be beast like Amarok ;-).</p>
+<p>TepSonic is just yet another audio player. It's based on Qt 5, it's simple, fast, lightweight, but it has various features that one can expect to find in application like this. The goal is to provide a audio player that will fit daily needs of average users, without growing to be beast like Amarok ;-).</p>
 
 <h2>
 <a name="history" class="anchor" href="#history"><span class="octicon octicon-link"></span></a>HISTORY</h2>
@@ -44,10 +44,9 @@
 <a name="requirements" class="anchor" href="#requirements"><span class="octicon octicon-link"></span></a>REQUIREMENTS</h2>
 
 <ul>
-<li>Qt &gt;= 4.5</li>
+<li>Qt &gt;= 5.1</li>
 <li>Phonon</li>
 <li>TagLib (<a href="http://developer.kde.org/%7Ewheeler/taglib.html">http://developer.kde.org/~wheeler/taglib.html</a>)</li>
-<li>Qxt (on Linux only, see part 'Compiling')</li>
 <li>SQLite or MySQL database for collections</li>
 <li>some music</li>
 </ul><h2>
@@ -60,8 +59,6 @@ make install
 </code></pre>
 
 <p>You may want to append <code>-DCMAKE_INSTALL_PREFIX=/usr</code> to the cmake command.</p>
-
-<p>You can force CMake to link statically against Qxt compiled from sources distributed together with TepSonic by using <code>-DFORCE_INBUILD_QXT=ON</code>. This means that you don't need to have libQxt installed on your system. Without this switch on Linux systems CMake will be looking for libqxt and will fail if does not find it.</p>
 
 <h2>
 <a name="bugs" class="anchor" href="#bugs"><span class="octicon octicon-link"></span></a>BUGS</h2>
