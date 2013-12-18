@@ -27,14 +27,12 @@
 TrayIcon::TrayIcon(QObject *parent):
     QSystemTrayIcon(parent)
 {
-    setParent(parent);
 }
 
 TrayIcon::TrayIcon(const QIcon &icon, QObject* parent):
     QSystemTrayIcon(parent)
 {
     setIcon(icon);
-    setParent(parent);
 }
 
 bool TrayIcon::event(QEvent *event)
@@ -59,8 +57,7 @@ bool TrayIcon::event(QEvent *event)
         }
         event->accept();
         return true;
-    }
-    if (event->type() == QEvent::ToolTip) {
+    } else if (event->type() == QEvent::ToolTip) {
         event->accept();
         return true;
     }

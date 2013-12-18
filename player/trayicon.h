@@ -27,8 +27,8 @@ class TrayIcon : public QSystemTrayIcon
     Q_OBJECT
 
   public:
-    explicit TrayIcon(QObject *parent = 0);
-    explicit TrayIcon(const QIcon &icon, QObject *parent = 0);
+    TrayIcon(QObject *parent = 0);
+    TrayIcon(const QIcon &icon, QObject *parent = 0);
 
   protected:
     bool event(QEvent *event);
