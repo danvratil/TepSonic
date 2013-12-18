@@ -505,10 +505,10 @@ void MainWindow::aboutTepSonic()
     QMessageBox aboutDlg;
 
     QStringList developers;
-    developers << QLatin1String("Dan Vrátil");
+    developers << QString::fromUtf8("Daniel Vrátil");
     QStringList artwork;
-    artwork << QLatin1String("Matěj Zvěřina")
-            << QLatin1String("Michael Ruml");
+    artwork << QString::fromUtf8("Matěj Zvěřina")
+            << QString::fromUtf8("Michael Ruml");
 
     const QString str = tr("<h1>%1</h1>"
                   "Version %2"
@@ -518,7 +518,7 @@ void MainWindow::aboutTepSonic()
                   "2 of the License, or (at your option) any later version.</p>"
                   "<h2>Developers:</h2><p>%3</p>"
                   "<h2>Artwork:</h2><p>%4</p>"
-                  "<p>&copy; 2009 - 2013 <a href=\"mailto:dan@progdan.cz\">Dan Vrátil</a></p>")
+                  "<p>&copy; 2009 - 2013 <a href=\"mailto:dan@progdan.cz\">Daniel Vrátil</a></p>")
                   .arg(QApplication::applicationName(),
                        QApplication::applicationVersion(),
                        developers.join(QLatin1String(", ")),
