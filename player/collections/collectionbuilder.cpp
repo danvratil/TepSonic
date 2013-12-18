@@ -63,7 +63,7 @@ void CollectionBuilder::run()
     QFileInfo fileInfo;
     // List of files in database
     QHash<QString, uint> dbFiles;
-    const QStringList filters = SupportedFormats::getExtensionList();
+    const QStringList filters = SupportedFormats::extensionsList();
     {
         // Populate dbFiles map by ALL tracks from db
         QSqlQuery query(dbManager->sqlDb());

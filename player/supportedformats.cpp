@@ -22,7 +22,7 @@
 
 #include <QDebug>
 
-QStringList SupportedFormats::getExtensionList()
+QStringList SupportedFormats::extensionsList()
 {
     const QStringList availableMimeTypes = Phonon::BackendCapabilities::availableMimeTypes();
     const QString mimes = availableMimeTypes.join(QLatin1String(" "));

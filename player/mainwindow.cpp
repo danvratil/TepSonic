@@ -155,7 +155,7 @@ MainWindow::MainWindow():
     // Set up filesystem browser
     m_fileSystemModel = new QFileSystemModel(this);
     m_fileSystemModel->setRootPath(QDir::rootPath());
-    m_fileSystemModel->setNameFilters(SupportedFormats::getExtensionList());
+    m_fileSystemModel->setNameFilters(SupportedFormats::extensionsList());
     m_fileSystemModel->setNameFilterDisables(false);
     m_ui->filesystemBrowser->setModel(m_fileSystemModel);
     m_ui->filesystemBrowser->setContextMenuPolicy(Qt::CustomContextMenu);
@@ -529,7 +529,7 @@ void MainWindow::aboutTepSonic()
 void MainWindow::showSupportedFormats()
 {
     QMessageBox msBox(tr("Supported formats"),
-                      tr("On this computer TepSonic can play following audio files:") + QLatin1String("\n\n") + SupportedFormats::getExtensionList().join(QLatin1String(", ")),
+                      tr("On this computer TepSonic can play following audio files:") + QLatin1String("\n\n") + SupportedFormats::extensionsList().join(QLatin1String(", ")),
                       QMessageBox::Information,
                       QMessageBox::Ok,
                       0, 0);

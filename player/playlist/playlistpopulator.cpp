@@ -66,7 +66,7 @@ void PlaylistPopulator::run()
 
 void PlaylistPopulator::expandDir(const QString &dir)
 {
-    const QStringList filters = SupportedFormats::getExtensionList();
+    const QStringList filters = SupportedFormats::extensionsList();
     QDir dirlist(dir);
     dirlist.setNameFilters(filters);
     dirlist.setFilter(QDir::AllDirs | QDir::Files | QDir::NoDotAndDotDot);

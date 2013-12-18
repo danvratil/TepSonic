@@ -25,7 +25,7 @@
 class SupportedFormats
 {
   public:
-    static QStringList getExtensionList();
+    static QStringList extensionsList();
 };
 
 #endif // SUPPORTEDFORMATS_H
