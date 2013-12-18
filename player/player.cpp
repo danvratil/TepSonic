@@ -90,11 +90,11 @@ void Player::setTrack(const QString &fileName, bool autoPlay)
     m_phononPlayer->stop();
 
     if (QFileInfo(fileName).isFile()) {
-        m_phononPlayer->setCurrentSource(Phonon::MediaSource(fileName));
+        m_phononPlayer->setCurrentSource(Phonon::MediaSource(QUrl::fromLocalFile(fileName)));
     }
 
     Q_EMIT trackChanged(currentMetaData());
-    if (autoPlay==true) {
+    if (autoPlay == true) {
         play();
     }
 }
@@ -163,20 +163,20 @@ void Player::setDefaultOutputDevice()
     const QSettings settings(QString(_CONFIGDIR).append(QLatin1String("/main.conf")), QSettings::IniFormat);
     const int index = settings.value(QLatin1String("Preferences/OutputDevice")).toInt();
 
-    QList<Phonon::AudioOutputDevice> devices = Phonon::BackendCapabilities::availableAudioOutputDevices();
-    for (int i = 0; i < devices.length(); i++)
+    const QList<Phonon::AudioOutputDevice> devices = Phonon::BackendCapabilities::availableAudioOutputDevices();
+    for (int i = 0; i < devices.length(); i++) {
         if (devices.at(i).index() == index) {
             qDebug() << "Changing output audio device to" << devices.at(i).name();
             m_audioOutput->setOutputDevice(devices.at(i));
         }
+    }
 }
 
 void Player::loadEffects()
 {
     const QSettings settings(QString(_CONFIGDIR).append(QLatin1String("/main.conf")), QSettings::IniFormat);
     const QList<Phonon::EffectDescription> effects = Phonon::BackendCapabilities::availableAudioEffects();
-    for (int i = 0; i < effects.count(); i++)
-    {
+    for (int i = 0; i < effects.count(); i++) {
         Phonon::Effect *effect = new Phonon::Effect(effects.at(i));
         m_effects.append(effect);
         const bool state = settings.value(QLatin1String("Preferences/Effects/") + effects.at(i).name(), 0).toBool();
