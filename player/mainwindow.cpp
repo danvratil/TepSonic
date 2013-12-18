@@ -556,7 +556,7 @@ void MainWindow::openSettingsDialog()
 {
     // Show preferences dialog
     SettingsDialog *settingsDlg = new SettingsDialog(this);
-    connect(settingsDlg, SIGNAL(rebuildCollections()), m_taskManager, SLOT(rebuildCollections()));
+    connect(settingsDlg, SIGNAL(rebuildCollections()), TaskManager::instance(), SLOT(rebuildCollections()));
     connect(settingsDlg, SIGNAL(outputDeviceChanged()), Player::instance(), SLOT(setDefaultOutputDevice()));
     connect(settingsDlg, SIGNAL(accepted()), this, SIGNAL(settingsAccepted()));
     connect(settingsDlg, SIGNAL(accepted()), this, SLOT(settingsDialogAccepted()));

@@ -96,7 +96,7 @@ int main(int argc, char *argv[])
 
     int ret = tepsonic.exec();
 
-    TaskManager::destroy();
+    TaskManager::instance()->destroy();
 
     return ret;
 }
