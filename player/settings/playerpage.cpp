@@ -149,5 +149,3 @@ void PlayerPage::saveSettings(QSettings *settings)
     }
     settings->endGroup();
 }
-
-#include "moc_playerpage.cpp"

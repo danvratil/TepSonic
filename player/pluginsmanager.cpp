@@ -252,5 +252,3 @@ void PluginsManager::installPanes(QTabWidget *tabwidget)
     // Do not let plugins to automatically activate themselves
     tabwidget->setCurrentIndex(0);
 }
-
-#include "moc_pluginsmanager.cpp"

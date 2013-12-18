@@ -69,5 +69,3 @@ void ChangeShortcutDialog::accept()
     Q_EMIT shortcutChanged(m_index, m_shortcut);
     close();
 }
-
-#include "moc_changeshortcutdialog.cpp"

@@ -469,6 +469,3 @@ QStringList CollectionModel::getItemChildrenTracks(const QModelIndex &parent)
 
     return result;
 }
-
-#include "moc_collectionmodel.cpp"
-#include "moc_collectionmodel_p.cpp"

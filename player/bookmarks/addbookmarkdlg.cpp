@@ -43,5 +43,3 @@ void AddBookmarkDlg::emitAccepted()
     Q_EMIT accepted(m_ui->titleEdit->text(),
                     m_ui->pathEdit->text());
 }
-
-#include "moc_addbookmarkdlg.cpp"

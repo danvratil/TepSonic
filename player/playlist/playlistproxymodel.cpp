@@ -39,5 +39,3 @@ bool PlaylistProxyModel::filterAcceptsRow(int sourceRow, const QModelIndex &sour
 
     return false;
 }
-
-#include "moc_playlistproxymodel.cpp"

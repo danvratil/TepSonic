@@ -91,5 +91,3 @@ void AbstractPlugin::emitError(const QString &errorMsg)
 {
     Q_EMIT error(errorMsg);
 }
-
-#include "moc_abstractplugin.cpp"

@@ -318,6 +318,3 @@ void PlaylistBrowser::slotSortIndicatorChanged(int column, Qt::SortOrder order)
 {
     model()->sort(column, order);
 }
-
-
-#include "moc_playlistbrowser.cpp"

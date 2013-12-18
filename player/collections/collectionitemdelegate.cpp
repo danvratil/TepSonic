@@ -138,5 +138,3 @@ QSize CollectionItemDelegate::sizeHint(const QStyleOptionViewItem &option, const
 
     return size;
 }
-
-#include "moc_collectionitemdelegate.cpp"

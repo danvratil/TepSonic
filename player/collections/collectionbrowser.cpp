@@ -98,5 +98,3 @@ void CollectionBrowser::keyPressEvent(QKeyEvent* event)
 
     QTreeView::keyPressEvent(event);
 }
-
-#include "moc_collectionbrowser.cpp"

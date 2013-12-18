@@ -53,5 +53,3 @@ void PlaylistWriter::saveToFile(const QString &filename)
 {
     m_outputFile = filename;
 }
-
-#include "moc_playlistwriter.cpp"

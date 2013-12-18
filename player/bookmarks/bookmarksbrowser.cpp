@@ -99,5 +99,3 @@ QModelIndex BookmarksBrowser::mapFromSource(const QModelIndex &index) const
 {
     return m_proxyModel->mapFromSource(index);
 }
-
-#include "moc_bookmarksbrowser.cpp"
