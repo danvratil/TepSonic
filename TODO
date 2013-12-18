@@ -8,3 +8,6 @@
         that is not in VA, the interpret should not be ignored
 
  - store UI settings immediately after change, so that they are preserved when TS crashes
+
+ - use Qt5 Plugin JSON meta data instead of .desktop files and some of the virtual methods
+ - clean up and refactor the LastFmScrobbler plugin
