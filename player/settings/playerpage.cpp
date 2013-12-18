@@ -24,10 +24,10 @@
 #include "player.h"
 
 #include <QStandardItem>
-#include <Phonon/BackendCapabilities>
-#include <Phonon/Effect>
-#include <Phonon/EffectDescription>
-#include <Phonon/EffectWidget>
+#include <phonon/BackendCapabilities>
+#include <phonon/Effect>
+#include <phonon/EffectDescription>
+#include <phonon/EffectWidget>
 
 using namespace SettingsPages;
 

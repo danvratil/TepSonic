@@ -70,9 +70,6 @@ int main(int argc, char *argv[])
     translator.load(QLatin1String("tepsonic_") + locale,localeDir);
     tepsonic.installTranslator(&translator);
 
-    QTextCodec::setCodecForTr(QTextCodec::codecForName("utf8"));
-    QTextCodec::setCodecForCStrings(QTextCodec::codecForName("UTF-8"));
-
     qRegisterMetaType<Player::MetaData>("Player::MetaData");
 
     PluginsManager::instance();

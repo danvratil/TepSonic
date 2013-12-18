@@ -27,6 +27,8 @@
 #include <QUrl>
 #include <QFileInfo>
 #include <QDropEvent>
+#include <QDrag>
+#include <QMimeData>
 
 CollectionBrowser::CollectionBrowser(QWidget* parent):
     QTreeView(parent)

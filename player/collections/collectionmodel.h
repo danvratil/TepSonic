@@ -61,6 +61,8 @@ class CollectionModel : public QAbstractItemModel
     CollectionModel(QObject *parent = 0);
     ~CollectionModel();
 
+    Qt::DropActions supportedDragActions() const;
+
     QVariant data(const QModelIndex &index, int role) const;
     QModelIndex index(int row, int column,
                       const QModelIndex &parent = QModelIndex()) const;

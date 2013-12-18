@@ -23,9 +23,9 @@
 #include <QDialog>
 #include <QHBoxLayout>
 
-#include <Phonon/EffectDescription>
-#include <Phonon/Effect>
-#include <Phonon/EffectWidget>
+#include <phonon/EffectDescription>
+#include <phonon/Effect>
+#include <phonon/EffectWidget>
 
 class PlayerEffectDialog : public QDialog
 {
