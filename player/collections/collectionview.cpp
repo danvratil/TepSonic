@@ -17,10 +17,13 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Cambridge, MA 02110-1301, USA.
  */
 
-#include "collectionbrowser.h"
+#include "collectionview.h"
 #include "collectionproxymodel.h"
 #include "collectionmodel.h"
+#include "collectionitemdelegate.h"
+#include "taskmanager.h"
 
+#include <QHeaderView>
 #include <QDebug>
 #include <QList>
 #include <QStringList>
@@ -30,20 +33,50 @@
 #include <QDrag>
 #include <QMimeData>
 
-CollectionBrowser::CollectionBrowser(QWidget* parent):
+CollectionView::CollectionView(QWidget* parent):
     QTreeView(parent)
 {
-    setAcceptDrops(false);
-    setDragDropMode(DragOnly);
+    setItemDelegate(new CollectionItemDelegate(this));
 
-    Q_UNUSED (parent);
+    setSelectionMode(QAbstractItemView::ExtendedSelection);
+    setAcceptDrops(false);
+    setDragEnabled(true);
+    setDragDropMode(DragOnly);
+    setDropIndicatorShown(true);
+    setAlternatingRowColors(true);
+    setRootIsDecorated(true);
+
+    // Hide the last three columns that cotain filename and additional data
+    hideColumn(1);
+    hideColumn(2);
+    hideColumn(3);
+
+    // Hide the header
+    header()->setHidden(true);
+
+    connect(this, SIGNAL(doubleClicked(QModelIndex)),
+            this, SLOT(onDoubleClicked(QModelIndex)));
 }
 
-CollectionBrowser::~CollectionBrowser()
+CollectionView::~CollectionView()
 {
 }
 
-void CollectionBrowser::startDrag(Qt::DropActions actions)
+void CollectionView::disableCollections()
+{
+    QAbstractItemModel *m = model();
+    setModel(0);
+    m->deleteLater();
+}
+
+void CollectionView::enableCollections()
+{
+    if (!model()) {
+        setModel(new CollectionModel(this));
+    }
+}
+
+void CollectionView::startDrag(Qt::DropActions actions)
 {
     Q_UNUSED(actions);
 
@@ -79,7 +112,7 @@ void CollectionBrowser::startDrag(Qt::DropActions actions)
     drag->exec(Qt::CopyAction);
 }
 
-void CollectionBrowser::loadAlbum(const QModelIndex &album, QDataStream &stream) const
+void CollectionView::loadAlbum(const QModelIndex &album, QDataStream &stream) const
 {
     const int childrenCount = model()->rowCount(album);
     for (int i = 0; i < childrenCount; ++i) {
@@ -88,7 +121,7 @@ void CollectionBrowser::loadAlbum(const QModelIndex &album, QDataStream &stream)
     }
 }
 
-void CollectionBrowser::keyPressEvent(QKeyEvent* event)
+void CollectionView::keyPressEvent(QKeyEvent* event)
 {
     // When 'delete' pressed, remove selected row from collections
     if (event->matches(QKeySequence::Delete)) {
@@ -97,4 +130,12 @@ void CollectionBrowser::keyPressEvent(QKeyEvent* event)
     }
 
     QTreeView::keyPressEvent(event);
+}
+
+void CollectionView::onDoubleClicked(const QModelIndex &index)
+{
+    const QString file = index.data(CollectionModel::FilePathRole).toString();
+    if (!file.isEmpty()) {
+        TaskManager::instance()->addFileToPlaylist(file);
+    }
 }

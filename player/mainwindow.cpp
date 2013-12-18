@@ -65,8 +65,6 @@
 Q_DECLARE_METATYPE(QModelIndex)
 
 MainWindow::MainWindow():
-    m_collectionModel(0),
-    m_collectionProxyModel(0),
     m_metadataEditor(0),
     m_canClose(false)
 {
@@ -207,9 +205,6 @@ MainWindow::~MainWindow()
     delete m_playlistProxyModel;
     delete m_playlistModel;
 
-    delete m_collectionProxyModel;
-    delete m_collectionModel;
-
     delete m_appIcon;
     delete m_ui;
 }
@@ -241,14 +236,6 @@ void MainWindow::createMenus()
     m_trayIconMenu->addMenu(m_ui->menuRandom);
     m_trayIconMenu->addSeparator();
     m_trayIconMenu->addAction(m_ui->actionQuit_TepSonic);
-
-    // Create collections popup menu
-    m_collectionsPopupMenu = new QMenu(this);
-    m_collectionsPopupMenu->addAction(tr("&Expand all"), m_ui->collectionBrowser, SLOT(expandAll()));
-    m_collectionsPopupMenu->addAction(tr("&Collapse all"), m_ui->collectionBrowser, SLOT(collapseAll()));
-    m_collectionsPopupMenu->addSeparator();
-    m_collectionsPopupMenu->addAction(tr("&Delete file from disk"), this, SLOT(removeFileFromDisk()));
-    m_ui->collectionBrowser->setContextMenuPolicy(Qt::CustomContextMenu);
 
     // Create playlist popup menu
     m_playlistPopupMenu = new QMenu(this);
@@ -471,9 +458,6 @@ void MainWindow::setupPluginsUIs()
     // Let plugins install their menus
     manager->installMenus(m_trayIconMenu, AbstractPlugin::TrayMenu);
     manager->installMenus(m_playlistPopupMenu, AbstractPlugin::PlaylistPopup);
-    if (m_collectionModel) {
-        manager->installMenus(m_collectionsPopupMenu, AbstractPlugin::CollectionsPopup);
-    }
 
     // Let plugins install their tabs
     manager->installPanes(m_ui->mainTabWidget);
@@ -561,18 +545,12 @@ void MainWindow::openSettingsDialog()
     connect(settingsDlg, SIGNAL(accepted()), this, SIGNAL(settingsAccepted()));
     connect(settingsDlg, SIGNAL(accepted()), this, SLOT(settingsDialogAccepted()));
     settingsDlg->exec();
-
 }
 
 void MainWindow::settingsDialogAccepted()
 {
     if (m_settings->value(QLatin1String("Collections/EnableCollections")).toBool()) {
-        /* When collections were enabled in preferences but were not created during program startup,
-           create them now otherwise we can expect that collectionBrowser is already displayed and
-           working so no action is needed */
-        if (m_collectionModel == NULL) {
-            setupCollections();
-        }
+        setupCollections();
     } else {
         destroyCollections();
     }
@@ -764,14 +742,6 @@ void MainWindow::showError(const QString &error)
     m_ui->statusBar->showMessage(error, 5000);
 }
 
-void MainWindow::fixCollectionProxyModel()
-{
-    // Workaround for QTBUG 7585
-    // http://bugreports.qt.nokia.com/browse/QTBUG-7585
-    /*m_collectionProxyModel->invalidate();
-    m_collectionProxyModel->setFilterRegExp("");*/
-}
-
 void MainWindow::repeatModeChanged(Player::RepeatMode newMode)
 {
     switch (newMode) {
@@ -801,22 +771,6 @@ void MainWindow::playerPosChanged(qint64 newPos)
     m_ui->playbackTimeLabel->setText(formatMilliseconds(newPos, true));
 }
 
-void MainWindow::collectionBrowserDoubleClick(const QModelIndex &index)
-{
-    //QModelIndex mappedIndex = m_collectionProxyModel->mapToSource(index);
-    const QModelIndex mappedIndex = index;
-    const QString file = mappedIndex.sibling(index.row(), 1).data().toString();
-
-    if (!file.isEmpty()) {
-        m_taskManager->addFileToPlaylist(file);
-    }
-}
-
-void MainWindow::showCollectionsContextMenu(const QPoint &pos)
-{
-    m_collectionsPopupMenu->popup(m_ui->collectionBrowser->mapToGlobal(pos));
-}
-
 void MainWindow::showPlaylistContextMenu(const QPoint &pos)
 {
     const bool valid = (m_ui->playlistBrowser->currentIndex().isValid() ||
@@ -829,83 +783,9 @@ void MainWindow::showPlaylistContextMenu(const QPoint &pos)
     m_playlistPopupMenu->popup(m_ui->playlistBrowser->mapToGlobal(pos));
 }
 
-
-void MainWindow::removeFileFromDisk()
-{
-    const QPoint pos =m_ui->collectionBrowser->mapFromGlobal(m_collectionsPopupMenu->pos());
-    const QModelIndex item = m_ui->collectionBrowser->indexAt(pos);
-    const QString itemName = item.data().toString();
-    const QString file = item.sibling(item.row(), 1).data().toString();
-
-    QString question;
-    if (file.isEmpty()) {
-        question = QString(tr("Are you sure you want to remove all content of %1 from hard disk?").arg(itemName));
-    } else {
-        question = QString(tr("Are you sure you want to remove track %1 (%2) from hard disk?").arg(itemName, file));
-    }
-
-    if (QMessageBox::question(this,
-                              tr("Confirm removal"),
-                              question,
-                              QMessageBox::Yes,
-                              QMessageBox::No) == QMessageBox::Yes) {
-
-
-        if (file.isEmpty()) {
-            QStringList files = m_collectionModel->getItemChildrenTracks(item);
-            for (int i = 0; i < files.count(); i++) {
-                // Remove file
-                QFile::remove(files.at(i));
-                // And save only path instead of filepath
-                files[i] = QFileInfo(files.at(i)).absolutePath();
-            }
-            // Remove duplicate paths from list
-            files = files.toSet().toList();
-            // Rebuild collections in all paths that were affected
-            for (int i = 0; i < files.count(); i++) {
-                TaskManager::instance()->rebuildCollections(files.at(i));
-            }
-        } else {
-            // Remove the file
-            QFile::remove(file);
-            // Rebuild collections in the file's path
-            TaskManager::instance()->rebuildCollections(QFileInfo(file).absolutePath());
-        }
-    }
-}
-
-
 void MainWindow::setupCollections()
 {
-    m_collectionModel = new CollectionModel(this);
-
-    /*m_collectionProxyModel = new CollectionProxyModel(this);
-    m_collectionProxyModel->setSourceModel(m_collectionModel);
-    m_collectionProxyModel->setFilterCaseSensitivity(Qt::CaseInsensitive);
-    m_collectionProxyModel->setFilterKeyColumn(0);
-    m_collectionProxyModel->setDynamicSortFilter(true);*/
-
-    //m_collectionItemDelegate = new CollectionItemDelegate(this, m_collectionProxyModel);
-    m_collectionItemDelegate = new CollectionItemDelegate(this);
-
-    m_ui->collectionBrowser->setModel(m_collectionModel);
-    m_ui->collectionBrowser->setItemDelegate(m_collectionItemDelegate);
-    m_ui->collectionBrowser->setSelectionMode(QAbstractItemView::ExtendedSelection);
-    m_ui->collectionBrowser->setDragEnabled(true);
-    m_ui->collectionBrowser->setDropIndicatorShown(true);
-    m_ui->collectionBrowser->setAlternatingRowColors(true);
-    m_ui->collectionBrowser->setRootIsDecorated(true);
-    // Hide the last three columns that cotain filename and additional data
-    m_ui->collectionBrowser->hideColumn(1);
-    m_ui->collectionBrowser->hideColumn(2);
-    m_ui->collectionBrowser->hideColumn(3);
-    // Hide the header
-    m_ui->collectionBrowser->header()->setHidden(true);
-
-    connect(m_ui->collectionBrowser, SIGNAL(customContextMenuRequested(QPoint)),
-            this, SLOT(showCollectionsContextMenu(QPoint)));
-    connect(m_ui->collectionBrowser, SIGNAL(doubleClicked(QModelIndex)),
-            this, SLOT(collectionBrowserDoubleClick(QModelIndex)));
+    m_ui->collectionView->enableCollections();
 
     // Since we disabled the Proxy model, no search inputs are needed
     m_ui->label_2->hide();
@@ -917,12 +797,7 @@ void MainWindow::setupCollections()
 
 void MainWindow::destroyCollections()
 {
-    m_ui->collectionBrowser->setModel(NULL);
-    delete m_collectionProxyModel;
-    m_collectionProxyModel = 0;
-    delete m_collectionModel;
-    m_collectionModel = 0;
-
+    m_ui->collectionView->disableCollections();
     m_ui->viewsTab->setTabEnabled(0, false);
 }
 

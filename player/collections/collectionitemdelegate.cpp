@@ -20,7 +20,7 @@
 #include "collectionitemdelegate.h"
 #include "collectionmodel.h"
 #include "collectionproxymodel.h"
-#include "collectionbrowser.h"
+#include "collectionview.h"
 #include "tools.h"
 
 #include <QApplication>

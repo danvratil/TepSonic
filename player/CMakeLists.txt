@@ -28,11 +28,11 @@ set(player_SRCS
     settings/shortcutspage.cpp
     settings/changeshortcutdialog.cpp
     settings/playereffectdialog.cpp
-    collections/collectionbrowser.cpp
     collections/collectionmodel.cpp
     collections/collectionbuilder.cpp
     collections/collectionproxymodel.cpp
     collections/collectionitemdelegate.cpp
+    collections/collectionview.cpp
     playlist/playlistbrowser.cpp
     playlist/playlistitemdelegate.cpp
     playlist/playlistmodel.cpp

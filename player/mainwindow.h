@@ -40,9 +40,6 @@
 
 class PlaylistItemDelegate;
 class PlaylistProxyModel;
-class CollectionModel;
-class CollectionProxyModel;
-class CollectionItemDelegate;
 class DatabaseManager;
 class BookmarksManager;
 class FileSystemModel;
@@ -76,10 +73,6 @@ class MainWindow : public QMainWindow
     void changeEvent(QEvent *e);
 
   private Q_SLOTS:
-    void collectionBrowserDoubleClick(const QModelIndex &index);
-
-    void fixCollectionProxyModel();
-
     void clearCollectionSearch();
     void clearPlaylistSearch();
     void showPlaylistHeaderContextMenu(const QPoint &pos);
@@ -142,10 +135,7 @@ class MainWindow : public QMainWindow
     void randomModeChanged(bool newMode);
     void playerPosChanged(qint64 newPos);
 
-    void showCollectionsContextMenu(const QPoint &pos);
     void showPlaylistContextMenu(const QPoint &pos);
-
-    void removeFileFromDisk();
 
     void showMetadataEditor();
     void metadataEditorAccepted();
@@ -158,9 +148,6 @@ class MainWindow : public QMainWindow
     PlaylistModel *m_playlistModel;
     PlaylistProxyModel *m_playlistProxyModel;
     PlaylistItemDelegate *m_playlistItemDelegate;
-    CollectionModel *m_collectionModel;
-    CollectionProxyModel *m_collectionProxyModel;
-    CollectionItemDelegate *m_collectionItemDelegate;
     QFileSystemModel *m_fileSystemModel;
     QPointer<MetadataEditor> m_metadataEditor;
     BookmarksManager *m_bookmarksManager;

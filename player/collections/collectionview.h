@@ -17,42 +17,32 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Cambridge, MA 02110-1301, USA.
  */
 
-#ifndef COLLECTIONBROWSER_H
-#define COLLECTIONBROWSER_H
+#ifndef COLLECTIONVIEW_H
+#define COLLECTIONVIEW_H
 
 #include <QTreeView>
 
-//! A View for displaying tree structure of collections
-/*!
-  Class CollectionBrowser subclasses QTreeView and extends it for capability
-  of providing data when drag&drop operation (CollectionBrowser->PlaylistBrowser) is
-  started
-*/
-class CollectionBrowser : public QTreeView
+class CollectionView : public QTreeView
 {
     Q_OBJECT
 
   public:
-    //! Constructor
-    CollectionBrowser(QWidget *parent = 0);
+    CollectionView(QWidget *parent = 0);
+    ~CollectionView();
 
-    //! Destructor
-    ~CollectionBrowser();
+    void disableCollections();
+    void enableCollections();
 
   protected:
-    //! Event that is fired when drag operation is started
     void startDrag(Qt::DropActions dropActions);
-
-    //! Event handler that is fired when a key is pressed
-    /*!
-      It is called only when CollectionBrowser has focus when the key
-      is pressed
-    */
     void keyPressEvent(QKeyEvent *event);
+
+  private Q_SLOTS:
+    void onDoubleClicked(const QModelIndex &index);
 
   private:
     void loadAlbum(const QModelIndex &album, QDataStream &stream) const;
 
 };
 
-#endif // COLLECTIONBROWSER_H
+#endif // COLLECTIONVIEW_H
