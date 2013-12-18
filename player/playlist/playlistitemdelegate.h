@@ -26,7 +26,7 @@
 #include <QModelIndex>
 
 class PlaylistModel;
-class PlaylistBrowser;
+class PlaylistView;
 class PlaylistProxyModel;
 
 class PlaylistItemDelegate : public QStyledItemDelegate
@@ -34,7 +34,7 @@ class PlaylistItemDelegate : public QStyledItemDelegate
     Q_OBJECT
 
   public:
-    explicit PlaylistItemDelegate(PlaylistBrowser *parent);
+    explicit PlaylistItemDelegate(PlaylistView *parent);
     void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const;
 
 };

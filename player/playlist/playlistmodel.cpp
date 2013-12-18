@@ -22,7 +22,6 @@
 #include "playlistmodel.h"
 #include "playlistproxymodel.h"
 #include "player.h"
-#include "playlistbrowser.h"
 #include "tools.h"
 
 #include <QtCore/QDebug>

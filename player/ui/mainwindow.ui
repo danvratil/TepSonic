@@ -639,7 +639,7 @@
              </widget>
             </item>
             <item row="3" column="0" colspan="3">
-             <widget class="PlaylistBrowser" name="playlistBrowser">
+             <widget class="PlaylistView" name="playlistView">
               <property name="editTriggers">
                <set>QAbstractItemView::NoEditTriggers</set>
               </property>
@@ -1143,9 +1143,9 @@
    <header location="global">phonon/volumeslider.h</header>
   </customwidget>
   <customwidget>
-   <class>PlaylistBrowser</class>
+   <class>PlaylistView</class>
    <extends>QTreeView</extends>
-   <header location="global">playlistbrowser.h</header>
+   <header location="global">playlistview.h</header>
   </customwidget>
   <customwidget>
    <class>CollectionView</class>

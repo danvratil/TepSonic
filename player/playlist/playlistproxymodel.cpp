@@ -20,9 +20,10 @@
 #include "playlistproxymodel.h"
 #include "playlistmodel.h"
 
-PlaylistProxyModel::PlaylistProxyModel(QObject *parent):
+PlaylistProxyModel::PlaylistProxyModel(PlaylistModel *model, QObject *parent):
     QSortFilterProxyModel(parent)
 {
+    setSourceModel(model);
     setFilterRole(Qt::DisplayRole);
     setFilterCaseSensitivity(Qt::CaseInsensitive);
     setDynamicSortFilter(false);

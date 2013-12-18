@@ -17,21 +17,24 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Cambridge, MA 02110-1301, USA.
  */
 
-#ifndef PLAYLISTBROWSER_H
-#define PLAYLISTBROWSER_H
+#ifndef PLAYLISTVIEW_H
+#define PLAYLISTVIEW_H
 
 #include <QTreeView>
 #include <QStringList>
 
-class PlaylistBrowser : public QTreeView
+class PlaylistModel;
+class PlaylistView : public QTreeView
 {
 
     Q_OBJECT
 
   public:
-    PlaylistBrowser(QWidget *parent = 0);
+    PlaylistView(QWidget *parent = 0);
 
-    ~PlaylistBrowser();
+    ~PlaylistView();
+
+    void clear();
 
     QModelIndex nowPlaying() const;
     void setNowPlaying(const QModelIndex &index);
@@ -40,8 +43,13 @@ class PlaylistBrowser : public QTreeView
     void setStopTrack(const QModelIndex &index);
     void clearStopTrack();
 
+    PlaylistModel* playlistModel() const;
+
   public Q_SLOTS:
     void shuffle();
+    void selectNextTrack();
+    void selectPreviousTrack();
+    void setFilter(const QString &filter);
 
   protected:
     void dropEvent(QDropEvent *dropEvent);
@@ -51,7 +59,10 @@ class PlaylistBrowser : public QTreeView
     void mousePressEvent(QMouseEvent *event);
     void mouseMoveEvent(QMouseEvent *event);
 
+
   Q_SIGNALS:
+    void nowPlayingChanged(const QModelIndex &track);
+    void playlistLengthChanged(int length, int tracksCount);
     void addedFiles(const QStringList &files, int row);
 
   private Q_SLOTS:
@@ -64,7 +75,8 @@ class PlaylistBrowser : public QTreeView
 
     QModelIndex m_nowPlaying;
     QModelIndex m_stopTrack;
+    PlaylistModel *m_playlistModel;
 
 };
 
-#endif // PLAYLISTBROWSER_H
+#endif // PLAYLISTVIEW_H

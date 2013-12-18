@@ -34,12 +34,9 @@
 
 
 // These classes are used in inline methods
-#include "playlist/playlistmodel.h"
 #include "player.h"
 #include "trayicon.h"
 
-class PlaylistItemDelegate;
-class PlaylistProxyModel;
 class DatabaseManager;
 class BookmarksManager;
 class FileSystemModel;
@@ -79,9 +76,7 @@ class MainWindow : public QMainWindow
     void togglePlaylistColumnVisibility(int column);
     void savePlaylist();
 
-    void nextTrack();
     void playPause();
-    void previousTrack();
 
     void setRepeatModeAll() {
         Player::instance()->setRepeatMode(Player::RepeatAll);
@@ -106,7 +101,6 @@ class MainWindow : public QMainWindow
 
     void playerStatusChanged(Phonon::State newState, Phonon::State oldState);
     void setCurrentTrack(const QModelIndex &index);
-    void clearPlaylist();
 
     void openSettingsDialog();
     void settingsDialogAccepted();
@@ -145,9 +139,6 @@ class MainWindow : public QMainWindow
 
   private:
     Ui::MainWindow *m_ui;
-    PlaylistModel *m_playlistModel;
-    PlaylistProxyModel *m_playlistProxyModel;
-    PlaylistItemDelegate *m_playlistItemDelegate;
     QFileSystemModel *m_fileSystemModel;
     QPointer<MetadataEditor> m_metadataEditor;
     BookmarksManager *m_bookmarksManager;

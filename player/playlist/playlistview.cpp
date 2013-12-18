@@ -17,9 +17,11 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Cambridge, MA 02110-1301, USA.
  */
 
-#include "playlistbrowser.h"
+#include "playlistview.h"
 #include "playlistmodel.h"
 #include "playlistproxymodel.h"
+#include "playlistitemdelegate.h"
+#include "taskmanager.h"
 #include "tools.h"
 
 #include <QApplication>
@@ -45,62 +47,102 @@
 #include <time.h>
 #endif
 
-PlaylistBrowser::PlaylistBrowser(QWidget *parent):
+PlaylistView::PlaylistView(QWidget *parent):
     QTreeView(parent)
 {
-    setEditTriggers(NoEditTriggers);
+    m_playlistModel = new PlaylistModel(this);
+    PlaylistProxyModel *proxy = new PlaylistProxyModel(m_playlistModel, this);
+    setModel(proxy);
+
+    // Set up task manager
+    TaskManager::instance()->setPlaylistModel(m_playlistModel);
+
+    connect(m_playlistModel, SIGNAL(playlistLengthChanged(int, int)),
+            this, SIGNAL(playlistLengthChanged(int, int)));
+
+    setItemDelegate(new PlaylistItemDelegate(this));
     setAcceptDrops(true);
-    viewport()->setAcceptDrops(true);
-    setDragEnabled(true);
-    setDragDropMode(QAbstractItemView::DragDrop);
-    setDropIndicatorShown(true);
     setDefaultDropAction(Qt::MoveAction);
+    setDragDropMode(QAbstractItemView::DragDrop);
+    setDragEnabled(true);
+    setDropIndicatorShown(true);
+    setAlternatingRowColors(true);
+    setEditTriggers(QAbstractItemView::NoEditTriggers);
+    sortByColumn(-1);
     setWordWrap(false);
     setTextElideMode(Qt::ElideRight);
     setSelectionMode(QAbstractItemView::ExtendedSelection);
     setSelectionBehavior(QAbstractItemView::SelectRows);
+
+    header()->setContextMenuPolicy(Qt::CustomContextMenu);
     header()->setSortIndicatorShown(true);
     header()->setSectionsClickable(true);
 
+    // Hide the first column (with filename) and the last one (with order number)
+    hideColumn(PlaylistModel::FilenameColumn);
+    hideColumn(PlaylistModel::RandomOrderColumn);
+
     connect(header(), SIGNAL(sortIndicatorChanged(int,Qt::SortOrder)),
             this, SLOT(slotSortIndicatorChanged(int,Qt::SortOrder)));
+    connect(TaskManager::instance(), SIGNAL(playlistPopulated()),
+            model(), SLOT(invalidate()));
+    connect(TaskManager::instance(), SIGNAL(insertItemToPlaylist(Player::MetaData, int)),
+            m_playlistModel, SLOT(insertItem(Player::MetaData, int)));
 }
 
-PlaylistBrowser::~PlaylistBrowser()
+PlaylistView::~PlaylistView()
 {
 }
 
-QModelIndex PlaylistBrowser::nowPlaying() const
+PlaylistModel* PlaylistView::playlistModel() const
+{
+    return m_playlistModel;
+}
+
+void PlaylistView::clear()
+{
+    m_playlistModel->clear();
+    setNowPlaying(QModelIndex());
+    setStopTrack(QModelIndex());
+}
+
+QModelIndex PlaylistView::nowPlaying() const
 {
     return m_nowPlaying;
 }
 
-void PlaylistBrowser::setNowPlaying(const QModelIndex &index)
+void PlaylistView::setNowPlaying(const QModelIndex &index)
 {
+    // Break potential recursion
+    if (m_nowPlaying == index) {
+        return;
+    }
+
     invalidateIndex(m_nowPlaying);
     m_nowPlaying = index;
     invalidateIndex(m_nowPlaying);
+    Q_EMIT nowPlayingChanged(m_nowPlaying);
 }
 
-void PlaylistBrowser::setStopTrack(const QModelIndex &index)
+void PlaylistView::setStopTrack(const QModelIndex &index)
 {
     invalidateIndex(m_stopTrack);
     m_stopTrack = index;
     invalidateIndex(m_stopTrack);
 }
 
-QModelIndex PlaylistBrowser::stopTrack() const
+QModelIndex PlaylistView::stopTrack() const
 {
     return m_stopTrack;
 }
 
-void PlaylistBrowser::clearStopTrack()
+void PlaylistView::clearStopTrack()
 {
     invalidateIndex(m_stopTrack);
     m_stopTrack = QModelIndex();
 }
 
-void PlaylistBrowser::invalidateIndex(const QModelIndex &index)
+void PlaylistView::invalidateIndex(const QModelIndex &index)
 {
     if (index.isValid()) {
         const QModelIndex left = index.sibling(index.row(), 0);
@@ -109,21 +151,60 @@ void PlaylistBrowser::invalidateIndex(const QModelIndex &index)
     }
 }
 
+void PlaylistView::selectNextTrack()
+{
+    // If the track we just played was "stop-on-this" track then stop playback
+    if (m_stopTrack.isValid() && m_stopTrack.row() == m_nowPlaying.row()) {
+        Player::instance()->stop();
+        return;
+    }
+
+    // 1) Random playback?
+    if (Player::instance()->randomMode()) {
+        int row = rand() % m_playlistModel->rowCount();
+        setNowPlaying(model()->index(row, 0));
+
+        // 2) Not last item?
+    } else if (indexBelow(m_nowPlaying).isValid()) {
+        setNowPlaying(indexBelow(m_nowPlaying));
+
+        // 3) Repeat all playlist?
+    } else if (Player::instance()->repeatMode() == Player::RepeatAll) {
+        setNowPlaying(model()->index(0, 0));
+
+        // 4) Stop, there's nothing else to play
+    } else {
+        return;
+    }
+}
+
+void PlaylistView::selectPreviousTrack()
+{
+    if (m_nowPlaying.row() > 0 && model()->rowCount() > 0) {
+        setNowPlaying(model()->index(m_nowPlaying.row() - 1, 0));
+    }
+}
+
+void PlaylistView::setFilter(const QString &filter)
+{
+    qobject_cast<QSortFilterProxyModel*>(model())->setFilterRegExp(filter);
+}
+
 // Event: item is dragged over the widget
-void PlaylistBrowser::dragEnterEvent(QDragEnterEvent *event)
+void PlaylistView::dragEnterEvent(QDragEnterEvent *event)
 {
     // Just accept the proposed action
     event->acceptProposedAction();
 }
 
 // Event: drag has moved above the widget
-void PlaylistBrowser::dragMoveEvent(QDragMoveEvent *event)
+void PlaylistView::dragMoveEvent(QDragMoveEvent *event)
 {
     // Again - accept the proposed action
     event->acceptProposedAction();
 }
 
-void PlaylistBrowser::mousePressEvent(QMouseEvent *event)
+void PlaylistView::mousePressEvent(QMouseEvent *event)
 {
     // Remember the event position
     if (event->button() == Qt::LeftButton) {
@@ -134,7 +215,7 @@ void PlaylistBrowser::mousePressEvent(QMouseEvent *event)
     QTreeView::mousePressEvent(event);
 }
 
-void PlaylistBrowser::mouseMoveEvent(QMouseEvent *event)
+void PlaylistView::mouseMoveEvent(QMouseEvent *event)
 {
     // No left buttton? Run!
     if (!(event->buttons() & Qt::LeftButton)) {
@@ -182,7 +263,7 @@ void PlaylistBrowser::mouseMoveEvent(QMouseEvent *event)
 }
 
 // Drop event (item is dropped on the widget)
-void PlaylistBrowser::dropEvent(QDropEvent *event)
+void PlaylistView::dropEvent(QDropEvent *event)
 {
     event->acceptProposedAction();
 
@@ -274,7 +355,7 @@ void PlaylistBrowser::dropEvent(QDropEvent *event)
     event->setAccepted(true);
 }
 
-void PlaylistBrowser::keyPressEvent(QKeyEvent *event)
+void PlaylistView::keyPressEvent(QKeyEvent *event)
 {
     QTreeView::keyPressEvent(event);
     if (event->isAccepted()) {
@@ -300,7 +381,7 @@ void PlaylistBrowser::keyPressEvent(QKeyEvent *event)
     }
 }
 
-void PlaylistBrowser::shuffle()
+void PlaylistView::shuffle()
 {
     header()->setSortIndicator(-1, Qt::AscendingOrder);
 
@@ -314,7 +395,7 @@ void PlaylistBrowser::shuffle()
     model()->sort(PlaylistModel::RandomOrderColumn, Qt::AscendingOrder);
 }
 
-void PlaylistBrowser::slotSortIndicatorChanged(int column, Qt::SortOrder order)
+void PlaylistView::slotSortIndicatorChanged(int column, Qt::SortOrder order)
 {
     model()->sort(column, order);
 }

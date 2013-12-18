@@ -23,6 +23,8 @@
 #include <QSortFilterProxyModel>
 #include <QModelIndex>
 
+class PlaylistModel;
+
 //! PlaylistProxyModel is a filter model for playlist
 /*!
   PlaylistProxyModel is subclassed from QSortFilterProxyModel and reimplements filterAcceptsRow() method
@@ -37,7 +39,7 @@ class PlaylistProxyModel : public QSortFilterProxyModel
     /*!
       \param parent pointer to model's parent object
     */
-    PlaylistProxyModel(QObject *parent = 0);
+    PlaylistProxyModel(PlaylistModel *model, QObject *parent = 0);
 
   protected:
     //! Decides wheter the source row will be displayed of hidden

@@ -18,11 +18,11 @@
  */
 
 #include "playlistitemdelegate.h"
-#include "playlistbrowser.h"
+#include "playlistview.h"
 
 #include <QRect>
 
-PlaylistItemDelegate::PlaylistItemDelegate(PlaylistBrowser *parent):
+PlaylistItemDelegate::PlaylistItemDelegate(PlaylistView *parent):
     QStyledItemDelegate(parent)
 {
 }
@@ -30,7 +30,7 @@ PlaylistItemDelegate::PlaylistItemDelegate(PlaylistBrowser *parent):
 void PlaylistItemDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option,
                                  const QModelIndex &index) const
 {
-    PlaylistBrowser *browser = qobject_cast<PlaylistBrowser*>(parent());
+    PlaylistView *view = qobject_cast<PlaylistView*>(parent());
 
     QRect rect(option.rect);
     rect.setLeft(rect.left() - 3);
@@ -38,10 +38,10 @@ void PlaylistItemDelegate::paint(QPainter *painter, const QStyleOptionViewItem &
     painter->setFont(option.font);
     painter->setPen(option.palette.text().color());
 
-    const QModelIndex nowPlaying = browser->nowPlaying();
+    const QModelIndex nowPlaying = view->nowPlaying();
 
-    if (index.row() == browser->stopTrack().row()) {
-        if (index.row() == browser->nowPlaying().row()) {
+    if (index.row() == view->stopTrack().row()) {
+        if (index.row() == view->nowPlaying().row()) {
             painter->fillRect(rect, option.palette.link());
         } else {
             painter->fillRect(rect, option.palette.dark().color());
@@ -56,11 +56,11 @@ void PlaylistItemDelegate::paint(QPainter *painter, const QStyleOptionViewItem &
 
     painter->drawText(QRect(option.rect.left(),
                             option.rect.top(),
-                            browser->columnWidth(index.column()),
+                            view->columnWidth(index.column()),
                             option.rect.bottom()),
                       option.fontMetrics.elidedText(index.data().toString(),
                               Qt::ElideRight,
-                              browser->columnWidth(index.column()))
+                              view->columnWidth(index.column()))
                      );
 
 }

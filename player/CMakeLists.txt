@@ -33,7 +33,7 @@ set(player_SRCS
     collections/collectionproxymodel.cpp
     collections/collectionitemdelegate.cpp
     collections/collectionview.cpp
-    playlist/playlistbrowser.cpp
+    playlist/playlistview.cpp
     playlist/playlistitemdelegate.cpp
     playlist/playlistmodel.cpp
     playlist/playlistproxymodel.cpp
