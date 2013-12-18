@@ -93,6 +93,8 @@ void CollectionBrowser::keyPressEvent(QKeyEvent* event)
         model()->removeRow(selectionModel()->currentIndex().row(),
                            selectionModel()->currentIndex().parent());
     }
+
+    QTreeView::keyPressEvent(event);
 }
 
 #include "moc_collectionbrowser.cpp"
