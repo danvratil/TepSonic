@@ -28,6 +28,17 @@
 #include <QSettings>
 #include <QStringList>
 
+TaskManager *TaskManager::s_instance = 0;
+
+TaskManager* TaskManager::instance()
+{
+    if (s_instance == 0) {
+        s_instance = new TaskManager();
+    }
+
+    return s_instance;
+}
+
 TaskManager::TaskManager():
     m_playlistModel(0),
     m_threadPool(new QThreadPool(this)),
@@ -35,6 +46,12 @@ TaskManager::TaskManager():
 {
     // Only one collections thread at once. Another thread will be queued until the running thread is done
     m_collectionsThreadPool->setMaxThreadCount(1);
+}
+
+void TaskManager::destroy()
+{
+    delete s_instance;
+    s_instance = 0;
 }
 
 TaskManager::~TaskManager()

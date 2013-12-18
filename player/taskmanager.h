@@ -47,12 +47,9 @@ class TaskManager : public QObject
     Q_OBJECT
 
   public:
-    //! Constructor
-    /*!
-      \param playlistModel pointer to PlaylistModel
-      \param collectionModel pointer to CollectionModel
-    */
-    explicit TaskManager();
+    static TaskManager *instance();
+
+    void destroy();
 
     //! Destructor
     /*!
@@ -125,6 +122,9 @@ class TaskManager : public QObject
     void collectionsRebuildingStarted();
 
   private:
+    TaskManager();
+    static TaskManager *s_instance;
+
     //! Pointer to pointer to PlaylistModel
     PlaylistModel *m_playlistModel;
 

@@ -139,14 +139,13 @@ MainWindow::MainWindow():
     m_ui->viewsSplitter->restoreState(m_settings->value(QLatin1String("Window/ViewsSplit")).toByteArray());
 
     // Set up task manager
-    m_taskManager = new TaskManager();
-    m_taskManager->setPlaylistModel(m_playlistModel);
+    TaskManager::instance()->setPlaylistModel(m_playlistModel);
 
     // Enable or disable collections
     if (m_settings->value(QLatin1String("Collections/EnableCollections"), true).toBool() == true) {
         setupCollections();
         if (m_settings->value(QLatin1String("Collections/AutoRebuildAfterStart"), false).toBool() == true) {
-            m_taskManager->rebuildCollections();
+            TaskManager::instance()->rebuildCollections();
         }
     } else {
         m_ui->viewsTab->setTabEnabled(0, false);
@@ -166,7 +165,7 @@ MainWindow::MainWindow():
 
     // Load last playlist
     if (m_settings->value(QLatin1String("Preferences/RestoreSession"), true).toBool()) {
-        m_taskManager->addFileToPlaylist(QString(_CONFIGDIR).append(QLatin1String("/last.m3u")));
+        TaskManager::instance()->addFileToPlaylist(QString(_CONFIGDIR).append(QLatin1String("/last.m3u")));
         randomModeChanged(m_settings->value(QLatin1String("LastSession/RandomMode"), false).toBool());
         repeatModeChanged(Player::RepeatMode(m_settings->value(QLatin1String("LastSession/RepeatMode"), 0).toInt()));
     }
@@ -201,12 +200,9 @@ MainWindow::~MainWindow()
     }
 
     // Save current playlist to file
-    m_taskManager->savePlaylistToFile(QString(_CONFIGDIR).append(QLatin1String("/last.m3u")));
+    TaskManager::instance()->savePlaylistToFile(QString(_CONFIGDIR).append(QLatin1String("/last.m3u")));
 
     delete m_bookmarksManager;
-
-    qDebug() << "Waiting for taskManager to finish...";
-    delete m_taskManager;
 
     delete m_playlistProxyModel;
     delete m_playlistModel;
@@ -325,7 +321,7 @@ void MainWindow::bindSignals()
     connect(m_ui->filesystemBrowser, SIGNAL(pathChanged(QString)),
             m_ui->fsbPath, SLOT(setText(QString)));
     connect(m_ui->filesystemBrowser, SIGNAL(addTrackToPlaylist(QString)),
-            m_taskManager, SLOT(addFileToPlaylist(QString)));
+            TaskManager::instance(), SLOT(addFileToPlaylist(QString)));
     connect(m_ui->filesystemBrowser, SIGNAL(disableBack(bool)),
             m_ui->fsbBackBtn, SLOT(setDisabled(bool)));
     connect(m_ui->filesystemBrowser, SIGNAL(disableForward(bool)),
@@ -451,21 +447,16 @@ void MainWindow::bindSignals()
 
     // Task manager
     connect(m_ui->playlistBrowser, SIGNAL(addedFiles(QStringList, int)),
-            m_taskManager, SLOT(addFilesToPlaylist(QStringList, int)));
-    connect(m_taskManager, SIGNAL(collectionsPopulated()),
-            this, SLOT(fixCollectionProxyModel()));
-    connect(m_taskManager, SIGNAL(taskStarted(QString)),
+            TaskManager::instance(), SLOT(addFilesToPlaylist(QStringList, int)));
+    connect(TaskManager::instance(), SIGNAL(taskStarted(QString)),
             m_ui->statusBar, SLOT(showWorkingBar(QString)));
-    connect(m_taskManager, SIGNAL(taskDone()),
+    connect(TaskManager::instance(), SIGNAL(taskDone()),
             m_ui->statusBar, SLOT(cancelAction()));
     // This refreshes the filter when an item is added to the playlist so the item appears immediately
-    connect(m_taskManager, SIGNAL(playlistPopulated()),
+    connect(TaskManager::instance(), SIGNAL(playlistPopulated()),
             m_playlistProxyModel, SLOT(invalidate()));
-    connect(m_taskManager, SIGNAL(insertItemToPlaylist(Player::MetaData, int)),
+    connect(TaskManager::instance(), SIGNAL(insertItemToPlaylist(Player::MetaData, int)),
             m_playlistModel, SLOT(insertItem(Player::MetaData, int)));
-
-    connect(m_taskManager, SIGNAL(collectionsRebuilt()),
-            m_taskManager, SLOT(populateCollections()));
 
     // Plugins
     connect(PluginsManager::instance(), SIGNAL(pluginsLoaded()),
@@ -729,7 +720,7 @@ void MainWindow::nextTrack()
 
 void MainWindow::addPlaylistItem(const QString &filename)
 {
-    m_taskManager->addFileToPlaylist(filename);
+    TaskManager::instance()->addFileToPlaylist(filename);
 }
 
 void MainWindow::showPlaylistHeaderContextMenu(const QPoint &pos)
@@ -749,7 +740,7 @@ void MainWindow::savePlaylist()
                                             tr("Save playlist to..."),
                                             QString(),
                                             tr("M3U Playlist (*.m3u)"));
-    m_taskManager->savePlaylistToFile(filename);
+    TaskManager::instance()->savePlaylistToFile(filename);
 }
 
 void MainWindow::playlistLengthChanged(int totalLength, int tracksCount)
@@ -872,13 +863,13 @@ void MainWindow::removeFileFromDisk()
             files = files.toSet().toList();
             // Rebuild collections in all paths that were affected
             for (int i = 0; i < files.count(); i++) {
-                m_taskManager->rebuildCollections(files.at(i));
+                TaskManager::instance()->rebuildCollections(files.at(i));
             }
         } else {
             // Remove the file
             QFile::remove(file);
             // Rebuild collections in the file's path
-            m_taskManager->rebuildCollections(QFileInfo(file).absolutePath());
+            TaskManager::instance()->rebuildCollections(QFileInfo(file).absolutePath());
         }
     }
 }
@@ -998,7 +989,7 @@ void MainWindow::metadataEditorAccepted()
     idx = idx.sibling(idx.row(), PlaylistModel::TrackColumn);
     m_playlistModel->setData(idx, m_metadataEditor->trackNumber());
 
-    m_taskManager->rebuildCollections(m_metadataEditor->filename());
+    TaskManager::instance()->rebuildCollections(m_metadataEditor->filename());
 
     delete m_metadataEditor;
 }
@@ -1012,3 +1003,4 @@ void MainWindow::setStopTrackClicked()
         m_ui->playlistBrowser->setStopTrack(index);
     }
 }
+

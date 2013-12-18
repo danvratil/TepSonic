@@ -44,7 +44,6 @@ class CollectionModel;
 class CollectionProxyModel;
 class CollectionItemDelegate;
 class DatabaseManager;
-class TaskManager;
 class BookmarksManager;
 class FileSystemModel;
 class MetadataEditor;
@@ -165,7 +164,6 @@ class MainWindow : public QMainWindow
     QFileSystemModel *m_fileSystemModel;
     QPointer<MetadataEditor> m_metadataEditor;
     BookmarksManager *m_bookmarksManager;
-    TaskManager *m_taskManager;
 
     QActionGroup *m_randomPlaybackGroup;
     QActionGroup *m_repeatPlaybackGroup;

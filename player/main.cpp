@@ -31,6 +31,7 @@
 #include "player.h"
 #include "mainwindow.h"
 #include "pluginsmanager.h"
+#include "taskmanager.h"
 #include "constants.h"
 
 
@@ -73,6 +74,7 @@ int main(int argc, char *argv[])
     qRegisterMetaType<Player::MetaData>("Player::MetaData");
 
     PluginsManager::instance();
+    TaskManager::instance();
 
     MainWindow mainWindow;
     mainWindow.show();
@@ -93,6 +95,8 @@ int main(int argc, char *argv[])
     }
 
     int ret = tepsonic.exec();
+
+    TaskManager::destroy();
 
     return ret;
 }
