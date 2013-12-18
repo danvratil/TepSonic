@@ -1012,5 +1012,3 @@ void MainWindow::setStopTrackClicked()
         m_ui->playlistBrowser->setStopTrack(index);
     }
 }
-
-#include "moc_mainwindow.cpp"

@@ -103,5 +103,3 @@ void ShortcutsPage::saveSettings(QSettings *settings)
     }
     settings->endGroup();
 }
-
-#include "moc_shortcutspage.cpp"

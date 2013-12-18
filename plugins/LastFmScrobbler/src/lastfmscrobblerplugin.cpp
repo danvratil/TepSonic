@@ -252,5 +252,3 @@ void LastFmScrobblerPlugin::loveTrack()
         }
     }
 }
-
-Q_EXPORT_PLUGIN2(tepsonic_lastfmscrobbler, LastFmScrobblerPlugin)

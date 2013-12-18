@@ -25,7 +25,6 @@
 #include <QtConcurrentRun>
 #include <QFutureWatcher>
 #include <QFuture>
-#include <qcoreapplication.h>
 #include <QTimer>
 
 #include <QSqlDatabase>
@@ -303,12 +302,16 @@ CollectionModel::CollectionModel(QObject *parent):
     QAbstractItemModel(parent),
     d(new Private(this))
 {
-    setSupportedDragActions(Qt::CopyAction);
 }
 
 CollectionModel::~CollectionModel()
 {
     delete d;
+}
+
+Qt::DropActions CollectionModel::supportedDragActions() const
+{
+    return Qt::CopyAction;
 }
 
 int CollectionModel::columnCount(const QModelIndex & /* parent */) const
@@ -466,6 +469,3 @@ QStringList CollectionModel::getItemChildrenTracks(const QModelIndex &parent)
 
     return result;
 }
-
-#include "moc_collectionmodel.cpp"
-#include "moc_collectionmodel_p.cpp"

@@ -28,7 +28,7 @@
 #include <QPluginLoader>
 #include <QSettings>
 
-#include <Phonon/AudioOutputDevice>
+#include <phonon/AudioOutputDevice>
 
 #include "settingspage.h"
 

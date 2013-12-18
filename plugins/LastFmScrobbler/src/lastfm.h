@@ -23,6 +23,7 @@
 #include <QObject>
 #include <QNetworkReply>
 #include <QTimer>
+#include <QUrlQuery>
 
 /** Provides implementation of Last.fm Scrobbling API, version 2.0.
   * I haven't found any library that would support the 2.0 API, so I've
@@ -109,7 +110,7 @@ namespace LastFm {
             void raiseError(int code);
 
             /** Returns signature of given request */
-            static QString getRequestSignature(QUrl request);
+            static QString getRequestSignature(QUrlQuery request);
 
             /** Returns pointer to scrobbler's cache */
             LastFm::Cache* cache() { return m_cache; }

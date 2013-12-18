@@ -22,7 +22,7 @@
 
 #include <QStandardItemModel>
 
-#include <Phonon/Effect>
+#include <phonon/Effect>
 
 #include "settingspage.h"
 

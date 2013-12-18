@@ -74,5 +74,3 @@ void StatusBar::showWorkingBar(const QString &action)
 {
     setProgressBar(action, 1, 0);
 }
-
-#include "moc_statusbar.cpp"

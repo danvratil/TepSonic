@@ -1,12 +1,6 @@
-
-include_directories(
-    "bookmarks"
-    "collections"
-    "playlist"
-    "settings"
-)
-
-set(CMAKE_AUTOMOC TRUE)
+include_directories(bookmarks
+                    collections
+                    playlist)
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/constants.h.cmake
                ${CMAKE_CURRENT_BINARY_DIR}/constants.h)
@@ -83,8 +77,8 @@ endif (NOT DEFINED LANGS)
 
 message(STATUS "Translations to build: ${LANGUAGES}")
 
-qt4_wrap_ui(player_QUIS_HDRS ${player_QUIS})
-qt4_add_resources(player_RCCS_SRCS ${player_RCCS})
+qt5_wrap_ui(player_QUIS_HDRS ${player_QUIS})
+qt5_add_resources(player_RCCS_SRCS ${player_RCCS})
 #Create translations
 set(TRANSLATIONS)
 foreach (LANGUAGE ${LANGUAGES})
@@ -104,26 +98,31 @@ if (WIN32)
 endif (WIN32)
 
 add_executable(tepsonic
-  	       ${GUI_TYPE}
-	       ${player_RCCS_SRCS}
-	       ${player_QUIS_HDRS}
-	       ${player_QMOC_SRCS}
-	       ${player_SRCS}
-	       ${TRANSLATIONS_BINARY}
+               ${GUI_TYPE}
+               ${player_RCCS_SRCS}
+               ${player_QUIS_HDRS}
+               ${player_QMOC_SRCS}
+               ${player_SRCS}
+               ${TRANSLATIONS_BINARY}
 )
 
 if (TRANSLATIONS)
-	add_dependencies(tepsonic ${TRANSLATIONS})
+    add_dependencies(tepsonic ${TRANSLATIONS})
 endif (TRANSLATIONS)
 
+set(QXT_LIBRARIES qxt)
+if (UNIX)
+    set(QXT_LIBRARIES ${QXT_LIBRARIES} Qt5::X11Extras ${X11_LIBRARIES})
+endif ()
+
 target_link_libraries(tepsonic
-		      ${QT_QTCORE_LIBRARY}
-		      ${QT_QTGUI_LIBRARY}
-		      ${QT_QTSQL_LIBRARY}
-		      ${PHONON_LIBS}
-	              ${TAGLIB_LIBRARIES}
-        	      ${QXT_LIBRARIES}
-		      ${X11_LIBRARIES}
+                      Qt5::Core
+                      Qt5::Gui
+                      Qt5::Sql
+                      Qt5::Widgets
+                      ${PHONON_LIBRARIES}
+                      ${TAGLIB_LIBRARIES}
+                      ${QXT_LIBRARIES}
 )
 
 # standard instalation of the binary

@@ -271,5 +271,3 @@ void PlaylistModel::clear()
     m_items.clear();
     endResetModel();
 }
-
-#include "moc_playlistmodel.cpp"

@@ -360,5 +360,3 @@ void CollectionBuilder::cleanUpDatabase()
                         DatabaseManager::instance()->sqlDb());
     }
 }
-
-#include "moc_collectionbuilder.cpp"

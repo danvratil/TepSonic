@@ -1,11 +1,11 @@
-set(QT_USE_QTNETWORK 1)
-set(QT_USE_QTXML 1)
+find_package(Qt5Xml REQUIRED)
+find_package(Qt5Network REQUIRED)
 
 add_definitions(-DQT_PLUGIN -DQT_SHARED)
 
 include_directories(
-	${QT_QTNETWORK_INCLUDE_DIR}
-        ${QT_QTXML_INCLUDE_DIR}
+        ${Qt5Network_INCLUDE_DIRS}
+        ${Qt5Xml_INCLUDE_DIRS}
 )
 
 set(lyricsplugin_HDRS
@@ -32,8 +32,6 @@ else (NOT DEFINED LANGS)
   endif (NOT LANGS)
 endif (NOT DEFINED LANGS)
 
-
-qt4_wrap_cpp(lyricsplugin_QMOC_SRCS ${lyricsplugin_HDRS})
 #Create translations
 set(TRANSLATIONS)
 foreach (LANGUAGE ${LANGUAGES})
@@ -60,9 +58,9 @@ if (TRANSLATIONS)
 endif (TRANSLATIONS)
 
 target_link_libraries(tepsonic_lyricsplugin
-               ${QT_QTCORE_LIBRARY}
-	       ${QT_QTNETWORK_LIBRARY}
-               ${QT_QTXML_LIBRARY}
+               Qt5::Core
+               Qt5::Network
+               Qt5::Xml
 )
 
 # standard UNIX and windows

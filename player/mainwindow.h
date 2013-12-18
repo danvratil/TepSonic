@@ -20,17 +20,17 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include <QtGui/QMessageBox>
-#include <QtGui/QMainWindow>
-#include <QtGui/QActionGroup>
-#include <QtCore/QSettings>
-#include <QtCore/QSignalMapper>
-#include <QtCore/QPointer>
-#include <QtGui/QLabel>
-#include <QtGui/QKeyEvent>
-#include <QtGui/QFileSystemModel>
-#include <QtGui/QSortFilterProxyModel>
-#include <QtGui/QItemSelectionModel>
+#include <QMessageBox>
+#include <QMainWindow>
+#include <QActionGroup>
+#include <QSettings>
+#include <QSignalMapper>
+#include <QPointer>
+#include <QLabel>
+#include <QKeyEvent>
+#include <QFileSystemModel>
+#include <QSortFilterProxyModel>
+#include <QItemSelectionModel>
 
 
 // These classes are used in inline methods

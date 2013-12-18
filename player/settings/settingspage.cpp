@@ -23,5 +23,3 @@ SettingsPage::SettingsPage(QWidget *parent):
     QWidget(parent)
 {
 }
-
-#include "moc_settingspage.cpp"

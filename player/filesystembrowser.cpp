@@ -317,5 +317,3 @@ void FileSystemBrowser::showContextMenu(const QPoint &pos)
 
     m_contextMenu->popup(mapToGlobal(pos));
 }
-
-#include "moc_filesystembrowser.cpp"

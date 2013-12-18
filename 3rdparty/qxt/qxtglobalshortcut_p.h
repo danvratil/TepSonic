@@ -27,8 +27,15 @@
 
 #include "qxtglobalshortcut.h"
 #include <QAbstractEventDispatcher>
+#include <QAbstractNativeEventFilter>
 #include <QKeySequence>
 #include <QHash>
+
+class QxtGlobalShortcutNativeFilter: public QAbstractNativeEventFilter
+{
+  public:
+    bool nativeEventFilter(const QByteArray& eventType, void* message, long int* result);
+};
 
 class QxtGlobalShortcutPrivate : public QxtPrivate<QxtGlobalShortcut>
 {
@@ -45,11 +52,9 @@ public:
     bool unsetShortcut();
 
     static bool error;
-#ifndef Q_WS_MAC
+#ifndef Q_OS_MAC
     static int ref;
-    static QAbstractEventDispatcher::EventFilter prevEventFilter;
-    static bool eventFilter(void* message);
-#endif // Q_WS_MAC
+#endif // Q_OS_MAC
 
     static void activateShortcut(quint32 nativeKey, quint32 nativeMods);
 
@@ -61,6 +66,8 @@ private:
     static bool unregisterShortcut(quint32 nativeKey, quint32 nativeMods);
 
     static QHash<QPair<quint32, quint32>, QxtGlobalShortcut*> shortcuts;
+
+    static QxtGlobalShortcutNativeFilter *nativeFilter;
 };
 
 #endif // QXTGLOBALSHORTCUT_P_H

@@ -35,7 +35,7 @@
 #include <QFile>
 #include <QFileInfo>
 #include <QModelIndex>
-
+#include <QMimeData>
 
 #ifdef Q_WS_WIN
 #include <cstdlib>
@@ -60,7 +60,7 @@ PlaylistBrowser::PlaylistBrowser(QWidget *parent):
     setSelectionMode(QAbstractItemView::ExtendedSelection);
     setSelectionBehavior(QAbstractItemView::SelectRows);
     header()->setSortIndicatorShown(true);
-    header()->setClickable(true);
+    header()->setSectionsClickable(true);
 
     connect(header(), SIGNAL(sortIndicatorChanged(int,Qt::SortOrder)),
             this, SLOT(slotSortIndicatorChanged(int,Qt::SortOrder)));
@@ -318,6 +318,3 @@ void PlaylistBrowser::slotSortIndicatorChanged(int column, Qt::SortOrder order)
 {
     model()->sort(column, order);
 }
-
-
-#include "moc_playlistbrowser.cpp"

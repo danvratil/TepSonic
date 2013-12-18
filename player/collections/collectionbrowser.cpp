@@ -27,6 +27,8 @@
 #include <QUrl>
 #include <QFileInfo>
 #include <QDropEvent>
+#include <QDrag>
+#include <QMimeData>
 
 CollectionBrowser::CollectionBrowser(QWidget* parent):
     QTreeView(parent)
@@ -96,5 +98,3 @@ void CollectionBrowser::keyPressEvent(QKeyEvent* event)
 
     QTreeView::keyPressEvent(event);
 }
-
-#include "moc_collectionbrowser.cpp"

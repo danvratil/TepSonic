@@ -30,6 +30,7 @@
 #include <QSplitter>
 #include <QLabel>
 #include <QGridLayout>
+#include <QUrlQuery>
 
 #include <QNetworkAccessManager>
 #include <QNetworkRequest>
@@ -149,11 +150,12 @@ void LyricsPlugin::lyricsInfoRetrieved(QNetworkReply *reply)
     const QString tracks = QString::fromLatin1(reply->readAll());
     const QStringList tracks_list = tracks.split(QChar(10));
 
+    const QUrlQuery query(reply->url());
     if ((tracks_list.size() == 0 ||
         (tracks_list.size() == 1 && tracks_list.at(0).isEmpty())) &&
-        reply->url().queryItemValue(QLatin1String("for")) != QLatin1String("fullt"))
+        query.queryItemValue(QLatin1String("for")) != QLatin1String("fullt"))
     {
-        const QString track_name = reply->url().queryItemValue(QLatin1String("q")).replace(QLatin1Char('|'), QLatin1String(" - "));
+        const QString track_name = query.queryItemValue(QLatin1String("q")).replace(QLatin1Char('|'), QLatin1String(" - "));
         const QUrl url(QLatin1String("http://webservices.lyrdb.com/lookup.php?q=") + track_name + QLatin1String("&for=fullt&agent=TepSonic"));
 
         qDebug() << url;
@@ -200,5 +202,3 @@ void LyricsPlugin::lyricsPageRetrieved(QNetworkReply *reply)
     m_label->setText(lyrics);
     m_label->adjustSize();
 }
-
-Q_EXPORT_PLUGIN2(tepsonic_lyrics, LyricsPlugin)

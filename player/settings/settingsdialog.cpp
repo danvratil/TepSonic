@@ -128,5 +128,3 @@ void SettingsDialog::emitRebuildCollections()
 
     Q_EMIT rebuildCollections();
 }
-
-#include "moc_settingsdialog.cpp"
