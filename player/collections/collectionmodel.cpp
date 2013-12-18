@@ -44,6 +44,7 @@ CollectionModel::Private::Private(CollectionModel *parent):
 CollectionModel::Private::~Private()
 {
     delete root;
+    qDeleteAll(fakeNodes);
 }
 
 Node* CollectionModel::Private::getNode(const QModelIndex &index) const
