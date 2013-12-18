@@ -3,11 +3,10 @@
  Author: Dan Vratil <dan@progdan.cz>
  Homepage: http://danvratil.github.io/TepSonic
 
- 
- TepSonic is just yet another audio player. It is based on Qt and as an audio 
+ TepSonic is just yet another audio player. It is based on Qt5 and as an audio 
  backend it uses Phonon. For retrieving metadata from media files is used TagLib. 
  This player should provide all the user-comfort functions such as collections, 
- but it should not be as big as for example Amarok. 
+ but it should not be as big as for example Amarok.
 
  Have fun with TepSonic!
 
@@ -18,32 +17,25 @@ CONTENT
  2) Compiling
  3) Bugs
  4) Contributing
- 
 
 1) REQUIREMENTS
 ----------------
- * Qt >= 4.5
+ * Qt >= 5.1
  * Phonon
  * TagLib (http://developer.kde.org/~wheeler/taglib.html)
- * Qxt (on Linux only, see part 'Compiling')
  * SQLite or MySQL database for collections
  * some music
 
 
 2) COMPILING
 -------------
- 
+
  mkdir build && cd build
  cmake ../
  make
  make install
 
  You may want to append -DCMAKE_INSTALL_PREFIX=/usr to the cmake command.
- 
- You can force CMake to link statically against Qxt compiled from sources distributed together with TepSonic 
- by using -DFORCE_INBUILD_QXT=ON. This means that you don't need to have libQxt installed on your system. 
- Without this switch on Linux systems CMake will be looking for libqxt and will fail if does not find it. 
- On MacOS X and Windows CMake will automatically use the Qxt sources in /3rdparty/qxt.
 
 3) BUGS
 --------
@@ -54,4 +46,3 @@ CONTENT
 ----------------
  Please, feel free to contribute to TepSonic in any way. You can get latest sources from https://github.com/danvratil/TepSonic and
  start working on it. If you have any question, I'll be happy to answer it :-)
-
