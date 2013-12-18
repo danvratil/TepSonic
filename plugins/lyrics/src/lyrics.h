@@ -37,6 +37,7 @@ class QModelIndex;
 class LyricsPlugin : public AbstractPlugin
 {
     Q_OBJECT
+    Q_PLUGIN_METADATA(IID "cz.progdan.tepsonic.plugins.Lyrics")
 
   public:
     explicit LyricsPlugin();

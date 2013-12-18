@@ -34,6 +34,7 @@
 #include <QDir>
 #include <QTextStream>
 #include <QDateTime>
+#include <QUrlQuery>
 
 #include <QDebug>
 
@@ -161,19 +162,18 @@ void LastFm::Scrobbler::raiseError(int code)
     Q_EMIT error(errmsg, code);
 }
 
-QString LastFm::Scrobbler::getRequestSignature(QUrl request)
+QString LastFm::Scrobbler::getRequestSignature(QUrlQuery query)
 {
     // sort the list of query items alphabetically
-    QList<QPair<QString, QString> > list = request.queryItems();
+    QList<QPair<QString, QString> > list = query.queryItems();
     qSort(list);
 
-    QUrl url;
-    url.setQueryItems(list);
+    query.setQueryItems(list);
+
     // convert name1=value1&name2=value2... to name1value1name2value2
-    QString str = url.toString();
-    str.remove(QLatin1Char(url.queryPairDelimiter()));
-    str.remove(QLatin1Char(url.queryValueDelimiter()));
-    str.remove(0, 1); // remove trailing "?"
+    QString str = query.toString();
+    str.remove(query.queryPairDelimiter());
+    str.remove(query.queryValueDelimiter());
     str.append(LastFm::Global::secret_key);
     QByteArray ba;
     ba.append(str.toLatin1());
@@ -191,12 +191,14 @@ void LastFm::Auth::getToken()
 {
     QNetworkRequest request;
     QUrl url;
+    QUrlQuery query;
 
     url.setUrl(QLatin1String("http://ws.audioscrobbler.com/2.0/"));
-    url.addQueryItem(QLatin1String("api_key"), LastFm::Global::api_key);
-    url.addQueryItem(QLatin1String("method"), QLatin1String("auth.getToken"));
-    url.addQueryItem(QLatin1String("api_sig"), LastFm::Scrobbler::getRequestSignature(url));
-    request.setUrl(url.toString());
+    query.addQueryItem(QLatin1String("api_key"), LastFm::Global::api_key);
+    query.addQueryItem(QLatin1String("method"), QLatin1String("auth.getToken"));
+    query.addQueryItem(QLatin1String("api_sig"), LastFm::Scrobbler::getRequestSignature(query));
+    url.setQuery(query);
+    request.setUrl(url);
 
     QNetworkAccessManager *nam = new QNetworkAccessManager();
     connect(nam, SIGNAL(finished(QNetworkReply*)),
@@ -245,13 +247,15 @@ void LastFm::Auth::getSession()
 {
     QNetworkRequest request;
     QUrl url;
+    QUrlQuery query;
 
     url.setUrl(QLatin1String("http://ws.audioscrobbler.com/2.0/"));
-    url.addQueryItem(QLatin1String("api_key"), LastFm::Global::api_key);
-    url.addQueryItem(QLatin1String("method"), QLatin1String("auth.getSession"));
-    url.addQueryItem(QLatin1String("token"), LastFm::Global::token);
-    url.addQueryItem(QLatin1String("api_sig"), LastFm::Scrobbler::getRequestSignature(url));
-    request.setUrl(url.toString());
+    query.addQueryItem(QLatin1String("api_key"), LastFm::Global::api_key);
+    query.addQueryItem(QLatin1String("method"), QLatin1String("auth.getSession"));
+    query.addQueryItem(QLatin1String("token"), LastFm::Global::token);
+    query.addQueryItem(QLatin1String("api_sig"), LastFm::Scrobbler::getRequestSignature(query));
+    url.setQuery(query);
+    request.setUrl(url);
 
     QNetworkAccessManager *nam = new QNetworkAccessManager(this);
     connect(nam, SIGNAL(finished(QNetworkReply*)),
@@ -343,24 +347,28 @@ void LastFm::Track::nowPlaying()
     QNetworkRequest request;
 
     QUrl requestUrl(QLatin1String("http://ws.audioscrobbler.com/2.0/"));
-    requestUrl.addQueryItem(QLatin1String("method"), QLatin1String("track.updateNowPlaying"));
-    requestUrl.addQueryItem(QLatin1String("track"), m_trackTitle);
+    {
+        QUrlQuery query;
+        query.addQueryItem(QLatin1String("method"), QLatin1String("track.updateNowPlaying"));
+        query.addQueryItem(QLatin1String("track"), m_trackTitle);
+        requestUrl.setQuery(query);
+    }
     request.setUrl(requestUrl);
 
     QByteArray data;
-    QUrl params;
-    params.addQueryItem(QLatin1String("album"), m_album);
-    params.addQueryItem(QLatin1String("api_key"), LastFm::Global::api_key);
-    params.addQueryItem(QLatin1String("artist"), m_artist);
-    params.addQueryItem(QLatin1String("duration"), QString::number(m_trackLength));
-    params.addQueryItem(QLatin1String("method"), QLatin1String("track.updateNowPlaying"));
-    params.addQueryItem(QLatin1String("sk"), LastFm::Global::session_key);
-    params.addQueryItem(QLatin1String("token"), LastFm::Global::token);
-    params.addQueryItem(QLatin1String("track"), m_trackTitle);
-    params.addQueryItem(QLatin1String("trackNumber"), QString::number(m_trackNumber));
-    params.addQueryItem(QLatin1String("api_sig"), LastFm::Scrobbler::getRequestSignature(params));
+    QUrlQuery query;
+    query.addQueryItem(QLatin1String("album"), m_album);
+    query.addQueryItem(QLatin1String("api_key"), LastFm::Global::api_key);
+    query.addQueryItem(QLatin1String("artist"), m_artist);
+    query.addQueryItem(QLatin1String("duration"), QString::number(m_trackLength));
+    query.addQueryItem(QLatin1String("method"), QLatin1String("track.updateNowPlaying"));
+    query.addQueryItem(QLatin1String("sk"), LastFm::Global::session_key);
+    query.addQueryItem(QLatin1String("token"), LastFm::Global::token);
+    query.addQueryItem(QLatin1String("track"), m_trackTitle);
+    query.addQueryItem(QLatin1String("trackNumber"), QString::number(m_trackNumber));
+    query.addQueryItem(QLatin1String("api_sig"), LastFm::Scrobbler::getRequestSignature(query));
     // Remove the trailing "?" from the params, since we are doing POST
-    data.append(params.toString().remove(0, 1).toLatin1());
+    data.append(query.toString().toLatin1());
 
     QNetworkAccessManager *nam = new QNetworkAccessManager();
     connect(nam, SIGNAL(finished(QNetworkReply*)),
@@ -382,20 +390,24 @@ void LastFm::Track::love()
 {
     QNetworkRequest request;
     QUrl requestUrl(QLatin1String("http://ws.audioscrobbler.com/2.0/"));
-    requestUrl.addQueryItem(QLatin1String("method"), QLatin1String("track.love"));
-    requestUrl.addQueryItem(QLatin1String("track"), m_trackTitle);
+    {
+        QUrlQuery query;
+        query.addQueryItem(QLatin1String("method"), QLatin1String("track.love"));
+        query.addQueryItem(QLatin1String("track"), m_trackTitle);
+        requestUrl.setQuery(query);
+    }
     request.setUrl(requestUrl);
 
     QByteArray data;
-    QUrl params;
-    params.addQueryItem(QLatin1String("api_key"), LastFm::Global::api_key);
-    params.addQueryItem(QLatin1String("artist"), m_artist);
-    params.addQueryItem(QLatin1String("method"), QLatin1String("track.love"));
-    params.addQueryItem(QLatin1String("sk"), LastFm::Global::session_key);
-    params.addQueryItem(QLatin1String("token"), LastFm::Global::token);
-    params.addQueryItem(QLatin1String("track"), m_trackTitle);
-    params.addQueryItem(QLatin1String("api_sig"), LastFm::Scrobbler::getRequestSignature(params));
-    data.append(params.toString().remove(0, 1).toLatin1());
+    QUrlQuery query;
+    query.addQueryItem(QLatin1String("api_key"), LastFm::Global::api_key);
+    query.addQueryItem(QLatin1String("artist"), m_artist);
+    query.addQueryItem(QLatin1String("method"), QLatin1String("track.love"));
+    query.addQueryItem(QLatin1String("sk"), LastFm::Global::session_key);
+    query.addQueryItem(QLatin1String("token"), LastFm::Global::token);
+    query.addQueryItem(QLatin1String("track"), m_trackTitle);
+    query.addQueryItem(QLatin1String("api_sig"), LastFm::Scrobbler::getRequestSignature(query));
+    data.append(query.toString().toLatin1());
 
     QNetworkAccessManager *nam = new QNetworkAccessManager();
     connect(nam, SIGNAL(finished(QNetworkReply*)),
@@ -421,18 +433,19 @@ void LastFm::Track::scrobbled(QNetworkReply *reply)
     QDomDocument document;
     document.setContent(reply->readAll());
 
-    const QString method = reply->request().url().queryItemValue(QLatin1String("method"));
+    const QUrlQuery query(reply->request().url());
+    const QString method = query.queryItemValue(QLatin1String("method"));
 
     const QDomElement lfm = document.documentElement();
     if (lfm.attribute(QLatin1String("status")) == QLatin1String("ok")) {
-        qDebug() << method << "for" << reply->request().url().queryItemValue(QLatin1String("track")) << "successfull";
+        qDebug() << method << "for" << query.queryItemValue(QLatin1String("track")) << "successfull";
         if (method == QLatin1String("track.love")) {
             Q_EMIT loved();
         } else {
             Q_EMIT scrobbled();
         }
     } else {
-        qDebug() << method << "for" << reply->request().url().queryItemValue(QLatin1String("track")) << "failed:";
+        qDebug() << method << "for" << query.queryItemValue(QLatin1String("track")) << "failed:";
         QDomElement err = lfm.childNodes().at(0).toElement();
         qDebug() << err.childNodes().at(0).nodeValue();
 
@@ -503,10 +516,14 @@ void LastFm::Cache::submit()
 {
     QNetworkRequest request;
     QUrl requestUrl(QLatin1String("http://ws.audioscrobbler.com/2.0/"));
-    requestUrl.addQueryItem(QLatin1String("method"), QLatin1String("track.scrobble"));
+    {
+        QUrlQuery query;
+        query.addQueryItem(QLatin1String("method"), QLatin1String("track.scrobble"));
+        requestUrl.setQuery(query);
+    }
     request.setUrl(requestUrl);
     QByteArray data;
-    QUrl params;
+    QUrlQuery params;
 
     const int items_count = qMin(m_cache.size(), 40);
 
@@ -530,7 +547,7 @@ void LastFm::Cache::submit()
     params.addQueryItem(QLatin1String("api_sig"), LastFm::Scrobbler::getRequestSignature(params));
     request.setAttribute(QNetworkRequest::User, QVariant(items_count));
 
-    data.append(params.toString().remove(0, 1).toLatin1());
+    data.append(params.toString().toLatin1());
 
     QNetworkAccessManager *nam = new QNetworkAccessManager();
     // When request is done, destroy the QNetworkAccessManager
@@ -548,7 +565,8 @@ void LastFm::Cache::submitted(QNetworkReply *reply)
     QDomDocument document;
     document.setContent(reply->readAll());
 
-    const QString method = reply->request().url().queryItemValue(QLatin1String("method"));
+    const QUrlQuery query(reply->request().url());
+    const QString method = query.queryItemValue(QLatin1String("method"));
     const QDomElement lfm = document.documentElement();
     if (lfm.attribute(QLatin1String("status")) == QLatin1String("ok")) {
         qDebug() << method << "for tracks in cache successfull, removing them from cache";

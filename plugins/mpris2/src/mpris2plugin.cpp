@@ -58,6 +58,3 @@ void MPRIS2Plugin::init()
             this, QDBusConnection::ExportAdaptors);
     }
 }
-
-Q_EXPORT_PLUGIN2(tepsonic_mpris2plugin, MPRIS2Plugin)
-

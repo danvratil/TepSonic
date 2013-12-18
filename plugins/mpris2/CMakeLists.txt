@@ -1,8 +1,7 @@
-set(QT_USE_QTDBUS 1)
-
+find_package(Qt5DBus REQUIRED)
 
 include_directories(
-    ${QT_QTDBUS_INCLUDE_DIR}
+    ${Qt5DBus_INCLUDE_DIRS}
 )
 
 add_definitions(-DQT_PLUGIN -DQT_SHARED)
@@ -21,16 +20,14 @@ set(mpris2plugin_SRCS
     src/mprismediaplayer2player.cpp
 )
 
-qt4_wrap_cpp(mpris2plugin_QMOC_SRCS ${mpris2plugin_HDRS})
-
 add_library(tepsonic_mpris2plugin SHARED
                ${mpris2plugin_SRCS}
                ${mpris2plugin_QMOC_SRCS}
 )
 
 target_link_libraries(tepsonic_mpris2plugin
-               ${QT_CORE_LIBRARY}
-               ${QT_DBUS_LIBRARY}
+               Qt5::Core
+               Qt5::DBus
 )
 
 # standard UNIX and windows

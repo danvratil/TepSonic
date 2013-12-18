@@ -35,6 +35,7 @@
 class LastFmScrobblerPlugin : public AbstractPlugin
 {
     Q_OBJECT
+    Q_PLUGIN_METADATA(IID "cz.progdan.tepsonic.plugins.LastFmScrobbler")
 
   public:
     explicit LastFmScrobblerPlugin();

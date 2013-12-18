@@ -27,6 +27,7 @@ class QDBusAbstractAdaptor;
 class MPRIS2Plugin : public AbstractPlugin
 {
     Q_OBJECT
+    Q_PLUGIN_METADATA(IID "cz.progdan.tepsonic.plugins.MPRIS2")
 
   public:
     explicit MPRIS2Plugin();

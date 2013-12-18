@@ -1,11 +1,13 @@
 # Make sure all Qt parts will be available
+find_package(Qt5Xml REQUIRED)
+find_package(Qt5Network REQUIRED)
 
 add_definitions(-DQT_PLUGIN -DQT_SHARED)
 
 include_directories(
         ${CMAKE_CURRENT_BINARY_DIR}
-	${QT_QTNETWORK_INCLUDE_DIR}
-        ${QT_QTXML_INCLUDE_DIR}
+        ${Qt5Network_INCLUDE_DIRS}
+        ${Qt5Xml_INCLUDE_DIRS}
 )
 
 set(lastfmscrobbler_HDRS
@@ -37,8 +39,7 @@ else (NOT DEFINED LANGS)
 endif (NOT DEFINED LANGS)
 
 
-qt4_wrap_ui(lastfmscrobbler_QUIS_HDRS ${lastfmscrobbler_QUIS})
-qt4_wrap_cpp(lastfmscrobbler_QMOC_SRCS ${lastfmscrobbler_HDRS})
+qt5_wrap_ui(lastfmscrobbler_QUIS_HDRS ${lastfmscrobbler_QUIS})
 
 #Create translations
 set(TRANSLATIONS)
@@ -67,10 +68,10 @@ if (TRANSLATIONS)
 endif (TRANSLATIONS)
 
 target_link_libraries(tepsonic_lastfmscrobbler
-	       ${QT_QTCORE_LIBRARY}
-	       ${QT_QTGUI_LIBRARY}
-	       ${QT_QTNETWORK_LIBRARY}
-               ${QT_QTXML_LIBRARY}
+	       Qt5::Core
+	       Qt5::Gui
+	       Qt5::Network
+               Qt5::Xml
 )
 
 # standard UNIX and windows
