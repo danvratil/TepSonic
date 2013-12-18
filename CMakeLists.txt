@@ -1,6 +1,6 @@
 project(tepsonic)
 
-cmake_minimum_required(VERSION 2.8.6)
+cmake_minimum_required(VERSION 2.8.9)
 
 set(TEPSONIC_VERSION_MAJOR 0)
 set(TEPSONIC_VERSION_MINOR 99)
@@ -8,14 +8,18 @@ set(TEPSONIC_VERSION_PATCH 0)
 set(TEPSONIC_VERSION ${TEPSONIC_VERSION_MAJOR}.${TEPSONIC_VERSION_MINOR}.${TEPSONIC_VERSION_PATCH})
 
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules)
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+set(CMAKE_AUTOMOC ON)
 
 find_package(PkgConfig REQUIRED)
 find_package(X11 REQUIRED)
-find_package(Qt4 4.5 REQUIRED)
+find_package(Qt5Core REQUIRED)
+find_package(Qt5Concurrent REQUIRED)
+find_package(Qt5Gui REQUIRED)
+find_package(Qt5Widgets REQUIRED)
+find_package(Qt5Sql REQUIRED)
 find_package(Taglib REQUIRED)
-find_package(Phonon REQUIRED)
-
-include(${QT_USE_FILE})
+find_package(Phonon4Qt5 REQUIRED)
 
 add_definitions(${QT_DEFINITIONS}
                 ${TAGLIB_CFLAGS}
@@ -23,32 +27,23 @@ add_definitions(${QT_DEFINITIONS}
                 -DQT_NO_CAST_TO_ASCII
                 -DQT_NO_KEYWORDS)
 
-# Use native libqxt on Linux and patched sources in /3rdparty/qxt on Mac an Win.
-if (NOT FORCE_INBUILD_QXT)
-        set(QXT_USE_QXTCORE TRUE)
-        set(QXT_USE_QXTGUI TRUE)
-        find_package(Qxt REQUIRED)
-else ()
-        add_definitions(-DQXT_STATIC -DBUILD_QXT_GUI -DBUILD_QXT_CORE)
-        set(QXT_INCLUDE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/qxt")
-        set(QXT_LIBRARIES qxt)
-endif ()
-
-
 include_directories(
-        ${QT_QTCORE_INCLUDE_DIR}
-        ${QT_QTGUI_INCLUDE_DIR}
-        ${QT_QTNETWORK_INCLUDE_DIR}
-        ${QT_QTSQL_INCLUDE_DIR}
-        ${PHONON_INCLUDES}
+        ${Qt5Core_INCLUDE_DIRS}
+        ${Qt5Concurrent_INCLUDE_DIRS}
+        ${Qt5Gui_INCLUDE_DIRS}
+        ${Qt5Widgets_INCLUDE_DIRS}
+        ${Qt5Sql_INCLUDE_DIRS}
+        ${PHONON_INCLUDE_DIR}
         ${TAGLIB_INCLUDES}
-        ${QXT_INCLUDE_DIRS}
+        ${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/qxt
         ${CMAKE_CURRENT_SOURCE_DIR}/player
         ${CMAKE_CURRENT_BINARY_DIR}/player
 )
 
-# Add custom cmake modules
-set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules ${CMAKE_MODULE_PATH})
+if (UNIX)
+    find_package(Qt5X11Extras REQUIRED)
+    include_directories(${Qt5X11Extras_INCLUDE_DIRS})
+endif ()
 
 if (NOT DEFINED CMAKE_INSTALL_PREFIX)
    set(CMAKE_INSTALL_PREFIX /usr/local)
@@ -83,12 +78,10 @@ else (NOT DEFINED CMAKE_INSTALL_DATA_DIR)
    set(INSTALL_DATA_DIR ${CMAKE_INSTALL_DATA_DIR})
 endif (NOT DEFINED CMAKE_INSTALL_DATA_DIR)
 
-add_definitions(${QT_DEFINITIONS}
-		-DPKGDATADIR="${INSTALL_DATA_DIR}"
-		-DLIBDIR="${INSTALL_LIBRARY_DIR}"
-		-Wall)
+add_definitions(-DPKGDATADIR="${INSTALL_DATA_DIR}"
+                -DLIBDIR="${INSTALL_LIBRARY_DIR}"
+                -Wall)
 
-# First player, then plugins, this is strict order!
 add_subdirectory(3rdparty)
 add_subdirectory(player)
 add_subdirectory(plugins)
