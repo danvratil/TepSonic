@@ -102,7 +102,7 @@ DECLAREOPTION(QString, collectionsMySQLPassword, setCollectionsMySQLPassword,
               "Collections", "MySQL/Password", QString())
 
 DECLAREOPTION(QString, collectionsStorageEngine, setCollectionsStorageEngine,
-              "Collections", "StorageEngine", QLatin1String("QSQLITE"))
+              "Collections", "StorageEngine", QLatin1String("SQLite"))
 
 
 DECLAREOPTION(bool, sessionRestore, setSessionRestore,

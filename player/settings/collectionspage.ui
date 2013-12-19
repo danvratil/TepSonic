@@ -60,16 +60,10 @@
             <property name="text">
              <string>SQLite</string>
             </property>
-            <property name="data">
-              <string>QSQLITE</string>
-            </property>
            </item>
            <item>
             <property name="text">
              <string>MySQL</string>
-            </property>
-            <property name="data">
-              <string>QMYSQL</string>
             </property>
            </item>
           </widget>
