@@ -18,6 +18,7 @@
  */
 
 #include "filesystembrowser.h"
+#include "settings.h"
 #include "constants.h"
 
 #include <QMimeData>
@@ -40,13 +41,12 @@ FileSystemBrowser::FileSystemBrowser(QWidget *parent):
     m_contextMenu = new QMenu(this);
     m_contextMenu->addAction(tr("Add to bookmarks"), this, SLOT(emitAddBookmark()));
 
-    connect(this, SIGNAL(doubleClicked(QModelIndex)),
-            this, SLOT(setRootDir(QModelIndex)));
-    connect(this, SIGNAL(customContextMenuRequested(QPoint)),
-            this, SLOT(showContextMenu(QPoint)));
-
-    connect(this, SIGNAL(pathChanged(QString)),
-            this, SLOT(saveCurrentPath(QString)));
+    connect(this, &FileSystemBrowser::doubleClicked,
+            this, &FileSystemBrowser::setRootDir);
+    connect(this, &FileSystemBrowser::customContextMenuRequested,
+            this, &FileSystemBrowser::showContextMenu);
+    connect(this, &FileSystemBrowser::pathChanged,
+            [=](const QString &path) { Settings::instance()->setSessionFSBrowserPath(path); });
 }
 
 void FileSystemBrowser::setModel(QAbstractItemModel *model)
@@ -62,12 +62,6 @@ void FileSystemBrowser::setModel(QAbstractItemModel *model)
                               Q_ARG(QString, lastPath));
 }
 
-void FileSystemBrowser::saveCurrentPath(const QString &path)
-{
-    QSettings settings(_CONFIGDIR + QDir::separator() + QLatin1String("main.conf"), QSettings::IniFormat);
-    settings.beginGroup(QLatin1String("Last Session"));
-    settings.setValue(QLatin1String("LastFSBPath"), path);
-}
 
 void FileSystemBrowser::startDrag(Qt::DropActions supportedActions)
 {
@@ -104,8 +98,9 @@ void FileSystemBrowser::setRootDir(const QModelIndex &dir)
     }
 
     // Prevent from having two same items in backDirs in row
-    if ((m_backDirs.isEmpty()) || (m_backDirs.first() != fsmodel->filePath(rootIndex())))
+    if ((m_backDirs.isEmpty()) || (m_backDirs.first() != fsmodel->filePath(rootIndex()))) {
         m_backDirs.prepend(fsmodel->filePath(rootIndex()));
+    }
 
     setRootIndex(fsmodel->index(path));
     setCurrentIndex(QModelIndex());

@@ -68,7 +68,8 @@ void CollectionModel::Private::populateArtists()
     QFutureWatcher<Node::List> *watcher = new QFutureWatcher<Node::List>();
     QFuture<Node::List> future = QtConcurrent::run<Node::List>(this, &CollectionModel::Private::populateArtistsRunnable);
     watcher->setFuture(future);
-    connect(watcher, SIGNAL(finished()), this, SLOT(onArtistsPopulated()));
+    connect(watcher, &QFutureWatcher<Node::List>::finished,
+            this, &CollectionModel::Private::onArtistsPopulated);
 }
 
 Node::List CollectionModel::Private::populateArtistsRunnable()
@@ -146,7 +147,8 @@ void CollectionModel::Private::populateAlbums(Node *parentNode)
     watcher->setProperty("ParentNode", QVariant::fromValue(parentNode));
     QFuture<Node::List> future = QtConcurrent::run<Node::List>(this, &CollectionModel::Private::populateAlbumsRunnable, parentNode);
     watcher->setFuture(future);
-    connect(watcher, SIGNAL(finished()), this, SLOT(onAlbumsPopulated()));
+    connect(watcher, &QFutureWatcher<Node::List>::finished,
+            this, &CollectionModel::Private::onAlbumsPopulated);
 }
 
 Node::List CollectionModel::Private::populateAlbumsRunnable(Node *parentNode)
@@ -236,7 +238,8 @@ void CollectionModel::Private::populateTracks(Node *parentNode)
     watcher->setProperty("ParentNode", QVariant::fromValue(parentNode));
     QFuture<Node::List> future = QtConcurrent::run<Node::List>(this, &CollectionModel::Private::populateTracksRunnable, parentNode);
     watcher->setFuture(future);
-    connect(watcher, SIGNAL(finished()), this, SLOT(onAlbumsPopulated()));
+    connect(watcher, &QFutureWatcher<Node::List>::finished,
+            this, &CollectionModel::Private::onTracksPopulated);
 }
 
 QList<Node*> CollectionModel::Private::populateTracksRunnable(Node *parentNode)

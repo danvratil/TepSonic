@@ -57,12 +57,12 @@ Player::Player()
     // By default tick every 1 second
     m_phononPlayer->setTickInterval(1000);
 
-    connect(m_phononPlayer, SIGNAL(finished()),
-            this, SLOT(emitFinished()));
-    connect(m_phononPlayer, SIGNAL(stateChanged(Phonon::State,Phonon::State)),
-            this, SIGNAL(stateChanged(Phonon::State,Phonon::State)));
-    connect(m_phononPlayer, SIGNAL(tick(qint64)),
-            this, SIGNAL(trackPositionChanged(qint64)));
+    connect(m_phononPlayer, &Phonon::MediaObject::finished,
+            this, &Player::emitFinished);
+    connect(m_phononPlayer, &Phonon::MediaObject::stateChanged,
+            this, &Player::stateChanged);
+    connect(m_phononPlayer, &Phonon::MediaObject::tick,
+            this, &Player::trackPositionChanged);
     //connect(m_phononPlayer,SIGNAL(currentSourceChanged(Phonon::MediaSource)),this,SLOT(emitTrackChanged()));
 
     m_randomMode = false;
@@ -73,8 +73,9 @@ Player::Player()
 
 Player::~Player()
 {
-    if (m_phononPlayer->state() == Phonon::PlayingState)
+    if (m_phononPlayer->state() == Phonon::PlayingState) {
         m_phononPlayer->stop();
+    }
 
     delete m_phononPlayer;
     delete m_audioOutput;

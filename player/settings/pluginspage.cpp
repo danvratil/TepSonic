@@ -32,8 +32,8 @@ PluginsPage::PluginsPage(QWidget *parent):
     m_ui = new Ui::PluginsPage();
     m_ui->setupUi(this);
     m_ui->tabs->setCurrentIndex(0);
-    connect(m_ui->pluginsList, SIGNAL(itemChanged(QListWidgetItem *)),
-            this, SLOT(pluginsListItemChanged(QListWidgetItem *)));
+    connect(m_ui->pluginsList, &QListWidget::itemChanged,
+            this, &PluginsPage::pluginsListItemChanged);
 }
 
 PluginsPage::~PluginsPage()

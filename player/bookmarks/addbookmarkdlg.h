@@ -38,9 +38,6 @@ class AddBookmarkDlg : public QDialog
   Q_SIGNALS:
     void accepted(const QString &title, const QString &path);
 
-  private Q_SLOTS:
-    void emitAccepted();
-
   private:
     Ui::AddBookmarkDlg *m_ui;
 

@@ -29,17 +29,12 @@ AddBookmarkDlg::AddBookmarkDlg(const QString &path, QWidget *parent) :
     m_ui->titleEdit->setText(path);
     m_ui->pathEdit->setText(path);
 
-    connect(this, SIGNAL(accepted()),
-            this, SLOT(emitAccepted()));
+    connect(this, &AddBookmarkDlg::accepted,
+            [=]() { Q_EMIT accepted(m_ui->titleEdit->text(),
+                                    m_ui->pathEdit->text()); });
 }
 
 AddBookmarkDlg::~AddBookmarkDlg()
 {
     delete m_ui;
-}
-
-void AddBookmarkDlg::emitAccepted()
-{
-    Q_EMIT accepted(m_ui->titleEdit->text(),
-                    m_ui->pathEdit->text());
 }

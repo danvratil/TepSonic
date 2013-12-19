@@ -60,10 +60,10 @@ PlayerPage::PlayerPage(QWidget *parent):
         m_effectsModel->appendRow(item);
     }
     m_ui->playerEffectsList->setModel(m_effectsModel);
-    connect(m_ui->playerEffectsList, SIGNAL(clicked(QModelIndex)),
-            this, SLOT(setEffectDescription(QModelIndex)));
-    connect(m_ui->playerEffectsList, SIGNAL(doubleClicked(QModelIndex)),
-            this, SLOT(showEffectSettings(QModelIndex)));
+    connect(m_ui->playerEffectsList, &QListView::clicked,
+            this, &PlayerPage::setEffectDescription);
+    connect(m_ui->playerEffectsList, &QListView::doubleClicked,
+            this, &PlayerPage::showEffectSettings);
 }
 
 PlayerPage::~PlayerPage()

@@ -22,6 +22,7 @@
 #include "abstractplugin.h"
 #include "mainwindow.h"
 #include "player.h"
+#include "settings.h"
 
 
 #include <QApplication>
@@ -33,7 +34,6 @@
 #include <QDebug>
 #include <QSettings>
 #include <QTimer>
-#include <phonon/mediaobject.h>
 
 PluginsManager::Plugin::Plugin():
     isEnabled(false)
@@ -78,10 +78,7 @@ PluginsManager::~PluginsManager()
 
 void PluginsManager::loadPlugins()
 {
-    QSettings settings(QString(_CONFIGDIR).append(QLatin1String("/main.conf")),
-                       QSettings::IniFormat);
-    settings.beginGroup(QLatin1String("Plugins"));
-
+    const QStringList enabledPlugins = Settings::instance()->enabledPlugins();
     QDir pluginsDir(QLatin1String(PKGDATADIR) + QDir::separator() + QLatin1String("tepsonic") + QDir::separator() + QLatin1String("plugins"));
 
     // Temporary list to avoid duplicate loading of plugins
@@ -96,7 +93,7 @@ void PluginsManager::loadPlugins()
         // If the file is a library...
         Plugin *plugin = parseDesktopFile(desktopFile);
         if (plugin) {
-            const bool enabled = settings.value(plugin->id, plugin->enabledByDefault).toBool();
+            const bool enabled = enabledPlugins.contains(plugin->id);
             if (enabled) {
                 enablePlugin(plugin);
             }
@@ -167,7 +164,8 @@ void PluginsManager::disablePlugin(Plugin *plugin)
 
     AbstractPlugin* aplg = reinterpret_cast<AbstractPlugin*>(plugin->loader->instance());
 
-    disconnect(aplg,SLOT(settingsAccepted()));
+    disconnect(this, &PluginsManager::settingsAccepted,
+               aplg, &AbstractPlugin::settingsAccepted);
     aplg->quit();
 
     plugin->loader->unload();
@@ -196,10 +194,10 @@ void PluginsManager::enablePlugin(Plugin *plugin)
     aplg->init();
 
     // Now we can connect all the signals/slots to the plugin
-    connect(this, SIGNAL(settingsAccepted()),
-            aplg, SLOT(settingsAccepted()));
-    connect(aplg, SIGNAL(error(QString)),
-            this, SIGNAL(error(QString)));
+    connect(this, &PluginsManager::settingsAccepted,
+            aplg, &AbstractPlugin::settingsAccepted);
+    connect(aplg, &AbstractPlugin::error,
+            this, &PluginsManager::error);
 
     plugin->isEnabled = true;
 

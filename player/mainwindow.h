@@ -30,16 +30,16 @@
 #include <QFileSystemModel>
 #include <QSortFilterProxyModel>
 #include <QItemSelectionModel>
+#include <QSystemTrayIcon>
 
 
-// These classes are used in inline methods
 #include "player.h"
-#include "trayicon.h"
 
 class DatabaseManager;
 class BookmarksManager;
 class FileSystemModel;
 class MetadataEditor;
+class TrayIcon;
 
 namespace Ui
 {
@@ -72,31 +72,9 @@ class MainWindow : public QMainWindow
     void clearCollectionSearch();
     void clearPlaylistSearch();
     void showPlaylistHeaderContextMenu(const QPoint &pos);
-    void togglePlaylistColumnVisibility(int column);
     void savePlaylist();
 
     void playPause();
-
-    void setRepeatModeAll() {
-        Player::instance()->setRepeatMode(Player::RepeatAll);
-    }
-
-    void setRepeatModeOff() {
-        Player::instance()->setRepeatMode(Player::RepeatOff);
-    }
-
-    void setRepeatModeTrack() {
-        Player::instance()->setRepeatMode(Player::RepeatTrack);
-    }
-
-    void setRandomModeOff() {
-        Player::instance()->setRandomMode(false);
-    }
-
-    void setRandomModeOn() {
-        Player::instance()->setRandomMode(true);
-    }
-
 
     void playerStatusChanged(Phonon::State newState, Phonon::State oldState);
     void setCurrentTrack(const QModelIndex &index);
@@ -104,21 +82,9 @@ class MainWindow : public QMainWindow
     void openSettingsDialog();
     void settingsDialogAccepted();
 
-    void showHideWindow() {
-        trayClicked(QSystemTrayIcon::Trigger);
-    }
-
-    void quitApp() {
-        m_canClose = true;
-        this->close();
-    }
-
     void trayClicked(QSystemTrayIcon::ActivationReason reason);
     void reportBug();
     void aboutTepSonic();
-    void aboutQt() {
-        QMessageBox::aboutQt(this, tr("About Qt"));
-    }
 
     void showSupportedFormats();
     void updatePlayerTrack();

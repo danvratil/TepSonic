@@ -36,15 +36,13 @@ Settings* Settings::instance()
     return s_instance;
 }
 
-Settings::Settings():
-    QObject()
+Settings::Settings()
 {
-    m_settings = new QSettings(_CONFIGDIR + QLatin1String("/main.conf"), QSettings::IniFormat, this);
-    m_writebackTimer = new QTimer(this);
-    m_writebackTimer->setInterval(500);
+    m_settings = new QSettings(_CONFIGDIR + QLatin1String("/main.conf"), QSettings::IniFormat);
+    m_writebackTimer = new QTimer();
+    m_writebackTimer->setInterval(100);
     m_writebackTimer->setSingleShot(true);
-    connect(m_writebackTimer, SIGNAL(timeout()),
-            this, SLOT(onWritebackTimeout()));
+    QObject::connect(m_writebackTimer, &QTimer::timeout, [=]() { m_settings->sync(); });
 }
 
 Settings::~Settings()
@@ -53,18 +51,14 @@ Settings::~Settings()
         m_writebackTimer->stop();
     }
 
-    onWritebackTimeout();
+    m_writebackTimer->deleteLater();
+    m_settings->deleteLater();
 }
 
 void Settings::destroy()
 {
     delete s_instance;
     s_instance = 0;
-}
-
-void Settings::onWritebackTimeout()
-{
-    m_settings->sync();
 }
 
 #define DECLARESETTINGSGETTER(type, getter, group, option, default) \

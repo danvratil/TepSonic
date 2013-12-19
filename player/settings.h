@@ -28,9 +28,9 @@
 class QTimer;
 class QSettings;
 
-class Settings : public QObject
+class Settings
 {
-    Q_OBJECT
+    Q_DISABLE_COPY(Settings)
 
   public:
     static Settings *instance();
@@ -84,9 +84,6 @@ class Settings : public QObject
     DECLAREPROPERTY(QVariantList, playlistColumnsWidths, setPlaylistColumnsWidths)
 
 #undef DECLAREPROPERTY
-
-  private Q_SLOTS:
-    void onWritebackTimeout();
 
   private:
     Settings();

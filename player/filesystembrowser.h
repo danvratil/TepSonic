@@ -43,7 +43,6 @@ class FileSystemBrowser : public QListView
   private Q_SLOTS:
     void setRootDir(const QModelIndex &dir);
     void emitAddBookmark();
-    void saveCurrentPath(const QString &path);
 
   public Q_SLOTS:
     void goBack();

@@ -60,16 +60,13 @@ class AbstractPlugin : public QObject
     void emitError(const QString &error);
 
   Q_SIGNALS:
-#if !defined(Q_MOC_RUN) && !defined(DOXYGEN_SHOULD_SKIP_THIS) && !defined(IN_IDE_PARSER)
-  private:
-#endif
     void error(const QString &msg);
 
   private:
     class Private;
     Private * const d;
     friend class Private;
-
+    friend class PluginsManager;
 };
 
 #endif // ABSTRACTPLUGIN_H

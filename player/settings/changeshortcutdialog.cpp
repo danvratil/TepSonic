@@ -28,10 +28,10 @@ ChangeShortcutDialog::ChangeShortcutDialog(const QModelIndex &index, QWidget *pa
     m_index(index)
 {
     m_ui->setupUi(this);
-    connect(m_ui->buttonBox, SIGNAL(rejected()),
-            this, SLOT(close()));
-    connect(m_ui->buttonBox, SIGNAL(accepted()),
-            this, SLOT(accept()));
+    connect(m_ui->buttonBox, &QDialogButtonBox::rejected,
+            this, &ChangeShortcutDialog::close);
+    connect(m_ui->buttonBox, &QDialogButtonBox::accepted,
+            this, &ChangeShortcutDialog::accept);
 
     m_ui->currentShortcut->setText(index.sibling(index.row(), 1).data().toString());
 

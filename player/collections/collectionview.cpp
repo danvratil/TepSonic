@@ -54,8 +54,8 @@ CollectionView::CollectionView(QWidget* parent):
     // Hide the header
     header()->setHidden(true);
 
-    connect(this, SIGNAL(doubleClicked(QModelIndex)),
-            this, SLOT(onDoubleClicked(QModelIndex)));
+    connect(this, &CollectionView::doubleClicked,
+            this, &CollectionView::onDoubleClicked);
 }
 
 CollectionView::~CollectionView()

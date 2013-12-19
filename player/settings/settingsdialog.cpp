@@ -36,6 +36,7 @@
 #include "ui_shortcutspage.h"
 
 #include "abstractplugin.h"
+#include "taskmanager.h"
 
 #include <QFileDialog>
 #include <QStandardItemModel>
@@ -55,8 +56,8 @@ SettingsDialog::SettingsDialog(MainWindow *parent):
     m_ui->setupUi(this);
     m_ui->pagesButtons->item(0)->setSelected(true);
 
-    connect(m_ui->pagesButtons, SIGNAL(currentItemChanged(QListWidgetItem *, QListWidgetItem *)),
-            this, SLOT(changePage(QListWidgetItem *, QListWidgetItem *)));
+    connect(m_ui->pagesButtons, &QListWidget::currentItemChanged,
+            this, &SettingsDialog::changePage);
 
     m_pages.insert(PLAYER_PAGE, new SettingsPages::PlayerPage);
     m_pages.insert(COLLECTIONS_PAGE, new SettingsPages::CollectionsPage);
@@ -67,9 +68,6 @@ SettingsDialog::SettingsDialog(MainWindow *parent):
         m_ui->pages->addWidget(page);
         page->loadSettings();
     }
-
-    connect(m_pages[COLLECTIONS_PAGE], SIGNAL(rebuildCollections()),
-            this, SLOT(emitRebuildCollections()));
 
     connect(m_ui->buttonBox, SIGNAL(accepted()),
             this, SLOT(dialogAccepted()));
@@ -99,26 +97,19 @@ void SettingsDialog::dialogAccepted()
     }
 
     if (qobject_cast<SettingsPages::CollectionsPage *>(m_pages[COLLECTIONS_PAGE])->collectionsSourceChanged()) {
-        Q_EMIT rebuildCollections();
+        TaskManager::instance()->rebuildCollections();
     }
 
     if (qobject_cast<SettingsPages::PlayerPage *>(m_pages[PLAYER_PAGE])->outputDeviceChanged()) {
-        Q_EMIT outputDeviceChanged();
+        Player::instance()->setDefaultOutputDevice();
     }
 
     accept();
-
-    this->close();
+    close();
 }
 
 void SettingsDialog::changePage(QListWidgetItem *current, QListWidgetItem *previous)
 {
     Q_UNUSED(previous);
     m_ui->pages->setCurrentIndex(m_ui->pagesButtons->row(current));
-}
-
-void SettingsDialog::emitRebuildCollections()
-{
-    m_pages[COLLECTIONS_PAGE]->saveSettings();
-    Q_EMIT rebuildCollections();
 }

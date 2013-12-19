@@ -18,14 +18,18 @@
  */
 
 #include "statusbar.h"
+#include "taskmanager.h"
 
 StatusBar::StatusBar(QWidget *parent) :
     QStatusBar(parent),
     m_actionLabel(0),
     m_progressBar(0)
 {
+    connect(TaskManager::instance(), &TaskManager::taskStarted,
+            this, &StatusBar::showWorkingBar);
+    connect(TaskManager::instance(), &TaskManager::taskDone,
+            this, &StatusBar::cancelAction);
 }
-
 
 void StatusBar::setProgressBar(const QString &action, int position, int maxPosition)
 {

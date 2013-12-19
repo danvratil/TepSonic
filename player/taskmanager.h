@@ -116,11 +116,6 @@ class TaskManager : public QObject
     */
     void rebuildCollections(const QString &folder = QString());
 
-  private Q_SLOTS:
-
-    //! Emits signals with information about collections rebuilding has started
-    void collectionsRebuildingStarted();
-
   private:
     TaskManager();
     static TaskManager *s_instance;

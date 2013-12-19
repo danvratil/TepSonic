@@ -57,8 +57,8 @@ PlaylistView::PlaylistView(QWidget *parent):
     // Set up task manager
     TaskManager::instance()->setPlaylistModel(m_playlistModel);
 
-    connect(m_playlistModel, SIGNAL(playlistLengthChanged(int, int)),
-            this, SIGNAL(playlistLengthChanged(int, int)));
+    connect(m_playlistModel, &PlaylistModel::playlistLengthChanged,
+            this, &PlaylistView::playlistLengthChanged);
 
     setItemDelegate(new PlaylistItemDelegate(this));
     setAcceptDrops(true);
@@ -82,12 +82,16 @@ PlaylistView::PlaylistView(QWidget *parent):
     hideColumn(PlaylistModel::FilenameColumn);
     hideColumn(PlaylistModel::RandomOrderColumn);
 
-    connect(header(), SIGNAL(sortIndicatorChanged(int,Qt::SortOrder)),
-            this, SLOT(slotSortIndicatorChanged(int,Qt::SortOrder)));
-    connect(TaskManager::instance(), SIGNAL(playlistPopulated()),
-            model(), SLOT(invalidate()));
-    connect(TaskManager::instance(), SIGNAL(insertItemToPlaylist(Player::MetaData, int)),
-            m_playlistModel, SLOT(insertItem(Player::MetaData, int)));
+    connect(header(), &QHeaderView::sortIndicatorChanged,
+            this, &PlaylistView::slotSortIndicatorChanged);
+    connect(TaskManager::instance(), &TaskManager::playlistPopulated,
+            qobject_cast<PlaylistProxyModel*>(model()), &PlaylistProxyModel::invalidate);
+    connect(TaskManager::instance(), &TaskManager::insertItemToPlaylist,
+            m_playlistModel, &PlaylistModel::insertItem);
+    connect(this, &PlaylistView::doubleClicked,
+            this, &PlaylistView::setNowPlaying);
+    connect(this, &PlaylistView::addedFiles,
+            TaskManager::instance(), &TaskManager::addFilesToPlaylist);
 }
 
 PlaylistView::~PlaylistView()

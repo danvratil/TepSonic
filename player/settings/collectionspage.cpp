@@ -20,6 +20,7 @@
 #include "collectionspage.h"
 #include "ui_collectionspage.h"
 #include "settings.h"
+#include "taskmanager.h"
 
 #include <QFileDialog>
 #include <QListWidgetItem>
@@ -39,18 +40,18 @@ CollectionsPage::CollectionsPage(QWidget *parent):
     m_ui->setupUi(this);
     m_ui->tabWidget->setCurrentIndex(TAB_SETTINGS);
 
-    connect(m_ui->dbEngineCombo, SIGNAL(currentIndexChanged(QString)),
-            this, SLOT(changeEngine(QString)));
-    connect(m_ui->rebuildCollectionsButton, SIGNAL(clicked()),
-            this, SIGNAL(rebuildCollections()));
-    connect(m_ui->addPathButton, SIGNAL(clicked()),
-            this, SLOT(addPath()));
-    connect(m_ui->removePathButton, SIGNAL(clicked()),
-            this, SLOT(removePath()));
-    connect(m_ui->removeAllPathsButton, SIGNAL(clicked()),
-            this, SLOT(removeAllPaths()));
-    connect(m_ui->enableCollectionsCheckbox, SIGNAL(toggled(bool)),
-            this, SLOT(collectionStateToggled()));
+    connect(m_ui->dbEngineCombo, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged),
+            this, &CollectionsPage::changeEngine);
+    connect(m_ui->rebuildCollectionsButton, &QPushButton::clicked,
+            [=]() { saveSettings(); TaskManager::instance()->rebuildCollections(); });
+    connect(m_ui->addPathButton, &QPushButton::clicked,
+            this, &CollectionsPage::addPath);
+    connect(m_ui->removePathButton, &QPushButton::clicked,
+            this, &CollectionsPage::removePath);
+    connect(m_ui->removeAllPathsButton, &QPushButton::clicked,
+            this, &CollectionsPage::removeAllPaths);
+    connect(m_ui->enableCollectionsCheckbox, &QCheckBox::toggled,
+            this, &CollectionsPage::collectionStateToggled);
 }
 
 CollectionsPage::~CollectionsPage()
@@ -58,9 +59,10 @@ CollectionsPage::~CollectionsPage()
     delete m_ui;
 }
 
-void CollectionsPage::changeEngine(const QString &currEngine)
+void CollectionsPage::changeEngine(int index)
 {
-    if (currEngine == QLatin1String("SQLite")) {
+    const QString currEngine = m_ui->dbEngineCombo->itemData(index).toString();
+    if (currEngine == QLatin1String("QSQLITE")) {
         m_ui->mysqlSettings->setDisabled(true);
     } else {
         m_ui->mysqlSettings->setEnabled(true);

@@ -56,12 +56,9 @@ class CollectionsPage: public SettingsPage
     void removeAllPaths();
     void removePath();
     void addPath();
-    void changeEngine(const QString &engine);
+    void changeEngine(int index);
 
     void collectionStateToggled();
-
-  Q_SIGNALS:
-    void rebuildCollections();
 };
 }
 

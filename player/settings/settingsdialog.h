@@ -61,9 +61,6 @@ class SettingsDialog : public QDialog
     ~SettingsDialog();
 
   Q_SIGNALS:
-    //! Informs main window that rebuilding collections was requested
-    void rebuildCollections();
-
     //! Informs that a new audio output device has been selected
     void outputDeviceChanged();
 
@@ -91,9 +88,6 @@ class SettingsDialog : public QDialog
       settingsAccepted() is called so plugins could store their settings
     */
     void dialogAccepted();
-
-    //! Saves current confugration and then emits signal rebuildCollections()
-    void emitRebuildCollections();
 };
 
 #endif // PREFERENCESDIALOG_H

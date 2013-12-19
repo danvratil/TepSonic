@@ -31,8 +31,8 @@ ShortcutsPage::ShortcutsPage(QWidget *parent):
 {
     m_ui = new Ui::ShortcutsPage();
     m_ui->setupUi(this);
-    connect(m_ui->shortcutsList, SIGNAL(doubleClicked(QModelIndex)),
-            this, SLOT(changeShortcut(QModelIndex)));
+    connect(m_ui->shortcutsList, &QTreeWidget::doubleClicked,
+            this, &ShortcutsPage::changeShortcut);
 }
 
 ShortcutsPage::~ShortcutsPage()
@@ -43,8 +43,8 @@ ShortcutsPage::~ShortcutsPage()
 void ShortcutsPage::changeShortcut(const QModelIndex &index)
 {
     m_csw = new ChangeShortcutDialog(index, this);
-    connect(m_csw, SIGNAL(shortcutChanged(QModelIndex, QKeySequence)),
-            this, SLOT(shortcutChanged(QModelIndex, QKeySequence)));
+    connect(m_csw, &ChangeShortcutDialog::shortcutChanged,
+            this, &ShortcutsPage::shortcutChanged);
     m_csw->show();
 }
 
