@@ -23,6 +23,7 @@
 #include "playlist/playlistmodel.h"
 #include "playlist/playlistpopulator.h"
 #include "playlist/playlistwriter.h"
+#include "settings.h"
 
 #include <QDir>
 #include <QSettings>
@@ -114,8 +115,7 @@ void TaskManager::rebuildCollections(const QString &folder)
 {
     QStringList dirs;
     if (folder.isEmpty()) {
-        QSettings settings(QString(_CONFIGDIR).append(QLatin1String("/main.conf")), QSettings::IniFormat, this);
-        dirs << settings.value(QLatin1String("Collections/SourcePaths"), QStringList()).toStringList();
+        dirs = Settings::instance()->collectionsSourcePaths();
     } else {
         QFileInfo finfo (folder);
         if (finfo.isDir())
