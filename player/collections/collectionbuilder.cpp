@@ -68,7 +68,7 @@ void CollectionBuilder::run()
         // Populate dbFiles map by ALL tracks from db
         QSqlQuery query(dbManager->sqlDb());
         query.prepare(QLatin1String("SELECT filename, mtime FROM tracks WHERE filename LIKE :folder"));
-        query.bindValue(QLatin1String(":folder"), m_folders.first() + QLatin1Char('%'));
+        query.bindValue(QLatin1String(":folder"), QString::fromLatin1("%1%%").arg(m_folders.first()));
         query.exec();
         while (query.next()) {
             dbFiles.insert(query.value(0).toString(), query.value(1).toUInt());

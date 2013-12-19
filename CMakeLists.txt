@@ -25,7 +25,10 @@ add_definitions(${QT_DEFINITIONS}
                 ${TAGLIB_CFLAGS}
                 -DQT_NO_CAST_FROM_ASCII
                 -DQT_NO_CAST_TO_ASCII
-                -DQT_NO_KEYWORDS)
+                -DQT_NO_KEYWORDS
+                -DQT_USE_FAST_CONCATENATION
+                -DQT_USE_FAST_OPERATOR_PLUS
+)
 
 include_directories(
         ${Qt5Core_INCLUDE_DIRS}
@@ -81,6 +84,33 @@ endif (NOT DEFINED CMAKE_INSTALL_DATA_DIR)
 add_definitions(-DPKGDATADIR="${INSTALL_DATA_DIR}"
                 -DLIBDIR="${INSTALL_LIBRARY_DIR}"
                 -Wall)
+
+if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_C_COMPILER MATCHES "icc" OR (CMAKE_CXX_COMPILER_ID MATCHES "Clang"))
+  # more aggressive warnings and C++11 support
+  set(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS} -Wno-long-long -std=iso9899:1990 -Wundef -Wcast-align -Werror-implicit-function-declaration -Wchar-subscripts -Wall -Wextra -Wpointer-arith -Wwrite-strings -Wformat-security -Wmissing-format-attribute -fno-common")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x -Wnon-virtual-dtor -Wundef -Wcast-align -Wchar-subscripts -Wall -Wextra -Wpointer-arith -Wformat-security -fno-check-new -fno-common")
+
+  # debugfull target
+  set(CMAKE_CXX_FLAGS_DEBUGFULL "-g0 -fno-inline" CACHE STRING "Flags used by the C++ compiler during debugfull builds." FORCE)
+  set(CMAKE_C_FLAGS_DEBUGFULL   "-g0 -fno-inline" CACHE STRING "Flags used by the C compiler during debugfull builds." FORCE)
+  mark_as_advanced(CMAKE_CXX_FLAGS_DEBUGFULL CMAKE_C_FLAGS_DEBUGFULL)
+
+  # Update the documentation string of CMAKE_BUILD_TYPE for ccache & cmake-gui
+  set(CMAKE_BUILD_TYPE "${CMAKE_BUILD_TYPE}" CACHE STRING
+      "Choose the type of build, options are: None debugfull Debug Release RelWithDebInfo MinSizeRel."
+      FORCE)
+
+  # coverage support
+  if(CMAKE_COMPILE_GCOV)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fprofile-arcs -ftest-coverage")
+    if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+      set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -lprofile_rt" CACHE STRING "Flags used by the linker" FORCE)
+      set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} -lprofile_rt" CACHE STRING "Flags used by the linker" FORCE)
+      set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -lprofile_rt" CACHE STRING "Flags used by the linker" FORCE)
+    endif()
+  endif()
+endif()
+
 
 add_subdirectory(3rdparty)
 add_subdirectory(player)
