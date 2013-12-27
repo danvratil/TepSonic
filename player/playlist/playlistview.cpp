@@ -368,8 +368,9 @@ void PlaylistView::keyPressEvent(QKeyEvent *event)
 
     switch (event->key()) {
         case Qt::Key_Delete: { // Key DELETE
-            for (int i = 0; i < selectedIndexes().size(); i++) {
-                model()->removeRow(selectedIndexes().at(i).row());
+            const QModelIndexList selected = selectedIndexes();
+            for (int i = selected.size() - 1; i > 0; --i) {
+                model()->removeRow(selected.at(i).row());
             }
             event->accept();
             return;
