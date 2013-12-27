@@ -292,6 +292,11 @@ void FileSystemBrowser::keyPressEvent(QKeyEvent *event)
         setRootDir(currentIndex());
         event->accept();
     }
+
+    // Chain up
+    else {
+        QListView::keyPressEvent(event);
+    }
 }
 
 void FileSystemBrowser::emitAddBookmark()
