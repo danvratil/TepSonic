@@ -106,7 +106,6 @@ class MainWindow : public QMainWindow
     Ui::MainWindow *m_ui;
     QFileSystemModel *m_fileSystemModel;
     QPointer<MetadataEditor> m_metadataEditor;
-    BookmarksManager *m_bookmarksManager;
 
     QActionGroup *m_randomPlaybackGroup;
     QActionGroup *m_repeatPlaybackGroup;

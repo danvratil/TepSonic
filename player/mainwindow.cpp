@@ -27,7 +27,6 @@
 #include "ui_mainwindow.h"
 #include "settings/settingsdialog.h"
 #include "playlist/playlistmodel.h"
-#include "bookmarks/bookmarksmanager.h"
 #include "abstractplugin.h"
 #include "taskmanager.h"
 #include "pluginsmanager.h"
@@ -146,10 +145,7 @@ MainWindow::MainWindow():
         repeatModeChanged(static_cast<Player::RepeatMode>(Settings::instance()->playerRepeatMode()));
     }
 
-    // Create bookmarks manager
-    m_bookmarksManager = new BookmarksManager(m_ui);
-
-    // At the very end bind all signals and slots
+   // At the very end bind all signals and slots
     bindSignals();
     // Bind global shortcuts
     bindShortcuts();
@@ -178,8 +174,6 @@ MainWindow::~MainWindow()
 
     // Save current playlist to file
     TaskManager::instance()->savePlaylistToFile(QString(_CONFIGDIR).append(QLatin1String("/last.m3u")));
-
-    delete m_bookmarksManager;
 
     delete m_appIcon;
     delete m_ui;
@@ -281,11 +275,6 @@ void MainWindow::bindSignals()
             m_ui->fsbFwBtn, &QWidget::setDisabled);
     connect(m_ui->filesystemBrowser, &FileSystemBrowser::disableCdUp,
             m_ui->fsbCdUpBtn, &QWidget::setDisabled);
-    connect(m_ui->fsbBookmarksBtn, &QPushButton::toggled,
-            m_bookmarksManager, &BookmarksManager::toggleBookmarks);
-    connect(m_ui->filesystemBrowser, &FileSystemBrowser::addBookmark,
-            m_bookmarksManager, &BookmarksManager::showAddBookmarkDialog);
-
 
     // Menu 'Player'
     connect(m_ui->actionNext_track, &QAction::triggered,
