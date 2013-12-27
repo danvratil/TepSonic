@@ -8,6 +8,24 @@
         that is not in VA, the interpret should not be ignored
 
  - store UI settings immediately after change, so that they are preserved when TS crashes
-
- - use Qt5 Plugin JSON meta data instead of .desktop files and some of the virtual methods
- - clean up and refactor the LastFmScrobbler plugin
+ - plugins: use Qt5 JSON metadata instead of .desktop files and virtual methods
+ - use Qt5 version connect() in plugins
+ - clean up and refactor the LastFmScrobbler plugin (const&, etc)
+ - lambdas! - clean up the code where possible
+ - get rid of TaskManager - implement "tasks" in respective models
+ - make BookmarksManager a singleton
+ - rename BookmarksBrowser to BookmarksView and move code related to Bookmarks
+   from MainWindow to BookmarksBrowser
+ - create FSB widget with all the buttons and input and move there all related logic
+   from MainWindow
+ - revisit AbstractPlugin interface - simplify?
+ - revisit design of Settings - can we provide a more generic yet equally safe framework
+   for configuration, reusable by plugins?
+ - clean up MetadataEditor
+ - clean up the translations mess in CMakeLists.txt
+ - create ActionManager singleton to construct and manage actions, so that we can
+   move popup menus into their respective parents, and still be able to use the actions
+ - move away from .ui?
+ - proper config UI for some Phonon effects
+ - make MetadataEditor available from CollectionsView, too
+    - support batch-changes of certain meta data
