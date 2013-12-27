@@ -17,14 +17,42 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Cambridge, MA 02110-1301, USA.
  */
 
-#include "lastfm.h"
+#ifndef LASTFM_AUTH_H
+#define LASTFM_AUTH_H
+
+#include <QtCore/QObject>
+
+class QNetworkReply;
 
 namespace LastFm {
-    namespace Global {
-        QString api_key;
-        QString session_key;
-        QString secret_key;
-        QString token;
-        QString username;
-    }
+
+class Scrobbler;
+
+class Auth : public QObject
+{
+    Q_OBJECT
+
+  public:
+    Auth(LastFm::Scrobbler *scrobbler);
+    ~Auth() {}
+
+  public Q_SLOTS:
+    void getToken();
+    void getSession();
+
+  private Q_SLOTS:
+    void slotGotToken(QNetworkReply *reply);
+    void slotGotSession(QNetworkReply *reply);
+
+  private:
+    LastFm::Scrobbler *m_scrobbler;
+
+  Q_SIGNALS:
+    void gotToken(const QString &token);
+    void gotSession(const QString &key, const QString &username);
+
+};
+
 }
+
+#endif // LASTFM_AUTH_H

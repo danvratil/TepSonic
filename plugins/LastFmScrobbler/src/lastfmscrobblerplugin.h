@@ -32,6 +32,11 @@
 #include <QTranslator>
 #include <QMenu>
 
+namespace LastFm {
+    class Scrobbler;
+    class Auth;
+}
+
 class LastFmScrobblerPlugin : public AbstractPlugin
 {
     Q_OBJECT

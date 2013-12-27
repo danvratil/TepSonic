@@ -20,6 +20,9 @@
 #include "lastfmscrobblerplugin.h"
 #include "constants.h"
 #include "lastfm.h"
+#include "auth.h"
+#include "scrobbler.h"
+#include "track.h"
 #include "playlist/playlistmodel.h"
 #include "player.h"
 
@@ -69,11 +72,10 @@ void LastFmScrobblerPlugin::init()
 {
     QSettings settings(QString(_CONFIGDIR) + QDir::separator() + QLatin1String("lastfmscrobbler.conf"),
                        QSettings::IniFormat, this);
-    QString key = settings.value(QLatin1String("key"), QString()).toString();
-
     LastFm::Global::api_key = QLatin1String("824f0af8fbc9ca2dd16091ad47817988");
     LastFm::Global::secret_key = QLatin1String("15545c2b44b3e3108a73bb0ad4bc23ea");
-    LastFm::Global::session_key = key;
+    LastFm::Global::session_key = settings.value(QLatin1String("key"), QString()).toString();
+    LastFm::Global::token = settings.value(QLatin1String("token"), QString()).toString();
 
     initScrobbler();
 }

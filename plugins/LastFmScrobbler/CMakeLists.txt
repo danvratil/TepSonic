@@ -10,14 +10,13 @@ include_directories(
         ${Qt5Xml_INCLUDE_DIRS}
 )
 
-set(lastfmscrobbler_HDRS
-    src/lastfm.h
-    src/lastfmscrobblerplugin.h
-)
-
 set(lastfmscrobbler_SRCS
     src/lastfm.cpp
     src/lastfmscrobblerplugin.cpp
+    src/auth.cpp
+    src/cache.cpp
+    src/scrobbler.cpp
+    src/track.cpp
 )
 
 set(lastfmscrobbler_QUIS

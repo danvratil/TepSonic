@@ -17,14 +17,47 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Cambridge, MA 02110-1301, USA.
  */
 
-#include "lastfm.h"
+#ifndef LASTFM_CACHE_H
+#define LASTFM_CACHE_H
+
+#include <QObject>
+#include <QVector>
+
+class QNetworkReply;
+class QTimer;
 
 namespace LastFm {
-    namespace Global {
-        QString api_key;
-        QString session_key;
-        QString secret_key;
-        QString token;
-        QString username;
-    }
+
+class Scrobbler;
+class Track;
+
+class Cache : public QObject
+{
+    Q_OBJECT
+
+  public:
+    Cache(LastFm::Scrobbler *scrobbler);
+    ~Cache();
+
+  public Q_SLOTS:
+    void add(LastFm::Track *track);
+    void submit();
+
+  private Q_SLOTS:
+    void submitted(QNetworkReply *reply);
+
+  private:
+    void loadCache();
+
+    QVector<LastFm::Track*> m_cache;
+    LastFm::Scrobbler *m_scrobbler;
+
+    QTimer *m_resubmitTimer;
+
+    // Let's have access to track's private items
+    friend class Track;
+};
+
 }
+
+#endif // LASTFM_CACHE_H
