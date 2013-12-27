@@ -313,7 +313,7 @@ void MainWindow::bindSignals()
 
     // Menu 'Playlist'
     connect(m_ui->actionClear_playlist, &QAction::triggered,
-            m_ui->playlistView, &PlaylistView::clearSelection);
+            m_ui->playlistView, &PlaylistView::clear);
     connect(m_ui->actionSave_playlist, &QAction::triggered,
             this, &MainWindow::savePlaylist);
     connect(m_ui->actionShuffle_playlist, &QAction::triggered,
