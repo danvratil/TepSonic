@@ -45,32 +45,25 @@ class LyricsPlugin : public AbstractPlugin
 
     void init();
 
-    bool setupPane(QWidget *widget, QString &label);
+    bool setupPane(QWidget *widget, const QString &label);
 
   public Q_SLOTS:
     void trackChanged(const Player::MetaData &trackData);
 
-  private:
-    QTranslator *_translator;
-
-    void setError(int err) {};
-
-    LyricsSrollArea *m_scrollArea;
-
-    QLabel *m_label;
-
-    QListWidget *m_listWidget;
-
-    QSplitter *m_splitter;
-
-    QGridLayout *m_layout;
-
   private Q_SLOTS:
     void loadLyrics(const QModelIndex &index);
+    void lyricsInfoRetrieved(QNetworkReply *reply);
+    void lyricsPageRetrieved(QNetworkReply *reply);
 
-    void lyricsInfoRetrieved(QNetworkReply *);
+  private:
+    void setError(int err);
 
-    void lyricsPageRetrieved(QNetworkReply *);
+    QTranslator *m_translator;
+    LyricsSrollArea *m_scrollArea;
+    QLabel *m_label;
+    QListWidget *m_listWidget;
+    QSplitter *m_splitter;
+    QGridLayout *m_layout;
 };
 
 #endif // LYRICS_H

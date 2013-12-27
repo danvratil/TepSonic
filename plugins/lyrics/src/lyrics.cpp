@@ -43,7 +43,7 @@ LyricsPlugin::LyricsPlugin()
     setHasConfigUI(false);
 
     const QString locale = QLocale::system().name();
-    _translator = new QTranslator(this);
+    m_translator = new QTranslator(this);
 
     const QString dataDir = QLatin1String(PKGDATADIR);
     const QString localeDir = dataDir
@@ -51,8 +51,8 @@ LyricsPlugin::LyricsPlugin()
             + QDir::separator() +  QLatin1String("locale")
             + QDir::separator() + QLatin1String("lyricsplugin");
 
-    _translator->load(QLatin1String("lyricsplugin_") + locale, localeDir);
-    qApp->installTranslator(_translator);
+    m_translator->load(QLatin1String("lyricsplugin_") + locale, localeDir);
+    qApp->installTranslator(m_translator);
 
     connect(Player::instance(), SIGNAL(trackChanged(Player::MetaData)),
             this, SLOT(trackChanged(Player::MetaData)));
@@ -108,10 +108,10 @@ void LyricsPlugin::trackChanged(const Player::MetaData &trackData)
 
     QNetworkRequest req(url);
     QNetworkAccessManager *nam = new QNetworkAccessManager();
-    connect(nam, SIGNAL(finished(QNetworkReply*)),
-            this, SLOT(lyricsInfoRetrieved(QNetworkReply*)));
-    connect(nam, SIGNAL(finished(QNetworkReply*)),
-            nam, SLOT(deleteLater()));
+    connect(nam, &QNetworkAccessManager::finished,
+            this, &LyricsPlugin::lyricsInfoRetrieved);
+    connect(nam, &QNetworkAccessManager::finished,
+            nam, &QNetworkAccessManager::deleteLater);
     nam->get(req);
 }
 
@@ -128,10 +128,10 @@ void LyricsPlugin::loadLyrics(const QModelIndex &index)
     const QUrl url(QLatin1String("http://webservices.lyrdb.com/getlyr.php?q=") + trackID);
     QNetworkRequest req(url);
     QNetworkAccessManager *nam = new QNetworkAccessManager();
-    connect(nam, SIGNAL(finished(QNetworkReply*)),
-            this, SLOT(lyricsPageRetrieved(QNetworkReply*)));
-    connect(nam, SIGNAL(finished(QNetworkReply*)),
-            nam, SLOT(deleteLater()));
+    connect(nam, &QNetworkAccessManager::finished,
+            this, &LyricsPlugin::lyricsPageRetrieved);
+    connect(nam, &QNetworkAccessManager::finished,
+            nam, &QNetworkAccessManager::deleteLater);
     nam->get(req);
 }
 
@@ -162,10 +162,10 @@ void LyricsPlugin::lyricsInfoRetrieved(QNetworkReply *reply)
 
         QNetworkRequest req(url);
         QNetworkAccessManager *nam = new QNetworkAccessManager();
-        connect(nam, SIGNAL(finished(QNetworkReply*)),
-                this, SLOT(lyricsInfoRetrieved(QNetworkReply*)));
-        connect(nam, SIGNAL(finished(QNetworkReply*)),
-                nam, SLOT(deleteLater()));
+        connect(nam, &QNetworkAccessManager::finished,
+                this, &LyricsPlugin::lyricsInfoRetrieved);
+        connect(nam, &QNetworkAccessManager::finished,
+                nam, &QNetworkAccessManager::deleteLater);        
         nam->get(req);
     }
 
