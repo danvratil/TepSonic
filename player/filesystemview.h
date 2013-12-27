@@ -17,56 +17,50 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Cambridge, MA 02110-1301, USA.
  */
 
-#ifndef FILESYSTEMBROWSER_H
-#define FILESYSTEMBROWSER_H
+#ifndef FILESYSTEMVIEW_H
+#define FILESYSTEMVIEW_H
 
 #include <QListView>
-#include <QKeyEvent>
-#include <QMenu>
-#include <QStringList>
+#include <QString>
 #include <QModelIndex>
+#include <QStack>
 
-class FileSystemBrowser : public QListView
+class QFileSystemModel;
+class FileSystemView : public QListView
 {
     Q_OBJECT
 
   public:
-    FileSystemBrowser(QWidget *parent = 0);
+    FileSystemView(QWidget *parent = 0);
+    virtual ~FileSystemView();
 
-    void startDrag(Qt::DropActions supportedActions);
+    bool canGoBack() const;
+    bool canGoForward() const;
+    bool canGoUp() const;
 
-    virtual void setModel(QAbstractItemModel *model);
+  public Q_SLOTS:
+    void goBack();
+    void goHome();
+    void goForward();
+    void cdUp();
+    void setPath(const QString &newPath);
+
+  Q_SIGNALS:
+    void pathChanged(const QString &newPath);
+    void trackSelected(const QString &filePath);
 
   protected:
+    void startDrag(Qt::DropActions supportedActions);
     void keyPressEvent(QKeyEvent *event);
 
   private Q_SLOTS:
     void setRootDir(const QModelIndex &dir);
-    void emitAddBookmark();
-
-  public Q_SLOTS:
-    void goBack();
-    void goForward();
-    void goHome();
-    void cdUp();
-    void goToDir(const QString &newPath);
-    void showContextMenu(const QPoint &pos);
 
   private:
 
-    QStringList m_forwardDirs;
-    QStringList m_backDirs;
-    QMenu *m_contextMenu;
-
-  Q_SIGNALS:
-    void pathChanged(const QString &newPath);
-    void addTrackToPlaylist(const QString &filename);
-    void disableForward(bool disable);
-    void disableBack(bool disable);
-    void disableCdUp(bool disable);
-    void addBookmark(const QString &path);
-
-
+    QStack<QString> mBackHistory;
+    QStack<QString> mForwardHistory;
+    QFileSystemModel *mFSModel;
 };
 
 #endif // FILESYSTEMBROWSER_H

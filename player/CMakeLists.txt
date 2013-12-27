@@ -18,7 +18,8 @@ set(player_SRCS settings.cpp
     tools.cpp
     trayicon.cpp
     supportedformats.cpp
-    filesystembrowser.cpp
+    filesystemview.cpp
+    filesystemwidget.cpp
     metadataeditor.cpp
     settings.cpp
     settings/settingspage.cpp
@@ -40,10 +41,6 @@ set(player_SRCS settings.cpp
     playlist/playlistproxymodel.cpp
     playlist/playlistpopulator.cpp
     playlist/playlistwriter.cpp
-    bookmarks/bookmarksbrowser.cpp
-    bookmarks/bookmarksitem.cpp
-    bookmarks/bookmarksmanager.cpp
-    bookmarks/addbookmarkdlg.cpp
 )
 
 set(player_QUIS
@@ -55,7 +52,6 @@ set(player_QUIS
     settings/pluginspage.ui
     settings/shortcutspage.ui
     settings/changeshortcutdialog.ui
-    bookmarks/addbookmarkdlg.ui
 )
 
 set(player_RCCS
@@ -65,7 +61,7 @@ set(player_RCCS
 option(LANGS "Using translations" "")
 if (NOT DEFINED LANGS)
   set (LANGS cs CACHE STRING "Using translations" FORCE)
-  set (LANGUAGES cs)
+  set (LANGUAGES filesystemwidget.cpp cs)
 else (NOT DEFINED LANGS)
   if (NOT LANGS) 
     set (LANGUAGES "")

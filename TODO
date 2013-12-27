@@ -13,11 +13,6 @@
  - clean up and refactor the LastFmScrobbler plugin (const&, etc)
  - lambdas! - clean up the code where possible
  - get rid of TaskManager - implement "tasks" in respective models
- - make BookmarksManager a singleton
- - rename BookmarksBrowser to BookmarksView and move code related to Bookmarks
-   from MainWindow to BookmarksBrowser
- - create FSB widget with all the buttons and input and move there all related logic
-   from MainWindow
  - revisit AbstractPlugin interface - simplify?
  - revisit design of Settings - can we provide a more generic yet equally safe framework
    for configuration, reusable by plugins?

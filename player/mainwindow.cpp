@@ -126,14 +126,6 @@ MainWindow::MainWindow():
         m_ui->viewsTab->setTabEnabled(0, false);
     }
 
-    // Set up filesystem browser
-    m_fileSystemModel = new QFileSystemModel(this);
-    m_fileSystemModel->setRootPath(QDir::rootPath());
-    m_fileSystemModel->setNameFilters(SupportedFormats::extensionsList());
-    m_fileSystemModel->setNameFilterDisables(false);
-    m_ui->filesystemBrowser->setModel(m_fileSystemModel);
-    m_ui->filesystemBrowser->setContextMenuPolicy(Qt::CustomContextMenu);
-
     // Create seek slider and volume slider
     m_ui->seekSlider->setMediaObject(Player::instance()->mediaObject());
     m_ui->volumeSlider->setAudioOutput(Player::instance()->audioOutput());
@@ -255,26 +247,8 @@ void MainWindow::bindSignals()
             this, &MainWindow::showPlaylistContextMenu);
 
     // Filesystem browser
-    connect(m_ui->fsbBackBtn, &QPushButton::clicked,
-            m_ui->filesystemBrowser, &FileSystemBrowser::goBack);
-    connect(m_ui->fsbFwBtn, &QPushButton::clicked,
-            m_ui->filesystemBrowser, &FileSystemBrowser::goForward);
-    connect(m_ui->fsbGoHomeBtn, &QPushButton::clicked,
-            m_ui->filesystemBrowser, &FileSystemBrowser::goHome);
-    connect(m_ui->fsbCdUpBtn, &QPushButton::clicked,
-            m_ui->filesystemBrowser, &FileSystemBrowser::cdUp);
-    connect(m_ui->fsbPath, &QLineEdit::textChanged,
-            m_ui->filesystemBrowser, &FileSystemBrowser::goToDir);
-    connect(m_ui->filesystemBrowser, &FileSystemBrowser::pathChanged,
-            m_ui->fsbPath, &QLineEdit::setText);
-    connect(m_ui->filesystemBrowser, &FileSystemBrowser::addTrackToPlaylist,
-            [=](const QString &file) { TaskManager::instance()->addFileToPlaylist(file); });
-    connect(m_ui->filesystemBrowser, &FileSystemBrowser::disableBack,
-            m_ui->fsbBackBtn, &QWidget::setDisabled);
-    connect(m_ui->filesystemBrowser, &FileSystemBrowser::disableForward,
-            m_ui->fsbFwBtn, &QWidget::setDisabled);
-    connect(m_ui->filesystemBrowser, &FileSystemBrowser::disableCdUp,
-            m_ui->fsbCdUpBtn, &QWidget::setDisabled);
+    connect(m_ui->fsbTab, &FileSystemWidget::trackSelected,
+            [=](const QString &filePath) { TaskManager::instance()->addFileToPlaylist(filePath); });
 
     // Menu 'Player'
     connect(m_ui->actionNext_track, &QAction::triggered,
@@ -590,11 +564,6 @@ void MainWindow::playPause()
 
         player->play();
     }
-}
-
-void MainWindow::addPlaylistItem(const QString &filename)
-{
-    TaskManager::instance()->addFileToPlaylist(filename);
 }
 
 void MainWindow::showPlaylistHeaderContextMenu(const QPoint &pos)

@@ -27,7 +27,6 @@
 #include <QPointer>
 #include <QLabel>
 #include <QKeyEvent>
-#include <QFileSystemModel>
 #include <QSortFilterProxyModel>
 #include <QItemSelectionModel>
 #include <QSystemTrayIcon>
@@ -36,8 +35,6 @@
 #include "player.h"
 
 class DatabaseManager;
-class BookmarksManager;
-class FileSystemModel;
 class MetadataEditor;
 class TrayIcon;
 
@@ -58,7 +55,6 @@ class MainWindow : public QMainWindow
 
   public Q_SLOTS:
     void showError(const QString &error);
-    void addPlaylistItem(const QString &filename);
     void setupPluginsUIs();
 
   Q_SIGNALS:
@@ -104,7 +100,6 @@ class MainWindow : public QMainWindow
 
   private:
     Ui::MainWindow *m_ui;
-    QFileSystemModel *m_fileSystemModel;
     QPointer<MetadataEditor> m_metadataEditor;
 
     QActionGroup *m_randomPlaybackGroup;
