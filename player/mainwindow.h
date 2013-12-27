@@ -22,21 +22,18 @@
 
 #include <QMessageBox>
 #include <QMainWindow>
-#include <QActionGroup>
-#include <QSignalMapper>
 #include <QPointer>
 #include <QLabel>
 #include <QKeyEvent>
 #include <QSortFilterProxyModel>
 #include <QItemSelectionModel>
-#include <QSystemTrayIcon>
-
+#include <QMenu>
 
 #include "player.h"
+#include "actionmanager.h"
 
 class DatabaseManager;
 class MetadataEditor;
-class TrayIcon;
 
 namespace Ui
 {
@@ -56,6 +53,7 @@ class MainWindow : public QMainWindow
   public Q_SLOTS:
     void showError(const QString &error);
     void setupPluginsUIs();
+    void toggleWindowVisible();
 
   Q_SIGNALS:
     void settingsAccepted();
@@ -67,7 +65,6 @@ class MainWindow : public QMainWindow
   private Q_SLOTS:
     void clearCollectionSearch();
     void clearPlaylistSearch();
-    void showPlaylistHeaderContextMenu(const QPoint &pos);
     void savePlaylist();
 
     void playPause();
@@ -78,7 +75,6 @@ class MainWindow : public QMainWindow
     void openSettingsDialog();
     void settingsDialogAccepted();
 
-    void trayClicked(QSystemTrayIcon::ActivationReason reason);
     void reportBug();
     void aboutTepSonic();
 
@@ -86,11 +82,7 @@ class MainWindow : public QMainWindow
     void updatePlayerTrack();
 
     void playlistLengthChanged(int totalLength, int tracksCount);
-    void repeatModeChanged(Player::RepeatMode newMode);
-    void randomModeChanged(bool newMode);
     void playerPosChanged(qint64 newPos);
-
-    void showPlaylistContextMenu(const QPoint &pos);
 
     void showMetadataEditor();
     void metadataEditorAccepted();
@@ -102,21 +94,28 @@ class MainWindow : public QMainWindow
     Ui::MainWindow *m_ui;
     QPointer<MetadataEditor> m_metadataEditor;
 
-    QActionGroup *m_randomPlaybackGroup;
-    QActionGroup *m_repeatPlaybackGroup;
-    TrayIcon *m_trayIcon;
-
-    QMenu *m_trayIconMenu;
-    QMenu *m_collectionsPopupMenu;
-    QMenu *m_playlistPopupMenu;
-    QSignalMapper *m_playlistVisibleColumnContextMenuMapper;
-
-    QIcon *m_appIcon;
     QLabel *m_playlistLengthLabel;
 
     bool m_canClose;
 
     void createMenus();
+
+    template<typename T>
+    void addAction(QMenu *menu, const QString &name, T *receiver, void (T::*method)(void))
+    {
+        QAction *action = ActionManager::instance()->action(name);
+        connect(action, &QAction::triggered, receiver, method);
+        menu->addAction(action);
+    }
+
+    template<typename Functor>
+    void addAction(QMenu *menu, const QString &name, Functor f)
+    {
+        QAction *action = ActionManager::instance()->action(name);
+        connect(action, &QAction::triggered, f);
+        menu->addAction(action);
+    }
+
     void bindShortcuts();
     void bindSignals();
 

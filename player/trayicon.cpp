@@ -19,21 +19,61 @@
 
 #include "trayicon.h"
 #include "player.h"
+#include "mainwindow.h"
 
 #include <QEvent>
+#include <QFileInfo>
 #include <QWheelEvent>
 
 
-TrayIcon::TrayIcon(QObject *parent):
+TrayIcon::TrayIcon(MainWindow *parent):
     QSystemTrayIcon(parent)
 {
+    connect(this, &TrayIcon::activated,
+            [=](QSystemTrayIcon::ActivationReason reason) {
+                if (reason == QSystemTrayIcon::Trigger) {
+                    parent->toggleWindowVisible();
+                }
+            });
+
+    setIcon(QIcon(QStringLiteral(":/icons/mainIcon")));
+    setVisible(true);
+    setContextMenu(ActionManager::instance()->menu(QStringLiteral("TrayIconMenu")));
+    setToolTip(tr("Player is stopped"));
 }
 
-TrayIcon::TrayIcon(const QIcon &icon, QObject* parent):
-    QSystemTrayIcon(parent)
+void TrayIcon::playerStatusChanged(Phonon::State newState, Phonon::State oldState)
 {
-    setIcon(icon);
+    Q_UNUSED(oldState);
+
+    const Player::MetaData metadata = Player::instance()->currentMetaData();
+
+    QString playing;
+    if (metadata.title.isEmpty()) {
+        playing = QFileInfo(metadata.filename).fileName();
+    } else {
+        playing = metadata.title;
+    }
+    if (!metadata.artist.isEmpty()) {
+        playing = metadata.artist + QLatin1String(" - ") + playing;
+    }
+
+    switch (newState) {
+        case Phonon::PlayingState:
+            setToolTip(tr("Playing: ") + playing);
+            break;
+        case Phonon::PausedState:
+            setToolTip(tr("%1 [paused]").arg(toolTip()));
+            break;
+        case Phonon::StoppedState:
+            setToolTip(tr("Player is stopped"));
+            break;
+        default:
+            //...
+            break;
+    }
 }
+
 
 bool TrayIcon::event(QEvent *event)
 {

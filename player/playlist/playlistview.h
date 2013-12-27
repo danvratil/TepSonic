@@ -67,6 +67,8 @@ class PlaylistView : public QTreeView
 
   private Q_SLOTS:
     void slotSortIndicatorChanged(int column, Qt::SortOrder order);
+    void slotHeaderContextMenuRequested(const QPoint &pos);
+    void slotContextMenuRequested(const QPoint &pos);
 
   private:
     void invalidateIndex(const QModelIndex &index);

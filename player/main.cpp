@@ -34,6 +34,7 @@
 #include "taskmanager.h"
 #include "constants.h"
 #include "settings.h"
+#include "trayicon.h"
 
 
 Player *player;
@@ -45,6 +46,7 @@ int main(int argc, char *argv[])
     tepsonic.setApplicationName(QLatin1String("TepSonic"));
     tepsonic.setOrganizationName(QLatin1String("Dan Vrátil"));
     tepsonic.setApplicationVersion(QLatin1String(TEPSONIC_VERSION));
+    tepsonic.setWindowIcon(QIcon(QStringLiteral(":/icons/mainIcon")));
 
     QString locale = QLocale::system().name().left(2);
 
@@ -80,6 +82,8 @@ int main(int argc, char *argv[])
     MainWindow *mainWindow = new MainWindow;
     mainWindow->show();
 
+    TrayIcon *trayIcon = new TrayIcon(mainWindow);
+
     Player *player = Player::instance();
     for (int i=1; i<tepsonic.arguments().count(); i++) {
         qDebug() << tepsonic.arguments().at(i);
@@ -97,6 +101,7 @@ int main(int argc, char *argv[])
 
     int ret = tepsonic.exec();
 
+    delete trayIcon;
     delete mainWindow;
 
     TaskManager::instance()->destroy();

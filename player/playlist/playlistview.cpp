@@ -23,6 +23,7 @@
 #include "playlistitemdelegate.h"
 #include "taskmanager.h"
 #include "tools.h"
+#include "actionmanager.h"
 
 #include <QApplication>
 #include <QDropEvent>
@@ -38,6 +39,7 @@
 #include <QFileInfo>
 #include <QModelIndex>
 #include <QMimeData>
+#include <QMenu>
 
 #ifdef Q_WS_WIN
 #include <cstdlib>
@@ -92,6 +94,10 @@ PlaylistView::PlaylistView(QWidget *parent):
             this, &PlaylistView::setNowPlaying);
     connect(this, &PlaylistView::addedFiles,
             TaskManager::instance(), &TaskManager::addFilesToPlaylist);
+    connect(header(), &QHeaderView::customContextMenuRequested,
+            this, &PlaylistView::slotHeaderContextMenuRequested);
+    connect(this, &PlaylistView::customContextMenuRequested,
+            this, &PlaylistView::slotContextMenuRequested);
 }
 
 PlaylistView::~PlaylistView()
@@ -403,4 +409,22 @@ void PlaylistView::shuffle()
 void PlaylistView::slotSortIndicatorChanged(int column, Qt::SortOrder order)
 {
     model()->sort(column, order);
+}
+
+void PlaylistView::slotHeaderContextMenuRequested(const QPoint &pos)
+{
+    QMenu *menu = ActionManager::instance()->menu(QStringLiteral("PlaylistVisibleColumns"));
+    menu->popup(header()->mapToGlobal(pos));
+}
+
+void PlaylistView::slotContextMenuRequested(const QPoint &pos)
+{
+    QMenu *menu = ActionManager::instance()->menu(QStringLiteral("PlaylistContextMenu"));
+    const bool valid = (currentIndex().isValid() || indexAt(pos).isValid());
+
+    for (int i = 0; i < menu->actions().count(); i++) {
+        menu->actions().at(i)->setEnabled(valid);
+    }
+
+    menu->popup(mapToGlobal(pos));
 }

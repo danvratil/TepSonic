@@ -25,6 +25,7 @@
 
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include "actionmanager.h"
 #include "settings/settingsdialog.h"
 #include "playlist/playlistmodel.h"
 #include "abstractplugin.h"
@@ -34,7 +35,6 @@
 #include "supportedformats.h"
 #include "metadataeditor.h"
 #include "settings.h"
-#include "trayicon.h"
 
 #include <taglib/fileref.h>
 #include <taglib/tag.h>
@@ -50,6 +50,8 @@
 #include <QHeaderView>
 #include <QItemSelectionModel>
 #include <QDateTime>
+#include <QSignalMapper>
+#include <QActionGroup>
 
 #include <phonon/seekslider.h>
 #include <phonon/volumeslider.h>
@@ -71,21 +73,8 @@ MainWindow::MainWindow():
     m_ui = new Ui::MainWindow();
     m_ui->setupUi(this);
 
-    // Set application icon
-    m_appIcon = new QIcon(QLatin1String(":/icons/mainIcon"));
-    QApplication::setWindowIcon(*m_appIcon);
-
     // Create menus
     createMenus();
-
-    // Create tray
-    m_trayIcon = new TrayIcon(*m_appIcon, this);
-    m_trayIcon->setVisible(true);
-    m_trayIcon->setContextMenu(m_trayIconMenu);
-    m_trayIcon->setToolTip(tr("Player is stopped"));
-    connect(m_trayIcon, &TrayIcon::activated,
-            this, &MainWindow::trayClicked);
-
 
     // Create label for displaying playlist length
     m_playlistLengthLabel = new QLabel(this);
@@ -100,14 +89,15 @@ MainWindow::MainWindow():
     // Set playlist browser columns widths and visibility
     const QVariantList playlistColumnsStates = Settings::instance()->playlistColumnsStates();
     const QVariantList playlistColumnsWidths = Settings::instance()->playlistColumnsWidths();
+    QMenu *menu = ActionManager::instance()->menu(QStringLiteral("PlaylistVisibleColumns"));
     for (int i = 0; i < playlistColumnsStates.count() - 1; i++) {
         if (playlistColumnsStates.at(i).toBool()) {
             m_ui->playlistView->showColumn(i);
             m_ui->playlistView->setColumnWidth(i, playlistColumnsWidths.at(i).toInt());
-            m_ui->menuVisible_columns->actions().at(i)->setChecked(true);
+            menu->actions().at(i)->setChecked(true);
         } else {
             m_ui->playlistView->hideColumn(i);
-            m_ui->menuVisible_columns->actions().at(i)->setChecked(false);
+            menu->actions().at(i)->setChecked(false);
         }
     }
 
@@ -133,8 +123,8 @@ MainWindow::MainWindow():
     // Load last playlist
     if (Settings::instance()->sessionRestore()) {
         TaskManager::instance()->addFileToPlaylist(QString(_CONFIGDIR).append(QLatin1String("/last.m3u")));
-        randomModeChanged(Settings::instance()->playerRandomMode());
-        repeatModeChanged(static_cast<Player::RepeatMode>(Settings::instance()->playerRepeatMode()));
+        Player::instance()->setRandomMode(Settings::instance()->playerRandomMode());
+        Player::instance()->setRepeatMode(static_cast<Player::RepeatMode>(Settings::instance()->playerRepeatMode()));
     }
 
    // At the very end bind all signals and slots
@@ -167,43 +157,74 @@ MainWindow::~MainWindow()
     // Save current playlist to file
     TaskManager::instance()->savePlaylistToFile(QString(_CONFIGDIR).append(QLatin1String("/last.m3u")));
 
-    delete m_appIcon;
     delete m_ui;
 }
 
 void MainWindow::createMenus()
 {
-    // Create 'Random mode' submenu
-    m_randomPlaybackGroup = new QActionGroup(this);
-    m_randomPlaybackGroup->addAction(m_ui->actionRandom_ON);
-    m_randomPlaybackGroup->addAction(m_ui->actionRandom_OFF);
+    addAction(m_ui->menuTepSonic, QStringLiteral("Settings"),
+              this, &MainWindow::openSettingsDialog);
+    m_ui->menuTepSonic->addSeparator();
+    addAction(m_ui->menuTepSonic, QStringLiteral("ToggleWindow"),
+              this, &MainWindow::toggleWindowVisible);
+    m_ui->menuTepSonic->addSeparator();
+    addAction(m_ui->menuTepSonic, QStringLiteral("Quit"),
+              [=]() { m_canClose = true; close(); });
 
-    // Create 'Repeat mode' submenu
-    m_repeatPlaybackGroup = new QActionGroup(this);
-    m_repeatPlaybackGroup->addAction(m_ui->actionRepeat_OFF);
-    m_repeatPlaybackGroup->addAction(m_ui->actionRepeat_playlist);
-    m_repeatPlaybackGroup->addAction(m_ui->actionRepeat_track);
-    m_ui->actionRepeat_OFF->setChecked(true);
+    addAction(m_ui->menuPlaylist, QStringLiteral("PlaylistClear"),
+              m_ui->playlistView, &PlaylistView::clear);
+    addAction(m_ui->menuPlaylist, QStringLiteral("PlaylistShuffle"),
+              m_ui->playlistView, &PlaylistView::shuffle);
+    m_ui->menuPlaylist->addSeparator();
+    addAction(m_ui->menuPlaylist, QStringLiteral("PlaylistSave"),
+              this, &MainWindow::savePlaylist);
 
-    // Create tray menu
-    m_trayIconMenu = new QMenu(this);
-    m_trayIconMenu->addAction(m_ui->actionShow_Hide);
-    m_trayIconMenu->addSeparator();
-    m_trayIconMenu->addAction(m_ui->actionPrevious_track);
-    m_trayIconMenu->addAction(m_ui->actionPlay_pause);
-    m_trayIconMenu->addAction(m_ui->actionStop);
-    m_trayIconMenu->addAction(m_ui->actionNext_track);
-    m_trayIconMenu->addSeparator();
-    m_trayIconMenu->addMenu(m_ui->menuRepeat);
-    m_trayIconMenu->addMenu(m_ui->menuRandom);
-    m_trayIconMenu->addSeparator();
-    m_trayIconMenu->addAction(m_ui->actionQuit_TepSonic);
+    QSignalMapper *signalMapper = new QSignalMapper(this);
+    connect(signalMapper, static_cast<void (QSignalMapper::*)(int)>(&QSignalMapper::mapped),
+            [=](int column) { m_ui->playlistView->setColumnHidden(column, (!m_ui->playlistView->isColumnHidden(column))); });
+    QMenu *menu = m_ui->menuPlaylist->addMenu(tr("&Visible Columns"));
+    for (int i = 0; i < m_ui->playlistView->header()->count(); ++i) {
+        QAction *action = ActionManager::instance()->addAction(
+                QString::fromLatin1("Column%1").arg(i),
+                m_ui->playlistView->model()->headerData(i, Qt::Horizontal).toString());
+        action->setCheckable(true);
+        connect(action, &QAction::triggered,
+                signalMapper, static_cast<void (QSignalMapper::*)(void)>(&QSignalMapper::map));
+        signalMapper->setMapping(action, i);
+        menu->addAction(action);
+    }
+    ActionManager::instance()->addMenu(QStringLiteral("PlaylistVisibleColumns"), menu);
 
-    // Create playlist popup menu
-    m_playlistPopupMenu = new QMenu(this);
-    m_playlistPopupMenu->addAction(tr("&Stop after this track"), this, SLOT(setStopTrackClicked()));
-    m_playlistPopupMenu->addAction(tr("&Edit metadata"), this, SLOT(showMetadataEditor()));
-    m_ui->playlistView->setContextMenuPolicy(Qt::CustomContextMenu);
+    addAction(m_ui->menuPlayer, QStringLiteral("PlayerPreviousTrack"),
+              m_ui->playlistView, &PlaylistView::selectNextTrack);
+    addAction(m_ui->menuPlayer, QStringLiteral("PlayerPlayPause"),
+              m_ui->playlistView, &PlaylistView::selectPreviousTrack);
+    addAction(m_ui->menuPlayer, QStringLiteral("PlayerStop"),
+              this, &MainWindow::playPause);
+    addAction(m_ui->menuPlayer, QStringLiteral("PlayerNextTrack"),
+              Player::instance(), &Player::stop);
+    m_ui->menuPlayer->addSeparator();
+    m_ui->menuPlayer->addMenu(ActionManager::instance()->menu(QStringLiteral("PlayerRandomSubmenu")));
+    m_ui->menuPlayer->addMenu(ActionManager::instance()->menu(QStringLiteral("PlayerRepeatSubmenu")));
+    ActionManager::instance()->action(QStringLiteral("PlayerRandomOn"))->setChecked(true);
+    ActionManager::instance()->action(QStringLiteral("PlayerRepeatOff"))->setChecked(true);
+
+    addAction(m_ui->menuHelp, QStringLiteral("AboutTepSonic"),
+              this, &MainWindow::aboutTepSonic);
+    addAction(m_ui->menuHelp, QStringLiteral("AboutQt"),
+              [=]() { QMessageBox::aboutQt(this, tr("About Qt")); });
+    m_ui->menuHelp->addSeparator();
+    addAction(m_ui->menuHelp, QStringLiteral("SupportedFormats"),
+              this, &MainWindow::showSupportedFormats);
+    m_ui->menuHelp->addSeparator();
+    addAction(m_ui->menuHelp, QStringLiteral("ReportBug"),
+              this, &MainWindow::reportBug);
+
+    // FIXME: Move the entire metadata handling to PlaylistView, including this piece of code
+    menu = new QMenu(this);
+    menu->addAction(tr("&Stop after this track"), this, SLOT(setStopTrackClicked()));
+    menu->addAction(tr("&Edit metadata"), this, SLOT(showMetadataEditor()));
+    ActionManager::instance()->addMenu(QStringLiteral("PlaylistContextMenu"), menu);
 }
 
 void MainWindow::bindShortcuts()
@@ -231,7 +252,7 @@ void MainWindow::bindShortcuts()
     QxtGlobalShortcut *sc5 = new QxtGlobalShortcut(this);
     sc5->setShortcut(QKeySequence::fromString(Settings::instance()->shortcutToggleWindow()));
     connect(sc5, &QxtGlobalShortcut::activated,
-            [=]() { trayClicked(QSystemTrayIcon::Trigger); });
+            this, &MainWindow::toggleWindowVisible);
 }
 
 void MainWindow::bindSignals()
@@ -239,129 +260,37 @@ void MainWindow::bindSignals()
     // Playlist stuff
     connect(m_ui->clearPlaylistSearch, &QPushButton::clicked,
             [=]() { clearPlaylistSearch(); });
-    connect(m_ui->playlistView->header(), &QHeaderView::customContextMenuRequested,
-            this, &MainWindow::showPlaylistHeaderContextMenu);
     connect(m_ui->playlistSearchEdit, &QLineEdit::textChanged,
             m_ui->playlistView, &PlaylistView::setFilter);
-    connect(m_ui->playlistView, &PlaylistView::customContextMenuRequested,
-            this, &MainWindow::showPlaylistContextMenu);
 
     // Filesystem browser
     connect(m_ui->fsbTab, &FileSystemWidget::trackSelected,
             [=](const QString &filePath) { TaskManager::instance()->addFileToPlaylist(filePath); });
-
-    // Menu 'Player'
-    connect(m_ui->actionNext_track, &QAction::triggered,
-            m_ui->playlistView, &PlaylistView::selectNextTrack);
-    connect(m_ui->actionPrevious_track, &QAction::triggered,
-            m_ui->playlistView, &PlaylistView::selectPreviousTrack);
-    connect(m_ui->actionPlay_pause, &QAction::triggered,
-            this, &MainWindow::playPause);
-    connect(m_ui->actionStop, &QAction::triggered,
-            Player::instance(), &Player::stop);
-
-    // Menu 'Player -> Repeat mode'
-    connect(m_ui->actionRepeat_OFF, &QAction::triggered,
-            [=]() { Player::instance()->setRepeatMode(Player::RepeatOff); });
-    connect(m_ui->actionRepeat_playlist, &QAction::triggered,
-            [=]() { Player::instance()->setRepeatMode(Player::RepeatAll); });
-    connect(m_ui->actionRepeat_track, &QAction::triggered,
-            [=]() { Player::instance()->setRepeatMode(Player::Player::RepeatTrack); });
-
-    // Menu 'Player -> Random mode'
-    connect(m_ui->actionRandom_ON, &QAction::triggered,
-            [=]() { Player::instance()->setRandomMode(true); });
-    connect(m_ui->actionRandom_OFF, &QAction::triggered,
-            [=]() { Player::instance()->setRandomMode(false); });
-
-    // Menu 'Playlist'
-    connect(m_ui->actionClear_playlist, &QAction::triggered,
-            m_ui->playlistView, &PlaylistView::clear);
-    connect(m_ui->actionSave_playlist, &QAction::triggered,
-            this, &MainWindow::savePlaylist);
-    connect(m_ui->actionShuffle_playlist, &QAction::triggered,
-            m_ui->playlistView, &PlaylistView::shuffle);
-
-    // Menu 'TepSonic'
-    connect(m_ui->actionSettings, &QAction::triggered,
-            this, &MainWindow::openSettingsDialog);
-    connect(m_ui->actionShow_Hide, &QAction::triggered,
-            [=]() { trayClicked(QSystemTrayIcon::Trigger); });
-    connect(m_ui->actionQuit_TepSonic, &QAction::triggered,
-            [=]() { m_canClose = true; close(); });
-
-    // Menu 'Help
-    connect(m_ui->actionReport_a_bug, &QAction::triggered,
-            this, &MainWindow::reportBug);
-    connect(m_ui->actionAbout_TepSonic, &QAction::triggered,
-            this, &MainWindow::aboutTepSonic);
-    connect(m_ui->actionAbout_Qt, &QAction::triggered,
-            [=]() { QMessageBox::aboutQt(this, tr("About Qt")); });
-    connect(m_ui->actionSupported_formats, &QAction::triggered,
-            this, &MainWindow::showSupportedFormats);
 
     // Player object
     connect(Player::instance(), static_cast<void (Player::*)()>(&Player::trackFinished),
             this, &MainWindow::updatePlayerTrack);
     connect(Player::instance(), &Player::stateChanged,
             this, &MainWindow::playerStatusChanged);
-    connect(Player::instance(), &Player::repeatModeChanged,
-            this, &MainWindow::repeatModeChanged);
-    connect(Player::instance(), &Player::randomModeChanged,
-            this, &MainWindow::randomModeChanged);
     connect(Player::instance(), &Player::trackPositionChanged,
             this, &MainWindow::playerPosChanged);
 
     // Connect UI buttons to their equivalents in the main menu
     connect(m_ui->clearPlaylistButton, &QPushButton::clicked,
-            m_ui->actionClear_playlist, &QAction::trigger);
+            ActionManager::instance()->action(QStringLiteral("PlaylistClear")), &QAction::trigger);
     connect(m_ui->previousTrackButton, &QPushButton::clicked,
-            m_ui->actionPrevious_track, &QAction::trigger);
+            ActionManager::instance()->action(QStringLiteral("PlayerPreviousTrack")), &QAction::trigger);
     connect(m_ui->playPauseButton, &QPushButton::clicked,
-            m_ui->actionPlay_pause, &QAction::trigger);
+            ActionManager::instance()->action(QStringLiteral("PlayerPlayPause")), &QAction::trigger);
     connect(m_ui->stopButton, &QPushButton::clicked,
-            m_ui->actionStop, &QAction::trigger);
+            ActionManager::instance()->action(QStringLiteral("PlayerStop")), &QAction::trigger);
     connect(m_ui->nextTrackButton, &QPushButton::clicked,
-            m_ui->actionNext_track, &QAction::trigger);
+            ActionManager::instance()->action(QStringLiteral("PlayerNextTrack")), &QAction::trigger);
     connect(m_ui->shufflePlaylistButton, &QPushButton::clicked,
-            m_ui->actionShuffle_playlist, &QAction::trigger);
+            ActionManager::instance()->action(QStringLiteral("PlaylistShuffle")), &QAction::trigger);
 
 
-    // Connect individual PlaylistBrowser columns' visibility state with QActions in ui->menuVisiblem_columns
-    m_playlistVisibleColumnContextMenuMapper = new QSignalMapper(this);
-    connect(m_ui->actionFilename, &QAction::toggled,
-            [=](bool) { m_playlistVisibleColumnContextMenuMapper->map(); });
-    connect(m_ui->actionTrack, &QAction::toggled,
-            [=](bool) { m_playlistVisibleColumnContextMenuMapper->map(); });
-    connect(m_ui->actionInterpret, &QAction::toggled,
-            [=](bool) { m_playlistVisibleColumnContextMenuMapper->map(); });
-    connect(m_ui->actionTrackname, &QAction::toggled,
-            [=](bool) { m_playlistVisibleColumnContextMenuMapper->map(); });
-    connect(m_ui->actionAlbum, &QAction::toggled,
-            [=](bool) { m_playlistVisibleColumnContextMenuMapper->map(); });
-    connect(m_ui->actionGenre, &QAction::toggled,
-            [=](bool) { m_playlistVisibleColumnContextMenuMapper->map(); });
-    connect(m_ui->actionYear, &QAction::toggled,
-            [=](bool) { m_playlistVisibleColumnContextMenuMapper->map(); });
-    connect(m_ui->actionLength, &QAction::toggled,
-            [=](bool) { m_playlistVisibleColumnContextMenuMapper->map(); });
-    connect(m_ui->actionBitrate, &QAction::toggled,
-            [=](bool) { m_playlistVisibleColumnContextMenuMapper->map(); });
-    connect(m_playlistVisibleColumnContextMenuMapper, static_cast<void (QSignalMapper::*)(int)>(&QSignalMapper::mapped),
-            [=](int column) { m_ui->playlistView->setColumnHidden(column, (! m_ui->playlistView->isColumnHidden(column))); });
-
-    // Map an identifier to each caller
-    m_playlistVisibleColumnContextMenuMapper->setMapping(m_ui->actionFilename, PlaylistModel::FilenameColumn);
-    m_playlistVisibleColumnContextMenuMapper->setMapping(m_ui->actionTrack, PlaylistModel::TrackColumn);
-    m_playlistVisibleColumnContextMenuMapper->setMapping(m_ui->actionInterpret, PlaylistModel::InterpretColumn);
-    m_playlistVisibleColumnContextMenuMapper->setMapping(m_ui->actionTrackname, PlaylistModel::TracknameColumn);
-    m_playlistVisibleColumnContextMenuMapper->setMapping(m_ui->actionAlbum, PlaylistModel::AlbumColumn);
-    m_playlistVisibleColumnContextMenuMapper->setMapping(m_ui->actionGenre, PlaylistModel::GenreColumn);
-    m_playlistVisibleColumnContextMenuMapper->setMapping(m_ui->actionYear, PlaylistModel::YearColumn);
-    m_playlistVisibleColumnContextMenuMapper->setMapping(m_ui->actionLength, PlaylistModel::LengthColumn);
-    m_playlistVisibleColumnContextMenuMapper->setMapping(m_ui->actionBitrate, PlaylistModel::BitrateColumn);
-
-    // Plugins
+    //Plugins
     connect(PluginsManager::instance(), &PluginsManager::pluginsLoaded,
             this, &MainWindow::setupPluginsUIs);
     connect(this, &MainWindow::settingsAccepted,
@@ -372,11 +301,20 @@ void MainWindow::setupPluginsUIs()
 {
     PluginsManager *manager = PluginsManager::instance();
     // Let plugins install their menus
-    manager->installMenus(m_trayIconMenu, AbstractPlugin::TrayMenu);
-    manager->installMenus(m_playlistPopupMenu, AbstractPlugin::PlaylistPopup);
+    manager->installMenus(ActionManager::instance()->menu(QStringLiteral("TrayIconMenu")), AbstractPlugin::TrayMenu);
+    manager->installMenus(ActionManager::instance()->menu(QStringLiteral("PlaylistContextMenu")), AbstractPlugin::PlaylistPopup);
 
     // Let plugins install their tabs
     manager->installPanes(m_ui->mainTabWidget);
+}
+
+void MainWindow::toggleWindowVisible()
+{
+    if (isVisible()) {
+        hide();
+    } else {
+        show();
+    }
 }
 
 void MainWindow::changeEvent(QEvent *e)
@@ -432,21 +370,10 @@ void MainWindow::reportBug()
     QDesktopServices::openUrl(QUrl(QLatin1String("https://github.com/danvratil/TepSonic/issues"), QUrl::TolerantMode));
 }
 
-void MainWindow::trayClicked(QSystemTrayIcon::ActivationReason reason)
-{
-    if (reason == QSystemTrayIcon::Trigger) {
-        if (this->isHidden()) {
-            this->show();
-        } else {
-            this->hide();
-        }
-    }
-}
-
 void MainWindow::closeEvent(QCloseEvent *event)
 {
     // If tray icon is visible then hide the window and ignore this event
-    if (m_trayIcon->isVisible() && (m_canClose == false)) {
+    if (!m_canClose) {
         this->hide();
         event->ignore();
     }
@@ -513,29 +440,26 @@ void MainWindow::playerStatusChanged(Phonon::State newState, Phonon::State oldSt
     switch (newState) {
     case Phonon::PlayingState:
         m_ui->playPauseButton->setIcon(QIcon(QLatin1String(":/icons/pause")));
-        m_ui->actionPlay_pause->setIcon(QIcon(QLatin1String(":/icons/pause")));
+        ActionManager::instance()->action(QStringLiteral("PlayerPlayPause"))->setIcon(QIcon(QLatin1String(":/icons/pause")));
         m_ui->stopButton->setEnabled(true);
-        m_ui->actionStop->setEnabled(true);
+        ActionManager::instance()->action(QStringLiteral("PlayerStop"))->setEnabled(true);
         m_ui->trackTitleLabel->setText(playing);
         m_ui->playbackTimeLabel->setText(QLatin1String("00:00:00"));
-        m_trayIcon->setToolTip(tr("Playing: ") + playing);
         break;
     case Phonon::PausedState:
         m_ui->playPauseButton->setIcon(QIcon(QLatin1String(":/icons/start")));
-        m_ui->actionPlay_pause->setIcon(QIcon(QLatin1String(":/icons/start")));
+        ActionManager::instance()->action(QStringLiteral("PlayerPlayPause"))->setIcon(QIcon(QLatin1String(":/icons/start")));
         m_ui->stopButton->setEnabled(true);
-        m_ui->actionStop->setEnabled(true);
+        ActionManager::instance()->action(QStringLiteral("PlayerStop"))->setEnabled(true);
         m_ui->trackTitleLabel->setText(tr("%1 [paused]").arg(m_ui->trackTitleLabel->text()));
-        m_trayIcon->setToolTip(tr("%1 [paused]").arg(m_trayIcon->toolTip()));
         break;
     case Phonon::StoppedState:
         m_ui->playPauseButton->setIcon(QIcon(QLatin1String(":/icons/start")));
-        m_ui->actionPlay_pause->setIcon(QIcon(QLatin1String(":/icons/start")));
+        ActionManager::instance()->action(QStringLiteral("PlayerPlayPause"))->setIcon(QIcon(QLatin1String(":/icons/start")));
         m_ui->stopButton->setEnabled(false);
-        m_ui->actionStop->setEnabled(false);
+        ActionManager::instance()->action(QStringLiteral("PlayerStop"))->setEnabled(false);
         m_ui->trackTitleLabel->setText(tr("Player is stopped"));
         m_ui->playbackTimeLabel->setText(tr("Stopped"));
-        m_trayIcon->setToolTip(tr("Player is stopped"));
         break;
     case Phonon::ErrorState:
         m_ui->statusBar->showMessage(Player::instance()->errorString(), 5000);
@@ -564,11 +488,6 @@ void MainWindow::playPause()
 
         player->play();
     }
-}
-
-void MainWindow::showPlaylistHeaderContextMenu(const QPoint &pos)
-{
-    m_ui->menuVisible_columns->popup(m_ui->playlistView->header()->mapToGlobal(pos));
 }
 
 void MainWindow::savePlaylist()
@@ -602,45 +521,9 @@ void MainWindow::showError(const QString &error)
     m_ui->statusBar->showMessage(error, 5000);
 }
 
-void MainWindow::repeatModeChanged(Player::RepeatMode newMode)
-{
-    switch (newMode) {
-    case Player::RepeatOff:
-        m_ui->actionRepeat_OFF->setChecked(true);
-        break;
-    case Player::RepeatTrack:
-        m_ui->actionRepeat_track->setChecked(true);
-        break;
-    case Player::RepeatAll:
-        m_ui->actionRepeat_playlist->setChecked(true);
-        break;
-    }
-}
-
-void MainWindow::randomModeChanged(bool newMode)
-{
-    if (newMode == true) {
-        m_ui->actionRandom_ON->setChecked(true);
-    } else {
-        m_ui->actionRandom_OFF->setChecked(true);
-    }
-}
-
 void MainWindow::playerPosChanged(qint64 newPos)
 {
     m_ui->playbackTimeLabel->setText(formatMilliseconds(newPos, true));
-}
-
-void MainWindow::showPlaylistContextMenu(const QPoint &pos)
-{
-    const bool valid = (m_ui->playlistView->currentIndex().isValid() ||
-                  m_ui->playlistView->indexAt(pos).isValid());
-
-    for (int i = 0; i < m_playlistPopupMenu->actions().count(); i++) {
-        m_playlistPopupMenu->actions().at(i)->setEnabled(valid);
-    }
-
-    m_playlistPopupMenu->popup(m_ui->playlistView->mapToGlobal(pos));
 }
 
 void MainWindow::setupCollections()

@@ -5,7 +5,9 @@ include_directories(bookmarks
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/constants.h.cmake
                ${CMAKE_CURRENT_BINARY_DIR}/constants.h)
 
-set(player_SRCS settings.cpp
+set(player_SRCS
+    actionmanager.cpp
+    settings.cpp
     main.cpp
     constants.cpp
     mainwindow.cpp

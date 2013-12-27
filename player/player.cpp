@@ -18,12 +18,14 @@
  */
 
 #include "player.h"
+#include "actionmanager.h"
 #include "constants.h"
 
 #include <QtCore/QSettings>
 
 #include <QFileInfo>
 #include <QStringList>
+#include <QAction>
 #include <phonon/mediaobject.h>
 #include <phonon/path.h>
 #include <phonon/audiooutput.h>
@@ -104,6 +106,13 @@ void Player::setRandomMode(bool randomMode)
 {
     if (m_randomMode != randomMode) {
         m_randomMode = randomMode;
+        QString action;
+        if (m_randomMode) {
+            action = QStringLiteral("PlayerRandomOn");
+        } else {
+            action = QStringLiteral("PlayerRandomOff");
+        }
+        ActionManager::instance()->action(action)->setChecked(true);
         Q_EMIT randomModeChanged(randomMode);
     }
 }
@@ -112,6 +121,19 @@ void Player::setRepeatMode(RepeatMode repeatMode)
 {
     if (m_repeatMode != repeatMode) {
         m_repeatMode = repeatMode;
+        QString action;
+        switch (m_repeatMode) {
+            case RepeatAll:
+                action = QStringLiteral("PlayerRepeatAll");
+                break;
+            case Player::RepeatTrack:
+                action = QStringLiteral("PlayerRepeatTrack");
+                break;
+            case Player::RepeatOff:
+                action = QStringLiteral("PlayerRepeatOff");
+                break;
+        }
+        ActionManager::instance()->action(action)->setChecked(true);
         Q_EMIT repeatModeChanged(repeatMode);
     }
 }

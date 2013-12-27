@@ -22,13 +22,19 @@
 
 #include <QSystemTrayIcon>
 
+#include "player.h"
+
+class MainWindow;
+
 class TrayIcon : public QSystemTrayIcon
 {
     Q_OBJECT
 
   public:
-    TrayIcon(QObject *parent = 0);
-    TrayIcon(const QIcon &icon, QObject *parent = 0);
+    TrayIcon(MainWindow *parent);
+
+  private Q_SLOTS:
+    void playerStatusChanged(Phonon::State newState, Phonon::State oldState);
 
   protected:
     bool event(QEvent *event);

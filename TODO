@@ -18,8 +18,6 @@
    for configuration, reusable by plugins?
  - clean up MetadataEditor
  - clean up the translations mess in CMakeLists.txt
- - create ActionManager singleton to construct and manage actions, so that we can
-   move popup menus into their respective parents, and still be able to use the actions
  - move away from .ui?
  - proper config UI for some Phonon effects
  - make MetadataEditor available from CollectionsView, too
