@@ -6,6 +6,7 @@ add_definitions(-DQT_PLUGIN -DQT_SHARED)
 include_directories(
         ${Qt5Network_INCLUDE_DIRS}
         ${Qt5Xml_INCLUDE_DIRS}
+        ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
 set(lyricsplugin_HDRS
@@ -74,7 +75,4 @@ install(TARGETS tepsonic_lyricsplugin
 )
 install(FILES ${TRANSLATIONS_BINARY}
         DESTINATION ${INSTALL_DATA_DIR}/tepsonic/locale/
-)
-install(FILES lyrics.desktop
-        DESTINATION ${INSTALL_DATA_DIR}/tepsonic/plugins/
 )

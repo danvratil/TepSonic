@@ -1,0 +1,16 @@
+{
+    "id": "mpris2",
+    "name": {
+        "en": "MPRIS2 Plugin"
+    },
+    "description": {
+        "en":  "Enables MPRIS2 interface"
+    },
+    "author": {
+        "name": "Daniel Vrátil",
+        "email": "dan@progdan.cz"
+    },
+    "version": "1.0",
+    "enabledByDefault": true,
+    "hasConfigUI": false
+}

@@ -19,50 +19,18 @@
 
 #include "abstractplugin.h"
 
-class AbstractPlugin::Private
-{
-  public:
-    bool hasConfigUi;
-    QString pluginName;
-};
-
 AbstractPlugin::AbstractPlugin(QObject *parent):
-    QObject(parent),
-    d(new Private)
+    QObject(parent)
 {
-    d->hasConfigUi = false;
 }
 
 AbstractPlugin::~AbstractPlugin()
 {
-    delete d;
-}
-
-bool AbstractPlugin::hasConfigUI() const
-{
-    return d->hasConfigUi;
-}
-
-void AbstractPlugin::setHasConfigUI(bool hasConfigUi)
-{
-    d->hasConfigUi = hasConfigUi;
 }
 
 void AbstractPlugin::configUI(QWidget *parentWidget)
 {
-    Q_ASSERT(!d->hasConfigUi);
-
     Q_UNUSED(parentWidget);
-}
-
-QString AbstractPlugin::pluginName() const
-{
-    return d->pluginName;
-}
-
-void AbstractPlugin::setPluginName(const QString &pluginName)
-{
-    d->pluginName = pluginName;
 }
 
 void AbstractPlugin::settingsAccepted()

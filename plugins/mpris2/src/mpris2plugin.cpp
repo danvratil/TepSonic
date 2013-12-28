@@ -31,7 +31,6 @@
 
 MPRIS2Plugin::MPRIS2Plugin()
 {
-    setHasConfigUI(false);
 }
 
 MPRIS2Plugin::~MPRIS2Plugin()

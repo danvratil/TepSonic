@@ -43,9 +43,6 @@ LastFmScrobblerPlugin::LastFmScrobblerPlugin():
     m_scrobbler(0),
     m_auth(0)
 {
-    setHasConfigUI(true);
-    setPluginName(tr("Last.fm plugin"));
-
     QString locale = QLocale::system().name();
     m_translator = new QTranslator(this);
 

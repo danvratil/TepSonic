@@ -5,6 +5,7 @@ find_package(Qt5Network REQUIRED)
 add_definitions(-DQT_PLUGIN -DQT_SHARED)
 
 include_directories(
+        ${CMAKE_CURRENT_SOURCE_DIR}
         ${CMAKE_CURRENT_BINARY_DIR}
         ${Qt5Network_INCLUDE_DIRS}
         ${Qt5Xml_INCLUDE_DIRS}
@@ -85,7 +86,4 @@ install(TARGETS tepsonic_lastfmscrobbler
 )
 install(FILES ${TRANSLATIONS_BINARY}
         DESTINATION ${INSTALL_DATA_DIR}/tepsonic/locale/
-)
-install(FILES lastfmscrobbler.desktop
-        DESTINATION ${INSTALL_DATA_DIR}/tepsonic/plugins/
 )

@@ -1,0 +1,16 @@
+{
+    "id": "lastfm",
+    "name": {
+        "en": "Last.fm plugin"
+    },
+    "description": {
+        "en": "Automatically submits tracks to Last.Fm"
+    },
+    "author": {
+        "name": "Daniel Vrátil",
+        "email": "dan@progdan.cz"
+    },
+    "version": "1.0",
+    "enabledByDefault": false,
+    "hasConfigUI": true
+}

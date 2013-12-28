@@ -44,11 +44,6 @@ class AbstractPlugin : public QObject
     virtual void quit();
 
     virtual void configUI(QWidget *parentWidget);
-    bool hasConfigUI() const;
-    void setHasConfigUI(bool hasConfigUi);
-
-    void setPluginName(const QString &pluginName);
-    QString pluginName() const;
 
     virtual void setupMenu(QMenu *menu, AbstractPlugin::MenuTypes menuType);
     virtual bool setupPane(QWidget *widget, QString &label);
@@ -64,8 +59,6 @@ class AbstractPlugin : public QObject
 
   private:
     class Private;
-    Private * const d;
-    friend class Private;
     friend class PluginsManager;
 };
 

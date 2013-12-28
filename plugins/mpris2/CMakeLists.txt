@@ -2,6 +2,7 @@ find_package(Qt5DBus REQUIRED)
 
 include_directories(
     ${Qt5DBus_INCLUDE_DIRS}
+    ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
 add_definitions(-DQT_PLUGIN -DQT_SHARED)
@@ -38,7 +39,4 @@ set_target_properties(tepsonic_mpris2plugin
 )
 install(TARGETS tepsonic_mpris2plugin
         DESTINATION ${INSTALL_LIBRARY_DIR}/
-)
-install(FILES mpris2.desktop
-        DESTINATION ${INSTALL_DATA_DIR}/tepsonic/plugins/
 )

@@ -40,8 +40,6 @@
 
 LyricsPlugin::LyricsPlugin()
 {
-    setHasConfigUI(false);
-
     const QString locale = QLocale::system().name();
     m_translator = new QTranslator(this);
 

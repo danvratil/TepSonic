@@ -40,7 +40,8 @@ namespace LastFm {
 class LastFmScrobblerPlugin : public AbstractPlugin
 {
     Q_OBJECT
-    Q_PLUGIN_METADATA(IID "cz.progdan.tepsonic.plugins.LastFmScrobbler")
+    Q_PLUGIN_METADATA(IID "cz.progdan.tepsonic.plugins.LastFmScrobbler"
+                      FILE "LastFmScrobbler.json")
 
   public:
     explicit LastFmScrobblerPlugin();
