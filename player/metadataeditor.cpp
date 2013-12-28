@@ -93,5 +93,7 @@ void MetadataEditor::setFilename(const QString &filename)
 
 void MetadataEditor::resizeEvent(QResizeEvent *e)
 {
+    Q_UNUSED(e);
+
     m_ui->box->setTitle(fontMetrics().elidedText(m_filename, Qt::ElideMiddle, m_ui->box->width()));
 }

@@ -111,6 +111,7 @@ QVariant PlaylistModel::data(const QModelIndex &index, int role) const
 
 bool PlaylistModel::setData(const QModelIndex &index, const QVariant &value, int role)
 {
+    Q_UNUSED(role);
     Q_ASSERT(index.model() == this);
 
     Node *node = m_items.at(index.row());
