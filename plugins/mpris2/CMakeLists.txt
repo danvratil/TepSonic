@@ -38,5 +38,5 @@ set_target_properties(tepsonic_mpris2plugin
                 SOVERSION 1
 )
 install(TARGETS tepsonic_mpris2plugin
-        DESTINATION ${INSTALL_LIBRARY_DIR}/
+        DESTINATION ${INSTALL_PLUGINS_DIR}/tepsonic/
 )

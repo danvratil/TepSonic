@@ -48,8 +48,6 @@ PluginsManager::Plugin::~Plugin()
     }
 }
 
-
-
 PluginsManager* PluginsManager::s_instance = 0;
 
 PluginsManager *PluginsManager::instance()
@@ -79,69 +77,82 @@ PluginsManager::~PluginsManager()
 void PluginsManager::loadPlugins()
 {
     const QStringList enabledPlugins = Settings::instance()->enabledPlugins();
-    QDir pluginsDir(QLatin1String(PKGDATADIR) + QDir::separator() + QLatin1String("tepsonic") + QDir::separator() + QLatin1String("plugins"));
 
-    // Temporary list to avoid duplicate loading of plugins
-    pluginsDir.setNameFilters(QStringList() << QLatin1String("*.desktop"));
-    pluginsDir.setFilter(QDir::Files | QDir::NoSymLinks);
+    QList<QByteArray> pluginsDirs;
+    pluginsDirs << qgetenv("QT_PLUGIN_PATH").split(':');
+    pluginsDirs << QByteArray(LIBDIR) + "/qt/plugins";
+    pluginsDirs << QByteArray(LIBDIR) + "/qt5/plugins";
+    pluginsDirs << "/usr/lib/qt/plugins";
 
-    qDebug() << "Searching plugins in " << pluginsDir;
-    // Now go through all the plugins found in the current folder
-    Q_FOREACH (const QString &filename, pluginsDir.entryList()) {
-        // Get complete path+filename
-        const QString desktopFile = pluginsDir.path() + QDir::separator() + filename;
-        // If the file is a library...
-        Plugin *plugin = parseDesktopFile(desktopFile);
-        if (plugin) {
-            const bool enabled = enabledPlugins.contains(plugin->id);
-            if (enabled) {
-                enablePlugin(plugin);
+    Q_FOREACH (const QByteArray &pluginsDir, pluginsDirs) {
+        const QString tepsonicPluginsDir = QString::fromLatin1(pluginsDir) + QLatin1String("/tepsonic");
+        qDebug() << "Searching plugins in " << tepsonicPluginsDir;
+        QDir dir(tepsonicPluginsDir);
+        // Temporary list to avoid duplicate loading of plugins
+        //dir.setNameFilters(QStringList() << QLatin1String("libtepsonic_*"));
+        dir.setFilter(QDir::Files | QDir::NoSymLinks);
+
+        const QStringList plugins = dir.entryList();
+        if (plugins.isEmpty()) {
+            continue;
+        }
+
+        qDebug() << "Plugins:" << plugins;
+        // Now go through all the plugins found in the current folder
+        Q_FOREACH (const QString &filename, dir.entryList()) {
+            // Get complete path+filename
+            const QString file = dir.path() + QDir::separator() + filename;
+            // If the file is a library...
+            Plugin *plugin = tryLoadPlugin(file);
+            if (plugin) {
+                const bool enabled = enabledPlugins.contains(plugin->id);
+                if (enabled) {
+                    enablePlugin(plugin);
+                }
+                qDebug() << "Loaded" << plugin->id << "(" << filename << ")";
+                m_pluginsList << plugin;
             }
-            m_pluginsList << plugin;
         }
     }
 
     Q_EMIT pluginsLoaded();
 }
 
-PluginsManager::Plugin *PluginsManager::parseDesktopFile(const QString &filePath)
+PluginsManager::Plugin *PluginsManager::tryLoadPlugin(const QString &filePath)
 {
-    QStringList mandatoryFields;
-    mandatoryFields << QLatin1String("Name")
-                    << QLatin1String("Comment")
-                    << QLatin1String("Type")
-                    << QLatin1String("X-TepSonic-Plugin-Id")
-                    << QLatin1String("X-TepSonic-Plugin-Library")
-                    << QLatin1String("X-TepSonic-Plugin-Version")
-                    << QLatin1String("X-TepSonic-Plugin-Author");
-
-    QSettings parser(filePath, QSettings::IniFormat);
-    parser.beginGroup(QLatin1String("Desktop Entry"));
-    Q_FOREACH (const QString &field, mandatoryFields) {
-        if (!parser.contains(field)) {
-            qDebug() << filePath << "is missing mandatory field" << field;
-            return 0;
-        }
+    QPluginLoader *loader = new QPluginLoader(filePath);
+    const QJsonObject data = loader->metaData();
+    if (data.isEmpty()) {
+        qWarning() << filePath << "plugin file does not contain any metadata";
+        return 0;
     }
 
-    const QString libraryName = parser.value(QLatin1String("X-TepSonic-Plugin-Library")).toString();
-    const QString extension = QLatin1String(".so");
+    const QString iid = data[QLatin1String("IID")].toString();
+    if (!iid.startsWith(QLatin1String("cz.progdan.tepsonic.plugins"))) {
+        qWarning() << filePath << "is not a valid TepSonic plugin file";
+        return 0;
+    }
 
-    const QString libPath = QLatin1String(LIBDIR) + QDir::separator() + libraryName + extension;
-    if (!QFile::exists(libPath)) {
-        qDebug() << libPath << "plugin library does not exist";
+    const QJsonObject metadata = data[QLatin1String("MetaData")].toObject();
+    const QJsonObject name = metadata[QLatin1String("name")].toObject();
+    const QJsonObject description = metadata[QLatin1String("description")].toObject();
+    const QJsonObject author = metadata[QLatin1String("author")].toObject();
+    if (name.isEmpty() || description.isEmpty() || author.isEmpty()) {
+        qWarning() << filePath << "is not a valid TepSonic plugin file";
         return 0;
     }
 
     Plugin *plugin = new Plugin;
-    plugin->libraryFilePath = libPath;
-    plugin->name = parser.value(QLatin1String("Name")).toString();
-    plugin->description = parser.value(QLatin1String("Comment")).toString();
-    plugin->id = parser.value(QLatin1String("X-TepSonic-Plugin-Id")).toString();
-    plugin->enabledByDefault = parser.value(QLatin1String("X-TepSonic-Plugin-EnabledByDefault"), false).toBool();
-    plugin->version = parser.value(QLatin1String("X-TepSonic-Plugin->Version")).toString();
-    plugin->author = parser.value(QLatin1String("X-TepSonic-Plugin-Author")).toString();
-    plugin->email = parser.value(QLatin1String("X-TepSonic-Plugin-Email")).toString();
+    plugin->id = iid;
+    plugin->loader = loader;
+    plugin->name =  name[QLatin1String("en")].toString();
+    plugin->description = description[QLatin1String("en")].toString();
+    plugin->enabledByDefault = metadata[QLatin1String("enabledByDefault")].toBool();
+    plugin->version = metadata[QLatin1String("version")].toString();
+    plugin->author = author[QLatin1String("name")].toString();
+    plugin->email = author[QLatin1String("email")].toString();
+    plugin->hasConfigUI = metadata[QLatin1String("hasConfigUI")].toBool();
+    plugin->isEnabled = false;
 
     return plugin;
 }
@@ -163,7 +174,6 @@ void PluginsManager::disablePlugin(Plugin *plugin)
     }
 
     AbstractPlugin* aplg = reinterpret_cast<AbstractPlugin*>(plugin->loader->instance());
-
     disconnect(this, &PluginsManager::settingsAccepted,
                aplg, &AbstractPlugin::settingsAccepted);
     aplg->quit();
@@ -181,12 +191,10 @@ void PluginsManager::enablePlugin(Plugin *plugin)
         return;
     }
 
-    QPluginLoader *pluginLoader = new QPluginLoader(plugin->libraryFilePath);
-    if (! pluginLoader->load()) {
-        qDebug() << plugin->id << " load error:" << pluginLoader->errorString();
+    if (!plugin->loader->load()) {
+        qDebug() << plugin->id << " load error:" << plugin->loader->errorString();
         return;
     }
-    plugin->loader = pluginLoader;
 
     AbstractPlugin *aplg = reinterpret_cast<AbstractPlugin*>(plugin->loader->instance());
 

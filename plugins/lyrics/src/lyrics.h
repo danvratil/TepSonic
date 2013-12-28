@@ -46,7 +46,7 @@ class LyricsPlugin : public AbstractPlugin
 
     void init();
 
-    bool setupPane(QWidget *widget, const QString &label);
+    bool setupPane(QWidget *widget, QString &label);
 
   public Q_SLOTS:
     void trackChanged(const Player::MetaData &trackData);

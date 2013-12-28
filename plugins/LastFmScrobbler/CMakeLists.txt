@@ -82,7 +82,7 @@ set_target_properties(tepsonic_lastfmscrobbler
 )
 
 install(TARGETS tepsonic_lastfmscrobbler
-        DESTINATION ${INSTALL_LIBRARY_DIR}/
+        DESTINATION ${INSTALL_PLUGINS_DIR}/tepsonic/
 )
 install(FILES ${TRANSLATIONS_BINARY}
         DESTINATION ${INSTALL_DATA_DIR}/tepsonic/locale/

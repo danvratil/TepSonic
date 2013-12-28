@@ -51,8 +51,8 @@ void PluginsPage::pluginsListItemChanged(QListWidgetItem *item)
     if (item->checkState() == Qt::Checked) {
         pluginsManager->enablePlugin(plugin);
         // If the plugin has a config m_ui then add a tab with the m_ui to Plugins page
-        AbstractPlugin *aplg = reinterpret_cast<AbstractPlugin *>(plugin->loader->instance());
-        if (aplg->hasConfigUI()) {
+        if (plugin->hasConfigUI) {
+            AbstractPlugin *aplg = reinterpret_cast<AbstractPlugin *>(plugin->loader->instance());
             QWidget *pluginWidget = new QWidget();
             m_ui->tabs->insertTab(pluginIndex + 1, pluginWidget, plugin->name);
             aplg->configUI(pluginWidget);
@@ -70,19 +70,20 @@ void PluginsPage::loadSettings()
     PluginsManager *pluginsManager = PluginsManager::instance();
     // Iterate through all plugins
     for (int i = 0; i < pluginsManager->pluginsCount(); i++) {
-        if (pluginsManager->pluginAt(i)->isEnabled) {
+        PluginsManager::Plugin *plugin = pluginsManager->pluginAt(i);
+        if (plugin->isEnabled) {
             // If the plugin has a config m_ui then add a tab with the m_ui to Plugins page
-            AbstractPlugin *plugin = reinterpret_cast<AbstractPlugin *>(pluginsManager->pluginAt(i)->loader->instance());
-            if (plugin->hasConfigUI()) {
+            if (plugin->hasConfigUI) {
+                AbstractPlugin *aplg = reinterpret_cast<AbstractPlugin *>(plugin->loader->instance());
                 QWidget *pluginWidget = new QWidget();
                 m_ui->tabs->addTab(pluginWidget, pluginsManager->pluginAt(i)->name);
-                plugin->configUI(pluginWidget);
+                aplg->configUI(pluginWidget);
             }
         }
 
-        QListWidgetItem *item = new QListWidgetItem(pluginsManager->pluginAt(i)->name);
+        QListWidgetItem *item = new QListWidgetItem(plugin->name);
         // If the plugin is not yet listed in the QSettings then set it as disabled by default
-        if (pluginsManager->pluginAt(i)->isEnabled) {
+        if (plugin->isEnabled) {
             item->setCheckState(Qt::Checked);
         } else {
             item->setCheckState(Qt::Unchecked);

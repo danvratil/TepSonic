@@ -26,5 +26,7 @@ LyricsSrollArea::LyricsSrollArea(QWidget *parent):
 
 void LyricsSrollArea::resizeEvent(QResizeEvent *e)
 {
+    Q_UNUSED(e);
+
     widget()->adjustSize();
 }

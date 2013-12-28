@@ -71,7 +71,7 @@ set_target_properties(tepsonic_lyricsplugin
                 SOVERSION 1
 )
 install(TARGETS tepsonic_lyricsplugin
-        DESTINATION ${INSTALL_LIBRARY_DIR}/
+        DESTINATION ${INSTALL_PLUGINS_DIR}/tepsonic
 )
 install(FILES ${TRANSLATIONS_BINARY}
         DESTINATION ${INSTALL_DATA_DIR}/tepsonic/locale/

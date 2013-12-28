@@ -47,11 +47,11 @@ class PluginsManager : public QObject
         QString description;
         QString id;
         bool enabledByDefault;
+        bool hasConfigUI;
         QPluginLoader *loader;
         QString version;
         QString author;
         QString email;
-        QString libraryFilePath;
 
         bool isEnabled;
     };
@@ -76,7 +76,7 @@ class PluginsManager : public QObject
     explicit PluginsManager();
     static PluginsManager *s_instance;
 
-    Plugin* parseDesktopFile(const QString &filePath);
+    Plugin* tryLoadPlugin(const QString &filePath);
     void initPlugin(Plugin *plugin);
 
     QList<Plugin *> m_pluginsList;
