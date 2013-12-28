@@ -8,9 +8,6 @@
         that is not in VA, the interpret should not be ignored
 
  - store UI settings immediately after change, so that they are preserved when TS crashes
- - plugins: use Qt5 JSON metadata instead of .desktop files and virtual methods
- - use Qt5 version connect() in plugins
- - clean up and refactor the LastFmScrobbler plugin (const&, etc)
  - lambdas! - clean up the code where possible
  - get rid of TaskManager - implement "tasks" in respective models
  - revisit AbstractPlugin interface - simplify?
