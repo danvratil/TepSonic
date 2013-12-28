@@ -49,7 +49,7 @@ LyricsPlugin::LyricsPlugin()
             + QDir::separator() +  QLatin1String("locale")
             + QDir::separator() + QLatin1String("lyricsplugin");
 
-    m_translator->load(QLatin1String("lyricsplugin_") + locale, localeDir);
+    m_translator->load(QLatin1String("tepsonic_lyricsplugin_") + locale, localeDir);
     qApp->installTranslator(m_translator);
 
     connect(Player::instance(), SIGNAL(trackChanged(Player::MetaData)),

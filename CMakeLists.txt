@@ -11,6 +11,8 @@ set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 set(CMAKE_AUTOMOC ON)
 
+include(TepSonicMacros)
+
 find_package(PkgConfig REQUIRED)
 find_package(X11 REQUIRED)
 find_package(Qt5Core REQUIRED)
@@ -18,6 +20,7 @@ find_package(Qt5Concurrent REQUIRED)
 find_package(Qt5Gui REQUIRED)
 find_package(Qt5Widgets REQUIRED)
 find_package(Qt5Sql REQUIRED)
+find_package(Qt5LinguistTools REQUIRED)
 find_package(Taglib REQUIRED)
 find_package(Phonon4Qt5 REQUIRED)
 

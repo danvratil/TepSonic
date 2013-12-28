@@ -48,10 +48,8 @@ LastFmScrobblerPlugin::LastFmScrobblerPlugin():
 
     // standard unix/windows
     const QString dataDir = QLatin1String(PKGDATADIR);
-    const QString localeDir = dataDir + QDir::separator() + QLatin1String("tepsonic")
-                            + QDir::separator() +  QLatin1String("locale")
-                            + QDir::separator() + QLatin1String("lastfmscrobbler");
-    m_translator->load(QLatin1String("lastfmscrobbler_") + locale, localeDir);
+    const QString localeDir = QLatin1String(PKGDATADIR) + QLatin1String("/tepsonic/locale");
+    m_translator->load(QLatin1String("tepsonic_lastfmscrobbler_") + locale, localeDir);
     qApp->installTranslator(m_translator);
 
     connect(Player::instance(), SIGNAL(trackChanged(Player::MetaData)),

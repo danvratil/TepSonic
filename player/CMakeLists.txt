@@ -60,37 +60,8 @@ set(player_RCCS
     icons.qrc
 )
 
-option(LANGS "Using translations" "")
-if (NOT DEFINED LANGS)
-  set (LANGS cs CACHE STRING "Using translations" FORCE)
-  set (LANGUAGES filesystemwidget.cpp cs)
-else (NOT DEFINED LANGS)
-  if (NOT LANGS) 
-    set (LANGUAGES "")
-  else (NOT LANGS)
-    string(REGEX MATCHALL [a-zA-Z]+
-           langs1 ${LANGS})
-    set (LANGUAGES ${langs1})
-  endif (NOT LANGS)
-endif (NOT DEFINED LANGS)
-
-message(STATUS "Translations to build: ${LANGUAGES}")
-
 qt5_wrap_ui(player_QUIS_HDRS ${player_QUIS})
 qt5_add_resources(player_RCCS_SRCS ${player_RCCS})
-#Create translations
-set(TRANSLATIONS)
-foreach (LANGUAGE ${LANGUAGES})
-        set (TS ${CMAKE_CURRENT_SOURCE_DIR}/ts/${LANGUAGE}.ts)
-        set (QM ${CMAKE_CURRENT_SOURCE_DIR}/ts/tepsonic_${LANGUAGE}.qm)
-	set (TRANSLATIONS_BINARY ${TRANSLATIONS_BINARY} ${QM})
-	add_custom_command(OUTPUT ${QM}
-			   PRE_BUILD
-			   COMMAND ${QT_LRELEASE_EXECUTABLE}
-			   ARGS ${TS} -qm ${QM})
-	add_custom_target(transl_${LANGUAGE} DEPENDS ${QM})
-	set (TRANSLATIONS ${TRANSLATIONS} transl_${LANGUAGE})
-endforeach()
 
 if (WIN32)
   set(GUI_TYPE WIN32)
@@ -104,10 +75,6 @@ add_executable(tepsonic
                ${player_SRCS}
                ${TRANSLATIONS_BINARY}
 )
-
-if (TRANSLATIONS)
-    add_dependencies(tepsonic ${TRANSLATIONS})
-endif (TRANSLATIONS)
 
 set(QXT_LIBRARIES qxt)
 if (UNIX)
@@ -124,13 +91,12 @@ target_link_libraries(tepsonic
                       ${QXT_LIBRARIES}
 )
 
+set(player_TSS cs)
+tepsonic_add_translations(tepsonic ${player_TSS})
+
 # standard instalation of the binary
 install(TARGETS tepsonic
         RUNTIME DESTINATION ${INSTALL_BINARY_DIR}
-)
-
-install(FILES ${TRANSLATIONS_BINARY}
-        DESTINATION ${INSTALL_DATA_DIR}/tepsonic/locale/
 )
 
 install(FILES ../tepsonic.desktop

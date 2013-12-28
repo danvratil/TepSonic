@@ -61,17 +61,14 @@ int main(int argc, char *argv[])
 
     // standard unix/windows
     QString dataDir = QLatin1String(PKGDATADIR);
-    QString localeDir = dataDir + QDir::separator() + QLatin1String("tepsonic")
-                        + QDir::separator() + QLatin1String("locale")
-                        + QDir::separator() + QLatin1String("tepsonic");
+    QString localeDir = dataDir + QLatin1String("/tepsonic/locale");
+
     // If app was not "installed" use the app directory
     if (!QFile::exists(localeDir)) {
-        localeDir = qApp->applicationDirPath() + QDir::separator() +  QLatin1String("tepsonic")
-                    + QDir::separator() + QLatin1String("locale")
-                    + QDir::separator() + QLatin1String("tepsonic");
+        localeDir = qApp->applicationDirPath() + QLatin1String("/tepsonic/locale");
     }
 
-    translator.load(QLatin1String("tepsonic_") + locale,localeDir);
+    translator.load(QLatin1String("tepsonic_") + locale, localeDir);
     tepsonic.installTranslator(&translator);
 
     qRegisterMetaType<Player::MetaData>("Player::MetaData");

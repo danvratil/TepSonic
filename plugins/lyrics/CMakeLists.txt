@@ -19,34 +19,8 @@ set(lyricsplugin_SRCS
     src/lyricsscrollarea.cpp
 )
 
-option(LANGS "Using translations" "")
-if (NOT DEFINED LANGS)
-  set (LANGS cs CACHE STRING "Using translations" FORCE)
-  set (LANGUAGES cs)
-else (NOT DEFINED LANGS)
-  if (NOT LANGS)
-    set(LANGUAGES "")
-  else (NOT LANGS)
-    string(REGEX MATCHALL [a-zA-Z]+
-           langs1 ${LANGS})
-    set (LANGUAGES ${langs1})
-  endif (NOT LANGS)
-endif (NOT DEFINED LANGS)
-
-#Create translations
-set(TRANSLATIONS)
-foreach (LANGUAGE ${LANGUAGES})
-        set (TS ${CMAKE_CURRENT_SOURCE_DIR}/ts/${LANGUAGE}.ts)
-        set (QM ${CMAKE_CURRENT_SOURCE_DIR}/ts/lyricsplugin_${LANGUAGE}.qm)
-	set (TRANSLATIONS_BINARY ${TRANSLATIONS_BINARY} ${QM})
-        add_custom_command (OUTPUT ${QM}
-			    PRE_BUILD
-	                    COMMAND ${QT_LRELEASE_EXECUTABLE}
-		            ARGS ${TS} -qm ${QM})
-	add_custom_target(lf_transl_${LANGUAGE} DEPENDS ${QM})
-	set (TRANSLATIONS ${TRANSLATIONS} lf_transl_${LANGUAGE})
-endforeach()
-
+#set(lyricsplugin_TSS)
+#tepsonic_add_translations(tepsonic_lyricsplugin ${lyricsplugin_TSS})
 
 add_library(tepsonic_lyricsplugin SHARED
 	       ${lyricsplugin_SRCS}

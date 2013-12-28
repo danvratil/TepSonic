@@ -14,7 +14,6 @@
  - revisit design of Settings - can we provide a more generic yet equally safe framework
    for configuration, reusable by plugins?
  - clean up MetadataEditor
- - clean up the translations mess in CMakeLists.txt
  - move away from .ui?
  - proper config UI for some Phonon effects
  - make MetadataEditor available from CollectionsView, too
