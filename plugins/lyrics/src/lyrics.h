@@ -57,8 +57,6 @@ class LyricsPlugin : public AbstractPlugin
     void lyricsPageRetrieved(QNetworkReply *reply);
 
   private:
-    void setError(int err);
-
     QTranslator *m_translator;
     LyricsSrollArea *m_scrollArea;
     QLabel *m_label;

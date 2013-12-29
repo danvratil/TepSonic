@@ -139,7 +139,6 @@ void LyricsPlugin::lyricsInfoRetrieved(QNetworkReply *reply)
     const int status = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
 
     if (status != 200) {
-        setError(status);
         return;
     }
 
@@ -188,7 +187,6 @@ void LyricsPlugin::lyricsPageRetrieved(QNetworkReply *reply)
     const int status = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
 
     if (status != 200) {
-        setError(status);
         return;
     }
 
