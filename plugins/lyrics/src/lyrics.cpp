@@ -190,6 +190,10 @@ void LyricsPlugin::lyricsPageRetrieved(QNetworkReply *reply)
         return;
     }
 
+    if (!m_listWidget->currentItem()) {
+        return;
+    }
+
     QString lyrics = QString::fromLatin1(reply->readAll());
     lyrics.prepend(QLatin1String("<h2>") + m_listWidget->currentItem()->text() + QLatin1String("</h2>"));
     lyrics.replace(QChar(10), QLatin1String("<br>"));
