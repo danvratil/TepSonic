@@ -53,9 +53,6 @@ CollectionView::CollectionView(QWidget* parent):
 
     // Hide the header
     header()->setHidden(true);
-
-    connect(this, &CollectionView::doubleClicked,
-            this, &CollectionView::onDoubleClicked);
 }
 
 CollectionView::~CollectionView()
@@ -130,12 +127,4 @@ void CollectionView::keyPressEvent(QKeyEvent* event)
     }
 
     QTreeView::keyPressEvent(event);
-}
-
-void CollectionView::onDoubleClicked(const QModelIndex &index)
-{
-    const QString file = index.data(CollectionModel::FilePathRole).toString();
-    if (!file.isEmpty()) {
-        TaskManager::instance()->addFileToPlaylist(file);
-    }
 }

@@ -20,9 +20,6 @@
 #include "taskmanager.h"
 #include "constants.h"
 #include "collections/collectionbuilder.h"
-#include "playlist/playlistmodel.h"
-#include "playlist/playlistpopulator.h"
-#include "playlist/playlistwriter.h"
 #include "settings.h"
 
 #include <QDir>
@@ -41,8 +38,6 @@ TaskManager* TaskManager::instance()
 }
 
 TaskManager::TaskManager():
-    m_playlistModel(0),
-    m_threadPool(new QThreadPool(this)),
     m_collectionsThreadPool(new QThreadPool(this))
 {
     // Only one collections thread at once. Another thread will be queued until the running thread is done
@@ -57,58 +52,8 @@ void TaskManager::destroy()
 
 TaskManager::~TaskManager()
 {
-    m_threadPool->waitForDone();
     m_collectionsThreadPool->waitForDone();
-    delete m_threadPool;
     delete m_collectionsThreadPool;
-}
-
-void TaskManager::setPlaylistModel(PlaylistModel *model)
-{
-    m_playlistModel = model;
-}
-
-void TaskManager::addFilesToPlaylist(const QStringList &files, int row)
-{
-    if ((row == 0) && (m_playlistModel)) {
-        row = m_playlistModel->rowCount(QModelIndex());
-    }
-
-    PlaylistPopulator *playlistPopulator = new PlaylistPopulator();
-    playlistPopulator->addFiles(files, row);
-    connect(playlistPopulator, &PlaylistPopulator::insertItemToPlaylist,
-            this, &TaskManager::insertItemToPlaylist,
-            Qt::QueuedConnection);
-    connect(playlistPopulator, &PlaylistPopulator::playlistPopulated,
-            this, &TaskManager::playlistPopulated);
-
-    m_threadPool->start(playlistPopulator);
-}
-
-void TaskManager::addFileToPlaylist(const QString &filename, int row)
-{
-    if ((row == 0) && (m_playlistModel)) {
-        row = m_playlistModel->rowCount(QModelIndex());
-    }
-
-    PlaylistPopulator *playlistPopulator = new PlaylistPopulator();
-    playlistPopulator->addFile(filename, row);
-    connect(playlistPopulator, &PlaylistPopulator::insertItemToPlaylist,
-            this, &TaskManager::insertItemToPlaylist);
-    connect(playlistPopulator, &PlaylistPopulator::playlistPopulated,
-            this, &TaskManager::playlistPopulated);
-
-    m_threadPool->start(playlistPopulator);
-}
-
-void TaskManager::savePlaylistToFile(const QString &filename)
-{
-    PlaylistWriter *playlistWriter = new PlaylistWriter(m_playlistModel);
-    playlistWriter->saveToFile(filename);
-    connect(playlistWriter, &PlaylistWriter::playlistSaved,
-            this, &TaskManager::playlistSaved);
-
-    m_threadPool->start(playlistWriter);
 }
 
 void TaskManager::rebuildCollections(const QString &folder)
@@ -117,7 +62,7 @@ void TaskManager::rebuildCollections(const QString &folder)
     if (folder.isEmpty()) {
         dirs = Settings::instance()->collectionsSourcePaths();
     } else {
-        QFileInfo finfo (folder);
+        const QFileInfo finfo (folder);
         if (finfo.isDir()) {
             dirs << folder;
         } else {

@@ -17,28 +17,15 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Cambridge, MA 02110-1301, USA.
  */
 
-#ifndef PLAYLISTPROXYMODEL_H
-#define PLAYLISTPROXYMODEL_H
+#ifndef M3U_H
+#define M3U_H
 
-#include <QSortFilterProxyModel>
-#include <QModelIndex>
-#include "playlistmodel.h"
+#include <QStringList>
 
-class PlaylistModel;
-
-class PlaylistProxyModel : public QSortFilterProxyModel
+namespace M3U
 {
-    Q_OBJECT
+    void writeToFile(const QStringList &playlist, const QString &file);
+    QStringList loadFromFile(const QString &file);
+}
 
-  public:
-    enum {
-        RandomColumn = PlaylistModel::ColumnCount
-    };
-
-    PlaylistProxyModel(PlaylistModel *model, QObject *parent = 0);
-
-  protected:
-    bool filterAcceptsRow(int sourceRow, const QModelIndex &sourceParent) const;
-};
-
-#endif // PLAYLISTPROXYMODEL_H
+#endif

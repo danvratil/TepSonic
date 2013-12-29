@@ -31,6 +31,7 @@
 #include "player.h"
 #include "mainwindow.h"
 #include "pluginsmanager.h"
+#include "playlistmodel.h"
 #include "taskmanager.h"
 #include "constants.h"
 #include "settings.h"
@@ -82,18 +83,17 @@ int main(int argc, char *argv[])
     TrayIcon *trayIcon = new TrayIcon(mainWindow);
 
     Player *player = Player::instance();
+    QStringList files;
     for (int i=1; i<tepsonic.arguments().count(); i++) {
-        qDebug() << tepsonic.arguments().at(i);
         QFileInfo param(tepsonic.arguments().at(i));
         if ((param.isFile()) && (param.exists())) {
-            TaskManager::instance()->addFileToPlaylist(param.absoluteFilePath());
-            // If this is a first file added, start playback immediatelly
-            if (i==1) {
-                player->setTrack(param.absoluteFilePath());
-                player->play();
-            }
+            files << param.absoluteFilePath();
         }
-
+    }
+    if (!files.isEmpty()) {
+        mainWindow->playlistModel()->addFiles(files);
+        player->setTrack(files.first());
+        player->play();
     }
 
     int ret = tepsonic.exec();

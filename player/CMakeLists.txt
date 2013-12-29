@@ -17,6 +17,7 @@ set(player_SRCS
     pluginsmanager.cpp
     taskmanager.cpp
     databasemanager.cpp
+    m3u.cpp
     tools.cpp
     trayicon.cpp
     supportedformats.cpp
@@ -41,8 +42,6 @@ set(player_SRCS
     playlist/playlistitemdelegate.cpp
     playlist/playlistmodel.cpp
     playlist/playlistproxymodel.cpp
-    playlist/playlistpopulator.cpp
-    playlist/playlistwriter.cpp
 )
 
 set(player_QUIS
@@ -86,6 +85,7 @@ target_link_libraries(tepsonic
                       Qt5::Gui
                       Qt5::Sql
                       Qt5::Widgets
+                      Qt5::Concurrent
                       ${PHONON_LIBRARIES}
                       ${TAGLIB_LIBRARIES}
                       ${QXT_LIBRARIES}

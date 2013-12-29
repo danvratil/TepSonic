@@ -63,7 +63,6 @@ class PlaylistView : public QTreeView
   Q_SIGNALS:
     void nowPlayingChanged(const QModelIndex &track);
     void playlistLengthChanged(int length, int tracksCount);
-    void addedFiles(const QStringList &files, int row);
 
   private Q_SLOTS:
     void slotSortIndicatorChanged(int column, Qt::SortOrder order);

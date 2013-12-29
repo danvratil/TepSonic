@@ -37,9 +37,6 @@ class CollectionView : public QTreeView
     void startDrag(Qt::DropActions dropActions);
     void keyPressEvent(QKeyEvent *event);
 
-  private Q_SLOTS:
-    void onDoubleClicked(const QModelIndex &index);
-
   private:
     void loadAlbum(const QModelIndex &album, QDataStream &stream) const;
 

@@ -21,9 +21,9 @@
 #include "playlistmodel.h"
 #include "playlistproxymodel.h"
 #include "playlistitemdelegate.h"
-#include "taskmanager.h"
 #include "tools.h"
 #include "actionmanager.h"
+#include "supportedformats.h"
 
 #include <QApplication>
 #include <QDropEvent>
@@ -56,9 +56,6 @@ PlaylistView::PlaylistView(QWidget *parent):
     PlaylistProxyModel *proxy = new PlaylistProxyModel(m_playlistModel, this);
     setModel(proxy);
 
-    // Set up task manager
-    TaskManager::instance()->setPlaylistModel(m_playlistModel);
-
     connect(m_playlistModel, &PlaylistModel::playlistLengthChanged,
             this, &PlaylistView::playlistLengthChanged);
 
@@ -82,18 +79,12 @@ PlaylistView::PlaylistView(QWidget *parent):
 
     // Hide the first column (with filename) and the last one (with order number)
     hideColumn(PlaylistModel::FilenameColumn);
-    hideColumn(PlaylistModel::RandomOrderColumn);
+    //hideColumn(PlaylistModel::RandomOrderColumn);
 
     connect(header(), &QHeaderView::sortIndicatorChanged,
             this, &PlaylistView::slotSortIndicatorChanged);
-    connect(TaskManager::instance(), &TaskManager::playlistPopulated,
-            qobject_cast<PlaylistProxyModel*>(model()), &PlaylistProxyModel::invalidate);
-    connect(TaskManager::instance(), &TaskManager::insertItemToPlaylist,
-            m_playlistModel, &PlaylistModel::insertItem);
     connect(this, &PlaylistView::doubleClicked,
             this, &PlaylistView::setNowPlaying);
-    connect(this, &PlaylistView::addedFiles,
-            TaskManager::instance(), &TaskManager::addFilesToPlaylist);
     connect(header(), &QHeaderView::customContextMenuRequested,
             this, &PlaylistView::slotHeaderContextMenuRequested);
     connect(this, &PlaylistView::customContextMenuRequested,
@@ -301,13 +292,36 @@ void PlaylistView::dropEvent(QDropEvent *event)
             }
         }
 
+
+        // Non-recursively expand folders
+        QMutableListIterator<QString> iter(files);
+        while (iter.hasNext()) {
+            QFileInfo finfo(iter.next());
+            if (finfo.isDir()) {
+                const QDir dir(finfo.filePath());
+                const QStringList subfiles = dir.entryList(SupportedFormats::extensionsList(),
+                                                           QDir::Files);
+                Q_FOREACH (const QString &file, subfiles) {
+                    iter.insert(finfo.filePath() + QLatin1Char('/') + file);
+                }
+                const QStringList subdirs = dir.entryList(QDir::Dirs | QDir::NoDot | QDir::NoDotDot);
+                Q_FOREACH (const QString &file, subdirs) {
+                    iter.insert(finfo.filePath() + QLatin1Char('/') + file);
+                }
+                iter.findPrevious(finfo.filePath());
+                iter.remove();
+            }
+        }
+
         //row where the items were dropped
         int row = indexAt(event->pos()).row();
         if (row == -1) {
             row = model()->rowCount();
         }
 
-        Q_EMIT addedFiles(files, row);
+        if (!files.isEmpty()) {
+            m_playlistModel->insertFiles(files, row);
+        }
     }
 
     // Drop from internal move
@@ -396,6 +410,7 @@ void PlaylistView::shuffle()
 {
     header()->setSortIndicator(-1, Qt::AscendingOrder);
 
+    /*
     srand(time(0)); // We needs microseconds
     const int rowCount = model()->rowCount();
     for (int row = 0; row < rowCount; row++) {
@@ -404,6 +419,7 @@ void PlaylistView::shuffle()
     }
 
     model()->sort(PlaylistModel::RandomOrderColumn, Qt::AscendingOrder);
+    */
 }
 
 void PlaylistView::slotSortIndicatorChanged(int column, Qt::SortOrder order)

@@ -35,6 +35,7 @@
 #include "supportedformats.h"
 #include "metadataeditor.h"
 #include "settings.h"
+#include "collectionmodel.h"
 
 #include <taglib/fileref.h>
 #include <taglib/tag.h>
@@ -122,7 +123,7 @@ MainWindow::MainWindow():
 
     // Load last playlist
     if (Settings::instance()->sessionRestore()) {
-        TaskManager::instance()->addFileToPlaylist(QString(_CONFIGDIR).append(QLatin1String("/last.m3u")));
+        playlistModel()->loadPlaylist(QString(_CONFIGDIR).append(QLatin1String("/last.m3u")));
         Player::instance()->setRandomMode(Settings::instance()->playerRandomMode());
         Player::instance()->setRepeatMode(static_cast<Player::RepeatMode>(Settings::instance()->playerRepeatMode()));
     }
@@ -155,9 +156,14 @@ MainWindow::~MainWindow()
     }
 
     // Save current playlist to file
-    TaskManager::instance()->savePlaylistToFile(QString(_CONFIGDIR).append(QLatin1String("/last.m3u")));
+    playlistModel()->savePlaylist(QString(_CONFIGDIR).append(QLatin1String("/last.m3u")));
 
     delete m_ui;
+}
+
+PlaylistModel* MainWindow::playlistModel() const
+{
+    return m_ui->playlistView->playlistModel();
 }
 
 void MainWindow::createMenus()
@@ -265,7 +271,7 @@ void MainWindow::bindSignals()
 
     // Filesystem browser
     connect(m_ui->fsbTab, &FileSystemWidget::trackSelected,
-            [=](const QString &filePath) { TaskManager::instance()->addFileToPlaylist(filePath); });
+            [=](const QString &filePath) { playlistModel()->addFile(filePath); });
 
     // Player object
     connect(Player::instance(), static_cast<void (Player::*)()>(&Player::trackFinished),
@@ -497,7 +503,7 @@ void MainWindow::savePlaylist()
                                             tr("Save playlist to..."),
                                             QString(),
                                             tr("M3U Playlist (*.m3u)"));
-    TaskManager::instance()->savePlaylistToFile(filename);
+    playlistModel()->savePlaylist(filename);
 }
 
 void MainWindow::playlistLengthChanged(int totalLength, int tracksCount)
@@ -529,6 +535,9 @@ void MainWindow::playerPosChanged(qint64 newPos)
 void MainWindow::setupCollections()
 {
     m_ui->collectionView->enableCollections();
+
+    connect(m_ui->collectionView, &CollectionView::doubleClicked,
+            this, &MainWindow::onCollectionViewDoubleClicked);
 
     // Since we disabled the Proxy model, no search inputs are needed
     m_ui->label_2->hide();
@@ -620,5 +629,13 @@ void MainWindow::setStopTrackClicked()
         m_ui->playlistView->clearStopTrack();
     } else {
         m_ui->playlistView->setStopTrack(index);
+    }
+}
+
+void MainWindow::onCollectionViewDoubleClicked(const QModelIndex& index)
+{
+    const QString file = index.data(CollectionModel::FilePathRole).toString();
+    if (!file.isEmpty()) {
+        playlistModel()->addFile(file);
     }
 }

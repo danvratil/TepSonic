@@ -31,6 +31,7 @@
 
 QString getConfigDir();
 
+// FIXME: Kill this variable
 const QString _CONFIGDIR = getConfigDir();
 
 

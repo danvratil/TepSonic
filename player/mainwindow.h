@@ -32,6 +32,7 @@
 #include "player.h"
 #include "actionmanager.h"
 
+class PlaylistModel;
 class DatabaseManager;
 class MetadataEditor;
 
@@ -49,6 +50,8 @@ class MainWindow : public QMainWindow
     ~MainWindow();
 
     void installPluginsMenus();
+
+    PlaylistModel* playlistModel() const;
 
   public Q_SLOTS:
     void showError(const QString &error);
@@ -89,6 +92,7 @@ class MainWindow : public QMainWindow
 
     void setStopTrackClicked();
 
+    void onCollectionViewDoubleClicked(const QModelIndex &index);
 
   private:
     Ui::MainWindow *m_ui;
