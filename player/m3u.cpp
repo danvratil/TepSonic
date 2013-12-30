@@ -63,11 +63,14 @@ void M3U::writeToFile(const QStringList &playlist, const QString &filePath)
 {
     QFile file(filePath);
     if (!file.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
-        file.write(M3UHEADER "\n");
         qWarning() << "Failed to open file" << filePath << "for writing";
-        Q_FOREACH (const QString &f, playlist) {
-            file.write(f.toLatin1() + '\n');
-        }
+        return;
     }
+
+    file.write(M3UHEADER "\n");
+    Q_FOREACH (const QString &f, playlist) {
+        file.write(f.toLatin1() + '\n');
+    }
+
     file.close();
 }
