@@ -369,6 +369,7 @@ void PlaylistModel::insertFiles(const QStringList &files, int row)
             this, &PlaylistModel::onMetaDataDone);
 }
 
+// FIXME: This is never called, since QtConcurrent::run() does not emit resultsReadyAt
 void PlaylistModel::onMetaDataAvailable(int beginIndex, int endIndex)
 {
     qDebug() << "onMetaDataAvailable:" << beginIndex << endIndex;
@@ -393,7 +394,6 @@ void PlaylistModel::onMetaDataDone()
     watcher->deleteLater();
 
     const int offset = watcher->property("startOffset").toInt();
-    qDebug() << "onMetaDataDone:" << offset << watcher->future().resultCount();
 
     Q_EMIT dataChanged(index(offset, 0), index(offset + watcher->future().resultCount(), 0));
 }
