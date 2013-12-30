@@ -17,45 +17,24 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Cambridge, MA 02110-1301, USA.
  */
 
-#include "abstractplugin.h"
+#ifndef TEPSONIC_M3U_H
+#define TEPSONIC_M3U_H
 
-AbstractPlugin::AbstractPlugin(QObject *parent):
-    QObject(parent)
+#include <QStringList>
+
+#include "tepsonic-core-export.h"
+
+namespace TepSonic
 {
-}
 
-AbstractPlugin::~AbstractPlugin()
+namespace M3U
 {
-}
 
-void AbstractPlugin::configUI(QWidget *parentWidget)
-{
-    Q_UNUSED(parentWidget);
-}
+    TEPSONIC_CORE_EXPORT void writeToFile(const QStringList &playlist, const QString &file);
+    TEPSONIC_CORE_EXPORT QStringList loadFromFile(const QString &file);
 
-void AbstractPlugin::settingsAccepted()
-{
-}
+} // namespace M3U
 
-void AbstractPlugin::quit()
-{
-}
+} // namespace TepSonic
 
-void AbstractPlugin::setupMenu(QMenu *menu, AbstractPlugin::MenuTypes menuType)
-{
-    Q_UNUSED(menu);
-    Q_UNUSED(menuType);
-}
-
-bool AbstractPlugin::setupPane(QWidget *widget, QString &label)
-{
-    Q_UNUSED(widget);
-    Q_UNUSED(label);
-
-    return false;
-}
-
-void AbstractPlugin::emitError(const QString &errorMsg)
-{
-    Q_EMIT error(errorMsg);
-}
+#endif // TEPSONIC_M3U_H

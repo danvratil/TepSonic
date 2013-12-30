@@ -17,8 +17,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Cambridge, MA 02110-1301, USA.
  */
 
-#ifndef PLAYER_H
-#define PLAYER_H
+#ifndef TEPSONIC_PLAYER_H
+#define TEPSONIC_PLAYER_H
 
 #include <QObject>
 
@@ -26,9 +26,14 @@
 #include <phonon/audiooutput.h>
 #include <phonon/mediaobject.h>
 
-#include "metadata.h"
+#include <metadata.h>
 
-class Player: public QObject
+#include "tepsonic-core-export.h"
+
+namespace TepSonic
+{
+
+class TEPSONIC_CORE_EXPORT Player: public QObject
 {
     Q_OBJECT
     Q_ENUMS(RepeatMode)
@@ -87,7 +92,7 @@ class Player: public QObject
     }
 
   public Q_SLOTS:
-    void setRepeatMode(RepeatMode repeatMode);
+    void setRepeatMode(Player::RepeatMode repeatMode);
     void setRandomMode(bool randomMode);
     void play() {
         m_phononPlayer->play();
@@ -132,4 +137,6 @@ class Player: public QObject
 
 };
 
-#endif // PLAYER_H
+} // namespace TepSonic
+
+#endif // TEPSONIC_PLAYER_H

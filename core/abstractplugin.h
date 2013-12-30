@@ -17,15 +17,20 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Cambridge, MA 02110-1301, USA.
  */
 
-#ifndef ABSTRACTPLUGIN_H
-#define ABSTRACTPLUGIN_H
+#ifndef TEPSONIC_ABSTRACTPLUGIN_H
+#define TEPSONIC_ABSTRACTPLUGIN_H
 
 #include <QObject>
+
+#include "tepsonic-core-export.h"
 
 class QWidget;
 class QMenu;
 
-class AbstractPlugin : public QObject
+namespace TepSonic
+{
+
+class TEPSONIC_CORE_EXPORT AbstractPlugin : public QObject
 {
     Q_OBJECT
 
@@ -62,4 +67,6 @@ class AbstractPlugin : public QObject
     friend class PluginsManager;
 };
 
-#endif // ABSTRACTPLUGIN_H
+} // namespace TepSonic
+
+#endif // TEPSONIC_ABSTRACTPLUGIN_H

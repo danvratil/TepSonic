@@ -1,6 +1,6 @@
 project(tepsonic)
 
-cmake_minimum_required(VERSION 2.8.9)
+cmake_minimum_required(VERSION 2.8.9 FATAL_ERROR)
 
 set(TEPSONIC_VERSION_MAJOR 1)
 set(TEPSONIC_VERSION_MINOR 60)
@@ -11,6 +11,9 @@ set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 set(CMAKE_AUTOMOC ON)
 
+include(InstallSettings)
+include(GenerateExportHeader)
+include(MacroWriteBasicCMakeVersionFile)
 include(TepSonicMacros)
 
 find_package(PkgConfig REQUIRED)
@@ -33,27 +36,10 @@ add_definitions(${QT_DEFINITIONS}
                 -DQT_USE_FAST_OPERATOR_PLUS
 )
 
-include_directories(
-        ${Qt5Core_INCLUDE_DIRS}
-        ${Qt5Concurrent_INCLUDE_DIRS}
-        ${Qt5Gui_INCLUDE_DIRS}
-        ${Qt5Widgets_INCLUDE_DIRS}
-        ${Qt5Sql_INCLUDE_DIRS}
-        ${PHONON_INCLUDE_DIR}
-        ${TAGLIB_INCLUDES}
-        ${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/qxt
-        ${CMAKE_CURRENT_SOURCE_DIR}/player
-        ${CMAKE_CURRENT_BINARY_DIR}/player
-)
-
 if (UNIX)
     find_package(Qt5X11Extras REQUIRED)
     include_directories(${Qt5X11Extras_INCLUDE_DIRS})
 endif ()
-
-if (NOT DEFINED CMAKE_INSTALL_PREFIX)
-   set(CMAKE_INSTALL_PREFIX /usr/local)
-endif (NOT DEFINED CMAKE_INSTALL_PREFIX)
 
 if (NOT DEFINED LIB_SUFFIX)
   # Detect 32 vs. 64 bit arch
@@ -66,32 +52,10 @@ else (NOT DEFINED LIB_SUFFIX)
    set(LIB_SUFFIX ${LIB_SUFFIX})
 endif ()
 
-if (NOT DEFINED CMAKE_INSTALL_BINARY_DIR)
-   set(INSTALL_BINARY_DIR ${CMAKE_INSTALL_PREFIX}/bin)
-else ()
-   set(INSTALL_BINARY_DIR ${CMAKE_INSTALL_BINARY_DIR})
-endif ()
+set(LIB_INSTALL_DIR lib${LIB_SUFFIX})
 
-if (NOT DEFINED CMAKE_INSTALL_LIBRARY_DIR)
-   set(INSTALL_LIBRARY_DIR ${CMAKE_INSTALL_PREFIX}/lib${LIB_SUFFIX})
-else ()
-   set(INSTALL_LIBRARY_DIR ${CMAKE_INSTALL_LIBRARY_DIR})
-endif ()
-
-if (NOT DEFINED CMAKE_INSTALL_DATA_DIR)
-   set(INSTALL_DATA_DIR ${CMAKE_INSTALL_PREFIX}/share)
-else ()
-   set(INSTALL_DATA_DIR ${CMAKE_INSTALL_DATA_DIR})
-endif ()
-
-if (NOT DEFINED CMAKE_INSTALL_PLUGINS_DIR)
-  set(INSTALL_PLUGINS_DIR ${INSTALL_LIBRARY_DIR}/qt5/plugins)
-else ()
-  set(INSTALL_PLUGINS_DIR ${CMAKE_INSTALL_PLUGINS_DIR})
-endif ()
-
-add_definitions(-DPKGDATADIR="${INSTALL_DATA_DIR}"
-                -DLIBDIR="${INSTALL_LIBRARY_DIR}"
+add_definitions(-DPKGDATADIR="${DATA_INSTALL_DIR}"
+                -DLIBDIR="${LIB_INSTALL_DIR}"
                 -Wall)
 
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_C_COMPILER MATCHES "icc" OR (CMAKE_CXX_COMPILER_ID MATCHES "Clang"))
@@ -122,5 +86,6 @@ endif()
 
 
 add_subdirectory(3rdparty)
+add_subdirectory(core)
 add_subdirectory(player)
 add_subdirectory(plugins)

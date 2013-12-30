@@ -20,10 +20,8 @@
 #include "constants.h"
 #include "pluginsmanager.h"
 #include "abstractplugin.h"
-#include "mainwindow.h"
 #include "player.h"
 #include "settings.h"
-
 
 #include <QApplication>
 #include <QDir>
@@ -34,6 +32,8 @@
 #include <QDebug>
 #include <QSettings>
 #include <QTimer>
+
+using namespace TepSonic;
 
 PluginsManager::Plugin::Plugin():
     isEnabled(false)

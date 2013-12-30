@@ -1,8 +1,10 @@
 find_package(Qt5DBus REQUIRED)
 
 include_directories(
-    ${Qt5DBus_INCLUDE_DIRS}
+    ${CMAKE_SOURCE_DIR}/core
+    ${CMAKE_BINARY_DIR}/core
     ${CMAKE_CURRENT_SOURCE_DIR}
+    ${Qt5DBus_INCLUDE_DIRS}
 )
 
 add_definitions(-DQT_PLUGIN -DQT_SHARED)

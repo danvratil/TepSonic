@@ -30,6 +30,7 @@
 #include <QSqlError>
 #include <QSqlQuery>
 
+using namespace TepSonic;
 
 DatabaseManager* DatabaseManager::s_instance = 0;
 
@@ -48,7 +49,7 @@ DatabaseManager *DatabaseManager::instance()
 
 DatabaseManager::DatabaseManager()
 {
-    QSettings settings(QString(_CONFIGDIR).append(QLatin1String("/main.conf")), QSettings::IniFormat);
+    QSettings settings(QString(XdgConfigDir).append(QLatin1String("/main.conf")), QSettings::IniFormat);
     m_driverType = (DriverTypes)settings.value(QLatin1String("Collections/StorageEngine"), 0).toInt();
     settings.beginGroup(QLatin1String("Collections"));
     settings.beginGroup(QLatin1String("MySQL"));
@@ -76,19 +77,19 @@ void DatabaseManager::connectToDB()
     case SQLite: {
         m_sqlDb = QSqlDatabase::addDatabase(QLatin1String("QSQLITE"));
         // If the DB file does not exist, try to create it
-        if (!QFile::exists(QString(_CONFIGDIR) + QDir::separator() + QLatin1String("collection.db"))) {
+        if (!QFile::exists(QString(XdgConfigDir) + QDir::separator() + QLatin1String("collection.db"))) {
             // First check, if ~/.config/tepsonic exists, eventually create it
             QDir configdir;
-            if (!configdir.exists(QString(_CONFIGDIR)))
-                configdir.mkdir(QString(_CONFIGDIR));
+            if (!configdir.exists(QString(XdgConfigDir)))
+                configdir.mkdir(QString(XdgConfigDir));
             // Now check if the DB file exist and try to create it
-            QFile file(QString(_CONFIGDIR) + QDir::separator() + QLatin1String("collection.db"));
+            QFile file(QString(XdgConfigDir) + QDir::separator() + QLatin1String("collection.db"));
             if (!file.open(QIODevice::WriteOnly)) {
                 qDebug() << "Failed to create new database file!";
                 return;
             }
         }
-        m_sqlDb.setDatabaseName(QString(_CONFIGDIR) + QDir::separator() + QLatin1String("collection.db"));
+        m_sqlDb.setDatabaseName(QString(XdgConfigDir) + QDir::separator() + QLatin1String("collection.db"));
     }
     break;
     }

@@ -17,16 +17,23 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Cambridge, MA 02110-1301, USA.
  */
 
-#ifndef METADATA_H
-#define METADATA_H
+#ifndef TEPSONIC_METADATA_H
+#define TEPSONIC_METADATA_H
 
 #include <QString>
 #include <QSharedDataPointer>
+#include <QList>
 
 #include <taglib/fileref.h>
 
+#include "tepsonic-core-export.h"
+
 class QSqlQuery;
-class MetaData
+
+namespace TepSonic
+{
+
+class TEPSONIC_CORE_EXPORT MetaData
 {
   public:
     typedef QList<MetaData> List;
@@ -66,4 +73,6 @@ class MetaData
     QSharedDataPointer<Private> d;
 };
 
-#endif
+} // namespace TepSonic
+
+#endif // TEPSONIC_METADATA_H

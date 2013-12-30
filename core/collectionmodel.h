@@ -18,17 +18,20 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Cambridge, MA 02110-1301, USA.
  */
 
-#ifndef COLLECTIONMODEL_H
-#define COLLECTIONMODEL_H
+#ifndef TEPSONIC_COLLECTIONMODEL_H
+#define TEPSONIC_COLLECTIONMODEL_H
 
 #include <QAbstractItemModel>
 #include <QModelIndex>
 #include <QVariant>
 #include <QStringList>
 
-class Node;
+#include "tepsonic-core-export.h"
 
-class CollectionModel : public QAbstractItemModel
+namespace TepSonic
+{
+
+class TEPSONIC_CORE_EXPORT CollectionModel : public QAbstractItemModel
 {
     Q_OBJECT
 
@@ -93,5 +96,6 @@ class CollectionModel : public QAbstractItemModel
     friend class Private;
 };
 
+} // namespace TepSonic
 
-#endif // COLLECTIONMODEL_H
+#endif // TEPSONIC_COLLECTIONMODEL_H

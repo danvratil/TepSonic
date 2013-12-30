@@ -23,10 +23,9 @@
 
 #include "utils.h"
 
-namespace Utils
-{
+using namespace TepSonic;
 
-QString formatTimestamp(qint64 secs, bool omitHour)
+QString Utils::formatTimestamp(qint64 secs, bool omitHour)
 {
     int weeks = secs / 604800;
     int days = (secs - (weeks * 604800)) / 86400;
@@ -52,7 +51,7 @@ QString formatTimestamp(qint64 secs, bool omitHour)
     return string;
 }
 
-QString formatMilliseconds(qint64 msecs, bool forceHours)
+QString Utils::formatMilliseconds(qint64 msecs, bool forceHours)
 {
     QTime time;
     time = time.addMSecs(msecs);
@@ -63,7 +62,7 @@ QString formatMilliseconds(qint64 msecs, bool forceHours)
     }
 }
 
-int formattedLengthToSeconds(const QString &formattedLength)
+int Utils::formattedLengthToSeconds(const QString &formattedLength)
 {
     QTime time;
     const QStringList times = formattedLength.split(QLatin1Char(':'), QString::SkipEmptyParts);
@@ -74,6 +73,4 @@ int formattedLengthToSeconds(const QString &formattedLength)
     }
 
     return -time.msecsTo(QTime());
-}
-
 }

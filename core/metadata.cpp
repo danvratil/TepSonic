@@ -28,6 +28,8 @@
 
 #include <taglib/fileref.h>
 
+using namespace TepSonic;
+
 class MetaData::Private : public QSharedData
 {
   public:

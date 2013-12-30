@@ -22,6 +22,8 @@
 
 #include <QDebug>
 
+using namespace TepSonic;
+
 QStringList SupportedFormats::extensionsList()
 {
     const QStringList availableMimeTypes = Phonon::BackendCapabilities::availableMimeTypes();

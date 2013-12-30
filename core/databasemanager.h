@@ -24,6 +24,7 @@
 #include <QSettings>
 #include <QSqlDatabase>
 
+#include "tepsonic-core-export.h"
 
 // Current DB revision
 /* When connecting to DB, we automatically checked for DB revision. When the numbers
@@ -31,7 +32,10 @@
 */
 #define _DBREVISION "8"
 
-class DatabaseManager
+namespace TepSonic
+{
+
+class TEPSONIC_CORE_EXPORT DatabaseManager
 {
 
   public:
@@ -78,6 +82,6 @@ class DatabaseManager
 
 };
 
-
+} // namespace TepSonic
 
 #endif // DATABASEMANAGER_H

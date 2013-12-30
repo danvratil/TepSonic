@@ -17,8 +17,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Cambridge, MA 02110-1301, USA.
  */
 
-#ifndef PLUGINSMANAGER_H
-#define PLUGINSMANAGER_H
+#ifndef TEPSONIC_PLUGINSMANAGER_H
+#define TEPSONIC_PLUGINSMANAGER_H
 
 #include <QObject>
 #include <QList>
@@ -26,12 +26,14 @@
 #include <QMenu>
 #include <QTabWidget>
 
-#include "abstractplugin.h"
+#include <abstractplugin.h>
 
-typedef QString(*PluginNameFcn)(void);
-typedef QString(*PluginIDFcn)(void);
+#include "tepsonic-core-export.h"
 
-class PluginsManager : public QObject
+namespace TepSonic
+{
+
+class TEPSONIC_CORE_EXPORT PluginsManager : public QObject
 {
     Q_OBJECT
     Q_DISABLE_COPY(PluginsManager)
@@ -93,4 +95,6 @@ class PluginsManager : public QObject
 
 };
 
-#endif // PLUGINSMANAGER_H
+} // namespace TepSonic
+
+#endif // TEPSONIC_PLUGINSMANAGER_H

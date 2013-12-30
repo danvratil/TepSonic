@@ -22,6 +22,8 @@
 #include <stdlib.h>
 #include <QDir>
 
+using namespace TepSonic;
+
 QString getConfigDir()
 {
 

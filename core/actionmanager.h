@@ -17,17 +17,23 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Cambridge, MA 02110-1301, USA.
  */
 
-#ifndef ACTIONMANAGER_H
-#define ACTIONMANAGER_H
+#ifndef TEPSONIC_ACTIONMANAGER_H
+#define TEPSONIC_ACTIONMANAGER_H
 
 #include <QMap>
 #include <QString>
 #include <QIcon>
 #include <QKeySequence>
 
+#include "tepsonic-core-export.h"
+
 class QAction;
 class QMenu;
-class ActionManager
+
+namespace TepSonic
+{
+
+class TEPSONIC_CORE_EXPORT ActionManager
 {
   public:
     static ActionManager *instance();
@@ -53,4 +59,6 @@ class ActionManager
     static ActionManager *sInstance;
 };
 
-#endif // ACTIONMANAGER_H
+} // namespace TepSonic
+
+#endif // TEPSONIC_ACTIONMANAGER_H

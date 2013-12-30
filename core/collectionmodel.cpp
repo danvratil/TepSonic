@@ -31,7 +31,9 @@
 #include <QSqlQuery>
 #include <QSqlError>
 
-Q_DECLARE_METATYPE(Node*)
+Q_DECLARE_METATYPE(TepSonic::Node*)
+
+using namespace TepSonic;
 
 CollectionModel::Private::Private(CollectionModel *parent):
     QObject(),

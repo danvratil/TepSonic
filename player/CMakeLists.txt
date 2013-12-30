@@ -1,31 +1,19 @@
-include_directories(bookmarks
+include_directories(${CMAKE_SOURCE_DIR}/core
+                    ${CMAKE_BINARY_DIR}/core
+                    bookmarks
                     collections
                     playlist)
 
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/constants.h.cmake
-               ${CMAKE_CURRENT_BINARY_DIR}/constants.h)
 
 set(player_SRCS
-    actionmanager.cpp
-    settings.cpp
     main.cpp
-    constants.cpp
     mainwindow.cpp
-    player.cpp
     statusbar.cpp
-    abstractplugin.cpp
-    pluginsmanager.cpp
     taskmanager.cpp
-    databasemanager.cpp
-    m3u.cpp
-    utils.cpp
     trayicon.cpp
-    supportedformats.cpp
     filesystemview.cpp
     filesystemwidget.cpp
-    metadata.cpp
     metadataeditor.cpp
-    settings.cpp
     settings/settingspage.cpp
     settings/settingsdialog.cpp
     settings/playerpage.cpp
@@ -34,14 +22,12 @@ set(player_SRCS
     settings/shortcutspage.cpp
     settings/changeshortcutdialog.cpp
     settings/playereffectdialog.cpp
-    collections/collectionmodel.cpp
     collections/collectionbuilder.cpp
     collections/collectionproxymodel.cpp
     collections/collectionitemdelegate.cpp
     collections/collectionview.cpp
     playlist/playlistview.cpp
     playlist/playlistitemdelegate.cpp
-    playlist/playlistmodel.cpp
     playlist/playlistproxymodel.cpp
 )
 
@@ -82,6 +68,7 @@ if (UNIX)
 endif ()
 
 target_link_libraries(tepsonic
+                      tepsonic_core
                       Qt5::Core
                       Qt5::Gui
                       Qt5::Sql
@@ -97,27 +84,27 @@ tepsonic_add_translations(tepsonic ${player_TSS})
 
 # standard instalation of the binary
 install(TARGETS tepsonic
-        RUNTIME DESTINATION ${INSTALL_BINARY_DIR}
+        DESTINATION ${BIN_INSTALL_DIR}
 )
 
 install(FILES ../tepsonic.desktop
-        DESTINATION ${INSTALL_DATA_DIR}/applications
+        DESTINATION ${DATA_INSTALL_DIR}/applications
 )
 install(FILES ../icons/app_icons/16x16/tepsonic.png
-        DESTINATION ${INSTALL_DATA_DIR}/icons/hicolor/16x16/apps
+        DESTINATION ${DATA_INSTALL_DIR}/icons/hicolor/16x16/apps
 )
 install(FILES ../icons/app_icons/32x32/tepsonic.png
-        DESTINATION ${INSTALL_DATA_DIR}/icons/hicolor/32x32/apps
+        DESTINATION ${DATA_INSTALL_DIR}/icons/hicolor/32x32/apps
 )
 install(FILES ../icons/app_icons/48x48/tepsonic.png
-        DESTINATION ${INSTALL_DATA_DIR}/icons/hicolor/48x48/apps
+        DESTINATION ${DATA_INSTALL_DIR}/icons/hicolor/48x48/apps
 )
 install(FILES ../icons/app_icons/64x64/tepsonic.png
-        DESTINATION ${INSTALL_DATA_DIR}/icons/hicolor/64x64/apps
+        DESTINATION ${DATA_INSTALL_DIR}/icons/hicolor/64x64/apps
 )
 install(FILES ../icons/app_icons/128x128/tepsonic.png
-        DESTINATION ${INSTALL_DATA_DIR}/icons/hicolor/128x128/apps
+        DESTINATION ${DATA_INSTALL_DIR}/icons/hicolor/128x128/apps
 )
 install(FILES ../icons/app_icons/256x256/tepsonic.png
-        DESTINATION ${INSTALL_DATA_DIR}/icons/hicolor/256x256/apps
+        DESTINATION ${DATA_INSTALL_DIR}/icons/hicolor/256x256/apps
 )

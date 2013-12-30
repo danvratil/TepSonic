@@ -24,6 +24,8 @@
 #include <QActionGroup>
 #include <QDebug>
 
+using namespace TepSonic;
+
 ActionManager* ActionManager::sInstance = 0;
 
 ActionManager* ActionManager::instance()

@@ -37,6 +37,8 @@
 #include <taglib/tag.h>
 #include <taglib/tstring.h>
 
+using namespace TepSonic;
+
 Player* Player::s_instance = 0;
 
 Player* Player::instance()
@@ -174,7 +176,7 @@ void Player::emitFinished()
 
 void Player::setDefaultOutputDevice()
 {
-    const QSettings settings(QString(_CONFIGDIR).append(QLatin1String("/main.conf")), QSettings::IniFormat);
+    const QSettings settings(QString(XdgConfigDir).append(QLatin1String("/main.conf")), QSettings::IniFormat);
     const int index = settings.value(QLatin1String("Preferences/OutputDevice")).toInt();
 
     const QList<Phonon::AudioOutputDevice> devices = Phonon::BackendCapabilities::availableAudioOutputDevices();
@@ -188,7 +190,7 @@ void Player::setDefaultOutputDevice()
 
 void Player::loadEffects()
 {
-    const QSettings settings(QString(_CONFIGDIR).append(QLatin1String("/main.conf")), QSettings::IniFormat);
+    const QSettings settings(QString(XdgConfigDir).append(QLatin1String("/main.conf")), QSettings::IniFormat);
     const QList<Phonon::EffectDescription> effects = Phonon::BackendCapabilities::availableAudioEffects();
     for (int i = 0; i < effects.count(); i++) {
         Phonon::Effect *effect = new Phonon::Effect(effects.at(i));

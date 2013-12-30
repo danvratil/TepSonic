@@ -5,10 +5,12 @@ find_package(Qt5Network REQUIRED)
 add_definitions(-DQT_PLUGIN -DQT_SHARED)
 
 include_directories(
-        ${CMAKE_CURRENT_SOURCE_DIR}
-        ${CMAKE_CURRENT_BINARY_DIR}
-        ${Qt5Network_INCLUDE_DIRS}
-        ${Qt5Xml_INCLUDE_DIRS}
+    ${CMAKE_SOURCE_DIR}/core
+    ${CMAKE_BINARY_DIR}/core
+    ${CMAKE_CURRENT_SOURCE_DIR}
+    ${CMAKE_CURRENT_BINARY_DIR}
+    ${Qt5Network_INCLUDE_DIRS}
+    ${Qt5Xml_INCLUDE_DIRS}
 )
 
 set(lastfmscrobbler_SRCS

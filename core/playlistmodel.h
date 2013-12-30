@@ -19,8 +19,8 @@
  */
 
 
-#ifndef PLAYLISTMODEL_H
-#define PLAYLISTMODEL_H
+#ifndef TEPSONIC_PLAYLISTMODEL_H
+#define TEPSONIC_PLAYLISTMODEL_H
 
 #include <QAbstractItemModel>
 #include <QModelIndex>
@@ -28,11 +28,14 @@
 #include <QReadWriteLock>
 #include <QStringList>
 
-#include "player.h"
+#include <metadata.h>
 
-class PlaylistProxyModel;
+#include "tepsonic-core-export.h"
 
-class PlaylistModel : public QAbstractItemModel
+namespace TepSonic
+{
+
+class TEPSONIC_CORE_EXPORT PlaylistModel : public QAbstractItemModel
 {
     Q_OBJECT
 
@@ -106,5 +109,6 @@ class PlaylistModel : public QAbstractItemModel
 
 };
 
+} // namespace TepSonic
 
-#endif // PLAYLISTMODEL_H
+#endif // TEPSONIC_PLAYLISTMODEL_H

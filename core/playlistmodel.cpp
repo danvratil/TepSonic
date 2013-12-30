@@ -20,7 +20,6 @@
 
 
 #include "playlistmodel.h"
-#include "playlistproxymodel.h"
 #include "player.h"
 #include "utils.h"
 #include "m3u.h"
@@ -38,6 +37,8 @@
 #include <taglib/taglib.h>
 #include <taglib/fileref.h>
 #include <taglib/tag.h>
+
+using namespace TepSonic;
 
 Q_DECLARE_METATYPE(MetaData);
 

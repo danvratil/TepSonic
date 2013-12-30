@@ -19,8 +19,8 @@
  *
  */
 
-#ifndef SETTINGS_H
-#define SETTINGS_H
+#ifndef TEPSONIC_SETTINGS_H
+#define TEPSONIC_SETTINGS_H
 
 #include <QtCore/QObject>
 #include <QtCore/QStringList>
@@ -28,7 +28,12 @@
 class QTimer;
 class QSettings;
 
-class Settings
+#include "tepsonic-core-export.h"
+
+namespace TepSonic
+{
+
+class TEPSONIC_CORE_EXPORT Settings
 {
     Q_DISABLE_COPY(Settings)
 
@@ -93,4 +98,6 @@ class Settings
     QTimer *m_writebackTimer;
 };
 
-#endif // SETTINGS_H
+} // namespace TepSonic
+
+#endif // TEPSONIC_SETTINGS_H

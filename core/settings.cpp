@@ -25,6 +25,8 @@
 #include <QSettings>
 #include <QTimer>
 
+using namespace TepSonic;
+
 Settings *Settings::s_instance = 0;
 
 Settings* Settings::instance()
@@ -38,7 +40,7 @@ Settings* Settings::instance()
 
 Settings::Settings()
 {
-    m_settings = new QSettings(_CONFIGDIR + QLatin1String("/main.conf"), QSettings::IniFormat);
+    m_settings = new QSettings(XdgConfigDir + QLatin1String("/main.conf"), QSettings::IniFormat);
     m_writebackTimer = new QTimer();
     m_writebackTimer->setInterval(100);
     m_writebackTimer->setSingleShot(true);

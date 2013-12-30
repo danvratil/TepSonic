@@ -1,6 +1,6 @@
 /*
  * TEPSONIC
- * Copyright 2010 David Watzke <david@watzke.cz>
+ * Copyright 2013 Daniel Vrátil <dan@progdan.cz>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -17,15 +17,47 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Cambridge, MA 02110-1301, USA.
  */
 
-#ifndef SUPPORTEDFORMATS_H
-#define SUPPORTEDFORMATS_H
+#include "abstractplugin.h"
 
-#include <QStringList>
+using namespace TepSonic;
 
-class SupportedFormats
+AbstractPlugin::AbstractPlugin(QObject *parent):
+    QObject(parent)
 {
-  public:
-    static QStringList extensionsList();
-};
+}
 
-#endif // SUPPORTEDFORMATS_H
+AbstractPlugin::~AbstractPlugin()
+{
+}
+
+void AbstractPlugin::configUI(QWidget *parentWidget)
+{
+    Q_UNUSED(parentWidget);
+}
+
+void AbstractPlugin::settingsAccepted()
+{
+}
+
+void AbstractPlugin::quit()
+{
+}
+
+void AbstractPlugin::setupMenu(QMenu *menu, AbstractPlugin::MenuTypes menuType)
+{
+    Q_UNUSED(menu);
+    Q_UNUSED(menuType);
+}
+
+bool AbstractPlugin::setupPane(QWidget *widget, QString &label)
+{
+    Q_UNUSED(widget);
+    Q_UNUSED(label);
+
+    return false;
+}
+
+void AbstractPlugin::emitError(const QString &errorMsg)
+{
+    Q_EMIT error(errorMsg);
+}

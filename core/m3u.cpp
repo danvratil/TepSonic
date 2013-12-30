@@ -25,6 +25,8 @@
 
 #define M3UHEADER "#EXT3MU"
 
+using namespace TepSonic;
+
 QStringList M3U::loadFromFile(const QString &filePath)
 {
     QFile file(filePath);

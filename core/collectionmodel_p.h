@@ -24,6 +24,9 @@
 
 #include <QSet>
 
+namespace TepSonic
+{
+
 class Node
 {
   public:
@@ -208,5 +211,7 @@ class CollectionModel::Private: public QObject
   private:
     CollectionModel * const q;
 };
+
+} // namespace TepSonic
 
 #endif

@@ -1,6 +1,6 @@
 /*
  * TEPSONIC
- * Copyright 2010 Dan Vratil <vratil@progdansoft.com>
+ * Copyright 2010 - 2013 Daniel Vrátil <dan@progdan.cz>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -17,22 +17,27 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Cambridge, MA 02110-1301, USA.
  */
 
-#ifndef CONSTANTS_H
-#define CONSTANTS_H
+#ifndef TEPSONIC_CONSTANTS_H
+#define TEPSONIC_CONSTANTS_H
 
 #include <QString>
 #include <stdlib.h>
+
+#include "tepsonic-core-export.h"
 
 #cmakedefine TEPSONIC_VERSION_MAJOR "${TEPSONIC_VERSION_MAJOR}"
 #cmakedefine TEPSONIC_VERSION_MINOR "${TEPSONIC_VERSION_MINOR}"
 #cmakedefine TEPSONIC_VERSION_PATCH "${TEPSONIC_VERSION_PATCH}"
 #cmakedefine TEPSONIC_VERSION "${TEPSONIC_VERSION}"
 
+namespace TepSonic
+{
 
-QString getConfigDir();
+    TEPSONIC_CORE_EXPORT QString getConfigDir();
 
-// FIXME: Kill this variable
-const QString _CONFIGDIR = getConfigDir();
+    // FIXME: Kill this variable
+    TEPSONIC_CORE_EXPORT const QString XdgConfigDir = getConfigDir();
 
+} // namespace TepSonic
 
-#endif // CONSTANTS_H
+#endif // TEPSONIC_CONSTANTS_H

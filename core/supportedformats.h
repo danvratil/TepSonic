@@ -1,5 +1,6 @@
 /*
  * TEPSONIC
+ * Copyright 2010 David Watzke <david@watzke.cz>
  * Copyright 2013 Daniel Vrátil <dan@progdan.cz>
  *
  * This program is free software; you can redistribute it and/or
@@ -17,15 +18,22 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Cambridge, MA 02110-1301, USA.
  */
 
-#ifndef M3U_H
-#define M3U_H
+#ifndef TEPSONIC_SUPPORTEDFORMATS_H
+#define TEPSONIC_SUPPORTEDFORMATS_H
 
 #include <QStringList>
 
-namespace M3U
-{
-    void writeToFile(const QStringList &playlist, const QString &file);
-    QStringList loadFromFile(const QString &file);
-}
+#include "tepsonic-core-export.h"
 
-#endif
+namespace TepSonic
+{
+
+class TEPSONIC_CORE_EXPORT SupportedFormats
+{
+  public:
+    static QStringList extensionsList();
+};
+
+} // namespace TepSonic
+
+#endif // TEPSONIC_SUPPORTEDFORMATS_H
