@@ -84,6 +84,9 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_C_COMPILER MATCHES "icc" OR (CMAKE_CXX_COMP
   endif()
 endif()
 
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}
+                    ${CMAKE_CURRENT_BINARY_DIR}
+)
 
 add_subdirectory(3rdparty)
 add_subdirectory(core)

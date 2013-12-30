@@ -19,7 +19,8 @@
 
 #include "lyrics.h"
 #include "lyricsscrollarea.h"
-#include "player.h"
+
+#include <core/player.h>
 
 #include <QDir>
 #include <QString>
@@ -38,6 +39,8 @@
 
 #include <QListWidgetItem>
 
+using namespace TepSonic;
+
 LyricsPlugin::LyricsPlugin()
 {
     const QString locale = QLocale::system().name();
@@ -52,8 +55,8 @@ LyricsPlugin::LyricsPlugin()
     m_translator->load(QLatin1String("tepsonic_lyricsplugin_") + locale, localeDir);
     qApp->installTranslator(m_translator);
 
-    connect(Player::instance(), SIGNAL(trackChanged(MetaData)),
-            this, SLOT(trackChanged(MetaData)));
+    connect(Player::instance(), &Player::trackChanged,
+            this, &LyricsPlugin::trackChanged);
 }
 
 LyricsPlugin::~LyricsPlugin()

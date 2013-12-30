@@ -26,7 +26,7 @@
 #include <QMenu>
 #include <QTabWidget>
 
-#include <abstractplugin.h>
+#include <core/abstractplugin.h>
 
 #include "tepsonic-core-export.h"
 

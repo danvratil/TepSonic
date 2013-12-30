@@ -1,5 +1,7 @@
-include_directories(${CMAKE_SOURCE_DIR}/core
-                    ${CMAKE_BINARY_DIR}/core
+include_directories(${CMAKE_BINARY_DIR}/core
+                    ${CMAKE_CURRENT_BINARY_DIR}
+                    ${CMAKE_CURRENT_SOURCE_DIR}
+                    ${CMAKE_SOURCE_DIR}/3rdparty/qxt
                     bookmarks
                     collections
                     playlist)
@@ -46,6 +48,7 @@ set(player_RCCS
     icons.qrc
 )
 
+
 qt5_wrap_ui(player_QUIS_HDRS ${player_QUIS})
 qt5_add_resources(player_RCCS_SRCS ${player_RCCS})
 
@@ -88,23 +91,23 @@ install(TARGETS tepsonic
 )
 
 install(FILES ../tepsonic.desktop
-        DESTINATION ${DATA_INSTALL_DIR}/applications
+        DESTINATION ${CMAKE_INSTALL_PREFIX}/share/applications
 )
 install(FILES ../icons/app_icons/16x16/tepsonic.png
-        DESTINATION ${DATA_INSTALL_DIR}/icons/hicolor/16x16/apps
+        DESTINATION ${CMAKE_INSTALL_PREFIX}/share//icons/hicolor/16x16/apps
 )
 install(FILES ../icons/app_icons/32x32/tepsonic.png
-        DESTINATION ${DATA_INSTALL_DIR}/icons/hicolor/32x32/apps
+        DESTINATION ${CMAKE_INSTALL_PREFIX}/share/icons/hicolor/32x32/apps
 )
 install(FILES ../icons/app_icons/48x48/tepsonic.png
-        DESTINATION ${DATA_INSTALL_DIR}/icons/hicolor/48x48/apps
+        DESTINATION ${CMAKE_INSTALL_PREFIX}/share/icons/hicolor/48x48/apps
 )
 install(FILES ../icons/app_icons/64x64/tepsonic.png
-        DESTINATION ${DATA_INSTALL_DIR}/icons/hicolor/64x64/apps
+        DESTINATION ${CMAKE_INSTALL_PREFIX}/share/icons/hicolor/64x64/apps
 )
 install(FILES ../icons/app_icons/128x128/tepsonic.png
-        DESTINATION ${DATA_INSTALL_DIR}/icons/hicolor/128x128/apps
+        DESTINATION ${CMAKE_INSTALL_PREFIX}/share/icons/hicolor/128x128/apps
 )
 install(FILES ../icons/app_icons/256x256/tepsonic.png
-        DESTINATION ${DATA_INSTALL_DIR}/icons/hicolor/256x256/apps
+        DESTINATION ${CMAKE_INSTALL_PREFIX}/share/icons/hicolor/256x256/apps
 )

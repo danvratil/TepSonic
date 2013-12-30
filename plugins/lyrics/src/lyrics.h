@@ -21,8 +21,8 @@
 #ifndef LYRICS_H
 #define LYRICS_H
 
-#include "abstractplugin.h"
-#include "metadata.h"
+#include <core/abstractplugin.h>
+#include <core/metadata.h>
 
 #include <QTranslator>
 #include <QNetworkReply>
@@ -34,7 +34,7 @@ class QSplitter;
 class QGridLayout;
 class QModelIndex;
 
-class LyricsPlugin : public AbstractPlugin
+class LyricsPlugin : public TepSonic::AbstractPlugin
 {
     Q_OBJECT
     Q_PLUGIN_METADATA(IID "cz.progdan.tepsonic.plugins.Lyrics"
@@ -49,7 +49,7 @@ class LyricsPlugin : public AbstractPlugin
     bool setupPane(QWidget *widget, QString &label);
 
   public Q_SLOTS:
-    void trackChanged(const MetaData &metaData);
+    void trackChanged(const TepSonic::MetaData &metaData);
 
   private Q_SLOTS:
     void loadLyrics(const QModelIndex &index);

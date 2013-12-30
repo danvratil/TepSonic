@@ -20,11 +20,11 @@
 #ifndef MPRIS2PLUGIN_H
 #define MPRIS2PLUGIN_H
 
-#include "abstractplugin.h"
+#include <core/abstractplugin.h>
 
 class QDBusAbstractAdaptor;
 
-class MPRIS2Plugin : public AbstractPlugin
+class MPRIS2Plugin : public TepSonic::AbstractPlugin
 {
     Q_OBJECT
     Q_PLUGIN_METADATA(IID "cz.progdan.tepsonic.plugins.MPRIS2"

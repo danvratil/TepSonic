@@ -18,7 +18,10 @@
  */
 
 #include "playlistproxymodel.h"
-#include "playlistmodel.h"
+
+#include <core/playlistmodel.h>
+
+using namespace TepSonic;
 
 PlaylistProxyModel::PlaylistProxyModel(PlaylistModel *model, QObject *parent):
     QSortFilterProxyModel(parent)

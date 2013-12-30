@@ -18,15 +18,18 @@
  */
 
 #include "collectionitemdelegate.h"
-#include "collectionmodel.h"
 #include "collectionproxymodel.h"
 #include "collectionview.h"
-#include "utils.h"
+
+#include <core/collectionmodel.h>
+#include <core/utils.h>
 
 #include <QApplication>
 #include <QFont>
 #include <QPoint>
 #include <QDebug>
+
+using namespace TepSonic;
 
 CollectionItemDelegate::CollectionItemDelegate(QObject *parent):
     QStyledItemDelegate(parent)

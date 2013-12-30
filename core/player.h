@@ -26,7 +26,7 @@
 #include <phonon/audiooutput.h>
 #include <phonon/mediaobject.h>
 
-#include <metadata.h>
+#include <core/metadata.h>
 
 #include "tepsonic-core-export.h"
 

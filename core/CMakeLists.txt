@@ -25,7 +25,7 @@ set(core_HDRS
     abstractplugin.h
     actionmanager.h
     collectionmodel.h
-    ${CMAKE_CURRENT_BINARY_DIR}/contants.h
+    ${CMAKE_CURRENT_BINARY_DIR}/constants.h
     databasemanager.h
     m3u.h
     metadata.h
@@ -68,7 +68,7 @@ install(TARGETS tepsonic_core
 )
 
 install(FILES ${core_HDRS}
-        DESTINATION ${INCLUDE_INSTALL_DIR}/tepsonic
+        DESTINATION ${INCLUDE_INSTALL_DIR}/tepsonic/core/
 )
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/TepSonicConfig.cmake.in

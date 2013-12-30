@@ -19,10 +19,10 @@
 
 #include "playerpage.h"
 #include "ui_playerpage.h"
-#include "settings.h"
-
 #include "playereffectdialog.h"
-#include "player.h"
+
+#include <core/settings.h>
+#include <core/player.h>
 
 #include <QStandardItem>
 #include <phonon/BackendCapabilities>
@@ -31,6 +31,7 @@
 #include <phonon/EffectWidget>
 
 using namespace SettingsPages;
+using namespace TepSonic;
 
 PlayerPage::PlayerPage(QWidget *parent):
     SettingsPage(parent)

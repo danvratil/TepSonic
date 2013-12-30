@@ -19,12 +19,15 @@
 
 #include "metadataeditor.h"
 #include "ui_metadataeditor.h"
-#include "databasemanager.h"
+
+#include <core/databasemanager.h>
 
 #include <QFontMetrics>
 #include <QSqlQuery>
 #include <QFileInfo>
 #include <QDebug>
+
+using namespace TepSonic;
 
 MetadataEditor::MetadataEditor(QWidget *parent) :
     QDialog(parent),

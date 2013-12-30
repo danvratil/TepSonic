@@ -19,13 +19,15 @@
 
 #include "collectionspage.h"
 #include "ui_collectionspage.h"
-#include "settings.h"
 #include "taskmanager.h"
+
+#include <core/settings.h>
 
 #include <QFileDialog>
 #include <QListWidgetItem>
 
 using namespace SettingsPages;
+using namespace TepSonic;
 
 enum {
     TAB_SETTINGS,

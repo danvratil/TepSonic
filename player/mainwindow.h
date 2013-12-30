@@ -20,26 +20,27 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include <QMessageBox>
 #include <QMainWindow>
 #include <QPointer>
-#include <QLabel>
-#include <QKeyEvent>
-#include <QSortFilterProxyModel>
-#include <QItemSelectionModel>
 #include <QMenu>
 
-#include "player.h"
-#include "actionmanager.h"
+#include <core/player.h>
+#include <core/actionmanager.h>
 
-class PlaylistModel;
-class DatabaseManager;
-class MetadataEditor;
+class QLabel;
+
+namespace TepSonic
+{
+    class PlaylistModel;
+    class DatabaseManager;
+}
 
 namespace Ui
 {
-class MainWindow;
+    class MainWindow;
 }
+
+class MetadataEditor;
 
 class MainWindow : public QMainWindow
 {
@@ -51,7 +52,7 @@ class MainWindow : public QMainWindow
 
     void installPluginsMenus();
 
-    PlaylistModel* playlistModel() const;
+    TepSonic::PlaylistModel* playlistModel() const;
 
   public Q_SLOTS:
     void showError(const QString &error);
@@ -107,7 +108,7 @@ class MainWindow : public QMainWindow
     template<typename T>
     void addAction(QMenu *menu, const QString &name, T *receiver, void (T::*method)(void))
     {
-        QAction *action = ActionManager::instance()->action(name);
+        QAction *action = TepSonic::ActionManager::instance()->action(name);
         connect(action, &QAction::triggered, receiver, method);
         menu->addAction(action);
     }
@@ -115,7 +116,7 @@ class MainWindow : public QMainWindow
     template<typename Functor>
     void addAction(QMenu *menu, const QString &name, Functor f)
     {
-        QAction *action = ActionManager::instance()->action(name);
+        QAction *action = TepSonic::ActionManager::instance()->action(name);
         connect(action, &QAction::triggered, f);
         menu->addAction(action);
     }

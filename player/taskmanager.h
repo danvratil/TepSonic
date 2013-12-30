@@ -24,7 +24,7 @@
 #include <QThreadPool>
 #include <QModelIndex>
 
-#include "player.h"
+#include <core/player.h>
 
 class CollectionBuilder;
 

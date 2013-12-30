@@ -18,12 +18,14 @@
  */
 
 #include "playlistview.h"
-#include "playlistmodel.h"
 #include "playlistproxymodel.h"
 #include "playlistitemdelegate.h"
-#include "utils.h"
-#include "actionmanager.h"
-#include "supportedformats.h"
+
+#include <core/actionmanager.h>
+#include <core/player.h>
+#include <core/playlistmodel.h>
+#include <core/supportedformats.h>
+#include <core/utils.h>
 
 #include <QApplication>
 #include <QDropEvent>
@@ -48,6 +50,8 @@
 #include <stdlib.h>
 #include <time.h>
 #endif
+
+using namespace TepSonic;
 
 PlaylistView::PlaylistView(QWidget *parent):
     QTreeView(parent)

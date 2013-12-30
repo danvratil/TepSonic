@@ -19,12 +19,15 @@
 
 #include "filesystemwidget.h"
 #include "filesystemview.h"
-#include "settings.h"
+
+#include <core/settings.h>
 
 #include <QVBoxLayout>
 #include <QPushButton>
 #include <QLineEdit>
 #include <QDir>
+
+using namespace TepSonic;
 
 FileSystemWidget::FileSystemWidget(QWidget* parent):
     QWidget(parent)

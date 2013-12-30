@@ -32,12 +32,15 @@
 
 namespace Ui
 {
-class SettingsDialog;
+    class SettingsDialog;
+}
+
+namespace TepSonic
+{
+    class Player;
 }
 
 class MainWindow;
-class Player;
-
 
 //! SettingsDialog is a dialog window with application settings
 /*!

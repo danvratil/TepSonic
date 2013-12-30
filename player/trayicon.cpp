@@ -18,13 +18,15 @@
  */
 
 #include "trayicon.h"
-#include "player.h"
 #include "mainwindow.h"
+
+#include <core/player.h>
 
 #include <QEvent>
 #include <QFileInfo>
 #include <QWheelEvent>
 
+using namespace TepSonic;
 
 TrayIcon::TrayIcon(MainWindow *parent):
     QSystemTrayIcon(parent)

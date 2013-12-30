@@ -22,9 +22,8 @@
 
 #include <QSortFilterProxyModel>
 #include <QModelIndex>
-#include "playlistmodel.h"
 
-class PlaylistModel;
+#include <core/playlistmodel.h>
 
 class PlaylistProxyModel : public QSortFilterProxyModel
 {
@@ -32,10 +31,10 @@ class PlaylistProxyModel : public QSortFilterProxyModel
 
   public:
     enum {
-        RandomColumn = PlaylistModel::ColumnCount
+        RandomColumn = TepSonic::PlaylistModel::ColumnCount
     };
 
-    PlaylistProxyModel(PlaylistModel *model, QObject *parent = 0);
+    PlaylistProxyModel(TepSonic::PlaylistModel *model, QObject *parent = 0);
 
   protected:
     bool filterAcceptsRow(int sourceRow, const QModelIndex &sourceParent) const;

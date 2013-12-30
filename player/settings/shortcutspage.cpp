@@ -20,11 +20,13 @@
 #include "shortcutspage.h"
 #include "ui_shortcutspage.h"
 #include "changeshortcutdialog.h"
-#include "settings.h"
+
+#include <core/settings.h>
 
 #include <QTreeWidgetItem>
 
 using namespace SettingsPages;
+using namespace TepSonic;
 
 ShortcutsPage::ShortcutsPage(QWidget *parent):
     SettingsPage(parent)

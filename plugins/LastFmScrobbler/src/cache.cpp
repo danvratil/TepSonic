@@ -21,7 +21,8 @@
 #include "scrobbler.h"
 #include "track.h"
 #include "lastfm.h"
-#include "constants.h" // player/constants.h
+
+#include <core/constants.h>
 
 #include <QDomDocument>
 #include <QNetworkRequest>
@@ -30,6 +31,7 @@
 #include <QDir>
 
 using namespace LastFm;
+using namespace TepSonic;
 
 Cache::Cache(Scrobbler *scrobbler):
     QObject(scrobbler),
@@ -42,7 +44,7 @@ Cache::Cache(Scrobbler *scrobbler):
 Cache::~Cache()
 {
     // Save the cache
-    QFile file(QString(_CONFIGDIR) + QDir::separator() + QLatin1String("lastfmcache.xml"));
+    QFile file(XdgConfigDir + QDir::separator() + QLatin1String("lastfmcache.xml"));
     if (!file.open(QIODevice::WriteOnly)) {
         return;
     }
@@ -179,7 +181,7 @@ void Cache::loadCache()
     qDeleteAll(m_cache);
     m_cache.clear();
 
-    QFile file(QString(_CONFIGDIR) + QDir::separator() + QLatin1String("lastfmcache.xml"));
+    QFile file(XdgConfigDir + QDir::separator() + QLatin1String("lastfmcache.xml"));
     if (!file.open(QIODevice::ReadOnly)) {
         return;
     }

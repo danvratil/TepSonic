@@ -28,7 +28,7 @@
 #include <QReadWriteLock>
 #include <QStringList>
 
-#include <metadata.h>
+#include <core/metadata.h>
 
 #include "tepsonic-core-export.h"
 

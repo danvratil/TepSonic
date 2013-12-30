@@ -24,13 +24,14 @@ set(mpris2plugin_SRCS
 )
 
 add_library(tepsonic_mpris2plugin SHARED
-               ${mpris2plugin_SRCS}
-               ${mpris2plugin_QMOC_SRCS}
+            ${mpris2plugin_SRCS}
+            ${mpris2plugin_QMOC_SRCS}
 )
 
 target_link_libraries(tepsonic_mpris2plugin
-               Qt5::Core
-               Qt5::DBus
+                      tepsonic_core
+                      Qt5::Core
+                      Qt5::DBus
 )
 
 # standard UNIX and windows
@@ -40,5 +41,5 @@ set_target_properties(tepsonic_mpris2plugin
                 SOVERSION 1
 )
 install(TARGETS tepsonic_mpris2plugin
-        DESTINATION ${INSTALL_PLUGINS_DIR}/tepsonic/
+        DESTINATION ${LIB_INSTALL_DIR}/qt5/plugins/tepsonic/
 )

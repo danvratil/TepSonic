@@ -18,9 +18,10 @@
  */
 
 #include "collectionbuilder.h"
-#include "collectionmodel.h"
-#include "databasemanager.h"
-#include "supportedformats.h"
+
+#include <core/collectionmodel.h>
+#include <core/databasemanager.h>
+#include <core/supportedformats.h>
 
 #include <taglib/fileref.h>
 #include <taglib/tag.h>
@@ -40,6 +41,8 @@
 #include <QSqlResult>
 #include <QHash>
 #include <QHashIterator>
+
+using namespace TepSonic;
 
 CollectionBuilder::CollectionBuilder():
     QObject(),

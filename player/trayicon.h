@@ -22,7 +22,7 @@
 
 #include <QSystemTrayIcon>
 
-#include "player.h"
+#include <core/player.h>
 
 class MainWindow;
 

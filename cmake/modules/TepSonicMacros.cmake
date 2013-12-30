@@ -1,5 +1,5 @@
 macro (tepsonic_add_translations _target _languages)
-  set (_install_target_dir "${INSTALL_DATA_DIR}/tepsonic/locale/")
+  set (_install_target_dir "${CMAKE_INSTALL_PREFIX}/share/tepsonic/locale/")
   set (_translations)
   foreach (language ${_languages})
         set (TS ${CMAKE_CURRENT_SOURCE_DIR}/ts/${language}.ts)

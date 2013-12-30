@@ -18,9 +18,10 @@
  */
 
 #include "filesystemview.h"
-#include "settings.h"
 #include "constants.h"
-#include "supportedformats.h"
+
+#include <core/settings.h>
+#include <core/supportedformats.h>
 
 #include <QMimeData>
 #include <QByteArray>
@@ -30,8 +31,7 @@
 #include <QKeyEvent>
 #include <QFileSystemModel>
 
-#include <QSettings>
-
+using namespace TepSonic;
 
 FileSystemView::FileSystemView(QWidget *parent):
     QListView(parent)

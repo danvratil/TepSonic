@@ -23,7 +23,11 @@
 #include <QTreeView>
 #include <QStringList>
 
-class PlaylistModel;
+namespace TepSonic
+{
+    class PlaylistModel;
+}
+
 class PlaylistView : public QTreeView
 {
 
@@ -43,7 +47,7 @@ class PlaylistView : public QTreeView
     void setStopTrack(const QModelIndex &index);
     void clearStopTrack();
 
-    PlaylistModel* playlistModel() const;
+    TepSonic::PlaylistModel* playlistModel() const;
 
   public Q_SLOTS:
     void shuffle();
@@ -76,7 +80,7 @@ class PlaylistView : public QTreeView
 
     QModelIndex m_nowPlaying;
     QModelIndex m_stopTrack;
-    PlaylistModel *m_playlistModel;
+    TepSonic::PlaylistModel *m_playlistModel;
 
 };
 

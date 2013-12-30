@@ -18,11 +18,13 @@
  */
 
 #include "mprismediaplayer2player.h"
-#include "player.h"
+#include <core/player.h>
 
 #include <QtCore/QCryptographicHash>
 
 #include <QtDBus/QDBusObjectPath>
+
+using namespace TepSonic;
 
 MPRISMediaPlayer2Player::MPRISMediaPlayer2Player(QObject* parent):
     DBusAbstractAdaptor(parent)

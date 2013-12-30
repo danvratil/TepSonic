@@ -18,9 +18,9 @@
  */
 
 #include "taskmanager.h"
-#include "constants.h"
 #include "collections/collectionbuilder.h"
-#include "settings.h"
+
+#include <core/settings.h>
 
 #include <QDir>
 #include <QSettings>
@@ -60,7 +60,7 @@ void TaskManager::rebuildCollections(const QString &folder)
 {
     QStringList dirs;
     if (folder.isEmpty()) {
-        dirs = Settings::instance()->collectionsSourcePaths();
+        dirs = TepSonic::Settings::instance()->collectionsSourcePaths();
     } else {
         const QFileInfo finfo (folder);
         if (finfo.isDir()) {

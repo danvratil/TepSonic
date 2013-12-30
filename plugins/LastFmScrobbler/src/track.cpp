@@ -28,7 +28,9 @@
 #include <QNetworkReply>
 #include <QDomDocument>
 
+
 using namespace LastFm;
+using namespace TepSonic;
 
 Track::Track(Scrobbler *scrobbler, const MetaData &metaData, uint playbackStart):
     QObject(scrobbler),

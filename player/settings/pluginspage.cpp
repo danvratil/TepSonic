@@ -19,12 +19,13 @@
 
 #include "pluginspage.h"
 #include "ui_pluginspage.h"
-#include "settings.h"
 
-#include "pluginsmanager.h"
-#include "abstractplugin.h"
+#include <core/settings.h>
+#include <core/pluginsmanager.h>
+#include <core/abstractplugin.h>
 
 using namespace SettingsPages;
+using namespace TepSonic;
 
 PluginsPage::PluginsPage(QWidget *parent):
     SettingsPage(parent)

@@ -25,9 +25,7 @@
 #include <QPainter>
 #include <QModelIndex>
 
-class PlaylistModel;
 class PlaylistView;
-class PlaylistProxyModel;
 
 class PlaylistItemDelegate : public QStyledItemDelegate
 {

@@ -7,6 +7,7 @@ include_directories(
     ${CMAKE_SOURCE_DIR}/core
     ${CMAKE_BINARY_DIR}/core
     ${CMAKE_CURRENT_SOURCE_DIR}
+    ${Qt5Widgets_INCLUDE_DIRS}
     ${Qt5Network_INCLUDE_DIRS}
     ${Qt5Xml_INCLUDE_DIRS}
 )
@@ -25,19 +26,15 @@ set(lyricsplugin_SRCS
 #tepsonic_add_translations(tepsonic_lyricsplugin ${lyricsplugin_TSS})
 
 add_library(tepsonic_lyricsplugin SHARED
-	       ${lyricsplugin_SRCS}
-	       ${lyricsplugin_QMOC_SRCS}
-	       ${TRANSLATIONS_BINARY}
+            ${lyricsplugin_SRCS}
+            ${lyricsplugin_QMOC_SRCS}
 )
 
-if (TRANSLATIONS)
-	add_dependencies(tepsonic_lyricsplugin ${TRANSLATIONS})
-endif (TRANSLATIONS)
-
 target_link_libraries(tepsonic_lyricsplugin
-               Qt5::Core
-               Qt5::Network
-               Qt5::Xml
+                      tepsonic_core
+                      Qt5::Core
+                      Qt5::Network
+                      Qt5::Xml
 )
 
 # standard UNIX and windows
@@ -47,8 +44,5 @@ set_target_properties(tepsonic_lyricsplugin
                 SOVERSION 1
 )
 install(TARGETS tepsonic_lyricsplugin
-        DESTINATION ${INSTALL_PLUGINS_DIR}/tepsonic
-)
-install(FILES ${TRANSLATIONS_BINARY}
-        DESTINATION ${INSTALL_DATA_DIR}/tepsonic/locale/
+        DESTINATION ${LIB_INSTALL_DIR}/qt5/plugins/tepsonic/
 )

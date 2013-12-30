@@ -21,26 +21,28 @@
 
 #include "settingsdialog.h"
 #include "ui_settingsdialog.h"
-#include "pluginsmanager.h"
 #include "mainwindow.h"
-#include "constants.h"
-#include "player.h"
-
 #include "playerpage.h"
 #include "collectionspage.h"
 #include "pluginspage.h"
 #include "shortcutspage.h"
+#include "taskmanager.h"
+
 #include "ui_playerpage.h"
 #include "ui_collectionspage.h"
 #include "ui_pluginspage.h"
 #include "ui_shortcutspage.h"
 
-#include "abstractplugin.h"
-#include "taskmanager.h"
+#include <core/constants.h>
+#include <core/pluginsmanager.h>
+#include <core/player.h>
+#include <core/abstractplugin.h>
 
 #include <QFileDialog>
 #include <QStandardItemModel>
 #include <QDebug>
+
+using namespace TepSonic;
 
 enum {
     PLAYER_PAGE,

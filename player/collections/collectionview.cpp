@@ -19,9 +19,10 @@
 
 #include "collectionview.h"
 #include "collectionproxymodel.h"
-#include "collectionmodel.h"
 #include "collectionitemdelegate.h"
 #include "taskmanager.h"
+
+#include <core/collectionmodel.h>
 
 #include <QHeaderView>
 #include <QDebug>
@@ -32,6 +33,8 @@
 #include <QDropEvent>
 #include <QDrag>
 #include <QMimeData>
+
+using namespace TepSonic;
 
 CollectionView::CollectionView(QWidget* parent):
     QTreeView(parent)

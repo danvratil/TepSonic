@@ -17,29 +17,30 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Cambridge, MA 02110-1301, USA.
  */
 
-// For random()
-#include <cstdlib>
-#include <ctime>
-
-#include "constants.h"
-
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-#include "actionmanager.h"
 #include "settings/settingsdialog.h"
-#include "playlist/playlistmodel.h"
-#include "abstractplugin.h"
 #include "taskmanager.h"
-#include "pluginsmanager.h"
-#include "utils.h"
-#include "supportedformats.h"
 #include "metadataeditor.h"
-#include "settings.h"
-#include "collectionmodel.h"
+
+#include <core/constants.h>
+#include <core/actionmanager.h>
+#include <core/playlistmodel.h>
+#include <core/abstractplugin.h>
+#include <core/pluginsmanager.h>
+#include <core/utils.h>
+#include <core/supportedformats.h>
+#include <core/settings.h>
+#include <core/collectionmodel.h>
+#include <core/player.h>
 
 #include <taglib/fileref.h>
 #include <taglib/tag.h>
 #include <taglib/tstring.h>
+
+// For random()
+#include <cstdlib>
+#include <ctime>
 
 #include <QMessageBox>
 #include <QDir>
@@ -53,15 +54,16 @@
 #include <QDateTime>
 #include <QSignalMapper>
 #include <QActionGroup>
+#include <QDebug>
 
 #include <phonon/seekslider.h>
 #include <phonon/volumeslider.h>
 
 #include "qxtglobalshortcut.h"
 
-#include <QDebug>
-
 Q_DECLARE_METATYPE(QModelIndex)
+
+using namespace TepSonic;
 
 MainWindow::MainWindow():
     m_metadataEditor(0),
@@ -123,7 +125,7 @@ MainWindow::MainWindow():
 
     // Load last playlist
     if (Settings::instance()->sessionRestore()) {
-        playlistModel()->loadPlaylist(QString(_CONFIGDIR).append(QLatin1String("/last.m3u")));
+        playlistModel()->loadPlaylist(XdgConfigDir + QLatin1String("/last.m3u"));
         Player::instance()->setRandomMode(Settings::instance()->playerRandomMode());
         Player::instance()->setRepeatMode(static_cast<Player::RepeatMode>(Settings::instance()->playerRepeatMode()));
     }
@@ -156,7 +158,7 @@ MainWindow::~MainWindow()
     }
 
     // Save current playlist to file
-    playlistModel()->savePlaylist(QString(_CONFIGDIR).append(QLatin1String("/last.m3u")));
+    playlistModel()->savePlaylist(XdgConfigDir + QLatin1String("/last.m3u"));
 
     delete m_ui;
 }

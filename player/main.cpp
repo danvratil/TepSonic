@@ -28,18 +28,15 @@
 #include <QString>
 #include <QDebug>
 
-#include "player.h"
+#include <core/constants.h>
+#include <core/player.h>
+#include <core/playlistmodel.h>
+#include <core/pluginsmanager.h>
+#include <core/settings.h>
+
 #include "mainwindow.h"
-#include "pluginsmanager.h"
-#include "playlistmodel.h"
 #include "taskmanager.h"
-#include "constants.h"
-#include "settings.h"
 #include "trayicon.h"
-
-
-Player *player;
-PluginsManager *pluginsManager;
 
 int main(int argc, char *argv[])
 {
@@ -72,9 +69,9 @@ int main(int argc, char *argv[])
     translator.load(QLatin1String("tepsonic_") + locale, localeDir);
     tepsonic.installTranslator(&translator);
 
-    qRegisterMetaType<MetaData>("MetaData");
-
-    PluginsManager::instance();
+    // Initialize singleton classes
+    TepSonic::PluginsManager::instance();
+    TepSonic::Player::instance();
     TaskManager::instance();
 
     MainWindow *mainWindow = new MainWindow;
@@ -82,7 +79,6 @@ int main(int argc, char *argv[])
 
     TrayIcon *trayIcon = new TrayIcon(mainWindow);
 
-    Player *player = Player::instance();
     QStringList files;
     for (int i=1; i<tepsonic.arguments().count(); i++) {
         QFileInfo param(tepsonic.arguments().at(i));
@@ -92,8 +88,8 @@ int main(int argc, char *argv[])
     }
     if (!files.isEmpty()) {
         mainWindow->playlistModel()->addFiles(files);
-        player->setTrack(files.first());
-        player->play();
+        TepSonic::Player::instance()->setTrack(files.first());
+        TepSonic::Player::instance()->play();
     }
 
     int ret = tepsonic.exec();
@@ -102,7 +98,7 @@ int main(int argc, char *argv[])
     delete mainWindow;
 
     TaskManager::instance()->destroy();
-    Settings::instance()->destroy();
+    TepSonic::Settings::instance()->destroy();
 
     return ret;
 }

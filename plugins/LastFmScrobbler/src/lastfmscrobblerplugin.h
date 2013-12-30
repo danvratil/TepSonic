@@ -20,10 +20,10 @@
 #ifndef LASTFMSCROBBLERPLUGIN_H
 #define LASTFMSCROBBLERPLUGIN_H
 
-#include "abstractplugin.h"
-#include "player.h"
-#include "lastfm.h"
+#include <core/abstractplugin.h>
+#include <core/player.h>
 
+#include "lastfm.h"
 #include "ui_lastfmscrobblerconfig.h"
 
 #include <QObject>
@@ -37,7 +37,7 @@ namespace LastFm {
     class Auth;
 }
 
-class LastFmScrobblerPlugin : public AbstractPlugin
+class LastFmScrobblerPlugin : public TepSonic::AbstractPlugin
 {
     Q_OBJECT
     Q_PLUGIN_METADATA(IID "cz.progdan.tepsonic.plugins.LastFmScrobbler"
@@ -54,7 +54,7 @@ class LastFmScrobblerPlugin : public AbstractPlugin
     virtual void setupMenu(QMenu *menu, MenuTypes menuType);
 
   public Q_SLOTS:
-    void trackChanged(const MetaData &trackData);
+    void trackChanged(const TepSonic::MetaData &trackData);
     void playerStatusChanged(Phonon::State newState, Phonon::State oldState);
 
     //! Submit track as loved()
