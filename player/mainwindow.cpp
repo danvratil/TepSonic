@@ -31,7 +31,7 @@
 #include "abstractplugin.h"
 #include "taskmanager.h"
 #include "pluginsmanager.h"
-#include "tools.h"
+#include "utils.h"
 #include "supportedformats.h"
 #include "metadataeditor.h"
 #include "settings.h"
@@ -508,7 +508,7 @@ void MainWindow::savePlaylist()
 
 void MainWindow::playlistLengthChanged(int totalLength, int tracksCount)
 {
-    QString time = formatTimestamp(totalLength);
+    QString time = Utils::formatTimestamp(totalLength);
     m_playlistLengthLabel->setText(tr("%n track(s)", "", tracksCount).append(QLatin1String(" (") + time + QLatin1String(")")));
 }
 
@@ -529,7 +529,7 @@ void MainWindow::showError(const QString &error)
 
 void MainWindow::playerPosChanged(qint64 newPos)
 {
-    m_ui->playbackTimeLabel->setText(formatMilliseconds(newPos, true));
+    m_ui->playbackTimeLabel->setText(Utils::formatMilliseconds(newPos, true));
 }
 
 void MainWindow::setupCollections()

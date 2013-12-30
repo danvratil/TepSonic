@@ -18,7 +18,7 @@
  */
 
 #include "metadata.h"
-#include "tools.h"
+#include "utils.h"
 
 #include <QSharedData>
 #include <QSqlQuery>
@@ -91,7 +91,7 @@ MetaData::Private::Private(const QSqlQuery &query):
     album = record.value(QLatin1Literal("album")).toString();
     genre = record.value(QLatin1Literal("genre")).toString();
     length = record.value(QLatin1Literal("length")).toLongLong();
-    formattedLength = formatMilliseconds(length);
+    formattedLength = Utils::formatMilliseconds(length);
     trackNumber = record.value(QLatin1Literal("track")).toInt();
     year = record.value(QLatin1Literal("year")).toUInt();
     bitrate = record.value(QLatin1Literal("bitrate")).toInt();
@@ -114,7 +114,7 @@ MetaData::Private::Private(const TagLib::FileRef &file):
     album = QString::fromLatin1(file.tag()->album().toCString(true));
     genre = QString::fromLatin1(file.tag()->genre().toCString(true));
     length = file.audioProperties()->length() * 1000;
-    formattedLength = formatMilliseconds(length);
+    formattedLength = Utils::formatMilliseconds(length);
     trackNumber = file.tag()->track();
     year = file.tag()->year();
     bitrate = file.audioProperties()->bitrate();
@@ -223,7 +223,7 @@ qint64 MetaData::length() const
 void MetaData::setLength(qint64 length)
 {
     d->length = length;
-    d->formattedLength = formatMilliseconds(length);
+    d->formattedLength = Utils::formatMilliseconds(length);
 }
 
 QString MetaData::formattedLength() const

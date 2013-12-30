@@ -21,7 +21,10 @@
 #include <QStringList>
 #include <QTime>
 
-#include "tools.h"
+#include "utils.h"
+
+namespace Utils
+{
 
 QString formatTimestamp(qint64 secs, bool omitHour)
 {
@@ -71,4 +74,6 @@ int formattedLengthToSeconds(const QString &formattedLength)
     }
 
     return -time.msecsTo(QTime());
+}
+
 }

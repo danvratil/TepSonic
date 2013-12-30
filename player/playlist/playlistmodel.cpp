@@ -22,7 +22,7 @@
 #include "playlistmodel.h"
 #include "playlistproxymodel.h"
 #include "player.h"
-#include "tools.h"
+#include "utils.h"
 #include "m3u.h"
 #include "databasemanager.h"
 

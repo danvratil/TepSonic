@@ -17,10 +17,13 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Cambridge, MA 02110-1301, USA.
  */
 
-#ifndef TOOLS_H
-#define TOOLS_H
+#ifndef UTILS_H
+#define UTILS_H
 
 #include <QString>
+
+namespace Utils
+{
 
 //! Parses timestamp
 /*!
@@ -48,5 +51,6 @@ QString formatMilliseconds(qint64 msecs, bool forceHours = false);
 */
 int formattedLengthToSeconds(const QString &formattedLength);
 
+}
 
-#endif // TOOLS_H
+#endif // UTILS_H

@@ -21,7 +21,7 @@
 #include "playlistmodel.h"
 #include "playlistproxymodel.h"
 #include "playlistitemdelegate.h"
-#include "tools.h"
+#include "utils.h"
 #include "actionmanager.h"
 #include "supportedformats.h"
 

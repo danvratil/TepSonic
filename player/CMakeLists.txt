@@ -18,7 +18,7 @@ set(player_SRCS
     taskmanager.cpp
     databasemanager.cpp
     m3u.cpp
-    tools.cpp
+    utils.cpp
     trayicon.cpp
     supportedformats.cpp
     filesystemview.cpp
