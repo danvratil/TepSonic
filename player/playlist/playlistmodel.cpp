@@ -39,16 +39,18 @@
 #include <taglib/fileref.h>
 #include <taglib/tag.h>
 
-void PlaylistModel::loadMetaDataRunnable(const QList<Player::MetaData>::Iterator &start,
-                                         const QList<Player::MetaData>::Iterator &end)
+Q_DECLARE_METATYPE(MetaData);
+
+void PlaylistModel::loadMetaDataRunnable(const MetaData::List::Iterator &start,
+                                         const MetaData::List::Iterator &end)
 {
     QWriteLocker locker(m_itemsLock);
     if (start == m_items.end()) {
         return;
     }
 
-    for (QList<Player::MetaData>::Iterator iter = start; iter <= end && iter < m_items.end(); ++iter) {
-        const QFileInfo finfo((*iter).filename);
+    for (MetaData::List::Iterator iter = start; iter <= end && iter < m_items.end(); ++iter) {
+        const QFileInfo finfo((*iter).fileName());
 
         if ((!finfo.exists()) || (!finfo.isFile())) {
             continue;
@@ -58,7 +60,7 @@ void PlaylistModel::loadMetaDataRunnable(const QList<Player::MetaData>::Iterator
         just slowing everything down */
         if (DatabaseManager::instance()->connectionAvailable()) {
             QSqlField data(QLatin1String("col"), QVariant::String);
-            data.setValue((*iter).filename);
+            data.setValue((*iter).fileName());
             QString fname = DatabaseManager::instance()->sqlDb().driver()->formatValue(data, false);
             QSqlQuery query(DatabaseManager::instance()->sqlDb());
             query.prepare(QLatin1String(
@@ -67,43 +69,39 @@ void PlaylistModel::loadMetaDataRunnable(const QList<Player::MetaData>::Iterator
                 "FROM `view_tracks` "
                 "WHERE `filename`= :filename "
                 "LIMIT 1"));
-            query.bindValue(QLatin1String(":filename"), (*iter).filename);
+            query.bindValue(QLatin1String(":filename"), (*iter).fileName());
             if (query.exec() && query.first()) {
-                (*iter).title = query.value(0).toString();
-                (*iter).trackNumber = query.value(1).toUInt();
-                (*iter).length = query.value(2).toUInt();
-                (*iter).artist = query.value(3).toString();
-                (*iter).genre = query.value(4).toString();
-                (*iter).album = query.value(5).toString();
-                (*iter).year = query.value(6).toUInt();
-                (*iter).bitrate = query.value(7).toInt();
+                (*iter).setTitle(query.value(0).toString());
+                (*iter).setTrackNumber(query.value(1).toUInt());
+                (*iter).setLength(query.value(2).toUInt());
+                (*iter).setArtist(query.value(3).toString());
+                (*iter).setGenre(query.value(4).toString());
+                (*iter).setAlbum(query.value(5).toString());
+                (*iter).setYear(query.value(6).toUInt());
+                (*iter).setBitrate(query.value(7).toInt());
                 continue;
             }
         }
 
-        if ((*iter).filename.isEmpty()) {
-            TagLib::FileRef f(finfo.fileName().toUtf8().constData());
+        TagLib::FileRef f((*iter).fileName().toUtf8().constData());
 
-            if (f.isNull() || !f.tag()) {
-                qDebug() << finfo.fileName() << " failed to be loaded by TagLib.";
-                continue;
-            }
-
-            (*iter).title = QString::fromLatin1(f.tag()->title().toCString(true));
-            (*iter).trackNumber = f.tag()->track();
-            (*iter).artist = QString::fromLatin1(f.tag()->artist().toCString(true));
-            (*iter).length = f.audioProperties()->length() * 1000;
-            (*iter).album = QString::fromLatin1(f.tag()->album().toCString(true));
-            (*iter).genre = QString::fromLatin1(f.tag()->genre().toCString(true));
-            (*iter).year = f.tag()->year();
-            (*iter).bitrate = f.audioProperties()->bitrate();
-
-            if ((*iter).title.isEmpty())
-                (*iter).title = finfo.fileName();
+        if (f.isNull() || !f.tag()) {
+            qDebug() << finfo.fileName() << " failed to be loaded by TagLib.";
+            continue;
         }
 
-        // And length of the track to the total length of the playlist
-        (*iter).formattedLength = formatMilliseconds((*iter).length);
+        (*iter).setTitle(QString::fromUtf8(f.tag()->title().toCString(true)));
+        (*iter).setTrackNumber(f.tag()->track());
+        (*iter).setArtist(QString::fromUtf8(f.tag()->artist().toCString(true)));
+        (*iter).setLength(f.audioProperties()->length() * 1000);
+        (*iter).setAlbum(QString::fromUtf8(f.tag()->album().toCString(true)));
+        (*iter).setGenre(QString::fromUtf8(f.tag()->genre().toCString(true)));
+        (*iter).setYear(f.tag()->year());
+        (*iter).setBitrate(f.audioProperties()->bitrate());
+
+        if ((*iter).title().isEmpty()) {
+            (*iter).setTitle(finfo.fileName());
+        }
     }
 }
 
@@ -140,28 +138,29 @@ QVariant PlaylistModel::data(const QModelIndex &index, int role) const
         return QVariant();
     }
 
-    const Player::MetaData metaData = m_items.at(index.row());
-
-    if (role == Qt::DisplayRole) {
+    const MetaData metaData = m_items.at(index.row());
+    if (role == PlaylistModel::MetaDataRole) {
+        return QVariant::fromValue(metaData);
+    } else if (role == Qt::DisplayRole) {
         switch (index.column()) {
             case FilenameColumn:
-                return metaData.filename;
+                return metaData.fileName();
             case TrackColumn:
-                return metaData.trackNumber;
+                return metaData.trackNumber();
             case InterpretColumn:
-                return metaData.artist;
+                return metaData.artist();
             case TracknameColumn:
-                return metaData.title;
+                return metaData.title();
             case AlbumColumn:
-                return metaData.album;
+                return metaData.album();
             case GenreColumn:
-                return metaData.genre;
+                return metaData.genre();
             case YearColumn:
-                return metaData.year;
+                return metaData.year();
             case LengthColumn:
-                return metaData.formattedLength;
+                return metaData.formattedLength();
             case BitrateColumn:
-                return QString::fromLatin1("%1 kbps").arg(metaData.bitrate);
+                return QString::fromLatin1("%1 kbps").arg(metaData.bitrate());
         }
     }
 
@@ -175,37 +174,36 @@ bool PlaylistModel::setData(const QModelIndex &index, const QVariant &value, int
     Q_UNUSED(role);
     Q_ASSERT(index.model() == this);
 
-    QList<Player::MetaData>::Iterator iter = m_items.begin();
+    MetaData::List::Iterator iter = m_items.begin();
     iter += index.row();
 
     switch (index.column()) {
         case FilenameColumn:
-            (*iter).filename = value.toString();
+            (*iter).setFileName(value.toString());
             break;
         case TrackColumn:
-            (*iter).trackNumber = value.toInt();
+            (*iter).setTrackNumber(value.toUInt());
             break;
         case InterpretColumn:
-            (*iter).artist = value.toString();
+            (*iter).setArtist(value.toString());
             break;
         case TracknameColumn:
-            (*iter).title = value.toString();
+            (*iter).setTitle(value.toString());
             break;
         case AlbumColumn:
-            (*iter).album = value.toString();
+            (*iter).setAlbum(value.toString());
             break;
         case GenreColumn:
-            (*iter).genre = value.toString();
+            (*iter).setGenre(value.toString());
             break;
         case YearColumn:
-            (*iter).year = value.toInt();
+            (*iter).setYear(value.toUInt());
             break;
         case LengthColumn:
-            (*iter).length = value.toInt();
-            (*iter).formattedLength = formatMilliseconds((*iter).length, false);
+            (*iter).setLength(value.toInt());
             break;
         case BitrateColumn:
-            (*iter).bitrate = value.toInt();
+            (*iter).setBitrate(value.toInt());
             break;
     }
 
@@ -277,8 +275,8 @@ bool PlaylistModel::removeRows(int position, int rows, const QModelIndex &parent
     beginRemoveRows(parent, position, position + rows - 1);
     m_itemsLock->lockForWrite();
     for (int i = 0; i < rows; i++) {
-        const Player::MetaData node = m_items.takeAt(position);
-        totalRemoveTime += node.length / 1000;
+        const MetaData metadata = m_items.takeAt(position);
+        totalRemoveTime += metadata.length() / 1000;
     }
     m_itemsLock->unlock();
     endRemoveRows();
@@ -300,7 +298,7 @@ int PlaylistModel::rowCount(const QModelIndex &parent) const
     return 0;
 }
 
-void PlaylistModel::insertItem(const Player::MetaData &metadata, int row)
+void PlaylistModel::insertItem(const MetaData &metadata, int row)
 {
     if (row < 0) {
         row = 0;
@@ -312,7 +310,7 @@ void PlaylistModel::insertItem(const Player::MetaData &metadata, int row)
     m_itemsLock->unlock();
     endInsertRows();
 
-    m_totalLength += (metadata.length / 1000);
+    m_totalLength += (metadata.length() / 1000);
     Q_EMIT playlistLengthChanged(m_totalLength, m_items.count());
 }
 
@@ -348,16 +346,16 @@ void PlaylistModel::insertFiles(const QStringList &files, int row)
     // lock after beginInsertRows(), which calls rowCount() internally, so we would deadlock
     QWriteLocker locker(m_itemsLock);
     for (int i = 0; i < files.count(); ++i) {
-        Player::MetaData md;
-        md.filename = files.at(i);
-        md.title = QFileInfo(md.filename).fileName();
+        MetaData md;
+        md.setFileName(files.at(i));
+        md.setTitle(QFileInfo(md.fileName()).fileName());
         m_items.insert(row + i, md);
     }
     locker.unlock();
     endInsertRows();
 
-    QList<Player::MetaData>::Iterator start = m_items.begin() + row;
-    QList<Player::MetaData>::iterator end = start + files.count();
+    const MetaData::List::Iterator start = m_items.begin() + row;
+    const MetaData::List::iterator end = start + files.count();
 
     QFutureWatcher<void> *watcher = new QFutureWatcher<void>(this);
     // QtConcurrent::map crashes, see QTBUG-35280 - we use run() instead
@@ -379,8 +377,8 @@ void PlaylistModel::onMetaDataAvailable(int beginIndex, int endIndex)
 
     int totalLength = 0;
     for (int i = offset + beginIndex; i <= endIndex; ++i) {
-        const Player::MetaData &metaData = m_items.at(i);
-        totalLength += (metaData.length / 1000);
+        const MetaData &metaData = m_items.at(i);
+        totalLength += (metaData.length() / 1000);
     }
     m_totalLength += totalLength;
 
@@ -414,8 +412,8 @@ void PlaylistModel::savePlaylist(const QString& file)
     QStringList playlist;
     playlist.reserve(m_items.count());
     m_itemsLock->lockForRead();
-    Q_FOREACH (const Player::MetaData &metaData, m_items) {
-        playlist << metaData.filename;
+    Q_FOREACH (const MetaData &metaData, m_items) {
+        playlist << metaData.fileName();
     }
     m_itemsLock->unlock();
 

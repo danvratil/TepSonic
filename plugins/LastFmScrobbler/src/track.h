@@ -21,6 +21,7 @@
 #define LASTFM_TRACK_H
 
 #include <QObject>
+#include "metadata.h"
 
 class QNetworkReply;
 
@@ -32,32 +33,9 @@ class Track : public QObject
 {
     Q_OBJECT
   public:
-    Track(LastFm::Scrobbler *scobbler,
-          const QString &artist = QString(),
-          const QString &trackTitle = QString(),
-          const QString &album = QString(),
-          int trackLength = 0,
-          const QString &genre = QString(),
-          int trackNumber = 0,
-          uint playbackStart = 0);
+    Track(LastFm::Scrobbler *scobbler, const MetaData &metaData, uint playbackStart = 0);
 
-    void setArtist(const QString &artist);
-    QString artist() const;
-
-    void setTrackTitle(const QString &trackTitle);
-    QString trackTitle() const;
-
-    void setAlbum(const QString &album);
-    QString album() const;
-
-    void setTrackLength(int trackLength);
-    int trackLength() const;
-
-    void setGenre(const QString &genre);
-    QString genre() const;
-
-    void setTrackNumber(int trackNumber);
-    int trackNumber() const;
+    MetaData metaData() const;
 
     void setPlaybackStart(uint playbackStart);
     uint playbackStart() const;
@@ -79,12 +57,7 @@ class Track : public QObject
     LastFm::Scrobbler *m_scrobbler;
 
     /** Track data **/
-    QString m_artist;
-    QString m_trackTitle;
-    QString m_album;
-    int m_trackLength;
-    QString m_genre;
-    int m_trackNumber;
+    MetaData m_metaData;
     uint m_playbackStart;
 
     /** Helper time counter **/

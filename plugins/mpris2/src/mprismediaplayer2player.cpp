@@ -31,7 +31,7 @@ MPRISMediaPlayer2Player::MPRISMediaPlayer2Player(QObject* parent):
             this, SLOT(playerRandomModeChanged()));
     connect(Player::instance(), SIGNAL(repeatModeChanged(Player::RepeatMode)),
             this, SLOT(playerRepeatModeChanged()));
-    connect(Player::instance(), SIGNAL(trackChanged(Player::MetaData)),
+    connect(Player::instance(), SIGNAL(trackChanged(MetaData)),
             this, SLOT(playerTrackChanged()));
     connect(Player::instance()->audioOutput(), SIGNAL(volumeChanged(qreal)),
             this, SLOT(playerVolumeChanged()));
@@ -152,18 +152,18 @@ static QDBusObjectPath trackPath(const QString &path)
 
 QVariantMap MPRISMediaPlayer2Player::metadata() const
 {
-    const Player::MetaData metaData = Player::instance()->currentMetaData();
+    const MetaData metaData = Player::instance()->currentMetaData();
 
     QVariantMap map;
-    map[QLatin1String("mpris:trackId")] = QVariant::fromValue<QDBusObjectPath>(trackPath(metaData.filename));
-    map[QLatin1String("xesam:album")] = metaData.album;
-    map[QLatin1String("xesam:albumArtist")] = metaData.artist;
-    map[QLatin1String("xesam:artist")] = metaData.artist;
-    map[QLatin1String("xesam:genre")] = metaData.genre;
-    map[QLatin1String("xesam:length")] = metaData.length;
-    map[QLatin1String("xesam:title")] = metaData.title;
-    map[QLatin1String("xesam:trackNumber")] = metaData.trackNumber;
-    map[QLatin1String("xesam:url")] = QString::fromLatin1(QUrl::toPercentEncoding(metaData.filename));
+    map[QLatin1String("mpris:trackId")] = QVariant::fromValue<QDBusObjectPath>(trackPath(metaData.fileName()));
+    map[QLatin1String("xesam:album")] = metaData.album();
+    map[QLatin1String("xesam:albumArtist")] = metaData.artist();
+    map[QLatin1String("xesam:artist")] = metaData.artist();
+    map[QLatin1String("xesam:genre")] = metaData.genre();
+    map[QLatin1String("xesam:length")] = metaData.length();
+    map[QLatin1String("xesam:title")] = metaData.title();
+    map[QLatin1String("xesam:trackNumber")] = metaData.trackNumber();
+    map[QLatin1String("xesam:url")] = QString::fromLatin1(QUrl::toPercentEncoding(metaData.fileName()));
 
     return map;
 }

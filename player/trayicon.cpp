@@ -46,16 +46,16 @@ void TrayIcon::playerStatusChanged(Phonon::State newState, Phonon::State oldStat
 {
     Q_UNUSED(oldState);
 
-    const Player::MetaData metadata = Player::instance()->currentMetaData();
+    const MetaData metadata = Player::instance()->currentMetaData();
 
     QString playing;
-    if (metadata.title.isEmpty()) {
-        playing = QFileInfo(metadata.filename).fileName();
+    if (metadata.title().isEmpty()) {
+        playing = QFileInfo(metadata.fileName()).fileName();
     } else {
-        playing = metadata.title;
+        playing = metadata.title();
     }
-    if (!metadata.artist.isEmpty()) {
-        playing = metadata.artist + QLatin1String(" - ") + playing;
+    if (!metadata.artist().isEmpty()) {
+        playing = metadata.artist() + QLatin1String(" - ") + playing;
     }
 
     switch (newState) {

@@ -52,8 +52,8 @@ LyricsPlugin::LyricsPlugin()
     m_translator->load(QLatin1String("tepsonic_lyricsplugin_") + locale, localeDir);
     qApp->installTranslator(m_translator);
 
-    connect(Player::instance(), SIGNAL(trackChanged(Player::MetaData)),
-            this, SLOT(trackChanged(Player::MetaData)));
+    connect(Player::instance(), SIGNAL(trackChanged(MetaData)),
+            this, SLOT(trackChanged(MetaData)));
 }
 
 LyricsPlugin::~LyricsPlugin()
@@ -98,12 +98,12 @@ bool LyricsPlugin::setupPane(QWidget *widget, QString &label)
     return true;
 }
 
-void LyricsPlugin::trackChanged(const Player::MetaData &trackData)
+void LyricsPlugin::trackChanged(const MetaData &metaData)
 {
-    const QUrl url(QLatin1String("http://webservices.lyrdb.com/lookup.php?q=")
-                    + trackData.artist + QLatin1String("|")
-                    + trackData.title + QLatin1String("&for=match&agent=TepSonic"));
-
+    const QByteArray u("http://webservices.lyrdb.com/lookup.php?q="  
+                    + QUrl::toPercentEncoding(metaData.artist()) + "|"
+                    + QUrl::toPercentEncoding(metaData.title()) + "&for=match&agent=TepSonic");
+    const QUrl url(QString::fromLatin1(u));
     QNetworkRequest req(url);
     QNetworkAccessManager *nam = new QNetworkAccessManager();
     connect(nam, &QNetworkAccessManager::finished,

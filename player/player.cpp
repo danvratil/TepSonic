@@ -144,26 +144,17 @@ void Player::pause()
     Q_EMIT trackPaused((m_phononPlayer->state() == Phonon::PausedState));
 }
 
-Player::MetaData Player::currentMetaData() const
+MetaData Player::currentMetaData() const
 {
-    Player::MetaData data;
-
+    // FIXME: Cache the metadata, or get them directly from Playlist!
     const QString filename = m_phononPlayer->currentSource().fileName();
     if ((!QFileInfo(filename).exists()) ||
         (m_phononPlayer->currentSource().type()==Phonon::MediaSource::Invalid)) {
-        return data;
+        return MetaData();
     }
 
     TagLib::FileRef f(filename.toUtf8().constData());
-    data.artist = QString::fromLatin1(f.tag()->artist().toCString(true));
-    data.title = QString::fromLatin1(f.tag()->title().toCString(true));
-    data.album = QLatin1String(f.tag()->album().toCString(true));
-    data.trackNumber = f.tag()->track();
-    // Length in msecs
-    data.length = f.audioProperties()->length() * 1000;
-    data.filename = filename;
-
-    return data;
+    return MetaData(f);
 }
 
 void Player::stop()

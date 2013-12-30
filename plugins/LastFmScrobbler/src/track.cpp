@@ -30,79 +30,17 @@
 
 using namespace LastFm;
 
-Track::Track(Scrobbler *scrobbler, const QString &artist,
-             const QString &trackTitle, const QString &album, int trackLength,
-             const QString &genre, int trackNumber, uint playbackStart):
+Track::Track(Scrobbler *scrobbler, const MetaData &metaData, uint playbackStart):
     QObject(scrobbler),
     m_scrobbler(scrobbler),
-    m_artist(artist),
-    m_trackTitle(trackTitle),
-    m_album(album),
-    m_trackLength(trackLength),
-    m_genre(genre),
-    m_trackNumber(trackNumber),
+    m_metaData(metaData),
     m_playbackStart(playbackStart)
 {
 }
 
-void Track::setArtist(const QString &artist)
+MetaData Track::metaData() const
 {
-    m_artist = artist;
-}
-
-QString Track::artist() const
-{
-    return m_artist;
-}
-
-void Track::setTrackTitle(const QString &trackTitle)
-{
-    m_trackTitle = trackTitle;
-}
-
-QString Track::trackTitle() const
-{
-    return m_trackTitle;
-}
-
-void Track::setAlbum(const QString &album)
-{
-    m_album = album;
-}
-
-QString Track::album() const
-{
-    return m_album;
-}
-
-void Track::setTrackLength(int trackLength)
-{
-    m_trackLength = trackLength;
-}
-
-int Track::trackLength() const
-{
-    return m_trackLength;
-}
-
-void Track::setGenre(const QString &genre)
-{
-    m_genre = genre;
-}
-
-QString Track::genre() const
-{
-    return m_genre;
-}
-
-void Track::setTrackNumber(int trackNumber)
-{
-    m_trackNumber = trackNumber;
-}
-
-int Track::trackNumber() const
-{
-    return m_trackNumber;
+    return m_metaData;
 }
 
 void Track::setPlaybackStart(uint playbackStart)
@@ -121,8 +59,8 @@ void Track::scrobble()
 
     // The track must be played for at least half of it's duration or at least 4 minutes, whatever
     // occurs first and must be longer then 30 seconds to be scrobbled
-    if (((m_playbackLength < m_trackLength / 2) && (m_playbackLength < 240)) || (m_trackLength < 30)) {
-        qDebug() << "Track" << m_trackTitle << "was not played long enough or is too short, not scrobbling";
+    if (((m_playbackLength < m_metaData.length() / 1000 / 2) && (m_playbackLength < 240)) || (m_metaData.length() / 1000 < 30)) {
+        qDebug() << "Track" << m_metaData.title() << "was not played long enough or is too short, not scrobbling";
         return;
     }
 
@@ -144,7 +82,7 @@ void Track::nowPlaying()
     {
         QUrlQuery query;
         query.addQueryItem(QLatin1String("method"), QLatin1String("track.updateNowPlaying"));
-        query.addQueryItem(QLatin1String("track"), m_trackTitle);
+        query.addQueryItem(QLatin1String("track"), m_metaData.title());
         requestUrl.setQuery(query);
     }
     QNetworkRequest request(requestUrl);
@@ -152,15 +90,15 @@ void Track::nowPlaying()
 
     QByteArray data;
     QUrlQuery query;
-    query.addQueryItem(QLatin1String("album"), m_album);
+    query.addQueryItem(QLatin1String("album"), m_metaData.album());
     query.addQueryItem(QLatin1String("api_key"), Global::api_key);
-    query.addQueryItem(QLatin1String("artist"), m_artist);
-    query.addQueryItem(QLatin1String("duration"), QString::number(m_trackLength));
+    query.addQueryItem(QLatin1String("artist"), m_metaData.artist());
+    query.addQueryItem(QLatin1String("duration"), QString::number(m_metaData.length() / 1000));
     query.addQueryItem(QLatin1String("method"), QLatin1String("track.updateNowPlaying"));
     query.addQueryItem(QLatin1String("sk"), Global::session_key);
     query.addQueryItem(QLatin1String("token"), Global::token);
-    query.addQueryItem(QLatin1String("track"), m_trackTitle);
-    query.addQueryItem(QLatin1String("trackNumber"), QString::number(m_trackNumber));
+    query.addQueryItem(QLatin1String("track"), m_metaData.title());
+    query.addQueryItem(QLatin1String("trackNumber"), QString::number(m_metaData.trackNumber()));
     query.addQueryItem(QLatin1String("api_sig"), Scrobbler::getRequestSignature(query));
     // Remove the trailing "?" from the params, since we are doing POST
     data.append(query.toString().toLatin1());
@@ -188,7 +126,7 @@ void Track::love()
     {
         QUrlQuery query;
         query.addQueryItem(QLatin1String("method"), QLatin1String("track.love"));
-        query.addQueryItem(QLatin1String("track"), m_trackTitle);
+        query.addQueryItem(QLatin1String("track"), m_metaData.title());
         requestUrl.setQuery(query);
     }
     QNetworkRequest request(requestUrl);
@@ -197,11 +135,11 @@ void Track::love()
     QByteArray data;
     QUrlQuery query;
     query.addQueryItem(QLatin1String("api_key"), Global::api_key);
-    query.addQueryItem(QLatin1String("artist"), m_artist);
+    query.addQueryItem(QLatin1String("artist"), m_metaData.artist());
     query.addQueryItem(QLatin1String("method"), QLatin1String("track.love"));
     query.addQueryItem(QLatin1String("sk"), Global::session_key);
     query.addQueryItem(QLatin1String("token"), Global::token);
-    query.addQueryItem(QLatin1String("track"), m_trackTitle);
+    query.addQueryItem(QLatin1String("track"), m_metaData.title());
     query.addQueryItem(QLatin1String("api_sig"), Scrobbler::getRequestSignature(query));
     data.append(query.toString().toLatin1());
 

@@ -22,7 +22,7 @@
 #define LYRICS_H
 
 #include "abstractplugin.h"
-#include "player.h"
+#include "metadata.h"
 
 #include <QTranslator>
 #include <QNetworkReply>
@@ -49,7 +49,7 @@ class LyricsPlugin : public AbstractPlugin
     bool setupPane(QWidget *widget, QString &label);
 
   public Q_SLOTS:
-    void trackChanged(const Player::MetaData &trackData);
+    void trackChanged(const MetaData &metaData);
 
   private Q_SLOTS:
     void loadLyrics(const QModelIndex &index);

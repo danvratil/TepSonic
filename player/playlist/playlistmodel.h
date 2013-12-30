@@ -50,6 +50,10 @@ class PlaylistModel : public QAbstractItemModel
         ColumnCount
     };
 
+    enum Roles {
+        MetaDataRole = Qt::UserRole + 1
+    };
+
     PlaylistModel(QObject *parent = 0);
     ~PlaylistModel();
 
@@ -78,7 +82,7 @@ class PlaylistModel : public QAbstractItemModel
     void addFiles(const QStringList &files);
 
     void insertFiles(const QStringList &files, int row);
-    void insertItem(const Player::MetaData &metadata, int row);
+    void insertItem(const MetaData &metadata, int row);
 
     void clear();
 
@@ -90,10 +94,10 @@ class PlaylistModel : public QAbstractItemModel
     void onMetaDataDone();
 
   private:
-    void loadMetaDataRunnable(const QList<Player::MetaData>::Iterator &start,
-                              const QList<Player::MetaData>::Iterator &end);
+    void loadMetaDataRunnable(const MetaData::List::Iterator &start,
+                              const MetaData::List::Iterator &end);
 
-    QList<Player::MetaData> m_items;
+    MetaData::List m_items;
     mutable QReadWriteLock *m_itemsLock;
 
     // total length in seconds

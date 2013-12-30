@@ -348,29 +348,25 @@ void PlaylistView::dropEvent(QDropEvent *event)
             row += 1;
         }
 
-        Player::MetaData metadata;
+        MetaData metadata;
         QString s;
         while (!stream.atEnd()) {
             stream >> s;
-            metadata.filename = s;
+            metadata.setFileName(s);
             stream >> s;
-            metadata.trackNumber = s.toInt();
+            metadata.setTrackNumber(s.toUInt());
             stream >> s;
-            metadata.artist = s;
+            metadata.setArtist(s);
             stream >> s;
-            metadata.title = s;
+            metadata.setTitle(s);
             stream >> s;
-            metadata.album = s;
+            metadata.setAlbum(s);
             stream >> s;
-            metadata.genre = s;
+            metadata.setGenre(s);
             stream >> s;
-            metadata.year = s.toInt();
+            metadata.setYear(s.toUInt());
             stream >> s;
-            metadata.formattedLength = s;
-            stream >> s;
-            metadata.bitrate = s.toInt();
-            // length in milliseconds - to properly count total length of playlist
-            metadata.length = formattedLengthToSeconds(metadata.formattedLength) * 1000;
+            metadata.setBitrate(s.toInt());
 
             model->insertItem(metadata, row);
         }

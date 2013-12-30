@@ -54,13 +54,13 @@ Cache::~Cache()
 
     Q_FOREACH (Track *track, m_cache) {
         QDomElement trackElement = document.createElement(QLatin1String("track"));
-
-        trackElement.setAttribute(QLatin1String("track"), track->trackTitle());
-        trackElement.setAttribute(QLatin1String("artist"), track->artist());
-        trackElement.setAttribute(QLatin1String("album"), track->album());
-        trackElement.setAttribute(QLatin1String("genre"), track->genre());
-        trackElement.setAttribute(QLatin1String("length"), track->trackLength());
-        trackElement.setAttribute(QLatin1String("trackNumber"), track->trackNumber());
+        const MetaData metaData = track->metaData();
+        trackElement.setAttribute(QLatin1String("track"), metaData.title());
+        trackElement.setAttribute(QLatin1String("artist"), metaData.artist());
+        trackElement.setAttribute(QLatin1String("album"), metaData.album());
+        trackElement.setAttribute(QLatin1String("genre"), metaData.genre());
+        trackElement.setAttribute(QLatin1String("length"), metaData.length());
+        trackElement.setAttribute(QLatin1String("trackNumber"), metaData.trackNumber());
         trackElement.setAttribute(QLatin1String("playbackStart"), track->playbackStart());
 
         rootElement.appendChild(trackElement);
@@ -80,7 +80,7 @@ Cache::~Cache()
 
 void Cache::add(Track *track)
 {
-    qDebug() << "Adding track" << track->trackTitle() << "to cache";
+    qDebug() << "Adding track" << track->metaData().title() << "to cache";
     m_cache.append(track);
 }
 
@@ -105,13 +105,15 @@ void Cache::submit()
     params.addQueryItem(QLatin1String("sk"), Global::session_key);
     params.addQueryItem(QLatin1String("token"), Global::token);
     for (int i = 0; i <= items_count; ++i) {
-        if (m_cache.at(i)) {
-            params.addQueryItem(QString::fromLatin1("album[%1]").arg(i), m_cache.at(i)->album());
-            params.addQueryItem(QString::fromLatin1("artist[%1]").arg(i), m_cache.at(i)->artist());
-            params.addQueryItem(QString::fromLatin1("duration[%1]").arg(i), QString::number(m_cache.at(i)->trackLength()));
-            params.addQueryItem(QString::fromLatin1("timestamp[%1]").arg(i), QString::number(m_cache.at(i)->playbackStart()));
-            params.addQueryItem(QString::fromLatin1("track[%1]").arg(i), m_cache.at(i)->trackTitle());
-            params.addQueryItem(QString::fromLatin1("trackNumber[%1]").arg(i), QString::number(m_cache.at(i)->trackNumber()));
+        Track *track = m_cache.at(i);
+        if (track) {
+            const MetaData metaData = track->metaData();
+            params.addQueryItem(QString::fromLatin1("album[%1]").arg(i), metaData.album());
+            params.addQueryItem(QString::fromLatin1("artist[%1]").arg(i), metaData.artist());
+            params.addQueryItem(QString::fromLatin1("duration[%1]").arg(i), QString::number(metaData.length() / 1000));
+            params.addQueryItem(QString::fromLatin1("timestamp[%1]").arg(i), QString::number(track->playbackStart()));
+            params.addQueryItem(QString::fromLatin1("track[%1]").arg(i), metaData.title());
+            params.addQueryItem(QString::fromLatin1("trackNumber[%1]").arg(i), QString::number(metaData.trackNumber()));
         }
     }
     params.addQueryItem(QLatin1String("api_sig"), Scrobbler::getRequestSignature(params));
@@ -186,7 +188,6 @@ void Cache::loadCache()
     document.setContent(&file);
 
     const QDomElement rootElement = document.documentElement();
-    Track *track;
 
     // Is the root element <tracks> ?
     if (rootElement.tagName() != QLatin1String("tracks")) {
@@ -210,22 +211,22 @@ void Cache::loadCache()
             continue;
         }
 
-        track = new Track(m_scrobbler,
-                          trackEl.attribute(QLatin1String("artist")),
-                          trackEl.attribute(QLatin1String("track")),
-                          trackEl.attribute(QLatin1String("album")),
-                          trackEl.attribute(QLatin1String("length")).toInt(),
-                          trackEl.attribute(QLatin1String("genre")),
-                          trackEl.attribute(QLatin1String("trackNumber")).toInt(),
-                          trackEl.attribute(QLatin1String("playbackStart")).toInt());
-        if (track->artist().isEmpty() || track->trackTitle().isEmpty()
-            || track->album().isEmpty() || track->trackLength() == 0
-            || track->playbackStart() == 0) {
+        MetaData metaData;
+        metaData.setArtist(trackEl.attribute(QLatin1String("artist")));
+        metaData.setTitle(trackEl.attribute(QLatin1String("track")));
+        metaData.setAlbum(trackEl.attribute(QLatin1String("album")));
+        metaData.setLength(trackEl.attribute(QLatin1String("length")).toInt() * 1000);
+        metaData.setGenre(trackEl.attribute(QLatin1String("genre")));
+        metaData.setTrackNumber(trackEl.attribute(QLatin1String("trackNumber")).toInt());
+        const uint playbackStart = trackEl.attribute(QLatin1String("playbackStart")).toInt();
+        if (metaData.artist().isEmpty() || metaData.title().isEmpty()
+            || metaData.album().isEmpty() || metaData.length() == 0 || playbackStart == 0)
+        {
             trackNode = trackNode.nextSibling();
             continue;
         }
 
-        m_cache.append(track);
+        m_cache.append(new Track(m_scrobbler, metaData, playbackStart));
         trackNode = trackNode.nextSibling();
     }
 }

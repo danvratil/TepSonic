@@ -23,6 +23,7 @@ set(player_SRCS
     supportedformats.cpp
     filesystemview.cpp
     filesystemwidget.cpp
+    metadata.cpp
     metadataeditor.cpp
     settings.cpp
     settings/settingspage.cpp

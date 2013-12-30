@@ -21,9 +21,12 @@
 #define PLAYER_H
 
 #include <QObject>
+
 #include <phonon/mediasource.h>
 #include <phonon/audiooutput.h>
 #include <phonon/mediaobject.h>
+
+#include "metadata.h"
 
 class Player: public QObject
 {
@@ -35,25 +38,10 @@ class Player: public QObject
     Q_PROPERTY(bool randomMode
                READ randomMode
                WRITE setRandomMode)
-    Q_PROPERTY(Player::MetaData metadata
+    Q_PROPERTY(MetaData metadata
                READ currentMetaData)
 
   public:
-    //! Structure to pass track's metadata
-    struct MetaData {
-        QString filename;  /*! < Name of file */
-        QString artist;    /*! < Track artist */
-        QString title;     /*! < Track title */
-        QString album;     /*! < Album name */
-        QString genre;     /*! < Genre string */
-        qint64 length;     /*! < Length of song in milliseconds */
-        QString formattedLength; /* ! < Formatted time (mm:ss) */
-        int trackNumber;   /*! < Track number */
-        uint year;         /*! < Year of release */
-        int bitrate;      /*! < bitrate */
-
-    };
-
     //! Enumeration of repeat modes.
     enum RepeatMode { RepeatOff = 0,    /*! < Disable repeat */
                       RepeatTrack = 1,  /*! < Repeat current track */
@@ -64,7 +52,7 @@ class Player: public QObject
 
     ~Player();
 
-    Player::MetaData currentMetaData() const;
+    MetaData currentMetaData() const;
 
     RepeatMode repeatMode() const {
         return m_repeatMode;
@@ -117,8 +105,8 @@ class Player: public QObject
   Q_SIGNALS:
     void repeatModeChanged(Player::RepeatMode repeatMode);
     void randomModeChanged(bool randomMode);
-    void trackChanged(const Player::MetaData &metadata);
-    void trackFinished(const Player::MetaData &metadata);
+    void trackChanged(const MetaData &metadata);
+    void trackFinished(const MetaData &metadata);
     void trackFinished();
     void stateChanged(Phonon::State newState, Phonon::State oldState);
     void trackPositionChanged(qint64 newPos);

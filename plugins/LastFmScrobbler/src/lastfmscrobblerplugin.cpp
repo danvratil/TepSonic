@@ -38,6 +38,8 @@
 #include <QDateTime>
 #include <QtPlugin>
 
+Q_DECLARE_METATYPE(MetaData);
+
 LastFmScrobblerPlugin::LastFmScrobblerPlugin():
     AbstractPlugin(),
     m_scrobbler(0),
@@ -52,8 +54,8 @@ LastFmScrobblerPlugin::LastFmScrobblerPlugin():
     m_translator->load(QLatin1String("tepsonic_lastfmscrobbler_") + locale, localeDir);
     qApp->installTranslator(m_translator);
 
-    connect(Player::instance(), SIGNAL(trackChanged(Player::MetaData)),
-            this, SLOT(trackChanged(Player::MetaData)));
+    connect(Player::instance(), SIGNAL(trackChanged(MetaData)),
+            this, SLOT(trackChanged(MetaData)));
     connect(Player::instance(), SIGNAL(stateChanged(Phonon::State,Phonon::State)),
             this, SLOT(playerStatusChanged(Phonon::State,Phonon::State)));
 }
@@ -113,7 +115,7 @@ void LastFmScrobblerPlugin::setupMenu(QMenu *menu, AbstractPlugin::MenuTypes men
     }
 }
 
-void LastFmScrobblerPlugin::trackChanged(const Player::MetaData &trackData)
+void LastFmScrobblerPlugin::trackChanged(const MetaData &metaData)
 {
     // Submit the old track
     if (m_scrobbler->currentTrack()) {
@@ -122,14 +124,7 @@ void LastFmScrobblerPlugin::trackChanged(const Player::MetaData &trackData)
 
     uint stamp = QDateTime::currentDateTime().toTime_t();
 
-    LastFm::Track *track = new LastFm::Track(m_scrobbler);
-    track->setArtist(trackData.artist);
-    track->setTrackTitle(trackData.title);
-    track->setAlbum(trackData.album);
-    track->setTrackLength(int(trackData.length/1000));
-    track->setGenre(trackData.genre);
-    track->setTrackNumber(trackData.trackNumber);
-    track->setPlaybackStart(stamp);
+    LastFm::Track *track = new LastFm::Track(m_scrobbler, metaData, stamp);
     m_scrobbler->setCurrentTrack(track);
 
     // Set "Now playing"
@@ -226,15 +221,9 @@ void LastFmScrobblerPlugin::loveTrack()
 
         // Pointer to QModelIndex stored in menu property
         const QModelIndex itemIndex = *(QModelIndex*)popupmenu->property("playlistItem").value<void *>();
-
-        // From playlist, we can love any track, so we need to get more info about the track
-        const QString trackname = itemIndex.sibling(itemIndex.row(), PlaylistModel::TracknameColumn).data().toString();
-        const QString artist = itemIndex.sibling(itemIndex.row(), PlaylistModel::InterpretColumn).data().toString();
-
         // Now we construct the track
-        LastFm::Track *track = new LastFm::Track(m_scrobbler);
-        track->setTrackTitle(trackname);
-        track->setArtist(artist);
+        const MetaData metaData = itemIndex.data(PlaylistModel::MetaDataRole).value<MetaData>();
+        LastFm::Track *track = new LastFm::Track(m_scrobbler, metaData);
 
         track->love();
         connect(track, SIGNAL(loved()),

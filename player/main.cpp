@@ -72,7 +72,7 @@ int main(int argc, char *argv[])
     translator.load(QLatin1String("tepsonic_") + locale, localeDir);
     tepsonic.installTranslator(&translator);
 
-    qRegisterMetaType<Player::MetaData>("Player::MetaData");
+    qRegisterMetaType<MetaData>("MetaData");
 
     PluginsManager::instance();
     TaskManager::instance();

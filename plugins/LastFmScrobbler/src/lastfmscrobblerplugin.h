@@ -54,7 +54,7 @@ class LastFmScrobblerPlugin : public AbstractPlugin
     virtual void setupMenu(QMenu *menu, MenuTypes menuType);
 
   public Q_SLOTS:
-    void trackChanged(const Player::MetaData &trackData);
+    void trackChanged(const MetaData &trackData);
     void playerStatusChanged(Phonon::State newState, Phonon::State oldState);
 
     //! Submit track as loved()
