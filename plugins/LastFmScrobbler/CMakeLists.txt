@@ -43,13 +43,6 @@ target_link_libraries(tepsonic_lastfmscrobbler
                       Qt5::Xml
 )
 
-# standard UNIX and windows
-set_target_properties(tepsonic_lastfmscrobbler
-                PROPERTIES
-                VERSION 0.2.0
-                SOVERSION 1
-)
-
 set(lastfmscrobbler_TSS cs)
 tepsonic_add_translations(tepsonic_lastfmscrobbler ${lastfmscrobbler_TSS})
 

@@ -37,12 +37,6 @@ target_link_libraries(tepsonic_lyricsplugin
                       Qt5::Xml
 )
 
-# standard UNIX and windows
-set_target_properties(tepsonic_lyricsplugin
-                PROPERTIES
-                VERSION 0.1.0
-                SOVERSION 1
-)
 install(TARGETS tepsonic_lyricsplugin
         DESTINATION ${LIB_INSTALL_DIR}/qt5/plugins/tepsonic/
 )

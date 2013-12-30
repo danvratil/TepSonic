@@ -34,12 +34,6 @@ target_link_libraries(tepsonic_mpris2plugin
                       Qt5::DBus
 )
 
-# standard UNIX and windows
-set_target_properties(tepsonic_mpris2plugin
-                PROPERTIES
-                VERSION 0.1.0
-                SOVERSION 1
-)
 install(TARGETS tepsonic_mpris2plugin
         DESTINATION ${LIB_INSTALL_DIR}/qt5/plugins/tepsonic/
 )
