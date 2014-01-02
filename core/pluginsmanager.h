@@ -69,30 +69,21 @@ class TEPSONIC_CORE_EXPORT PluginsManager : public QObject
     void disablePlugin(Plugin *plugin);
     void enablePlugin(Plugin *plugin);
 
-    void loadPlugins();
-
     void installMenus(QMenu *menu, AbstractPlugin::MenuTypes menuType);
     void installPanes(QTabWidget *tabwidgets);
 
-  private:
-    explicit PluginsManager();
-    static PluginsManager *s_instance;
-
-    Plugin* tryLoadPlugin(const QString &filePath);
-    void initPlugin(Plugin *plugin);
-
-    QList<Plugin *> m_pluginsList;
-    QMap<QMenu *, AbstractPlugin::MenuTypes> menus;
-
   Q_SIGNALS:
-    // Signals emitted by plugins
     void settingsAccepted();
-
-    // PluginsManager's own signals
     void pluginsLoaded();
-
     void error(const QString &error);
 
+  private:
+    PluginsManager();
+
+    class Private;
+    Private * const d;
+
+    Q_PRIVATE_SLOT(d, void loadPlugins())
 };
 
 } // namespace TepSonic

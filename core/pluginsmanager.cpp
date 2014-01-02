@@ -48,33 +48,42 @@ PluginsManager::Plugin::~Plugin()
     }
 }
 
-PluginsManager* PluginsManager::s_instance = 0;
-
-PluginsManager *PluginsManager::instance()
+class PluginsManager::Private
 {
-    if (s_instance == 0) {
-        s_instance = new PluginsManager();
-    }
+  public:
+    Private(PluginsManager *parent);
+    ~Private();
 
-    return s_instance;
+    void loadPlugins();
+    Plugin* tryLoadPlugin(const QString &filePath);
+    void initPlugin(Plugin *plugin);
+
+    static PluginsManager *instance;
+
+    QList<Plugin *> pluginsList;
+    QMap<QMenu *, AbstractPlugin::MenuTypes> menus;
+
+  private:
+    PluginsManager * const q;
+};
+
+PluginsManager* PluginsManager::Private::instance = 0;
+
+PluginsManager::Private::Private(PluginsManager *parent):
+    q(parent)
+{
 }
 
-PluginsManager::PluginsManager():
-    QObject()
-{
-    QMetaObject::invokeMethod(this, "loadPlugins", Qt::QueuedConnection);
-}
-
-PluginsManager::~PluginsManager()
+PluginsManager::Private::~Private()
 {
     // Unload all plugins
-    Q_FOREACH (Plugin *plugin, m_pluginsList) {
-        disablePlugin(plugin);
+    Q_FOREACH (Plugin *plugin, pluginsList) {
+        q->disablePlugin(plugin);
         delete plugin;
     }
 }
 
-void PluginsManager::loadPlugins()
+void PluginsManager::Private::loadPlugins()
 {
     const QStringList enabledPlugins = Settings::instance()->enabledPlugins();
 
@@ -107,18 +116,19 @@ void PluginsManager::loadPlugins()
             if (plugin) {
                 const bool enabled = enabledPlugins.contains(plugin->id);
                 if (enabled) {
-                    enablePlugin(plugin);
+                    q->enablePlugin(plugin);
                 }
                 qDebug() << "Loaded" << plugin->id << "(" << filename << ")";
-                m_pluginsList << plugin;
+                pluginsList << plugin;
             }
         }
     }
 
-    Q_EMIT pluginsLoaded();
+    Q_EMIT q->pluginsLoaded();
 }
 
-PluginsManager::Plugin *PluginsManager::tryLoadPlugin(const QString &filePath)
+
+PluginsManager::Plugin *PluginsManager::Private::tryLoadPlugin(const QString &filePath)
 {
     QPluginLoader *loader = new QPluginLoader(filePath);
     const QJsonObject data = loader->metaData();
@@ -157,14 +167,35 @@ PluginsManager::Plugin *PluginsManager::tryLoadPlugin(const QString &filePath)
     return plugin;
 }
 
+PluginsManager *PluginsManager::instance()
+{
+    if (Private::instance == 0) {
+        Private::instance = new PluginsManager();
+    }
+
+    return Private::instance;
+}
+
+PluginsManager::PluginsManager():
+    QObject(),
+    d(new Private(this))
+{
+    QTimer::singleShot(0, this, SLOT(loadPlugins()));
+}
+
+PluginsManager::~PluginsManager()
+{
+    delete d;
+}
+
 int PluginsManager::pluginsCount() const
 {
-    return m_pluginsList.count();
+    return d->pluginsList.count();
 }
 
 PluginsManager::Plugin* PluginsManager::pluginAt(int index) const
 {
-    return m_pluginsList.at(index);
+    return d->pluginsList.at(index);
 }
 
 void PluginsManager::disablePlugin(Plugin *plugin)
@@ -210,19 +241,19 @@ void PluginsManager::enablePlugin(Plugin *plugin)
     plugin->isEnabled = true;
 
     // Install menus for the plugins
-    for (int i = 0; i < menus.size(); i++) {
-        installMenus(menus.keys().at(i), menus.values().at(i));
+    for (int i = 0; i < d->menus.size(); i++) {
+        installMenus(d->menus.keys().at(i), d->menus.values().at(i));
     }
 }
 
 void PluginsManager::installMenus(QMenu *menu, AbstractPlugin::MenuTypes menuType)
 {
-    if (!menus.contains(menu)) {
-        menus.insert(menu, menuType);
+    if (!d->menus.contains(menu)) {
+        d->menus.insert(menu, menuType);
     }
 
-    for (int i = 0; i < m_pluginsList.size(); i++) {
-        Plugin *plugin = m_pluginsList.at(i);
+    for (int i = 0; i < d->pluginsList.size(); i++) {
+        Plugin *plugin = d->pluginsList.at(i);
         if (!plugin || !plugin->isEnabled) {
             continue;
         }
@@ -238,8 +269,8 @@ void PluginsManager::installMenus(QMenu *menu, AbstractPlugin::MenuTypes menuTyp
 
 void PluginsManager::installPanes(QTabWidget *tabwidget)
 {
-    for (int i = 0; i < m_pluginsList.size(); i++) {
-        Plugin *plugin = m_pluginsList.at(i);
+    for (int i = 0; i < d->pluginsList.size(); i++) {
+        Plugin *plugin = d->pluginsList.at(i);
         if (!plugin || !plugin->isEnabled) {
             continue;
         }
@@ -258,3 +289,5 @@ void PluginsManager::installPanes(QTabWidget *tabwidget)
     // Do not let plugins to automatically activate themselves
     tabwidget->setCurrentIndex(0);
 }
+
+#include "moc_pluginsmanager.cpp"

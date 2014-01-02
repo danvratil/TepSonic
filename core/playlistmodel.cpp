@@ -42,15 +42,44 @@ using namespace TepSonic;
 
 Q_DECLARE_METATYPE(MetaData);
 
-void PlaylistModel::loadMetaDataRunnable(const MetaData::List::Iterator &start,
-                                         const MetaData::List::Iterator &end)
+class PlaylistModel::Private
 {
-    QWriteLocker locker(m_itemsLock);
-    if (start == m_items.end()) {
+  public:
+    Private();
+    ~Private();
+    void loadMetaDataRunnable(const MetaData::List::Iterator &start,
+                              const MetaData::List::Iterator &end);
+
+    MetaData::List items;
+    mutable QReadWriteLock *itemsLock;
+
+    // total length in seconds
+    int totalLength;
+};
+
+PlaylistModel::Private::Private():
+    itemsLock(new QReadWriteLock(QReadWriteLock::Recursive)),
+    totalLength(0)
+{
+}
+
+PlaylistModel::Private::~Private()
+{
+    itemsLock->lockForWrite();
+    items.clear();
+    itemsLock->unlock();
+    delete itemsLock;
+}
+
+void PlaylistModel::Private::loadMetaDataRunnable(const MetaData::List::Iterator &start,
+                                                 const MetaData::List::Iterator &end)
+{
+    QWriteLocker locker(itemsLock);
+    if (start == items.end()) {
         return;
     }
 
-    for (MetaData::List::Iterator iter = start; iter <= end && iter < m_items.end(); ++iter) {
+    for (MetaData::List::Iterator iter = start; iter <= end && iter < items.end(); ++iter) {
         const QFileInfo finfo((*iter).fileName());
 
         if ((!finfo.exists()) || (!finfo.isFile())) {
@@ -108,17 +137,13 @@ void PlaylistModel::loadMetaDataRunnable(const MetaData::List::Iterator &start,
 
 PlaylistModel::PlaylistModel(QObject *parent) :
     QAbstractItemModel(parent),
-    m_itemsLock(new QReadWriteLock(QReadWriteLock::Recursive)),
-    m_totalLength(0)
+    d(new Private)
 {
 }
 
 PlaylistModel::~PlaylistModel()
 {
-    m_itemsLock->lockForWrite();
-    m_items.clear();
-    m_itemsLock->unlock();
-    delete m_itemsLock;
+    delete d;
 }
 
 int PlaylistModel::columnCount(const QModelIndex &parent) const
@@ -130,7 +155,7 @@ int PlaylistModel::columnCount(const QModelIndex &parent) const
 
 QVariant PlaylistModel::data(const QModelIndex &index, int role) const
 {
-    QReadLocker locker(m_itemsLock);
+    QReadLocker locker(d->itemsLock);
 
     Q_ASSERT(index.model() == this);
     Q_ASSERT(index.column() < PlaylistModel::ColumnCount);
@@ -139,7 +164,7 @@ QVariant PlaylistModel::data(const QModelIndex &index, int role) const
         return QVariant();
     }
 
-    const MetaData metaData = m_items.at(index.row());
+    const MetaData metaData = d->items.at(index.row());
     if (role == PlaylistModel::MetaDataRole) {
         return QVariant::fromValue(metaData);
     } else if (role == Qt::DisplayRole) {
@@ -170,12 +195,12 @@ QVariant PlaylistModel::data(const QModelIndex &index, int role) const
 
 bool PlaylistModel::setData(const QModelIndex &index, const QVariant &value, int role)
 {
-    QWriteLocker locker(m_itemsLock);
+    QWriteLocker locker(d->itemsLock);
 
     Q_UNUSED(role);
     Q_ASSERT(index.model() == this);
 
-    MetaData::List::Iterator iter = m_items.begin();
+    MetaData::List::Iterator iter = d->items.begin();
     iter += index.row();
 
     switch (index.column()) {
@@ -274,17 +299,17 @@ bool PlaylistModel::removeRows(int position, int rows, const QModelIndex &parent
 
     int totalRemoveTime = 0;
     beginRemoveRows(parent, position, position + rows - 1);
-    m_itemsLock->lockForWrite();
+    d->itemsLock->lockForWrite();
     for (int i = 0; i < rows; i++) {
-        const MetaData metadata = m_items.takeAt(position);
+        const MetaData metadata = d->items.takeAt(position);
         totalRemoveTime += metadata.length() / 1000;
     }
-    m_itemsLock->unlock();
+    d->itemsLock->unlock();
     endRemoveRows();
 
     // Decrease total length of the playlist by total length of removed tracks
-    m_totalLength -= totalRemoveTime;
-    Q_EMIT playlistLengthChanged(m_totalLength, rowCount(QModelIndex()));
+    d->totalLength -= totalRemoveTime;
+    Q_EMIT playlistLengthChanged(d->totalLength, rowCount(QModelIndex()));
 
     return true;
 }
@@ -292,8 +317,8 @@ bool PlaylistModel::removeRows(int position, int rows, const QModelIndex &parent
 int PlaylistModel::rowCount(const QModelIndex &parent) const
 {
     if (!parent.isValid()) {
-        QReadLocker locker(m_itemsLock);
-        return m_items.count();
+        QReadLocker locker(d->itemsLock);
+        return d->items.count();
     }
 
     return 0;
@@ -306,22 +331,22 @@ void PlaylistModel::insertItem(const MetaData &metadata, int row)
     }
 
     beginInsertRows(QModelIndex(), row, row);
-    m_itemsLock->lockForWrite();
-    m_items.insert(row, metadata);
-    m_itemsLock->unlock();
+    d->itemsLock->lockForWrite();
+    d->items.insert(row, metadata);
+    d->itemsLock->unlock();
     endInsertRows();
 
-    m_totalLength += (metadata.length() / 1000);
-    Q_EMIT playlistLengthChanged(m_totalLength, m_items.count());
+    d->totalLength += (metadata.length() / 1000);
+    Q_EMIT playlistLengthChanged(d->totalLength, d->items.count());
 }
 
 void PlaylistModel::clear()
 {
 
     beginResetModel();
-    m_itemsLock->lockForWrite();
-    m_items.clear();
-    m_itemsLock->unlock();
+    d->itemsLock->lockForWrite();
+    d->items.clear();
+    d->itemsLock->unlock();
     endResetModel();
 }
 
@@ -332,7 +357,7 @@ void PlaylistModel::addFile(const QString &file)
 
 void PlaylistModel::addFiles(const QStringList &files)
 {
-    insertFiles(files, m_items.count());
+    insertFiles(files, d->items.count());
 }
 
 void PlaylistModel::insertFiles(const QStringList &files, int row)
@@ -345,22 +370,22 @@ void PlaylistModel::insertFiles(const QStringList &files, int row)
 
     beginInsertRows(QModelIndex(), startIndex, startIndex + files.size() - 1);
     // lock after beginInsertRows(), which calls rowCount() internally, so we would deadlock
-    QWriteLocker locker(m_itemsLock);
+    QWriteLocker locker(d->itemsLock);
     for (int i = 0; i < files.count(); ++i) {
         MetaData md;
         md.setFileName(files.at(i));
         md.setTitle(QFileInfo(md.fileName()).fileName());
-        m_items.insert(row + i, md);
+        d->items.insert(row + i, md);
     }
     locker.unlock();
     endInsertRows();
 
-    const MetaData::List::Iterator start = m_items.begin() + row;
+    const MetaData::List::Iterator start = d->items.begin() + row;
     const MetaData::List::iterator end = start + files.count();
 
     QFutureWatcher<void> *watcher = new QFutureWatcher<void>(this);
     // QtConcurrent::map crashes, see QTBUG-35280 - we use run() instead
-    QFuture<void> future = QtConcurrent::run(this, &PlaylistModel::loadMetaDataRunnable, start, end);
+    QFuture<void> future = QtConcurrent::run(d, &PlaylistModel::Private::loadMetaDataRunnable, start, end);
     watcher->setFuture(future);
     watcher->setPendingResultsLimit(1);
     watcher->setProperty("startOffset", startIndex);
@@ -379,12 +404,12 @@ void PlaylistModel::onMetaDataAvailable(int beginIndex, int endIndex)
 
     int totalLength = 0;
     for (int i = offset + beginIndex; i <= endIndex; ++i) {
-        const MetaData &metaData = m_items.at(i);
+        const MetaData &metaData = d->items.at(i);
         totalLength += (metaData.length() / 1000);
     }
-    m_totalLength += totalLength;
+    d->totalLength += totalLength;
 
-    Q_EMIT playlistLengthChanged(m_totalLength, m_items.count());
+    Q_EMIT playlistLengthChanged(d->totalLength, d->items.count());
     Q_EMIT dataChanged(index(offset + beginIndex, 0),
                        index(offset + endIndex, ColumnCount));
 }
@@ -411,12 +436,12 @@ void PlaylistModel::loadPlaylist(const QString &file)
 void PlaylistModel::savePlaylist(const QString& file)
 {
     QStringList playlist;
-    playlist.reserve(m_items.count());
-    m_itemsLock->lockForRead();
-    Q_FOREACH (const MetaData &metaData, m_items) {
+    playlist.reserve(d->items.count());
+    d->itemsLock->lockForRead();
+    Q_FOREACH (const MetaData &metaData, d->items) {
         playlist << metaData.fileName();
     }
-    m_itemsLock->unlock();
+    d->itemsLock->unlock();
 
     if (!playlist.isEmpty()) {
         M3U::writeToFile(playlist, file);

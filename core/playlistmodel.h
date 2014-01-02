@@ -97,15 +97,8 @@ class TEPSONIC_CORE_EXPORT PlaylistModel : public QAbstractItemModel
     void onMetaDataDone();
 
   private:
-    void loadMetaDataRunnable(const MetaData::List::Iterator &start,
-                              const MetaData::List::Iterator &end);
-
-    MetaData::List m_items;
-    mutable QReadWriteLock *m_itemsLock;
-
-    // total length in seconds
-    int m_totalLength;
-
+    class Private;
+    Private * const d;
 
 };
 

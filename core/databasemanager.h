@@ -35,6 +35,7 @@
 namespace TepSonic
 {
 
+// TODO: Kill this class and manage collections directly through collectionsModel
 class TEPSONIC_CORE_EXPORT DatabaseManager
 {
 
@@ -43,8 +44,6 @@ class TEPSONIC_CORE_EXPORT DatabaseManager
 
     static DatabaseManager* instance();
     ~DatabaseManager();
-
-
 
     DriverTypes driverType() const  {
         return m_driverType;

@@ -27,59 +27,81 @@
 
 using namespace TepSonic;
 
-Settings *Settings::s_instance = 0;
+class Settings::Private
+{
+  public:
+    Private();
+    ~Private();
+
+    static Settings *instance;
+
+    QSettings *settings;
+    QTimer *writebackTimer;
+};
+
+Settings *Settings::Private::instance = 0;
+
+Settings::Private::Private()
+{
+    settings = new QSettings(XdgConfigDir + QLatin1String("/main.conf"), QSettings::IniFormat);
+    writebackTimer = new QTimer();
+    writebackTimer->setInterval(100);
+    writebackTimer->setSingleShot(true);
+    QObject::connect(writebackTimer, &QTimer::timeout, [=]() { settings->sync(); });
+}
+
+Settings::Private::~Private()
+{
+    if (writebackTimer->isActive()) {
+        writebackTimer->stop();
+    }
+
+    delete writebackTimer;
+    delete settings;
+}
 
 Settings* Settings::instance()
 {
-    if (s_instance == 0) {
-        s_instance = new Settings();
+    if (Private::instance == 0) {
+        Private::instance = new Settings();
     }
 
-    return s_instance;
+    return Private::instance;
 }
 
-Settings::Settings()
+Settings::Settings():
+    d(new Private)
 {
-    m_settings = new QSettings(XdgConfigDir + QLatin1String("/main.conf"), QSettings::IniFormat);
-    m_writebackTimer = new QTimer();
-    m_writebackTimer->setInterval(100);
-    m_writebackTimer->setSingleShot(true);
-    QObject::connect(m_writebackTimer, &QTimer::timeout, [=]() { m_settings->sync(); });
 }
 
 Settings::~Settings()
 {
-    if (m_writebackTimer->isActive()) {
-        m_writebackTimer->stop();
-    }
-
-    m_writebackTimer->deleteLater();
-    m_settings->deleteLater();
+    delete d;
 }
 
 void Settings::destroy()
 {
-    delete s_instance;
-    s_instance = 0;
+    delete Private::instance;
+    Private::instance = 0;
 }
 
 #define DECLARESETTINGSGETTER(type, getter, group, option, default) \
 type Settings::getter() const \
 { \
-    m_settings->beginGroup(QLatin1String(group)); \
-    const QVariant val = m_settings->value(QLatin1String(option), default); \
-    m_settings->endGroup(); \
+    d->settings->beginGroup(QLatin1String(group)); \
+    const QVariant val = d->settings->value(QLatin1String(option), default); \
+    d->settings->endGroup(); \
     return val.value<type>(); \
 }
 
 #define DECLARESETTINGSSETTER(type, setter, group, option) \
 void Settings::setter(const type &val) \
 { \
-    m_settings->beginGroup(QLatin1String(group)); \
-    m_settings->setValue(QLatin1String(option), val); \
-    m_settings->endGroup(); \
-    if (!m_writebackTimer->isActive()) { \
-        m_writebackTimer->start(); \
+    d->settings->beginGroup(QLatin1String(group)); \
+    d->settings->setValue(QLatin1String(option), val); \
+    d->settings->endGroup(); \
+    if (!d->writebackTimer->isActive()) { \
+        d->writebackTimer->start(); \
     } \
 }
 

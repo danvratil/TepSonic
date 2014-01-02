@@ -50,13 +50,9 @@ class TEPSONIC_CORE_EXPORT ActionManager
 
   private:
     ActionManager();
-    void initDefaultActions();
-    void initDefaultMenus();
 
-    QMap<QString, QAction*> mActions;
-    QMap<QString, QMenu*> mMenus;
-
-    static ActionManager *sInstance;
+    class Private;
+    Private * const d;
 };
 
 } // namespace TepSonic

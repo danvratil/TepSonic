@@ -39,63 +39,109 @@
 
 using namespace TepSonic;
 
-Player* Player::s_instance = 0;
+class Player::Private
+{
+  public:
+    Private();
+    ~Private();
+    void loadEffects();
+
+    static Player *sInstance;
+
+    RepeatMode repeatMode;
+    bool randomMode;
+
+    Phonon::MediaObject *phononPlayer;
+    Phonon::AudioOutput *audioOutput;
+    Phonon::Path phononPath;
+
+    QList<Phonon::Effect *> effects;
+
+};
+
+Player* Player::Private::sInstance = 0;
+
+Player::Private::Private():
+    repeatMode(Player::RepeatOff),
+    randomMode(false)
+{
+}
+
+Player::Private::~Private()
+{
+    delete phononPlayer;
+    delete audioOutput;
+
+    // Free all effects
+    qDeleteAll(effects);
+}
+
+void Player::Private::loadEffects()
+{
+    const QSettings settings(QString(XdgConfigDir).append(QLatin1String("/main.conf")), QSettings::IniFormat);
+    const QList<Phonon::EffectDescription> availableEffects = Phonon::BackendCapabilities::availableAudioEffects();
+    for (int i = 0; i < availableEffects.count(); i++) {
+        Phonon::Effect *effect = new Phonon::Effect(availableEffects.at(i));
+        effects.append(effect);
+        const bool state = settings.value(QLatin1String("Preferences/Effects/") + availableEffects.at(i).name(), 0).toBool();
+        if (state) {
+            phononPath.insertEffect(effect);
+        }
+    }
+}
+
+
 
 Player* Player::instance()
 {
-    if (s_instance == 0) {
-        s_instance = new Player();
+    if (Private::sInstance == 0) {
+        Private::sInstance = new Player();
     }
 
-    return s_instance;
+    return Private::sInstance;
 }
 
-Player::Player()
+Player::Player():
+    d(new Private)
 {
-    m_phononPlayer = new Phonon::MediaObject();
-    m_audioOutput = new Phonon::AudioOutput(Phonon::MusicCategory);
+    d->phononPlayer = new Phonon::MediaObject();
+    d->audioOutput = new Phonon::AudioOutput(Phonon::MusicCategory);
     setDefaultOutputDevice();
-    m_phononPath = Phonon::createPath(m_phononPlayer,
-                                      m_audioOutput);
+    d->phononPath = Phonon::createPath(d->phononPlayer, d->audioOutput);
 
     // By default tick every 1 second
-    m_phononPlayer->setTickInterval(1000);
+    d->phononPlayer->setTickInterval(1000);
 
-    connect(m_phononPlayer, &Phonon::MediaObject::finished,
+    connect(d->phononPlayer, &Phonon::MediaObject::finished,
             this, &Player::emitFinished);
-    connect(m_phononPlayer, &Phonon::MediaObject::stateChanged,
+    connect(d->phononPlayer, &Phonon::MediaObject::stateChanged,
             this, &Player::stateChanged);
-    connect(m_phononPlayer, &Phonon::MediaObject::tick,
+    connect(d->phononPlayer, &Phonon::MediaObject::tick,
             this, &Player::trackPositionChanged);
     //connect(m_phononPlayer,SIGNAL(currentSourceChanged(Phonon::MediaSource)),this,SLOT(emitTrackChanged()));
 
-    m_randomMode = false;
-    m_repeatMode = RepeatOff;
+    d->randomMode = false;
+    d->repeatMode = RepeatOff;
 
-    loadEffects();
+    d->loadEffects();
 }
 
 Player::~Player()
 {
-    if (m_phononPlayer->state() == Phonon::PlayingState) {
-        m_phononPlayer->stop();
+    if (d->phononPlayer->state() == Phonon::PlayingState) {
+        d->phononPlayer->stop();
     }
 
-    delete m_phononPlayer;
-    delete m_audioOutput;
-
-    // Free all effects
-    qDeleteAll(m_effects);
-    m_effects.clear();
+    delete d;
 }
 
 void Player::setTrack(const QString &fileName, bool autoPlay)
 {
     // Stop current track
-    m_phononPlayer->stop();
+    d->phononPlayer->stop();
 
     if (QFileInfo(fileName).isFile()) {
-        m_phononPlayer->setCurrentSource(Phonon::MediaSource(QUrl::fromLocalFile(fileName)));
+        d->phononPlayer->setCurrentSource(Phonon::MediaSource(QUrl::fromLocalFile(fileName)));
     }
 
     Q_EMIT trackChanged(currentMetaData());
@@ -106,10 +152,10 @@ void Player::setTrack(const QString &fileName, bool autoPlay)
 
 void Player::setRandomMode(bool randomMode)
 {
-    if (m_randomMode != randomMode) {
-        m_randomMode = randomMode;
+    if (d->randomMode != randomMode) {
+        d->randomMode = randomMode;
         QString action;
-        if (m_randomMode) {
+        if (d->randomMode) {
             action = QStringLiteral("PlayerRandomOn");
         } else {
             action = QStringLiteral("PlayerRandomOff");
@@ -119,12 +165,17 @@ void Player::setRandomMode(bool randomMode)
     }
 }
 
+bool Player::randomMode() const
+{
+    return d->randomMode;
+}
+
 void Player::setRepeatMode(RepeatMode repeatMode)
 {
-    if (m_repeatMode != repeatMode) {
-        m_repeatMode = repeatMode;
+    if (d->repeatMode != repeatMode) {
+        d->repeatMode = repeatMode;
         QString action;
-        switch (m_repeatMode) {
+        switch (d->repeatMode) {
             case RepeatAll:
                 action = QStringLiteral("PlayerRepeatAll");
                 break;
@@ -140,18 +191,37 @@ void Player::setRepeatMode(RepeatMode repeatMode)
     }
 }
 
+Player::RepeatMode Player::repeatMode() const
+{
+    return d->repeatMode;
+}
+
+
+void Player::play()
+{
+    d->phononPlayer->play();
+}
+
 void Player::pause()
 {
-    m_phononPlayer->pause();
-    Q_EMIT trackPaused((m_phononPlayer->state() == Phonon::PausedState));
+    d->phononPlayer->pause();
+    Q_EMIT trackPaused((d->phononPlayer->state() == Phonon::PausedState));
+}
+
+void Player::stop()
+{
+    d->phononPlayer->stop();
+    // Empty the source
+    d->phononPlayer->setCurrentSource(Phonon::MediaSource());
+    Q_EMIT trackChanged(MetaData());
 }
 
 MetaData Player::currentMetaData() const
 {
     // FIXME: Cache the metadata, or get them directly from Playlist!
-    const QString filename = m_phononPlayer->currentSource().fileName();
+    const QString filename = d->phononPlayer->currentSource().fileName();
     if ((!QFileInfo(filename).exists()) ||
-        (m_phononPlayer->currentSource().type()==Phonon::MediaSource::Invalid)) {
+        (d->phononPlayer->currentSource().type()==Phonon::MediaSource::Invalid)) {
         return MetaData();
     }
 
@@ -159,13 +229,37 @@ MetaData Player::currentMetaData() const
     return MetaData(f);
 }
 
-void Player::stop()
+Phonon::AudioOutput* Player::audioOutput() const
 {
-    m_phononPlayer->stop();
-    // Empty the source
-    m_phononPlayer->setCurrentSource(Phonon::MediaSource());
-    Q_EMIT trackChanged(MetaData());
+    return d->audioOutput;
 }
+
+Phonon::MediaObject* Player::mediaObject() const
+{
+    return d->phononPlayer;
+}
+
+QList< Phonon::Effect* > Player::effects() const
+{
+    return d->effects;
+}
+
+Phonon::MediaSource Player::currentSource() const
+{
+    return d->phononPlayer->currentSource();
+}
+
+QString Player::errorString() const
+{
+    return d->phononPlayer->errorString();
+}
+
+Phonon::State Player::playerState() const
+{
+    return d->phononPlayer->state();
+}
+
+
 
 void Player::emitFinished()
 {
@@ -183,30 +277,16 @@ void Player::setDefaultOutputDevice()
     for (int i = 0; i < devices.length(); i++) {
         if (devices.at(i).index() == index) {
             qDebug() << "Changing output audio device to" << devices.at(i).name();
-            m_audioOutput->setOutputDevice(devices.at(i));
-        }
-    }
-}
-
-void Player::loadEffects()
-{
-    const QSettings settings(QString(XdgConfigDir).append(QLatin1String("/main.conf")), QSettings::IniFormat);
-    const QList<Phonon::EffectDescription> effects = Phonon::BackendCapabilities::availableAudioEffects();
-    for (int i = 0; i < effects.count(); i++) {
-        Phonon::Effect *effect = new Phonon::Effect(effects.at(i));
-        m_effects.append(effect);
-        const bool state = settings.value(QLatin1String("Preferences/Effects/") + effects.at(i).name(), 0).toBool();
-        if (state) {
-            m_phononPath.insertEffect(effect);
+            d->audioOutput->setOutputDevice(devices.at(i));
         }
     }
 }
 
 void Player::enableEffect(Phonon::Effect *effect, bool enable)
 {
-    if (enable && !m_phononPath.effects().contains(effect)) {
-        m_phononPath.insertEffect(effect);
-    } else if (!enable && m_phononPath.effects().contains(effect)) {
-        m_phononPath.removeEffect(effect);
+    if (enable && !d->phononPath.effects().contains(effect)) {
+        d->phononPath.insertEffect(effect);
+    } else if (!enable && d->phononPath.effects().contains(effect)) {
+        d->phononPath.removeEffect(effect);
     }
 }

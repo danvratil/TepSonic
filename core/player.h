@@ -59,45 +59,19 @@ class TEPSONIC_CORE_EXPORT Player: public QObject
 
     MetaData currentMetaData() const;
 
-    RepeatMode repeatMode() const {
-        return m_repeatMode;
-    }
-
-    bool randomMode() const {
-        return m_randomMode;
-    }
-
-    Phonon::MediaSource currentSource() const {
-        return m_phononPlayer->currentSource();
-    }
-
-    Phonon::State playerState() const {
-        return m_phononPlayer->state();
-    }
-
-    QString errorString() const {
-        return m_phononPlayer->errorString();
-    }
-
-    Phonon::MediaObject *mediaObject() const {
-        return m_phononPlayer;
-    }
-
-    Phonon::AudioOutput *audioOutput() const {
-        return m_audioOutput;
-    }
-
-    QList<Phonon::Effect *> effects() const {
-        return m_effects;
-    }
+    RepeatMode repeatMode() const;
+    bool randomMode() const;
+    Phonon::MediaSource currentSource() const;
+    Phonon::State playerState() const;
+    QString errorString() const;
+    Phonon::MediaObject *mediaObject() const;
+    Phonon::AudioOutput *audioOutput() const;
+    QList<Phonon::Effect *> effects() const;
 
   public Q_SLOTS:
     void setRepeatMode(Player::RepeatMode repeatMode);
     void setRandomMode(bool randomMode);
-    void play() {
-        m_phononPlayer->play();
-    }
-
+    void play();
     void pause();
     void stop();
 
@@ -121,20 +95,10 @@ class TEPSONIC_CORE_EXPORT Player: public QObject
     void emitFinished();
 
   private:
-    explicit Player();
-    static Player *s_instance;
+    Player();
 
-    RepeatMode m_repeatMode;
-    bool m_randomMode;
-
-    Phonon::MediaObject *m_phononPlayer;
-    Phonon::AudioOutput *m_audioOutput;
-    Phonon::Path m_phononPath;
-
-    QList<Phonon::Effect *> m_effects;
-
-    void loadEffects();
-
+    class Private;
+    Private * const d;
 };
 
 } // namespace TepSonic

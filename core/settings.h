@@ -92,10 +92,9 @@ class TEPSONIC_CORE_EXPORT Settings
 
   private:
     Settings();
-    static Settings *s_instance;
 
-    QSettings *m_settings;
-    QTimer *m_writebackTimer;
+    class Private;
+    const Private * const d;
 };
 
 } // namespace TepSonic
