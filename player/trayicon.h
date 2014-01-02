@@ -34,7 +34,7 @@ class TrayIcon : public QSystemTrayIcon
     TrayIcon(MainWindow *parent);
 
   private Q_SLOTS:
-    void playerStatusChanged(Phonon::State newState, Phonon::State oldState);
+    void playerStateChanged(Phonon::State newState, Phonon::State oldState);
 
   protected:
     bool event(QEvent *event);

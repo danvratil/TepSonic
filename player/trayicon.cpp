@@ -37,6 +37,8 @@ TrayIcon::TrayIcon(MainWindow *parent):
                     parent->toggleWindowVisible();
                 }
             });
+    connect(Player::instance(), &Player::stateChanged,
+            this, &TrayIcon::playerStateChanged);
 
     setIcon(QIcon(QStringLiteral(":/icons/mainIcon")));
     setVisible(true);
@@ -44,7 +46,7 @@ TrayIcon::TrayIcon(MainWindow *parent):
     setToolTip(tr("Player is stopped"));
 }
 
-void TrayIcon::playerStatusChanged(Phonon::State newState, Phonon::State oldState)
+void TrayIcon::playerStateChanged(Phonon::State newState, Phonon::State oldState)
 {
     Q_UNUSED(oldState);
 

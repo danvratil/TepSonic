@@ -56,7 +56,6 @@ class Player::Private
     Phonon::Path phononPath;
 
     QList<Phonon::Effect *> effects;
-
 };
 
 Player* Player::Private::sInstance = 0;
