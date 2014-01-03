@@ -13,8 +13,13 @@
  - revisit AbstractPlugin interface - simplify?
  - revisit design of Settings - can we provide a more generic yet equally safe framework
    for configuration, reusable by plugins?
- - clean up MetadataEditor
  - move away from .ui?
  - proper config UI for some Phonon effects
  - make MetadataEditor available from CollectionsView, too
     - support batch-changes of certain meta data
+ - find better way of sharing MetaData between CollectionsModel and Playlist
+ - kill DatabaseManager (or make it internal) and make CollectionsModel
+    the only way to access collections, including changing the metadata
+ - make MetaData explicitly shared, so that changes are propagated everywhere,
+    or maybe work with QSharedPointer instead of QSharedData (that would save
+    some more memory)
