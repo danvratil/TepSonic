@@ -30,7 +30,7 @@
 
 #include <core/constants.h>
 #include <core/player.h>
-#include <core/playlistmodel.h>
+#include <core/playlist.h>
 #include <core/pluginsmanager.h>
 #include <core/settings.h>
 
@@ -75,8 +75,6 @@ int main(int argc, char *argv[])
     TaskManager::instance();
 
     MainWindow *mainWindow = new MainWindow;
-    mainWindow->show();
-
     TrayIcon *trayIcon = new TrayIcon(mainWindow);
 
     QStringList files;
@@ -87,11 +85,11 @@ int main(int argc, char *argv[])
         }
     }
     if (!files.isEmpty()) {
-        mainWindow->playlistModel()->addFiles(files);
-        TepSonic::Player::instance()->setTrack(files.first());
+        TepSonic::Player::instance()->playlist()->insert(files);
         TepSonic::Player::instance()->play();
     }
 
+    mainWindow->show();
     int ret = tepsonic.exec();
 
     delete trayIcon;

@@ -18,14 +18,14 @@
  */
 
 #include "playlistview.h"
-#include "playlistproxymodel.h"
 #include "playlistitemdelegate.h"
+#include "playlistsortfiltermodel.h"
 
 #include <core/actionmanager.h>
 #include <core/player.h>
-#include <core/playlistmodel.h>
 #include <core/supportedformats.h>
 #include <core/utils.h>
+#include <core/playlist.h>
 
 #include <QApplication>
 #include <QDropEvent>
@@ -54,14 +54,11 @@
 using namespace TepSonic;
 
 PlaylistView::PlaylistView(QWidget *parent):
-    QTreeView(parent)
+    QTreeView(parent),
+    m_currentTrack(-1),
+    m_stopTrack(-1)
 {
-    m_playlistModel = new PlaylistModel(this);
-    PlaylistProxyModel *proxy = new PlaylistProxyModel(m_playlistModel, this);
-    setModel(proxy);
-
-    connect(m_playlistModel, &PlaylistModel::playlistLengthChanged,
-            this, &PlaylistView::playlistLengthChanged);
+    setModel(new PlaylistSortFilterModel(this));
 
     setItemDelegate(new PlaylistItemDelegate(this));
     setAcceptDrops(true);
@@ -82,112 +79,24 @@ PlaylistView::PlaylistView(QWidget *parent):
     header()->setSectionsClickable(true);
 
     // Hide the first column (with filename) and the last one (with order number)
-    hideColumn(PlaylistModel::FilenameColumn);
-    //hideColumn(PlaylistModel::RandomOrderColumn);
+    hideColumn(0);
 
     connect(header(), &QHeaderView::sortIndicatorChanged,
             this, &PlaylistView::slotSortIndicatorChanged);
-    connect(this, &PlaylistView::doubleClicked,
-            this, &PlaylistView::setNowPlaying);
     connect(header(), &QHeaderView::customContextMenuRequested,
             this, &PlaylistView::slotHeaderContextMenuRequested);
     connect(this, &PlaylistView::customContextMenuRequested,
             this, &PlaylistView::slotContextMenuRequested);
+    connect(this, &PlaylistView::doubleClicked,
+            this, &PlaylistView::slotItemDoubleClicked);
+    connect(Player::instance(), &Player::trackChanged,
+            this, &PlaylistView::slotCurrentTrackChanged);
+    connect(Player::instance(), &Player::stopTrackChanged,
+            this, &PlaylistView::slotStopTrackChanged);
 }
 
 PlaylistView::~PlaylistView()
 {
-}
-
-PlaylistModel* PlaylistView::playlistModel() const
-{
-    return m_playlistModel;
-}
-
-void PlaylistView::clear()
-{
-    m_playlistModel->clear();
-    setNowPlaying(QModelIndex());
-    setStopTrack(QModelIndex());
-}
-
-QModelIndex PlaylistView::nowPlaying() const
-{
-    return m_nowPlaying;
-}
-
-void PlaylistView::setNowPlaying(const QModelIndex &index)
-{
-    // Break potential recursion
-    if (m_nowPlaying == index) {
-        return;
-    }
-
-    invalidateIndex(m_nowPlaying);
-    m_nowPlaying = index;
-    invalidateIndex(m_nowPlaying);
-    Q_EMIT nowPlayingChanged(m_nowPlaying);
-}
-
-void PlaylistView::setStopTrack(const QModelIndex &index)
-{
-    invalidateIndex(m_stopTrack);
-    m_stopTrack = index;
-    invalidateIndex(m_stopTrack);
-}
-
-QModelIndex PlaylistView::stopTrack() const
-{
-    return m_stopTrack;
-}
-
-void PlaylistView::clearStopTrack()
-{
-    invalidateIndex(m_stopTrack);
-    m_stopTrack = QModelIndex();
-}
-
-void PlaylistView::invalidateIndex(const QModelIndex &index)
-{
-    if (index.isValid()) {
-        const QModelIndex left = index.sibling(index.row(), 0);
-        const QModelIndex right = index.sibling(index.row(), model()->columnCount() - 1);
-        Q_EMIT dataChanged(left, right);
-    }
-}
-
-void PlaylistView::selectNextTrack()
-{
-    // If the track we just played was "stop-on-this" track then stop playback
-    if (m_stopTrack.isValid() && m_stopTrack.row() == m_nowPlaying.row()) {
-        Player::instance()->stop();
-        return;
-    }
-
-    // 1) Random playback?
-    if (Player::instance()->randomMode()) {
-        int row = rand() % m_playlistModel->rowCount();
-        setNowPlaying(model()->index(row, 0));
-
-        // 2) Not last item?
-    } else if (indexBelow(m_nowPlaying).isValid()) {
-        setNowPlaying(indexBelow(m_nowPlaying));
-
-        // 3) Repeat all playlist?
-    } else if (Player::instance()->repeatMode() == Player::RepeatAll) {
-        setNowPlaying(model()->index(0, 0));
-
-        // 4) Stop, there's nothing else to play
-    } else {
-        return;
-    }
-}
-
-void PlaylistView::selectPreviousTrack()
-{
-    if (m_nowPlaying.row() > 0 && model()->rowCount() > 0) {
-        setNowPlaying(model()->index(m_nowPlaying.row() - 1, 0));
-    }
 }
 
 void PlaylistView::setFilter(const QString &filter)
@@ -242,23 +151,13 @@ void PlaylistView::mouseMoveEvent(QMouseEvent *event)
     // Selected indexes
     QItemSelection selection = selectionModel()->selection();
 
-    PlaylistProxyModel *proxyModel = qobject_cast<PlaylistProxyModel *>(model());
-    if (!proxyModel) {
-        return;
-    }
-    selection = proxyModel->mapSelectionToSource(selection);
-    PlaylistModel *model = qobject_cast<PlaylistModel *>(proxyModel->sourceModel());
-    if (!model) {
-        return;
-    }
-
     for (int i = 0; i < selection.indexes().size(); i++) {
         const QModelIndex index = selection.indexes().at(i);
-        for (int j = 0; j < PlaylistModel::ColumnCount; j++)  {
+        for (int j = 0; j < model()->columnCount(); j++)  {
             stream << index.sibling(index.row(), j).data().toString();
         }
         // Remove the row from view
-        model->removeRow(selection.indexes().at(i).row());
+        model()->removeRow(selection.indexes().at(i).row());
     }
 
     mimeData->setData(QLatin1String("data/tepsonic-playlist-items"), encodedData);
@@ -324,7 +223,7 @@ void PlaylistView::dropEvent(QDropEvent *event)
         }
 
         if (!files.isEmpty()) {
-            m_playlistModel->insertFiles(files, row);
+            Player::instance()->playlist()->insert(files, row);
         }
     }
 
@@ -333,12 +232,7 @@ void PlaylistView::dropEvent(QDropEvent *event)
         QByteArray encodedData = event->mimeData()->data(QLatin1String("data/tepsonic-playlist-items"));
         QDataStream stream(&encodedData, QIODevice::ReadOnly);
 
-        // We need the original PlaylistModel
-        PlaylistProxyModel *proxyModel = qobject_cast<PlaylistProxyModel *>(model());
-        if (!proxyModel) {
-            return;
-        }
-        PlaylistModel *model = qobject_cast<PlaylistModel *>(proxyModel->sourceModel());
+        Playlist *model = Player::instance()->playlist();
         if (!model) {
             return;
         }
@@ -352,6 +246,7 @@ void PlaylistView::dropEvent(QDropEvent *event)
             row += 1;
         }
 
+        MetaData::List metadataList;
         MetaData metadata;
         QString s;
         while (!stream.atEnd()) {
@@ -372,8 +267,9 @@ void PlaylistView::dropEvent(QDropEvent *event)
             stream >> s;
             metadata.setBitrate(s.toInt());
 
-            model->insertItem(metadata, row);
+            metadataList << metadata;
         }
+        Player::instance()->playlist()->insert(metadataList, row);
     }
 
     event->setAccepted(true);
@@ -388,38 +284,34 @@ void PlaylistView::keyPressEvent(QKeyEvent *event)
 
     switch (event->key()) {
         case Qt::Key_Delete: { // Key DELETE
-            const QModelIndexList selected = selectedIndexes();
-            for (int i = selected.size() - 1; i > 0; --i) {
+            const QModelIndexList selected = selectionModel()->selectedRows();
+            if (selected.isEmpty()) { 
+                return;
+            }
+            int lastRow = selected.last().row();
+            for (int i = selected.size() - 1; i >= 0; --i) {
                 model()->removeRow(selected.at(i).row());
             }
+            if (lastRow >= model()->rowCount()) {
+                lastRow = model()->rowCount() - 1;
+                if (lastRow == -1) {
+                    return;
+                }
+            }
+            selectionModel()->select(QItemSelection(model()->index(lastRow, 0),
+                                                    model()->index(lastRow, model()->columnCount() - 1)),
+                                     QItemSelectionModel::ClearAndSelect);
             event->accept();
             return;
         }
 
         case Qt::Key_Enter:  // key ENTER (on numeric keypad)
         case Qt::Key_Return: { // Key ENTER
-            setNowPlaying(currentIndex());
-            Q_EMIT doubleClicked(currentIndex());
+            Player::instance()->setCurrentTrack(currentIndex().row());
             event->accept();
             return;
         }
     }
-}
-
-void PlaylistView::shuffle()
-{
-    header()->setSortIndicator(-1, Qt::AscendingOrder);
-
-    /*
-    srand(time(0)); // We needs microseconds
-    const int rowCount = model()->rowCount();
-    for (int row = 0; row < rowCount; row++) {
-        qulonglong order = (qulonglong)rand();
-        model()->setData(model()->index(row, PlaylistModel::RandomOrderColumn), QVariant(order));
-    }
-
-    model()->sort(PlaylistModel::RandomOrderColumn, Qt::AscendingOrder);
-    */
 }
 
 void PlaylistView::slotSortIndicatorChanged(int column, Qt::SortOrder order)
@@ -443,4 +335,39 @@ void PlaylistView::slotContextMenuRequested(const QPoint &pos)
     }
 
     menu->popup(mapToGlobal(pos));
+}
+
+void PlaylistView::slotItemDoubleClicked(const QModelIndex &index)
+{
+    QAbstractProxyModel *proxy = qobject_cast<QAbstractProxyModel*>(model());
+    const QModelIndex mappedIndex = proxy->mapToSource(index);
+    if (!mappedIndex.isValid()) {
+        return;
+    }
+
+    Player::instance()->setCurrentTrack(mappedIndex.row());
+    Player::instance()->play();
+}
+
+void PlaylistView::invalidateRow(int row)
+{
+    if (row > -1) {
+        dataChanged(model()->index(row, 0),
+            model()->index(row, model()->columnCount()));
+    }
+}
+
+
+void PlaylistView::slotCurrentTrackChanged()
+{
+    invalidateRow(m_currentTrack);
+    m_currentTrack = Player::instance()->currentTrack();
+    invalidateRow(m_currentTrack);
+}
+
+void PlaylistView::slotStopTrackChanged()
+{
+    invalidateRow(m_stopTrack);
+    m_stopTrack = Player::instance()->stopTrack();
+    invalidateRow(m_stopTrack);
 }

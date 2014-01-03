@@ -17,27 +17,35 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Cambridge, MA 02110-1301, USA.
  */
 
-#ifndef PLAYLISTITEMDELEGATE_H
-#define PLAYLISTITEMDELEGATE_H
+#include "playlistsortfiltermodel.h"
+#include "playlistproxymodel.h"
 
-#include <QStyledItemDelegate>
-#include <QStyleOptionViewItem>
-#include <QPainter>
-#include <QModelIndex>
+#include <QDebug>
 
-class QAbstractProxyModel;
-class PlaylistView;
-
-class PlaylistItemDelegate : public QStyledItemDelegate
+PlaylistSortFilterModel::PlaylistSortFilterModel(QObject* parent):
+    QSortFilterProxyModel(parent)
 {
-    Q_OBJECT
+    setSourceModel(new PlaylistProxyModel(this));
+    setFilterRole(Qt::DisplayRole);
+    setFilterCaseSensitivity(Qt::CaseInsensitive);
+    setDynamicSortFilter(false);
+}
 
-  public:
-    explicit PlaylistItemDelegate(PlaylistView *parent);
-    void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const;
 
-  private:
-    QAbstractProxyModel *mProxyModel;
-};
+bool PlaylistSortFilterModel::filterAcceptsRow(int sourceRow, const QModelIndex &sourceParent) const
+{
+    Q_UNUSED(sourceParent);
 
-#endif // PLAYLISTITEMDELEGATE_H
+    if (filterRegExp().isEmpty()) {
+        return true;
+    }
+
+    for (int i = 0; i < columnCount(); ++i) {
+        const QModelIndex idx = sourceModel()->index(sourceRow, i);
+        if (idx.data().toString().contains(filterRegExp())) {
+            return true;
+        }
+    }
+
+    return false;
+}

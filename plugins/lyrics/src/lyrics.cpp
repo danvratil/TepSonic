@@ -21,6 +21,7 @@
 #include "lyricsscrollarea.h"
 
 #include <core/player.h>
+#include <core/playlist.h>
 
 #include <QDir>
 #include <QString>
@@ -101,8 +102,13 @@ bool LyricsPlugin::setupPane(QWidget *widget, QString &label)
     return true;
 }
 
-void LyricsPlugin::trackChanged(const MetaData &metaData)
+void LyricsPlugin::trackChanged()
 {
+    const int currentTrack = Player::instance()->currentTrack();
+    if (currentTrack == -1 ) {
+        return;
+    }
+    const MetaData metaData = Player::instance()->playlist()->track(currentTrack);
     const QByteArray u("http://webservices.lyrdb.com/lookup.php?q="  
                     + QUrl::toPercentEncoding(metaData.artist()) + "|"
                     + QUrl::toPercentEncoding(metaData.title()) + "&for=match&agent=TepSonic");

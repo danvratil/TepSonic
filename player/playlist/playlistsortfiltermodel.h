@@ -17,27 +17,20 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Cambridge, MA 02110-1301, USA.
  */
 
-#ifndef PLAYLISTITEMDELEGATE_H
-#define PLAYLISTITEMDELEGATE_H
+#ifndef PLAYLISTSORTFILTERMODEL_H
+#define PLAYLISTSORTFILTERMODEL_H
 
-#include <QStyledItemDelegate>
-#include <QStyleOptionViewItem>
-#include <QPainter>
-#include <QModelIndex>
+#include <QSortFilterProxyModel>
 
-class QAbstractProxyModel;
-class PlaylistView;
-
-class PlaylistItemDelegate : public QStyledItemDelegate
+class PlaylistSortFilterModel: public QSortFilterProxyModel
 {
     Q_OBJECT
 
   public:
-    explicit PlaylistItemDelegate(PlaylistView *parent);
-    void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const;
+    PlaylistSortFilterModel(QObject* parent = 0);
 
-  private:
-    QAbstractProxyModel *mProxyModel;
+  protected:
+    bool filterAcceptsRow(int source_row, const QModelIndex& source_parent) const;
 };
 
-#endif // PLAYLISTITEMDELEGATE_H
+#endif // PLAYLISTSORTFILTERMODEL_H

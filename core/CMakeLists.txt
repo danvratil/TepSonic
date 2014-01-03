@@ -14,7 +14,7 @@ set(core_SRCS
     m3u.cpp
     metadata.cpp
     player.cpp
-    playlistmodel.cpp
+    playlist.cpp
     pluginsmanager.cpp
     settings.cpp
     supportedformats.cpp
@@ -30,7 +30,7 @@ set(core_HDRS
     m3u.h
     metadata.h
     player.h
-    playlistmodel.h
+    playlist.h
     pluginsmanager.h
     settings.h
     supportedformats.h

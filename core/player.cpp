@@ -20,11 +20,13 @@
 #include "player.h"
 #include "actionmanager.h"
 #include "constants.h"
+#include "playlist.h"
 
 #include <QtCore/QSettings>
 
 #include <QFileInfo>
 #include <QStringList>
+#include <QStack>
 #include <QAction>
 #include <phonon/mediaobject.h>
 #include <phonon/path.h>
@@ -48,6 +50,11 @@ class Player::Private
 
     static Player *sInstance;
 
+    Playlist *playlist;
+    int currentTrack;
+    int stopTrack;
+    QStack<int> previousRandomTracks;
+
     RepeatMode repeatMode;
     bool randomMode;
 
@@ -61,6 +68,9 @@ class Player::Private
 Player* Player::Private::sInstance = 0;
 
 Player::Private::Private():
+    playlist(new Playlist),
+    currentTrack(-1),
+    stopTrack(-1),
     repeatMode(Player::RepeatOff),
     randomMode(false)
 {
@@ -68,6 +78,7 @@ Player::Private::Private():
 
 Player::Private::~Private()
 {
+    delete playlist;
     delete phononPlayer;
     delete audioOutput;
 
@@ -88,8 +99,6 @@ void Player::Private::loadEffects()
         }
     }
 }
-
-
 
 Player* Player::instance()
 {
@@ -112,12 +121,23 @@ Player::Player():
     d->phononPlayer->setTickInterval(1000);
 
     connect(d->phononPlayer, &Phonon::MediaObject::finished,
-            this, &Player::emitFinished);
+            this, &Player::trackFinished);
+    connect(d->phononPlayer, &Phonon::MediaObject::finished,
+            this, &Player::onTrackFinished);
     connect(d->phononPlayer, &Phonon::MediaObject::stateChanged,
             this, &Player::stateChanged);
     connect(d->phononPlayer, &Phonon::MediaObject::tick,
             this, &Player::trackPositionChanged);
-    //connect(m_phononPlayer,SIGNAL(currentSourceChanged(Phonon::MediaSource)),this,SLOT(emitTrackChanged()));
+    connect(d->playlist, &Playlist::modelReset,
+            this, &Player::onPlaylistReset);
+    connect(ActionManager::instance()->action(QLatin1String("PlayerRandomOn")), &QAction::toggled,
+            [=](bool toggled) { setRandomMode(toggled); });
+    connect(ActionManager::instance()->action(QLatin1String("PlayerRepeatAll")), &QAction::toggled,
+            [=](bool toggled) { if (toggled) { setRepeatMode(RepeatAll); } });
+    connect(ActionManager::instance()->action(QLatin1String("PlayerRepeatTrack")), &QAction::toggled,
+            [=](bool toggled) { if (toggled) { setRepeatMode(RepeatTrack); } });
+    connect(ActionManager::instance()->action(QLatin1String("PlayerRepeatOff")), &QAction::toggled,
+            [=](bool toggled) { if (toggled) { setRepeatMode(RepeatOff); } });
 
     d->randomMode = false;
     d->repeatMode = RepeatOff;
@@ -134,34 +154,48 @@ Player::~Player()
     delete d;
 }
 
-void Player::setTrack(const QString &fileName, bool autoPlay)
+int Player::currentTrack() const
 {
-    // Stop current track
-    d->phononPlayer->stop();
+    return d->currentTrack;
+}
 
-    if (QFileInfo(fileName).isFile()) {
-        d->phononPlayer->setCurrentSource(Phonon::MediaSource(QUrl::fromLocalFile(fileName)));
+void Player::setCurrentTrack(int index)
+{
+    d->currentTrack = index;
+    if (d->currentTrack > -1) {
+        const MetaData currentTrack = d->playlist->track(index);
+        const Phonon::MediaSource source(QUrl::fromLocalFile(currentTrack.fileName()));
+        d->phononPlayer->setCurrentSource(source);
     }
+    Q_EMIT trackChanged(index);
+}
 
-    Q_EMIT trackChanged(currentMetaData());
-    if (autoPlay == true) {
-        play();
-    }
+int Player::stopTrack() const
+{
+    return d->stopTrack;
+}
+
+void Player::setStopTrack(int index)
+{
+    d->stopTrack = index;
+    Q_EMIT stopTrackChanged(index);
 }
 
 void Player::setRandomMode(bool randomMode)
 {
-    if (d->randomMode != randomMode) {
-        d->randomMode = randomMode;
-        QString action;
-        if (d->randomMode) {
-            action = QStringLiteral("PlayerRandomOn");
-        } else {
-            action = QStringLiteral("PlayerRandomOff");
-        }
-        ActionManager::instance()->action(action)->setChecked(true);
-        Q_EMIT randomModeChanged(randomMode);
+    if (d->randomMode == randomMode) {
+        return;
     }
+
+    d->randomMode = randomMode;
+    QString action;
+    if (d->randomMode) {
+        action = QStringLiteral("PlayerRandomOn");
+    } else {
+        action = QStringLiteral("PlayerRandomOff");
+    }
+    ActionManager::instance()->action(action)->setChecked(true);
+    Q_EMIT randomModeChanged(randomMode);
 }
 
 bool Player::randomMode() const
@@ -171,23 +205,25 @@ bool Player::randomMode() const
 
 void Player::setRepeatMode(RepeatMode repeatMode)
 {
-    if (d->repeatMode != repeatMode) {
-        d->repeatMode = repeatMode;
-        QString action;
-        switch (d->repeatMode) {
-            case RepeatAll:
-                action = QStringLiteral("PlayerRepeatAll");
-                break;
-            case Player::RepeatTrack:
-                action = QStringLiteral("PlayerRepeatTrack");
-                break;
-            case Player::RepeatOff:
-                action = QStringLiteral("PlayerRepeatOff");
-                break;
-        }
-        ActionManager::instance()->action(action)->setChecked(true);
-        Q_EMIT repeatModeChanged(repeatMode);
+    if (d->repeatMode == repeatMode) {
+        return;
     }
+
+    d->repeatMode = repeatMode;
+    QString action;
+    switch (d->repeatMode) {
+        case RepeatAll:
+            action = QStringLiteral("PlayerRepeatAll");
+            break;
+        case Player::RepeatTrack:
+            action = QStringLiteral("PlayerRepeatTrack");
+            break;
+        case Player::RepeatOff:
+            action = QStringLiteral("PlayerRepeatOff");
+            break;
+    }
+    ActionManager::instance()->action(action)->setChecked(true);
+    Q_EMIT repeatModeChanged(repeatMode);
 }
 
 Player::RepeatMode Player::repeatMode() const
@@ -195,37 +231,106 @@ Player::RepeatMode Player::repeatMode() const
     return d->repeatMode;
 }
 
-
 void Player::play()
 {
+    if (d->phononPlayer->currentSource().fileName().isEmpty()) {
+        if (d->currentTrack < 0) {
+            if (d->playlist->rowCount() == 0) {
+                return;
+            }
+            setCurrentTrack(0);
+        } else {
+            const MetaData currentTrack = d->playlist->track(d->currentTrack);
+            const Phonon::MediaSource source(QUrl::fromLocalFile(currentTrack.fileName()));
+            d->phononPlayer->setCurrentSource(source);
+        }
+    }
+
     d->phononPlayer->play();
 }
 
 void Player::pause()
 {
     d->phononPlayer->pause();
-    Q_EMIT trackPaused((d->phononPlayer->state() == Phonon::PausedState));
 }
 
 void Player::stop()
 {
     d->phononPlayer->stop();
-    // Empty the source
     d->phononPlayer->setCurrentSource(Phonon::MediaSource());
-    Q_EMIT trackChanged(MetaData());
 }
 
-MetaData Player::currentMetaData() const
+void Player::next()
 {
-    // FIXME: Cache the metadata, or get them directly from Playlist!
-    const QString filename = d->phononPlayer->currentSource().fileName();
-    if ((!QFileInfo(filename).exists()) ||
-        (d->phononPlayer->currentSource().type()==Phonon::MediaSource::Invalid)) {
-        return MetaData();
+    int index = -1;
+    const int rowCount = d->playlist->rowCount();
+
+    if (d->randomMode) {
+        if (d->currentTrack > -1) {
+            d->previousRandomTracks.push(d->currentTrack);
+        }
+        do {
+          index  = qrand() % rowCount;
+        } while (index == d->currentTrack);
+    } else {
+        index = d->currentTrack;
+        if (index < 0) {
+            index = 0;
+        } else if (index == rowCount - 1) {
+            if (d->repeatMode == RepeatAll) {
+                index = 0;
+            } else {
+                stop();
+                return;
+            }
+        } else {
+            ++index;
+        }
     }
 
-    TagLib::FileRef f(filename.toUtf8().constData());
-    return MetaData(f);
+    setCurrentTrack(index);
+    play();
+}
+
+void Player::previous()
+{
+    int index = -1;
+    if (d->randomMode) {
+        if (!d->previousRandomTracks.isEmpty()) {
+            index = d->previousRandomTracks.pop();
+        } else {
+            do {
+                index = qrand() % d->playlist->rowCount();
+            } while (index == d->currentTrack);
+        }
+    } else {
+        index = d->currentTrack;
+        if (index < 0) {
+            index = -1;
+        } else if (index == 0) {
+            if (d->repeatMode == RepeatAll) {
+                index = d->playlist->rowCount() - 1;
+            } else {
+                stop();
+                return;
+            }
+        } else {
+            --index;
+        }
+    }
+
+    setCurrentTrack(index);
+    play();
+}
+
+QString Player::errorString() const
+{
+    return d->phononPlayer->errorString();
+}
+
+Phonon::State Player::playerState() const
+{
+    return d->phononPlayer->state();
 }
 
 Phonon::AudioOutput* Player::audioOutput() const
@@ -243,28 +348,9 @@ QList< Phonon::Effect* > Player::effects() const
     return d->effects;
 }
 
-Phonon::MediaSource Player::currentSource() const
+Playlist* Player::playlist() const
 {
-    return d->phononPlayer->currentSource();
-}
-
-QString Player::errorString() const
-{
-    return d->phononPlayer->errorString();
-}
-
-Phonon::State Player::playerState() const
-{
-    return d->phononPlayer->state();
-}
-
-
-
-void Player::emitFinished()
-{
-    // Emit both signals - with parameter and without!!!!
-    Q_EMIT trackFinished(currentMetaData());
-    Q_EMIT trackFinished();
+    return d->playlist;
 }
 
 void Player::setDefaultOutputDevice()
@@ -287,5 +373,21 @@ void Player::enableEffect(Phonon::Effect *effect, bool enable)
         d->phononPath.insertEffect(effect);
     } else if (!enable && d->phononPath.effects().contains(effect)) {
         d->phononPath.removeEffect(effect);
+    }
+}
+
+void Player::onPlaylistReset()
+{
+    d->previousRandomTracks.clear();
+    setCurrentTrack(-1);
+    setStopTrack(-1);
+}
+
+void Player::onTrackFinished()
+{
+    if (d->repeatMode == RepeatTrack) {
+        play();
+    } else {
+        next();
     }
 }

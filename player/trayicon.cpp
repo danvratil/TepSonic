@@ -21,6 +21,7 @@
 #include "mainwindow.h"
 
 #include <core/player.h>
+#include <core/playlist.h>
 
 #include <QEvent>
 #include <QFileInfo>
@@ -50,7 +51,13 @@ void TrayIcon::playerStateChanged(Phonon::State newState, Phonon::State oldState
 {
     Q_UNUSED(oldState);
 
-    const MetaData metadata = Player::instance()->currentMetaData();
+    const int track = Player::instance()->currentTrack();
+    if (track == -1) {
+        setToolTip(tr("Player is stopped"));
+        return;
+    }
+
+    const MetaData metadata = Player::instance()->playlist()->track(track);
 
     QString playing;
     if (metadata.title().isEmpty()) {

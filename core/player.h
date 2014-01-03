@@ -33,18 +33,12 @@
 namespace TepSonic
 {
 
+class Playlist;
+
 class TEPSONIC_CORE_EXPORT Player: public QObject
 {
     Q_OBJECT
     Q_ENUMS(RepeatMode)
-    Q_PROPERTY(Player::RepeatMode repeatMode
-               READ repeatMode
-               WRITE setRepeatMode)
-    Q_PROPERTY(bool randomMode
-               READ randomMode
-               WRITE setRandomMode)
-    Q_PROPERTY(MetaData metadata
-               READ currentMetaData)
 
   public:
     //! Enumeration of repeat modes.
@@ -57,16 +51,20 @@ class TEPSONIC_CORE_EXPORT Player: public QObject
 
     ~Player();
 
-    MetaData currentMetaData() const;
+    int currentTrack() const;
+    void setCurrentTrack(int index);
+
+    int stopTrack() const;
+    void setStopTrack(int index);
 
     RepeatMode repeatMode() const;
     bool randomMode() const;
-    Phonon::MediaSource currentSource() const;
     Phonon::State playerState() const;
     QString errorString() const;
     Phonon::MediaObject *mediaObject() const;
     Phonon::AudioOutput *audioOutput() const;
     QList<Phonon::Effect *> effects() const;
+    Playlist *playlist() const;
 
   public Q_SLOTS:
     void setRepeatMode(Player::RepeatMode repeatMode);
@@ -74,8 +72,8 @@ class TEPSONIC_CORE_EXPORT Player: public QObject
     void play();
     void pause();
     void stop();
-
-    void setTrack(const QString &fileName, bool autoPlay = false);
+    void next();
+    void previous();
 
     void setDefaultOutputDevice();
 
@@ -84,21 +82,21 @@ class TEPSONIC_CORE_EXPORT Player: public QObject
   Q_SIGNALS:
     void repeatModeChanged(Player::RepeatMode repeatMode);
     void randomModeChanged(bool randomMode);
-    void trackChanged(const MetaData &metadata);
-    void trackFinished(const MetaData &metadata);
+    void trackChanged(int index);
+    void stopTrackChanged(int index);
     void trackFinished();
     void stateChanged(Phonon::State newState, Phonon::State oldState);
     void trackPositionChanged(qint64 newPos);
-    void trackPaused(bool paused);
-
-  private Q_SLOTS:
-    void emitFinished();
 
   private:
     Player();
 
     class Private;
     Private * const d;
+    friend class Private;
+
+    void onPlaylistReset();
+    void onTrackFinished();
 };
 
 } // namespace TepSonic

@@ -21,26 +21,18 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-#include <QPointer>
 #include <QMenu>
 
 #include <core/player.h>
 #include <core/actionmanager.h>
+#include <core/metadata.h>
 
 class QLabel;
-
-namespace TepSonic
-{
-    class PlaylistModel;
-    class DatabaseManager;
-}
 
 namespace Ui
 {
     class MainWindow;
 }
-
-class MetadataEditor;
 
 class MainWindow : public QMainWindow
 {
@@ -51,8 +43,6 @@ class MainWindow : public QMainWindow
     ~MainWindow();
 
     void installPluginsMenus();
-
-    TepSonic::PlaylistModel* playlistModel() const;
 
   public Q_SLOTS:
     void showError(const QString &error);
@@ -73,8 +63,10 @@ class MainWindow : public QMainWindow
 
     void playPause();
 
-    void playerStatusChanged(Phonon::State newState, Phonon::State oldState);
-    void setCurrentTrack(const QModelIndex &index);
+    void onPlayerTrackChanged();
+    void onPlayerStateChanged(Phonon::State newState, Phonon::State oldState);
+    void onPlayerPositionChanged(qint64 newPos);
+    void onPlaylistLengthChanged(int totalLength, int tracksCount);
 
     void openSettingsDialog();
     void settingsDialogAccepted();
@@ -83,13 +75,8 @@ class MainWindow : public QMainWindow
     void aboutTepSonic();
 
     void showSupportedFormats();
-    void updatePlayerTrack();
-
-    void playlistLengthChanged(int totalLength, int tracksCount);
-    void playerPosChanged(qint64 newPos);
 
     void showMetadataEditor();
-    void metadataEditorAccepted();
 
     void setStopTrackClicked();
 
@@ -97,7 +84,8 @@ class MainWindow : public QMainWindow
 
   private:
     Ui::MainWindow *m_ui;
-    QPointer<MetadataEditor> m_metadataEditor;
+
+    TepSonic::MetaData m_currentMetaData;
 
     QLabel *m_playlistLengthLabel;
 

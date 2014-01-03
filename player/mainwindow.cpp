@@ -25,7 +25,7 @@
 
 #include <core/constants.h>
 #include <core/actionmanager.h>
-#include <core/playlistmodel.h>
+#include <core/playlist.h>
 #include <core/abstractplugin.h>
 #include <core/pluginsmanager.h>
 #include <core/utils.h>
@@ -66,7 +66,6 @@ Q_DECLARE_METATYPE(QModelIndex)
 using namespace TepSonic;
 
 MainWindow::MainWindow():
-    m_metadataEditor(0),
     m_canClose(false)
 {
     // Initialize pseudo-random numbers generator
@@ -83,11 +82,6 @@ MainWindow::MainWindow():
     m_playlistLengthLabel = new QLabel(this);
     m_ui->statusBar->addPermanentWidget(m_playlistLengthLabel, 0);
     m_playlistLengthLabel->setText(tr("%n track(s)", "", 0).append(QLatin1String(" (00:00)")));
-
-    connect(m_ui->playlistView, &PlaylistView::playlistLengthChanged,
-            this, &MainWindow::playlistLengthChanged);
-    connect(m_ui->playlistView, &PlaylistView::nowPlayingChanged,
-            this, &MainWindow::setCurrentTrack);
 
     // Set playlist browser columns widths and visibility
     const QVariantList playlistColumnsStates = Settings::instance()->playlistColumnsStates();
@@ -125,7 +119,7 @@ MainWindow::MainWindow():
 
     // Load last playlist
     if (Settings::instance()->sessionRestore()) {
-        playlistModel()->loadPlaylist(XdgConfigDir + QLatin1String("/last.m3u"));
+        Player::instance()->playlist()->loadPlaylist(XdgConfigDir + QLatin1String("/last.m3u"));
         Player::instance()->setRandomMode(Settings::instance()->playerRandomMode());
         Player::instance()->setRepeatMode(static_cast<Player::RepeatMode>(Settings::instance()->playerRepeatMode()));
     }
@@ -134,6 +128,10 @@ MainWindow::MainWindow():
     bindSignals();
     // Bind global shortcuts
     bindShortcuts();
+
+    // The playlist can be populated before the MainWindow is constructed
+    onPlaylistLengthChanged(Player::instance()->playlist()->totalLength(),
+                            Player::instance()->playlist()->rowCount());
 }
 
 MainWindow::~MainWindow()
@@ -158,14 +156,9 @@ MainWindow::~MainWindow()
     }
 
     // Save current playlist to file
-    playlistModel()->savePlaylist(XdgConfigDir + QLatin1String("/last.m3u"));
+    Player::instance()->playlist()->savePlaylist(XdgConfigDir + QLatin1String("/last.m3u"));
 
     delete m_ui;
-}
-
-PlaylistModel* MainWindow::playlistModel() const
-{
-    return m_ui->playlistView->playlistModel();
 }
 
 void MainWindow::createMenus()
@@ -180,9 +173,9 @@ void MainWindow::createMenus()
               [=]() { m_canClose = true; close(); });
 
     addAction(m_ui->menuPlaylist, QStringLiteral("PlaylistClear"),
-              m_ui->playlistView, &PlaylistView::clear);
+              Player::instance()->playlist(), &Playlist::clear);
     addAction(m_ui->menuPlaylist, QStringLiteral("PlaylistShuffle"),
-              m_ui->playlistView, &PlaylistView::shuffle);
+              Player::instance()->playlist(), &Playlist::shuffle);
     m_ui->menuPlaylist->addSeparator();
     addAction(m_ui->menuPlaylist, QStringLiteral("PlaylistSave"),
               this, &MainWindow::savePlaylist);
@@ -204,17 +197,17 @@ void MainWindow::createMenus()
     ActionManager::instance()->addMenu(QStringLiteral("PlaylistVisibleColumns"), menu);
 
     addAction(m_ui->menuPlayer, QStringLiteral("PlayerPreviousTrack"),
-              m_ui->playlistView, &PlaylistView::selectNextTrack);
+              Player::instance(), &Player::previous);
     addAction(m_ui->menuPlayer, QStringLiteral("PlayerPlayPause"),
-              m_ui->playlistView, &PlaylistView::selectPreviousTrack);
-    addAction(m_ui->menuPlayer, QStringLiteral("PlayerStop"),
               this, &MainWindow::playPause);
-    addAction(m_ui->menuPlayer, QStringLiteral("PlayerNextTrack"),
+    addAction(m_ui->menuPlayer, QStringLiteral("PlayerStop"),
               Player::instance(), &Player::stop);
+    addAction(m_ui->menuPlayer, QStringLiteral("PlayerNextTrack"),
+              Player::instance(), &Player::next);
     m_ui->menuPlayer->addSeparator();
     m_ui->menuPlayer->addMenu(ActionManager::instance()->menu(QStringLiteral("PlayerRandomSubmenu")));
     m_ui->menuPlayer->addMenu(ActionManager::instance()->menu(QStringLiteral("PlayerRepeatSubmenu")));
-    ActionManager::instance()->action(QStringLiteral("PlayerRandomOn"))->setChecked(true);
+    ActionManager::instance()->action(QStringLiteral("PlayerRandomOff"))->setChecked(true);
     ActionManager::instance()->action(QStringLiteral("PlayerRepeatOff"))->setChecked(true);
 
     addAction(m_ui->menuHelp, QStringLiteral("AboutTepSonic"),
@@ -250,12 +243,12 @@ void MainWindow::bindShortcuts()
     QxtGlobalShortcut *sc3 = new QxtGlobalShortcut(this);
     sc3->setShortcut(QKeySequence::fromString(Settings::instance()->shortcutPreviousTrack()));
     connect(sc3, &QxtGlobalShortcut::activated,
-            m_ui->playlistView, &PlaylistView::selectPreviousTrack);
+            Player::instance(), &Player::next);
 
     QxtGlobalShortcut *sc4 = new QxtGlobalShortcut(this);
     sc4->setShortcut(QKeySequence::fromString(Settings::instance()->shortcutNextTrack()));
     connect(sc4, &QxtGlobalShortcut::activated,
-            m_ui->playlistView, &PlaylistView::selectNextTrack);
+            Player::instance(), &Player::previous);
 
     QxtGlobalShortcut *sc5 = new QxtGlobalShortcut(this);
     sc5->setShortcut(QKeySequence::fromString(Settings::instance()->shortcutToggleWindow()));
@@ -273,15 +266,17 @@ void MainWindow::bindSignals()
 
     // Filesystem browser
     connect(m_ui->fsbTab, &FileSystemWidget::trackSelected,
-            [=](const QString &filePath) { playlistModel()->addFile(filePath); });
+            [=](const QString &filePath) { Player::instance()->playlist()->insert(QStringList() << filePath); });
 
     // Player object
-    connect(Player::instance(), static_cast<void (Player::*)()>(&Player::trackFinished),
-            this, &MainWindow::updatePlayerTrack);
+    connect(Player::instance(), &Player::trackChanged,
+            this, &MainWindow::onPlayerTrackChanged);
     connect(Player::instance(), &Player::stateChanged,
-            this, &MainWindow::playerStatusChanged);
+            this, &MainWindow::onPlayerStateChanged);
     connect(Player::instance(), &Player::trackPositionChanged,
-            this, &MainWindow::playerPosChanged);
+            this, &MainWindow::onPlayerPositionChanged);
+    connect(Player::instance()->playlist(), &Playlist::playlistLengthChanged,
+            this, &MainWindow::onPlaylistLengthChanged);
 
     // Connect UI buttons to their equivalents in the main menu
     connect(m_ui->clearPlaylistButton, &QPushButton::clicked,
@@ -407,33 +402,11 @@ void MainWindow::settingsDialogAccepted()
     }
 }
 
-void MainWindow::updatePlayerTrack()
-{
-    Player *player = Player::instance();
-    if (player->repeatMode() == Player::RepeatTrack) {
-        player->setTrack(player->currentSource().fileName());
-        player->play();
-    } else {
-        m_ui->playlistView->selectNextTrack();
-    }
-}
-
-void MainWindow::setCurrentTrack(const QModelIndex &index)
-{
-    Q_ASSERT(index.isValid());
-
-    m_ui->playlistView->setNowPlaying(index);
-
-    const QModelIndex sibling = index.sibling(index.row(), PlaylistModel::FilenameColumn);
-    const QString filename = sibling.data().toString();
-    Player::instance()->setTrack(filename, true);
-}
-
-void MainWindow::playerStatusChanged(Phonon::State newState, Phonon::State oldState)
+void MainWindow::onPlayerStateChanged(Phonon::State newState, Phonon::State oldState)
 {
     Q_UNUSED(oldState);
 
-    const MetaData metadata = Player::instance()->currentMetaData();
+    const MetaData metadata = m_currentMetaData;
 
     QString playing;
     if (metadata.title().isEmpty()) {
@@ -487,14 +460,28 @@ void MainWindow::playPause()
     if (player->playerState() == Phonon::PlayingState) {
         player->pause();
     } else {
-        /* When the source is empty there are some files in playlist, select the
-           first row and load it as current source */
-        if ((player->currentSource().fileName().isEmpty()) && (m_ui->playlistView->model()->rowCount() > 0)) {
-            const QModelIndex nowPlaying = m_ui->playlistView->model()->index(0, 0);
-            setCurrentTrack(nowPlaying);
-        }
-
         player->play();
+    }
+}
+
+void MainWindow::onPlayerPositionChanged(qint64 newPos)
+{
+    m_ui->playbackTimeLabel->setText(Utils::formatMilliseconds(newPos, true));
+}
+
+void MainWindow::onPlaylistLengthChanged(int totalLength, int tracksCount)
+{
+    const QString time = Utils::formatTimestamp(totalLength);
+    m_playlistLengthLabel->setText(tr("%n track(s)", "", tracksCount).append(QLatin1String(" (") + time + QLatin1String(")")));
+}
+
+void MainWindow::onPlayerTrackChanged()
+{
+    const int index = Player::instance()->currentTrack();
+    if (index > -1) {
+        m_currentMetaData = Player::instance()->playlist()->track(index);
+    } else {
+        m_currentMetaData = MetaData();
     }
 }
 
@@ -505,13 +492,7 @@ void MainWindow::savePlaylist()
                                             tr("Save playlist to..."),
                                             QString(),
                                             tr("M3U Playlist (*.m3u)"));
-    playlistModel()->savePlaylist(filename);
-}
-
-void MainWindow::playlistLengthChanged(int totalLength, int tracksCount)
-{
-    QString time = Utils::formatTimestamp(totalLength);
-    m_playlistLengthLabel->setText(tr("%n track(s)", "", tracksCount).append(QLatin1String(" (") + time + QLatin1String(")")));
+    Player::instance()->playlist()->savePlaylist(filename);
 }
 
 void MainWindow::clearPlaylistSearch()
@@ -527,11 +508,6 @@ void MainWindow::clearCollectionSearch()
 void MainWindow::showError(const QString &error)
 {
     m_ui->statusBar->showMessage(error, 5000);
-}
-
-void MainWindow::playerPosChanged(qint64 newPos)
-{
-    m_ui->playbackTimeLabel->setText(Utils::formatMilliseconds(newPos, true));
 }
 
 void MainWindow::setupCollections()
@@ -557,87 +533,59 @@ void MainWindow::destroyCollections()
 
 void MainWindow::showMetadataEditor()
 {
-    if (!m_metadataEditor) {
-        m_metadataEditor = new MetadataEditor();
-        connect(m_metadataEditor, &MetadataEditor::accepted,
-                this, &MainWindow::metadataEditorAccepted);
-        connect(m_metadataEditor, &MetadataEditor::rejected,
-                m_metadataEditor, &MetadataEditor::deleteLater);
-    }
-
+    QPointer<MetadataEditor> editor(new MetadataEditor());
     const QModelIndex currentIndex = m_ui->playlistView->currentIndex();
-    QModelIndex idx = currentIndex.sibling(currentIndex.row(), PlaylistModel::FilenameColumn);
-    m_metadataEditor->setFilename(idx.data().toString());
-    idx = idx.sibling(idx.row(), PlaylistModel::TracknameColumn);
-    m_metadataEditor->setTrackTitle(idx.data().toString());
-    idx = idx.sibling(idx.row(), PlaylistModel::AlbumColumn);
-    m_metadataEditor->setAlbum(idx.data().toString());
-    idx = idx.sibling(idx.row(), PlaylistModel::InterpretColumn);
-    m_metadataEditor->setArtist(idx.data().toString());
-    idx = idx.sibling(idx.row(), PlaylistModel::GenreColumn);
-    m_metadataEditor->setGenre(idx.data().toString());
-    idx = idx.sibling(idx.row(), PlaylistModel::YearColumn);
-    m_metadataEditor->setYear(idx.data().toInt());
-    idx = idx.sibling(idx.row(), PlaylistModel::TrackColumn);
-    m_metadataEditor->setTrackNumber(idx.data().toInt());
+    const MetaData metaData = Player::instance()->playlist()->track(currentIndex.row());
+    editor->setMetaData(metaData);
 
-    m_metadataEditor->exec();
-}
-
-void MainWindow::metadataEditorAccepted()
-{
-    if (!m_metadataEditor) {
+    int result = editor->exec();
+    if (result == QDialog::Rejected) {
+        if (editor) {
+            editor->deleteLater();
+        }
         return;
     }
 
-    TagLib::FileRef f(m_metadataEditor->filename().toLocal8Bit().constData());
+    if (!editor) {
+        return;
+    }
+
+    const MetaData newMetaData = editor->metaData();
+    TagLib::FileRef f(newMetaData.fileName().toLocal8Bit().constData());
 //     // FileRef::isNull() is not enough sometimes. Let's check the tag() too...
     if (f.isNull() || !f.tag()) {
         return;
     }
 
-    f.tag()->setTrack(m_metadataEditor->trackNumber());
-    f.tag()->setArtist(m_metadataEditor->artist().toLocal8Bit().constData());
-    f.tag()->setAlbum(m_metadataEditor->album().toLocal8Bit().constData());
-    f.tag()->setTitle(m_metadataEditor->trackTitle().toLocal8Bit().constData());
-    f.tag()->setYear(m_metadataEditor->year());
-    f.tag()->setGenre(m_metadataEditor->genre().toLocal8Bit().constData());
+    f.tag()->setTrack(newMetaData.trackNumber());
+    f.tag()->setArtist(newMetaData.artist().toLocal8Bit().constData());
+    f.tag()->setAlbum(newMetaData.album().toLocal8Bit().constData());
+    f.tag()->setTitle(newMetaData.title().toLocal8Bit().constData());
+    f.tag()->setYear(newMetaData.year());
+    f.tag()->setGenre(newMetaData.genre().toLocal8Bit().constData());
     f.save();
 
-    QAbstractItemModel *model = m_ui->playlistView->model();
-    const QModelIndex currentIndex = m_ui->playlistView->currentIndex();
-    QModelIndex idx = currentIndex.sibling(currentIndex.row(), PlaylistModel::TracknameColumn);
-    model->setData(idx, m_metadataEditor->trackTitle());
-    idx = idx.sibling(idx.row(), PlaylistModel::AlbumColumn);
-    model->setData(idx, m_metadataEditor->album());
-    idx = idx.sibling(idx.row(), PlaylistModel::InterpretColumn);
-    model->setData(idx, m_metadataEditor->artist());
-    idx = idx.sibling(idx.row(), PlaylistModel::GenreColumn);
-    model->setData(idx, m_metadataEditor->genre());
-    idx = idx.sibling(idx.row(), PlaylistModel::YearColumn);
-    model->setData(idx, m_metadataEditor->year());
-    idx = idx.sibling(idx.row(), PlaylistModel::TrackColumn);
-    model->setData(idx, m_metadataEditor->trackNumber());
+    Player::instance()->playlist()->setTrack(currentIndex.row(), newMetaData);
+    TaskManager::instance()->rebuildCollections(newMetaData.fileName());
 
-    TaskManager::instance()->rebuildCollections(m_metadataEditor->filename());
-
-    delete m_metadataEditor;
+    delete editor;
 }
 
 void MainWindow::setStopTrackClicked()
 {
     const QModelIndex index = m_ui->playlistView->currentIndex();
-    if (index.row() == m_ui->playlistView->stopTrack().row()) {
-        m_ui->playlistView->clearStopTrack();
+    if (index.row() == Player::instance()->stopTrack()) {
+        Player::instance()->setStopTrack(-1);
     } else {
-        m_ui->playlistView->setStopTrack(index);
+        Player::instance()->setStopTrack(index.row());
     }
 }
 
 void MainWindow::onCollectionViewDoubleClicked(const QModelIndex& index)
 {
+    // FIXME: Share MetaData
     const QString file = index.data(CollectionModel::FilePathRole).toString();
     if (!file.isEmpty()) {
-        playlistModel()->addFile(file);
+        Player::instance()->playlist()->insert(QStringList() << file);
     }
 }

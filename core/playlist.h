@@ -19,8 +19,8 @@
  */
 
 
-#ifndef TEPSONIC_PLAYLISTMODEL_H
-#define TEPSONIC_PLAYLISTMODEL_H
+#ifndef TEPSONIC_PLAYLIST_H
+#define TEPSONIC_PLAYLIST_H
 
 #include <QAbstractItemModel>
 #include <QModelIndex>
@@ -35,73 +35,60 @@
 namespace TepSonic
 {
 
-class TEPSONIC_CORE_EXPORT PlaylistModel : public QAbstractItemModel
+class TEPSONIC_CORE_EXPORT Playlist : public QAbstractItemModel
 {
     Q_OBJECT
 
   public:
-    enum Columns {
-        FilenameColumn = 0,
-        TrackColumn = 1,
-        InterpretColumn = 2,
-        TracknameColumn = 3,
-        AlbumColumn = 4,
-        GenreColumn = 5,
-        YearColumn = 6,
-        LengthColumn = 7,
-        BitrateColumn = 8,
-        ColumnCount
-    };
-
     enum Roles {
         MetaDataRole = Qt::UserRole + 1
     };
 
-    PlaylistModel(QObject *parent = 0);
-    ~PlaylistModel();
+    Playlist(QObject *parent = 0);
+    ~Playlist();
 
-    QVariant headerData(int section, Qt::Orientation orientation,
-                        int role = Qt::DisplayRole) const;
-    QModelIndex index(int row, int column,
-                      const QModelIndex &parent = QModelIndex()) const;
+    QModelIndex index(int row, int column, const QModelIndex &parent = QModelIndex()) const;
     QModelIndex parent(const QModelIndex &index) const;
-
-    bool removeRows(int row, int count, const QModelIndex &parent = QModelIndex());
 
     int rowCount(const QModelIndex &parent = QModelIndex()) const;
     int columnCount(const QModelIndex &parent = QModelIndex()) const;
 
-    Qt::ItemFlags flags(const QModelIndex &index) const;
-
-    bool setData(const QModelIndex &index, const QVariant &value,
-                 int role = Qt::EditRole);
+    bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole);
     QVariant data(const QModelIndex &index, int role) const;
+
+    bool removeRows(int row, int count, const QModelIndex &parent = QModelIndex());
+    bool moveRows(const QModelIndex &sourceParent, int sourceRow, int count,
+                  const QModelIndex &destinationParent, int destinationChild);
 
     void savePlaylist(const QString &file);
     void loadPlaylist(const QString &file);
 
+    void insert(const QStringList &files, int row = -1);
+    void insert(const MetaData::List &metaData, int row = -1);
+
+    void remove(int start, int count = 1);
+
+    void move(int start, int count, int newStart);
+
+    void setTrack(int index, const MetaData &metaData);
+    MetaData track(int index) const;
+
+    int totalLength() const;
+
   public Q_SLOTS:
-    void addFile(const QString &file);
-    void addFiles(const QStringList &files);
-
-    void insertFiles(const QStringList &files, int row);
-    void insertItem(const MetaData &metadata, int row);
-
+    void shuffle();
     void clear();
 
   Q_SIGNALS:
     void playlistLengthChanged(int totalLength, int tracksCount);
 
-  private Q_SLOTS:
-    void onMetaDataAvailable(int beginIndex, int endIndex);
-    void onMetaDataDone();
-
   private:
     class Private;
     Private * const d;
 
+    void onMetaDataDone();
 };
 
 } // namespace TepSonic
 
-#endif // TEPSONIC_PLAYLISTMODEL_H
+#endif // TEPSONIC_PLAYLIST_H

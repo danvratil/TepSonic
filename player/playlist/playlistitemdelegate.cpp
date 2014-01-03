@@ -20,17 +20,24 @@
 #include "playlistitemdelegate.h"
 #include "playlistview.h"
 
+#include <core/player.h>
+
 #include <QRect>
+#include <QAbstractProxyModel>
+
+using namespace TepSonic;
 
 PlaylistItemDelegate::PlaylistItemDelegate(PlaylistView *parent):
     QStyledItemDelegate(parent)
 {
+    mProxyModel = qobject_cast<QAbstractProxyModel*>(parent->model());
 }
 
 void PlaylistItemDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option,
                                  const QModelIndex &index) const
 {
     PlaylistView *view = qobject_cast<PlaylistView*>(parent());
+    const QModelIndex mappedIndex = mProxyModel->mapToSource(index);
 
     QRect rect(option.rect);
     rect.setLeft(rect.left() - 3);
@@ -38,16 +45,17 @@ void PlaylistItemDelegate::paint(QPainter *painter, const QStyleOptionViewItem &
     painter->setFont(option.font);
     painter->setPen(option.palette.text().color());
 
-    const QModelIndex nowPlaying = view->nowPlaying();
+    const int currentTrack = Player::instance()->currentTrack();
+    const int stopTrack = Player::instance()->stopTrack();
 
-    if (index.row() == view->stopTrack().row()) {
-        if (index.row() == view->nowPlaying().row()) {
+    if (mappedIndex.row() == stopTrack) {
+        if (mappedIndex.row() == currentTrack) {
             painter->fillRect(rect, option.palette.link());
         } else {
             painter->fillRect(rect, option.palette.dark().color());
         }
         painter->setPen(option.palette.light().color());
-    } else if (nowPlaying.isValid() && index.row() == nowPlaying.row()) {
+    } else if (mappedIndex.row() == currentTrack) {
         painter->fillRect(rect, option.palette.link());
         painter->setPen(option.palette.highlightedText().color());
     } else if (option.state & QStyle::State_Selected) {

@@ -25,34 +25,18 @@
 
 namespace TepSonic
 {
-    class PlaylistModel;
+    class Playlist;
 }
 
 class PlaylistView : public QTreeView
 {
-
     Q_OBJECT
 
   public:
     PlaylistView(QWidget *parent = 0);
-
     ~PlaylistView();
 
-    void clear();
-
-    QModelIndex nowPlaying() const;
-    void setNowPlaying(const QModelIndex &index);
-
-    QModelIndex stopTrack() const;
-    void setStopTrack(const QModelIndex &index);
-    void clearStopTrack();
-
-    TepSonic::PlaylistModel* playlistModel() const;
-
   public Q_SLOTS:
-    void shuffle();
-    void selectNextTrack();
-    void selectPreviousTrack();
     void setFilter(const QString &filter);
 
   protected:
@@ -63,25 +47,20 @@ class PlaylistView : public QTreeView
     void mousePressEvent(QMouseEvent *event);
     void mouseMoveEvent(QMouseEvent *event);
 
-
-  Q_SIGNALS:
-    void nowPlayingChanged(const QModelIndex &track);
-    void playlistLengthChanged(int length, int tracksCount);
-
   private Q_SLOTS:
     void slotSortIndicatorChanged(int column, Qt::SortOrder order);
     void slotHeaderContextMenuRequested(const QPoint &pos);
     void slotContextMenuRequested(const QPoint &pos);
+    void slotItemDoubleClicked(const QModelIndex &index);
+    void slotCurrentTrackChanged();
+    void slotStopTrackChanged();
 
   private:
-    void invalidateIndex(const QModelIndex &index);
+    void invalidateRow(int row);
 
     QPoint m_dragStartPosition;
-
-    QModelIndex m_nowPlaying;
-    QModelIndex m_stopTrack;
-    TepSonic::PlaylistModel *m_playlistModel;
-
+    int m_currentTrack;
+    int m_stopTrack;
 };
 
 #endif // PLAYLISTVIEW_H

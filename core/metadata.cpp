@@ -225,7 +225,7 @@ qint64 MetaData::length() const
 void MetaData::setLength(qint64 length)
 {
     d->length = length;
-    d->formattedLength = Utils::formatMilliseconds(length);
+    d->formattedLength = Utils::formatMilliseconds(length * 1000);
 }
 
 QString MetaData::formattedLength() const

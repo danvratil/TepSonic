@@ -24,7 +24,7 @@
 #include "track.h"
 
 #include <core/constants.h>
-#include <core/playlistmodel.h>
+#include <core/playlist.h>
 #include <core/player.h>
 
 #include <QObject>
@@ -57,8 +57,8 @@ LastFmScrobblerPlugin::LastFmScrobblerPlugin():
     m_translator->load(QLatin1String("tepsonic_lastfmscrobbler_") + locale, localeDir);
     qApp->installTranslator(m_translator);
 
-    connect(Player::instance(), SIGNAL(trackChanged(MetaData)),
-            this, SLOT(trackChanged(MetaData)));
+    connect(Player::instance(), SIGNAL(trackChanged()),
+            this, SLOT(trackChanged()));
     connect(Player::instance(), SIGNAL(stateChanged(Phonon::State,Phonon::State)),
             this, SLOT(playerStatusChanged(Phonon::State,Phonon::State)));
 }
@@ -118,7 +118,7 @@ void LastFmScrobblerPlugin::setupMenu(QMenu *menu, AbstractPlugin::MenuTypes men
     }
 }
 
-void LastFmScrobblerPlugin::trackChanged(const MetaData &metaData)
+void LastFmScrobblerPlugin::trackChanged()
 {
     // Submit the old track
     if (m_scrobbler->currentTrack()) {
@@ -127,6 +127,12 @@ void LastFmScrobblerPlugin::trackChanged(const MetaData &metaData)
 
     uint stamp = QDateTime::currentDateTime().toTime_t();
 
+    int currentTrack = Player::instance()->currentTrack();
+    if (currentTrack == -1) {
+        return;
+    }
+
+    MetaData metaData = Player::instance()->playlist()->track(currentTrack);
     LastFm::Track *track = new LastFm::Track(m_scrobbler, metaData, stamp);
     m_scrobbler->setCurrentTrack(track);
 
@@ -225,7 +231,7 @@ void LastFmScrobblerPlugin::loveTrack()
         // Pointer to QModelIndex stored in menu property
         const QModelIndex itemIndex = *(QModelIndex*)popupmenu->property("playlistItem").value<void *>();
         // Now we construct the track
-        const MetaData metaData = itemIndex.data(PlaylistModel::MetaDataRole).value<MetaData>();
+        const MetaData metaData = itemIndex.data(Playlist::MetaDataRole).value<MetaData>();
         LastFm::Track *track = new LastFm::Track(m_scrobbler, metaData);
 
         track->love();

@@ -20,6 +20,7 @@
 #include <QString>
 #include <QStringList>
 #include <QTime>
+#include <QDebug>
 
 #include "utils.h"
 
@@ -39,7 +40,7 @@ QString Utils::formatTimestamp(qint64 secs, bool omitHour)
         string += QObject::tr("%n day(s)", "",days) + QLatin1Char(' ');
     }
 
-    QTime time;
+    QTime time(0, 0, 0);
     time = time.addSecs(secs);
 
     if (!omitHour || time.hour() > 0) {
@@ -53,7 +54,7 @@ QString Utils::formatTimestamp(qint64 secs, bool omitHour)
 
 QString Utils::formatMilliseconds(qint64 msecs, bool forceHours)
 {
-    QTime time;
+    QTime time(0, 0, 0);
     time = time.addMSecs(msecs);
     if (forceHours || time.hour() > 0) {
         return time.toString(QLatin1String("hh:mm:ss"));
@@ -64,7 +65,7 @@ QString Utils::formatMilliseconds(qint64 msecs, bool forceHours)
 
 int Utils::formattedLengthToSeconds(const QString &formattedLength)
 {
-    QTime time;
+    QTime time(0, 0, 0);
     const QStringList times = formattedLength.split(QLatin1Char(':'), QString::SkipEmptyParts);
     if (times.size() == 3) {
         time = QTime::fromString(formattedLength, QLatin1String("hh:mm:ss"));

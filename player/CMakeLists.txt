@@ -31,6 +31,7 @@ set(player_SRCS
     playlist/playlistview.cpp
     playlist/playlistitemdelegate.cpp
     playlist/playlistproxymodel.cpp
+    playlist/playlistsortfiltermodel.cpp
 )
 
 set(player_QUIS

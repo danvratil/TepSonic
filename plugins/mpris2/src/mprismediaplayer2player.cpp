@@ -19,6 +19,7 @@
 
 #include "mprismediaplayer2player.h"
 #include <core/player.h>
+#include <core/playlist.h>
 
 #include <QtCore/QCryptographicHash>
 
@@ -33,7 +34,7 @@ MPRISMediaPlayer2Player::MPRISMediaPlayer2Player(QObject* parent):
             this, SLOT(playerRandomModeChanged()));
     connect(Player::instance(), SIGNAL(repeatModeChanged(Player::RepeatMode)),
             this, SLOT(playerRepeatModeChanged()));
-    connect(Player::instance(), SIGNAL(trackChanged(MetaData)),
+    connect(Player::instance(), SIGNAL(trackChanged()),
             this, SLOT(playerTrackChanged()));
     connect(Player::instance()->audioOutput(), SIGNAL(volumeChanged(qreal)),
             this, SLOT(playerVolumeChanged()));
@@ -154,7 +155,11 @@ static QDBusObjectPath trackPath(const QString &path)
 
 QVariantMap MPRISMediaPlayer2Player::metadata() const
 {
-    const MetaData metaData = Player::instance()->currentMetaData();
+    const int currentTrack = Player::instance()->currentTrack();
+    if (currentTrack == -1) {
+        return QVariantMap();
+    }
+    const MetaData metaData = Player::instance()->playlist()->track(currentTrack);
 
     QVariantMap map;
     map[QLatin1String("mpris:trackId")] = QVariant::fromValue<QDBusObjectPath>(trackPath(metaData.fileName()));
@@ -250,7 +255,12 @@ void MPRISMediaPlayer2Player::Seek(qlonglong offset)
 void MPRISMediaPlayer2Player::SetPosition(const QDBusObjectPath& track,
                                           qlonglong position)
 {
-    const QString filename = Player::instance()->currentSource().fileName();
+    const int currentTrack = Player::instance()->currentTrack();
+    if (currentTrack == -1) {
+        return;
+    }
+    const MetaData metaData = Player::instance()->playlist()->track(currentTrack);
+    const QString filename = metaData.fileName();
     const QString path = QString::fromLatin1("/org/tepsonic/track/%1")
         .arg(QString::fromLatin1(QCryptographicHash::hash(filename.toLatin1(), QCryptographicHash::Md5).toHex()));
     if (track.path() != path) {

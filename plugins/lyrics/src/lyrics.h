@@ -49,7 +49,7 @@ class LyricsPlugin : public TepSonic::AbstractPlugin
     bool setupPane(QWidget *widget, QString &label);
 
   public Q_SLOTS:
-    void trackChanged(const TepSonic::MetaData &metaData);
+    void trackChanged();
 
   private Q_SLOTS:
     void loadLyrics(const QModelIndex &index);

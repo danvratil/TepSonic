@@ -19,27 +19,138 @@
 
 #include "playlistproxymodel.h"
 
-#include <core/playlistmodel.h>
+#include <core/playlist.h>
+#include <core/player.h>
+
+Q_DECLARE_METATYPE(TepSonic::MetaData)
 
 using namespace TepSonic;
 
-PlaylistProxyModel::PlaylistProxyModel(PlaylistModel *model, QObject *parent):
-    QSortFilterProxyModel(parent)
+PlaylistProxyModel::PlaylistProxyModel(QObject *parent):
+    QIdentityProxyModel(parent)
 {
-    setSourceModel(model);
-    setFilterRole(Qt::DisplayRole);
-    setFilterCaseSensitivity(Qt::CaseInsensitive);
-    setDynamicSortFilter(false);
+    setSourceModel(Player::instance()->playlist());
 }
 
-bool PlaylistProxyModel::filterAcceptsRow(int sourceRow, const QModelIndex &sourceParent) const
+Qt::ItemFlags PlaylistProxyModel::flags(const QModelIndex &index) const
 {
-    for (int col = PlaylistModel::TrackColumn; col <= PlaylistModel::YearColumn; col++) {
-        const QModelIndex index = sourceModel()->index(sourceRow, col, sourceParent);
-        if (index.data().toString().contains(filterRegExp())) {
-            return true;
+    const QModelIndex mappedProxyIndex = index.sibling(index.row(), 0);
+    return QIdentityProxyModel::flags(mappedProxyIndex);
+}
+
+int PlaylistProxyModel::columnCount(const QModelIndex &parent) const
+{
+    Q_UNUSED(parent);
+
+    return 9;
+}
+
+QVariant PlaylistProxyModel::headerData(int section, Qt::Orientation orientation, int role) const
+{
+    if (orientation == Qt::Horizontal && role == Qt::DisplayRole) {
+        switch (section) {
+            case 0:
+                return tr("Filename");
+            case 1:
+                return tr("Track Number");
+            case 2:
+                return tr("Artist");
+            case 3:
+                return tr("Track Title");
+            case 4:
+                return tr("Album");
+            case 5:
+                return tr("Genre");
+            case 6:
+                return tr("Year");
+            case 7:
+                return tr("Length");
+            case 8:
+                return tr("Bitrate");
         }
     }
 
-    return false;
+    return QIdentityProxyModel::headerData(section, orientation, role);
+}
+
+QVariant PlaylistProxyModel::data(const QModelIndex &index, int role) const
+{
+    if (role != Qt::DisplayRole) {
+        return QVariant();
+    }
+
+    const QModelIndex sourceIndex = sourceModel()->index(index.row(), 0);
+    const MetaData metaData = sourceModel()->data(sourceIndex, Playlist::MetaDataRole).value<MetaData>();
+    switch (index.column()) {
+        case 0:
+            return metaData.fileName();
+        case 1:
+            return metaData.trackNumber();
+        case 2:
+            return metaData.artist();
+        case 3:
+            return metaData.title();
+        case 4:
+            return metaData.album();
+        case 5:
+            return metaData.genre();
+        case 6:
+            return metaData.year();
+        case 7:
+            return metaData.formattedLength();
+        case 8:
+            return QString::fromLatin1("%1 kbps").arg(metaData.bitrate());
+    }
+
+    return QVariant();
+}
+
+bool PlaylistProxyModel::setData(const QModelIndex &index, const QVariant &value, int role)
+{
+    if (role != Qt::DisplayRole) {
+        return QIdentityProxyModel::setData(index, value, role);
+    }
+
+    const QModelIndex sourceIndex = sourceModel()->index(index.row(), 0);
+    MetaData metaData = sourceModel()->data(sourceIndex, Playlist::MetaDataRole).value<MetaData>();
+    switch (index.column()) {
+        case 0:
+            metaData.setFileName(value.toString());
+            break;
+        case 1:
+            metaData.setTrackNumber(value.toUInt());
+            break;
+        case 2:
+            metaData.setArtist(value.toString());
+            break;
+        case 3:
+            metaData.setTitle(value.toString());
+            break;
+        case 4:
+            metaData.setAlbum(value.toString());
+            break;
+        case 5:
+            metaData.setGenre(value.toString());
+            break;
+        case 6:
+            metaData.setYear(value.toUInt());
+            break;
+        case 7:
+            metaData.setLength(value.toLongLong());
+            break;
+        case 8:
+            metaData.setBitrate(value.toInt());
+            break;
+    }
+
+    return sourceModel()->setData(sourceIndex, QVariant::fromValue(metaData), Playlist::MetaDataRole);
+}
+
+QModelIndex PlaylistProxyModel::mapToSource(const QModelIndex &proxyIndex) const
+{
+    if (proxyIndex.column() > 0) {
+        return QModelIndex();
+    }
+
+    return QIdentityProxyModel::mapToSource(proxyIndex);
 }

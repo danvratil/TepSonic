@@ -86,17 +86,31 @@ MetadataEditor::~MetadataEditor()
     delete m_genreCompleter;
 }
 
-void MetadataEditor::setFilename(const QString &filename)
+MetaData MetadataEditor::metaData()
 {
-    const QFileInfo fi(filename);
-    m_filename = fi.absoluteFilePath();
+    m_metaData.setAlbum(m_ui->albumEdit->text());
+    m_metaData.setArtist(m_ui->artistEdit->text());
+    m_metaData.setGenre(m_ui->genreEdit->text());
+    m_metaData.setTrackNumber(m_ui->trackNumberEdit->text().toUInt());
+    m_metaData.setTitle(m_ui->trackTitleEdit->text());
+    m_metaData.setYear(m_ui->yearEdit->value());
+    return m_metaData;
+}
 
-    resizeEvent(0);
+void MetadataEditor::setMetaData(const MetaData &metaData)
+{
+    m_metaData = metaData;
+    m_ui->albumEdit->setText(metaData.album());
+    m_ui->artistEdit->setText(metaData.artist());
+    m_ui->genreEdit->setText(metaData.genre());
+    m_ui->trackNumberEdit->setText(QString::number(metaData.trackNumber()));
+    m_ui->trackTitleEdit->setText(metaData.title());
+    m_ui->yearEdit->setValue(metaData.year());
 }
 
 void MetadataEditor::resizeEvent(QResizeEvent *e)
 {
     Q_UNUSED(e);
 
-    m_ui->box->setTitle(fontMetrics().elidedText(m_filename, Qt::ElideMiddle, m_ui->box->width()));
+    m_ui->box->setTitle(fontMetrics().elidedText(m_metaData.fileName(), Qt::ElideMiddle, m_ui->box->width()));
 }

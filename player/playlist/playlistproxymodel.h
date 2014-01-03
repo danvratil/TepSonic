@@ -20,24 +20,25 @@
 #ifndef PLAYLISTPROXYMODEL_H
 #define PLAYLISTPROXYMODEL_H
 
-#include <QSortFilterProxyModel>
+#include <QIdentityProxyModel>
 #include <QModelIndex>
 
-#include <core/playlistmodel.h>
-
-class PlaylistProxyModel : public QSortFilterProxyModel
+class PlaylistProxyModel : public QIdentityProxyModel
 {
     Q_OBJECT
 
   public:
-    enum {
-        RandomColumn = TepSonic::PlaylistModel::ColumnCount
-    };
+    PlaylistProxyModel(QObject *parent = 0);
 
-    PlaylistProxyModel(TepSonic::PlaylistModel *model, QObject *parent = 0);
+    QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const;
+    QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
+    bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole);
+    Qt::ItemFlags flags(const QModelIndex &index) const;
 
-  protected:
-    bool filterAcceptsRow(int sourceRow, const QModelIndex &sourceParent) const;
+    int columnCount(const QModelIndex &parent = QModelIndex()) const;
+
+    QModelIndex mapToSource(const QModelIndex &proxyIndex) const;
+
 };
 
 #endif // PLAYLISTPROXYMODEL_H

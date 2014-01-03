@@ -54,7 +54,7 @@ class LastFmScrobblerPlugin : public TepSonic::AbstractPlugin
     virtual void setupMenu(QMenu *menu, MenuTypes menuType);
 
   public Q_SLOTS:
-    void trackChanged(const TepSonic::MetaData &trackData);
+    void trackChanged();
     void playerStatusChanged(Phonon::State newState, Phonon::State oldState);
 
     //! Submit track as loved()
