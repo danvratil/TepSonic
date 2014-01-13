@@ -49,6 +49,7 @@ class TEPSONIC_CORE_EXPORT CollectionModel : public QAbstractItemModel
 
     enum Roles {
         NodeTypeRole = Qt::UserRole,
+        InternalIdRole,
         ArtistNameRole,
         AlbumNameRole,
         TrackTitleRole,

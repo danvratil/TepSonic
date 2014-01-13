@@ -37,7 +37,7 @@ using namespace TepSonic;
 
 CollectionModel::Private::Private(CollectionModel *parent):
     QObject(),
-    root(new Node(0, RootNodeType)),
+    root(new Node(0)),
     q(parent)
 {
 }
@@ -244,7 +244,7 @@ void CollectionModel::Private::populateTracks(Node *parentNode)
             this, &CollectionModel::Private::onTracksPopulated);
 }
 
-QList<Node*> CollectionModel::Private::populateTracksRunnable(Node *parentNode)
+Node::List CollectionModel::Private::populateTracksRunnable(Node *parentNode)
 {
     Node::List nodes;
 
@@ -327,7 +327,7 @@ int CollectionModel::columnCount(const QModelIndex & /* parent */) const
 bool CollectionModel::canFetchMore(const QModelIndex &parent) const
 {
     Node *parentNode = d->getNode(parent);
-    if (parentNode->type == TrackNodeType) {
+    if (parentNode->nodeType() == TrackNodeType) {
         return false;
     } else {
         return !d->populatedNodes.contains(parentNode);
@@ -341,7 +341,7 @@ void CollectionModel::fetchMore(const QModelIndex &parent)
         return;
     }
 
-    switch (parentNode->type) {
+    switch (parentNode->nodeType()) {
         case CollectionModel::RootNodeType:
             d->populateArtists();
             break;
@@ -362,7 +362,7 @@ int CollectionModel::rowCount(const QModelIndex &parent) const
     if (d->populatedNodes.contains(parentNode)) {
         return parentNode->children.count();
     } else {
-        switch (parentNode->type) {
+        switch (parentNode->nodeType()) {
             case CollectionModel::ArtistNodeType:
                 return static_cast<ArtistNode*>(parentNode)->albumsCount;
             case CollectionModel::AlbumNodeType:
@@ -410,7 +410,7 @@ QModelIndex CollectionModel::index(int row, int column, const QModelIndex &paren
     } else {
         Node *fakeNode = d->fakeNodes.value(parentNode);
         if (!fakeNode) {
-            fakeNode = new Node(0, PendingNodeType);
+            fakeNode = new PendingNode(0);
             d->fakeNodes.insert(parentNode, fakeNode);
             d->reverseFakeNodes.insert(fakeNode, parentNode);
         }
@@ -426,7 +426,7 @@ QModelIndex CollectionModel::parent(const QModelIndex &index) const
 
     Node *node = d->getNode(index);
     Node *parentNode = 0;
-    if (node->type == PendingNodeType) {
+    if (node->nodeType() == PendingNodeType) {
         parentNode = d->reverseFakeNodes.value(node);
     } else {
         parentNode = node->parent;
@@ -451,7 +451,7 @@ void CollectionModel::clear()
 {
     beginResetModel();
     delete d->root;
-    d->root = new Node(0, RootNodeType);
+    d->root = new Node(0);
     d->pendingNodes.clear();
     d->populatedNodes.clear();
     endResetModel();

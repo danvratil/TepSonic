@@ -30,12 +30,11 @@ namespace TepSonic
 class Node
 {
   public:
-    typedef QList<Node*> List;
+    typedef QVector<Node*> List;
 
-    explicit Node(Node *parent_, CollectionModel::NodeType nodeType):
+    explicit Node(Node *parent_):
         internalId(-1),
-        parentId(-1),
-        type(nodeType)
+        parentId(-1)
     {
         parent = parent_;
         if (parent) {
@@ -55,10 +54,17 @@ class Node
         children << child;
     }
 
+    virtual CollectionModel::NodeType nodeType() const
+    {
+        return CollectionModel::RootNodeType;
+    }
+
     virtual QVariant data(int role) const
     {
         if (role == CollectionModel::NodeTypeRole) {
-            return type;
+            return nodeType();
+        } else if (role == CollectionModel::InternalIdRole) {
+            return internalId;
         }
 
         return QVariant();
@@ -66,27 +72,50 @@ class Node
 
     int internalId;
     int parentId;
-    CollectionModel::NodeType type;
 
-    QList<Node*> children;
+    Node::List children;
     Node *parent;
+};
+
+
+class PendingNode: public Node
+{
+  public:
+    explicit PendingNode(Node *parent):
+        Node(parent)
+    {
+    }
+
+    ~PendingNode()
+    {
+    }
+
+    CollectionModel::NodeType nodeType() const
+    {
+        return CollectionModel::PendingNodeType;
+    }
 };
 
 class ArtistNode: public Node
 {
   public:
     explicit ArtistNode(Node *parent):
-        Node(parent, CollectionModel::ArtistNodeType),
+        Node(parent),
         albumsCount(0),
         totalDuration(0)
     {
     }
 
-    virtual ~ArtistNode()
+    ~ArtistNode()
     {
     }
 
-    virtual QVariant data(int role) const
+    CollectionModel::NodeType nodeType() const
+    {
+        return CollectionModel::ArtistNodeType;
+    }
+
+    QVariant data(int role) const
     {
         switch (role) {
             case CollectionModel::ArtistNameRole:
@@ -109,17 +138,22 @@ class AlbumNode: public Node
 {
   public:
     explicit AlbumNode(Node *parent):
-        Node(parent, CollectionModel::AlbumNodeType),
+        Node(parent),
         tracksCount(0),
         totalDuration(0)
     {
     }
 
-    virtual ~AlbumNode()
+    ~AlbumNode()
     {
     }
 
-    virtual QVariant data(int role) const
+    CollectionModel::NodeType nodeType() const
+    {
+        return CollectionModel::AlbumNodeType;
+    }
+
+    QVariant data(int role) const
     {
         switch (role) {
             case CollectionModel::AlbumNameRole:
@@ -142,15 +176,20 @@ class TrackNode: public Node
 {
   public:
     explicit TrackNode(Node *parent):
-        Node(parent, CollectionModel::TrackNodeType)
+        Node(parent)
     {
     }
 
-    virtual ~TrackNode()
+    ~TrackNode()
     {
     }
 
-    virtual QVariant data(int role) const
+    CollectionModel::NodeType nodeType() const
+    {
+        return CollectionModel::TrackNodeType;
+    }
+
+    QVariant data(int role) const
     {
         switch (role) {
             case CollectionModel::TrackTitleRole:
