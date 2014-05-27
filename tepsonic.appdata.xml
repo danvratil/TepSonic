@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright 2014 Daniel Vrátil <dan@progdan.cz> -->
+<application>
+ <id type="desktop">tepsonic.desktop</id>
+ <metadata_license>CC0-1.0</metadata_license>
+ <project_license>GPL-3.0+</project_license>
+ <name>TepSonic</name>
+ <summary>A lightweight Qt audio player</summary>
+ <description>
+  <p>
+  TepSonic is a lightweight audio player written in Qt 5. It's goal is to be as small
+  as possible while still providing many useful features.
+  </p>
+  <p>TepSonic can build music collections, can scrobble your tracks to Last.fm,
+  retrieve song lyrics, can be controlled via MPRIS interface and more features can be
+  added through it's plugin interface. But all features and plugins can be disabled at
+  anytime however, keeping only a bare and simple player with minimum memory footprint.
+  </p>
+ </description>
+ <screenshots>
+  <screenshot type="default" width="1264" height="711">http://danvratil.github.io/TepSonic/tepsonic-ui.png</screenshot>
+ </screenshots>
+ <url type="homepage">http://danvratil.github.io/TepSonic/</url>
+ <updatecontact>dan@progdan.cz</updatecontact>
+</application>

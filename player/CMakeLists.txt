@@ -112,3 +112,6 @@ install(FILES ../icons/app_icons/128x128/tepsonic.png
 install(FILES ../icons/app_icons/256x256/tepsonic.png
         DESTINATION ${CMAKE_INSTALL_PREFIX}/share/icons/hicolor/256x256/apps
 )
+install(FILES ../tepsonic.appdata.xml
+        DESTINATION ${CMAKE_INSTALL_PREFIX}/share/appdata/
+)
