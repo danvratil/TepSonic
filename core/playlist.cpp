@@ -303,7 +303,7 @@ void Playlist::onMetaDataDone()
     d->itemsLock->lockForRead();
     for (int i = offset; i < offset + count; ++i) {
         const MetaData &metaData = d->items.at(i);
-        d->totalLength += (metaData.length());
+        d->totalLength += (metaData.length() / 1000);
     }
     d->itemsLock->unlock();
 
