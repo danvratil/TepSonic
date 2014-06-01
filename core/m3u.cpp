@@ -50,7 +50,7 @@ QStringList M3U::loadFromFile(const QString &filePath)
             continue;
         }
 
-        const QString filepath = playlistDir.absoluteFilePath(QString::fromLatin1(line)).remove(QLatin1Char('\n'), Qt::CaseInsensitive);
+        const QString filepath = playlistDir.absoluteFilePath(QString::fromUtf8(line)).remove(QLatin1Char('\n'), Qt::CaseInsensitive);
         if (!filepath.isEmpty()) {
             files.append(filepath);
         }
@@ -71,7 +71,7 @@ void M3U::writeToFile(const QStringList &playlist, const QString &filePath)
 
     file.write(M3UHEADER "\n");
     Q_FOREACH (const QString &f, playlist) {
-        file.write(f.toLatin1() + '\n');
+        file.write(f.toUtf8() + '\n');
     }
 
     file.close();
