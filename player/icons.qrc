@@ -13,8 +13,8 @@
         <file alias="openFile">../icons/document-open.png</file>
         <file alias="openFolder">../icons/document-open-folder.png</file>
         <file alias="quit">../icons/application-exit.png</file>
-        <file alias="mainIcon">../icons/TepSonic-Tray.png</file>
-        <file alias="appIcon">../icons/TepSonic-Main.png</file>
+        <file alias="mainIcon">../icons/tepsonic-tray.png</file>
+        <file alias="appIcon">../icons/tepsonic.png</file>
         <file alias="goHome">../icons/go-home.png</file>
 	<file alias="goNext">../icons/go-next.png</file>
 	<file alias="goUp">../icons/go-up.png</file>

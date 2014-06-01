@@ -7,5 +7,5 @@ Exec=tepsonic
 Terminal=false
 Type=Application
 Icon=tepsonic
-Categories=Application;Qt;Audio
+Categories=Application;Qt;Audio;
 StartupNotify=true
