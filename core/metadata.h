@@ -58,8 +58,11 @@ class TEPSONIC_CORE_EXPORT MetaData
     void setAlbum(const QString &album);
     QString genre() const;
     void setGenre(const QString &genre);
+    /**
+     * Returns length of the track in milliseconds
+     */
     qint64 length() const;
-    void setLength(qint64 length);
+    void setLength(qint64 msecs);
     QString formattedLength() const;
     uint trackNumber() const;
     void setTrackNumber(uint trackNumber);
