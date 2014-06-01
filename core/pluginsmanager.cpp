@@ -122,6 +122,7 @@ void PluginsManager::Private::loadPlugins()
             }
         }
     }
+    qDebug() << "Loaded" << pluginsList.count() << "plugins";
 
     Q_EMIT q->pluginsLoaded();
 }
