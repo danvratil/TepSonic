@@ -86,7 +86,7 @@ void Playlist::Private::loadMetaDataRunnable(const QVector<QPersistentModelIndex
 
     Q_FOREACH (const QPersistentModelIndex &index, indexes) {
         if (!index.isValid()) {
-            continue;
+            return;
         }
 
         const QString fileName = index.data(Playlist::MetaDataRole).value<MetaData>().fileName();
@@ -112,6 +112,9 @@ void Playlist::Private::loadMetaDataRunnable(const QVector<QPersistentModelIndex
             query.bindValue(QLatin1String(":filename"), fileName);
             if (query.exec() && query.first()) {
                 QWriteLocker locker(itemsLock);
+                if (!index.isValid()) {
+                    continue;
+                }
                 MetaData &metaData = items[index.row()];
                 metaData.setTitle(query.value(0).toString());
                 metaData.setTrackNumber(query.value(1).toUInt());
@@ -121,6 +124,8 @@ void Playlist::Private::loadMetaDataRunnable(const QVector<QPersistentModelIndex
                 metaData.setAlbum(query.value(5).toString());
                 metaData.setYear(query.value(6).toUInt());
                 metaData.setBitrate(query.value(7).toInt());
+                totalLength += (metaData.length() / 1000);
+                Q_EMIT q->playlistLengthChanged(totalLength, items.count());
                 locker.unlock();
                 Q_EMIT q->dataChanged(index, index);
                 continue;
@@ -135,6 +140,9 @@ void Playlist::Private::loadMetaDataRunnable(const QVector<QPersistentModelIndex
         }
 
         QWriteLocker locker(itemsLock);
+        if (!index.isValid()) {
+            continue;
+        }
         MetaData &metaData = items[index.row()];
         metaData.setTitle(QString::fromUtf8(f.tag()->title().toCString(true)));
         metaData.setTrackNumber(f.tag()->track());
@@ -148,6 +156,8 @@ void Playlist::Private::loadMetaDataRunnable(const QVector<QPersistentModelIndex
         if (metaData.title().isEmpty()) {
             metaData.setTitle(finfo.fileName());
         }
+        totalLength += (metaData.length() / 1000);
+        Q_EMIT q->playlistLengthChanged(totalLength, items.count());
         locker.unlock();
         Q_EMIT q->dataChanged(index, index);
     }
@@ -295,35 +305,8 @@ void Playlist::insert(const QStringList &files, int row)
     d->itemsLock->unlock();
     endInsertRows();
 
-    QFutureWatcher<void> *watcher = new QFutureWatcher<void>(this);
     // QtConcurrent::map crashes, see QTBUG-35280 - we use run() instead
-    QFuture<void> future = QtConcurrent::run(d, &Playlist::Private::loadMetaDataRunnable, indexesToProcess);
-    watcher->setFuture(future);
-    watcher->setPendingResultsLimit(1);
-    watcher->setProperty("startOffset", row);
-    watcher->setProperty("count", files.count());
-    connect(watcher, &QFutureWatcher<void>::finished,
-            this, &Playlist::onMetaDataDone);
-}
-
-void Playlist::onMetaDataDone()
-{
-    QFutureWatcher<void> *watcher = static_cast<QFutureWatcher<void> *>(sender());
-    watcher->deleteLater();
-
-    const int offset = watcher->property("startOffset").toInt();
-    const int count = watcher->property("count").toInt();
-    d->itemsLock->lockForRead();
-    for (int i = offset; i < offset + count; ++i) {
-        const MetaData &metaData = d->items.at(i);
-        d->totalLength += (metaData.length() / 1000);
-    }
-    d->itemsLock->unlock();
-
-    Q_EMIT playlistLengthChanged(d->totalLength, d->items.count());
-    /*Q_EMIT dataChanged(index(offset, 0),
-                       index(offset + count - 1, 0));
-    */
+    QtConcurrent::run(d, &Playlist::Private::loadMetaDataRunnable, indexesToProcess);
 }
 
 void Playlist::insert(const MetaData::List &metaData, int row)
