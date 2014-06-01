@@ -85,6 +85,7 @@ class TEPSONIC_CORE_EXPORT Playlist : public QAbstractItemModel
   private:
     class Private;
     Private * const d;
+    friend class Private;
 
     void onMetaDataDone();
 };

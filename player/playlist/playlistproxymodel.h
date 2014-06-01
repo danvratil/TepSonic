@@ -39,6 +39,10 @@ class PlaylistProxyModel : public QIdentityProxyModel
 
     QModelIndex mapToSource(const QModelIndex &proxyIndex) const;
 
+private Q_SLOTS:
+    void onSourceDataChanged(const QModelIndex &sourceTopLeft,
+                             const QModelIndex &sourceBottomRight,
+                             const QVector<int> &roles);
 };
 
 #endif // PLAYLISTPROXYMODEL_H

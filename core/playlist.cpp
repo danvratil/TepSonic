@@ -45,10 +45,9 @@ Q_DECLARE_METATYPE(MetaData);
 class Playlist::Private
 {
   public:
-    Private();
+    Private(Playlist *parent);
     ~Private();
-    void loadMetaDataRunnable(const MetaData::List::Iterator &start,
-                              const MetaData::List::Iterator &end);
+    void loadMetaDataRunnable(const QVector<QPersistentModelIndex> &indexes);
 
     MetaData::List items;
     mutable QReadWriteLock *itemsLock;
@@ -57,14 +56,18 @@ class Playlist::Private
     int totalLength;
     int currentTrack;
     int stopTrack;
+
+    Playlist * const q;
 };
 
-Playlist::Private::Private():
+Playlist::Private::Private(Playlist *parent):
     itemsLock(new QReadWriteLock(QReadWriteLock::Recursive)),
     totalLength(0),
     currentTrack(-1),
-    stopTrack(-1)
+    stopTrack(-1),
+    q(parent)
 {
+    qRegisterMetaType<QVector<int>>();
 }
 
 Playlist::Private::~Private()
@@ -75,16 +78,19 @@ Playlist::Private::~Private()
     delete itemsLock;
 }
 
-void Playlist::Private::loadMetaDataRunnable(const MetaData::List::Iterator &start,
-                                                 const MetaData::List::Iterator &end)
+void Playlist::Private::loadMetaDataRunnable(const QVector<QPersistentModelIndex> &indexes)
 {
-    QWriteLocker locker(itemsLock);
-    if (start == items.end()) {
+    if (indexes.isEmpty()) {
         return;
     }
 
-    for (MetaData::List::Iterator iter = start; iter <= end && iter < items.end(); ++iter) {
-        const QFileInfo finfo((*iter).fileName());
+    Q_FOREACH (const QPersistentModelIndex &index, indexes) {
+        if (!index.isValid()) {
+            continue;
+        }
+
+        const QString fileName = index.data(Playlist::MetaDataRole).value<MetaData>().fileName();
+        const QFileInfo finfo(fileName);
 
         if ((!finfo.exists()) || (!finfo.isFile())) {
             continue;
@@ -94,7 +100,7 @@ void Playlist::Private::loadMetaDataRunnable(const MetaData::List::Iterator &sta
         just slowing everything down */
         if (DatabaseManager::instance()->connectionAvailable()) {
             QSqlField data(QLatin1String("col"), QVariant::String);
-            data.setValue((*iter).fileName());
+            data.setValue(fileName);
             QString fname = DatabaseManager::instance()->sqlDb().driver()->formatValue(data, false);
             QSqlQuery query(DatabaseManager::instance()->sqlDb());
             query.prepare(QLatin1String(
@@ -103,45 +109,53 @@ void Playlist::Private::loadMetaDataRunnable(const MetaData::List::Iterator &sta
                 "FROM `view_tracks` "
                 "WHERE `filename`= :filename "
                 "LIMIT 1"));
-            query.bindValue(QLatin1String(":filename"), (*iter).fileName());
+            query.bindValue(QLatin1String(":filename"), fileName);
             if (query.exec() && query.first()) {
-                (*iter).setTitle(query.value(0).toString());
-                (*iter).setTrackNumber(query.value(1).toUInt());
-                (*iter).setLength(query.value(2).toUInt());
-                (*iter).setArtist(query.value(3).toString());
-                (*iter).setGenre(query.value(4).toString());
-                (*iter).setAlbum(query.value(5).toString());
-                (*iter).setYear(query.value(6).toUInt());
-                (*iter).setBitrate(query.value(7).toInt());
+                QWriteLocker locker(itemsLock);
+                MetaData &metaData = items[index.row()];
+                metaData.setTitle(query.value(0).toString());
+                metaData.setTrackNumber(query.value(1).toUInt());
+                metaData.setLength(query.value(2).toUInt());
+                metaData.setArtist(query.value(3).toString());
+                metaData.setGenre(query.value(4).toString());
+                metaData.setAlbum(query.value(5).toString());
+                metaData.setYear(query.value(6).toUInt());
+                metaData.setBitrate(query.value(7).toInt());
+                locker.unlock();
+                Q_EMIT q->dataChanged(index, index);
                 continue;
             }
         }
 
-        TagLib::FileRef f((*iter).fileName().toUtf8().constData());
+        TagLib::FileRef f(qPrintable(fileName));
 
         if (f.isNull() || !f.tag()) {
             qDebug() << finfo.fileName() << " failed to be loaded by TagLib.";
             continue;
         }
 
-        (*iter).setTitle(QString::fromUtf8(f.tag()->title().toCString(true)));
-        (*iter).setTrackNumber(f.tag()->track());
-        (*iter).setArtist(QString::fromUtf8(f.tag()->artist().toCString(true)));
-        (*iter).setLength(f.audioProperties()->length() * 1000);
-        (*iter).setAlbum(QString::fromUtf8(f.tag()->album().toCString(true)));
-        (*iter).setGenre(QString::fromUtf8(f.tag()->genre().toCString(true)));
-        (*iter).setYear(f.tag()->year());
-        (*iter).setBitrate(f.audioProperties()->bitrate());
+        QWriteLocker locker(itemsLock);
+        MetaData &metaData = items[index.row()];
+        metaData.setTitle(QString::fromUtf8(f.tag()->title().toCString(true)));
+        metaData.setTrackNumber(f.tag()->track());
+        metaData.setArtist(QString::fromUtf8(f.tag()->artist().toCString(true)));
+        metaData.setLength(f.audioProperties()->length() * 1000);
+        metaData.setAlbum(QString::fromUtf8(f.tag()->album().toCString(true)));
+        metaData.setGenre(QString::fromUtf8(f.tag()->genre().toCString(true)));
+        metaData.setYear(f.tag()->year());
+        metaData.setBitrate(f.audioProperties()->bitrate());
 
-        if ((*iter).title().isEmpty()) {
-            (*iter).setTitle(finfo.fileName());
+        if (metaData.title().isEmpty()) {
+            metaData.setTitle(finfo.fileName());
         }
+        locker.unlock();
+        Q_EMIT q->dataChanged(index, index);
     }
 }
 
 Playlist::Playlist(QObject *parent) :
     QAbstractItemModel(parent),
-    d(new Private)
+    d(new Private(this))
 {
 }
 
@@ -191,6 +205,8 @@ bool Playlist::setData(const QModelIndex &index, const QVariant &value, int role
         d->itemsLock->lockForWrite();
         d->items.replace(index.row(), value.value<MetaData>());
         d->itemsLock->unlock();
+
+        Q_EMIT dataChanged(index, index);
         return true;
     }
 
@@ -268,23 +284,20 @@ void Playlist::insert(const QStringList &files, int row)
     beginInsertRows(QModelIndex(), row, row + files.size() - 1);
     d->itemsLock->lockForWrite();
     const int count = files.count();
+    QVector<QPersistentModelIndex> indexesToProcess;
     for (int i = 0; i < count; ++i) {
         MetaData md;
         md.setFileName(files.at(i));
         md.setTitle(QFileInfo(md.fileName()).fileName());
         d->items.insert(row + i, md);
+        indexesToProcess << QPersistentModelIndex(index(row + i, 0));
     }
     d->itemsLock->unlock();
     endInsertRows();
 
-    d->itemsLock->lockForRead();
-    const MetaData::List::Iterator start = d->items.begin() + row;
-    const MetaData::List::iterator end = start + files.count();
-    d->itemsLock->unlock();
-
     QFutureWatcher<void> *watcher = new QFutureWatcher<void>(this);
     // QtConcurrent::map crashes, see QTBUG-35280 - we use run() instead
-    QFuture<void> future = QtConcurrent::run(d, &Playlist::Private::loadMetaDataRunnable, start, end);
+    QFuture<void> future = QtConcurrent::run(d, &Playlist::Private::loadMetaDataRunnable, indexesToProcess);
     watcher->setFuture(future);
     watcher->setPendingResultsLimit(1);
     watcher->setProperty("startOffset", row);
@@ -308,8 +321,9 @@ void Playlist::onMetaDataDone()
     d->itemsLock->unlock();
 
     Q_EMIT playlistLengthChanged(d->totalLength, d->items.count());
-    Q_EMIT dataChanged(index(offset, 0),
+    /*Q_EMIT dataChanged(index(offset, 0),
                        index(offset + count - 1, 0));
+    */
 }
 
 void Playlist::insert(const MetaData::List &metaData, int row)

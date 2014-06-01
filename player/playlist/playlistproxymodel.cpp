@@ -30,6 +30,8 @@ PlaylistProxyModel::PlaylistProxyModel(QObject *parent):
     QIdentityProxyModel(parent)
 {
     setSourceModel(Player::instance()->playlist());
+    connect(sourceModel(), &Playlist::dataChanged,
+            this, &PlaylistProxyModel::onSourceDataChanged);
 }
 
 Qt::ItemFlags PlaylistProxyModel::flags(const QModelIndex &index) const
@@ -153,4 +155,13 @@ QModelIndex PlaylistProxyModel::mapToSource(const QModelIndex &proxyIndex) const
     }
 
     return QIdentityProxyModel::mapToSource(proxyIndex);
+}
+
+void PlaylistProxyModel::onSourceDataChanged(const QModelIndex &sourceTopLeft,
+                                             const QModelIndex &sourceBottomRight,
+                                             const QVector<int> &roles)
+{
+    const QModelIndex topLeft = mapFromSource(sourceTopLeft);
+    const QModelIndex bottomRight = mapFromSource(sourceBottomRight).sibling(sourceBottomRight.row(), columnCount() - 1);
+    Q_EMIT dataChanged(topLeft, bottomRight, roles);
 }
