@@ -40,14 +40,8 @@ class TEPSONIC_CORE_EXPORT DatabaseManager
 {
 
   public:
-    enum DriverTypes { SQLite, MySQL };
-
     static DatabaseManager* instance();
     ~DatabaseManager();
-
-    DriverTypes driverType() const  {
-        return m_driverType;
-    };
 
     const QSqlDatabase& sqlDb() const {
         return m_sqlDb;
@@ -68,13 +62,7 @@ class TEPSONIC_CORE_EXPORT DatabaseManager
     void initDb();
     void connectToDB();
 
-    DriverTypes m_driverType;
-
-    QString m_server;
-    QString m_username;
-    QString m_password;
-    QString m_db;
-
+    QString m_dbFile;
     QSqlDatabase m_sqlDb;
 
     bool m_connectionAvailable;

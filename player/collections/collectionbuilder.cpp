@@ -78,15 +78,7 @@ void CollectionBuilder::run()
         }
     }
 
-    /* We don't need to do transaction on MySQL.
-       On SQLite it makes it MUCH faster because otherwise SQLite will commit
-       every INSERT individually and that makes ~60 commits per second (depends on the
-       speed of harddrive) meanwhile having everything in one transaction does only one
-       disk write and therefore writing data into the SQLite database takes < 1 second
-       (with separate transactions it takes tens of minutes...) */
-    if (dbManager->driverType() == DatabaseManager::SQLite) {
-        QSqlQuery(QLatin1String("BEGIN TRANSACTION;"), dbManager->sqlDb());
-    }
+    QSqlQuery(QLatin1String("BEGIN TRANSACTION;"), dbManager->sqlDb());
 
     QHash<QString, int> atirts;
     do {
@@ -138,9 +130,7 @@ void CollectionBuilder::run()
     cleanUpDatabase();
 
     // Now write all data to the disk
-    if (dbManager->driverType() == DatabaseManager::SQLite) {
-        QSqlQuery(QLatin1String("COMMIT TRANSACTION;"), dbManager->sqlDb());
-    }
+    QSqlQuery(QLatin1String("COMMIT TRANSACTION;"), dbManager->sqlDb());
 
     /* If anything has changed in collections, this signal will
         cause CollectionBrowser to be repopulated */

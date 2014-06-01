@@ -56,7 +56,6 @@ class CollectionsPage: public SettingsPage
     void removeAllPaths();
     void removePath();
     void addPath();
-    void changeEngine(int index);
 
     void collectionStateToggled();
 };

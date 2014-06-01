@@ -149,19 +149,6 @@ DECLAREOPTION(bool, collectionsAutoRebuild, setCollectionsAutoRebuild,
 DECLAREOPTION(QStringList, collectionsSourcePaths, setCollectionsSourcePaths,
               "Collections", "SourcePaths", QStringList())
 
-DECLAREOPTION(QString, collectionsMySQLServer, setCollectionsMySQLServer,
-              "Collections", "MySQL/Server", QLatin1String("127.0.0.1"))
-DECLAREOPTION(QString, collectionsMySQLDatabase, setCollectionsMySQLDatabase,
-              "Collections", "MySQL/Database", QLatin1String("TepSonic"))
-DECLAREOPTION(QString, collectionsMySQLUsername, setCollectionsMySQLUsername,
-              "Collections", "MySQL/Username", QString())
-DECLAREOPTION(QString, collectionsMySQLPassword, setCollectionsMySQLPassword,
-              "Collections", "MySQL/Password", QString())
-
-DECLAREOPTION(int, collectionsStorageEngine, setCollectionsStorageEngine,
-              "Collections", "StorageEngine", QLatin1String("SQLite"))
-
-
 DECLAREOPTION(bool, sessionRestore, setSessionRestore,
               "Session", "restore", true)
 DECLAREOPTION(QString, sessionFSBrowserPath, setSessionFSBrowserPath,

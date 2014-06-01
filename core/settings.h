@@ -55,13 +55,6 @@ class TEPSONIC_CORE_EXPORT Settings
     DECLAREPROPERTY(bool, collectionsAutoRebuild, setCollectionsAutoRebuild)
     DECLAREPROPERTY(QStringList, collectionsSourcePaths, setCollectionsSourcePaths)
 
-    DECLAREPROPERTY(QString, collectionsMySQLServer, setCollectionsMySQLServer)
-    DECLAREPROPERTY(QString, collectionsMySQLDatabase, setCollectionsMySQLDatabase)
-    DECLAREPROPERTY(QString, collectionsMySQLUsername, setCollectionsMySQLUsername)
-    DECLAREPROPERTY(QString, collectionsMySQLPassword, setCollectionsMySQLPassword)
-
-    DECLAREPROPERTY(int, collectionsStorageEngine, setCollectionsStorageEngine)
-
     /* === Session === */
     DECLAREPROPERTY(bool, sessionRestore, setSessionRestore)
     DECLAREPROPERTY(QString, sessionFSBrowserPath, setSessionFSBrowserPath)

@@ -42,8 +42,6 @@ CollectionsPage::CollectionsPage(QWidget *parent):
     m_ui->setupUi(this);
     m_ui->tabWidget->setCurrentIndex(TAB_SETTINGS);
 
-    connect(m_ui->dbEngineCombo, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged),
-            this, &CollectionsPage::changeEngine);
     connect(m_ui->rebuildCollectionsButton, &QPushButton::clicked,
             [=]() { saveSettings(); TaskManager::instance()->rebuildCollections(); });
     connect(m_ui->addPathButton, &QPushButton::clicked,
@@ -59,16 +57,6 @@ CollectionsPage::CollectionsPage(QWidget *parent):
 CollectionsPage::~CollectionsPage()
 {
     delete m_ui;
-}
-
-void CollectionsPage::changeEngine(int index)
-{
-    const QString currEngine = m_ui->dbEngineCombo->itemText(index);
-    if (currEngine == QLatin1String("SQLite")) {
-        m_ui->mysqlSettings->setDisabled(true);
-    } else {
-        m_ui->mysqlSettings->setEnabled(true);
-    }
 }
 
 void CollectionsPage::addPath()
@@ -101,14 +89,7 @@ void CollectionsPage::collectionStateToggled()
     const bool checked = m_ui->enableCollectionsCheckbox->isChecked();
 
     m_ui->autoupdateCollectionsCheckbox->setEnabled(checked);
-    m_ui->dbEngineCombo->setEnabled(checked);
     m_ui->rebuildCollectionsButton->setEnabled(checked);
-    if (checked && m_ui->dbEngineCombo->currentText() == QLatin1String("MySQL")) {
-        m_ui->mysqlSettings->setEnabled(true);
-    } else {
-        m_ui->mysqlSettings->setEnabled(false);
-    }
-
     m_ui->tabWidget->setTabEnabled(TAB_SOURCES, checked);
     // Always enabled
     m_ui->enableCollectionsCheckbox->setEnabled(true);
@@ -119,12 +100,6 @@ void CollectionsPage::loadSettings()
     m_ui->enableCollectionsCheckbox->setChecked(Settings::instance()->collectionsEnabled());
     m_ui->autoupdateCollectionsCheckbox->setChecked(Settings::instance()->collectionsAutoRebuild());
     m_ui->collectionsPathsList->addItems(Settings::instance()->collectionsSourcePaths());
-    m_ui->dbEngineCombo->setCurrentIndex(Settings::instance()->collectionsStorageEngine());
-
-    m_ui->mysqlServerEdit->setText(Settings::instance()->collectionsMySQLServer());
-    m_ui->mysqlUsernameEdit->setText(Settings::instance()->collectionsMySQLUsername());
-    m_ui->mysqlPasswordEdit->setText(Settings::instance()->collectionsMySQLPassword());
-    m_ui->mysqlDatabaseEdit->setText(Settings::instance()->collectionsMySQLDatabase());
 
     collectionStateToggled();
 }
@@ -139,11 +114,4 @@ void CollectionsPage::saveSettings()
         items.append(m_ui->collectionsPathsList->item(i)->text());
     }
     Settings::instance()->setCollectionsSourcePaths(items);
-    Settings::instance()->setCollectionsStorageEngine(m_ui->dbEngineCombo->currentIndex());
-
-    Settings::instance()->setCollectionsMySQLServer(m_ui->mysqlServerEdit->text());
-    Settings::instance()->setCollectionsMySQLUsername(m_ui->mysqlUsernameEdit->text());
-    // FIXME: Don't store the password in plain text
-    Settings::instance()->setCollectionsMySQLPassword(m_ui->mysqlPasswordEdit->text());
-    Settings::instance()->setCollectionsMySQLDatabase(m_ui->mysqlDatabaseEdit->text());
 }
