@@ -23,9 +23,9 @@
 #include "scrobbler.h"
 #include "track.h"
 
-#include <core/constants.h>
 #include <core/playlist.h>
 #include <core/player.h>
+#include <core/settings.h>
 
 #include <QObject>
 #include <QDir>
@@ -70,8 +70,8 @@ LastFmScrobblerPlugin::~LastFmScrobblerPlugin()
 
 void LastFmScrobblerPlugin::init()
 {
-    QSettings settings(XdgConfigDir + QDir::separator() + QLatin1String("lastfmscrobbler.conf"),
-                       QSettings::IniFormat, this);
+    const QString configFile = Settings::configDir() + QLatin1String("/lastfmscrobbler.conf");
+    QSettings settings(configFile, QSettings::IniFormat, this);
     LastFm::Global::api_key = QLatin1String("824f0af8fbc9ca2dd16091ad47817988");
     LastFm::Global::secret_key = QLatin1String("15545c2b44b3e3108a73bb0ad4bc23ea");
     LastFm::Global::session_key = settings.value(QLatin1String("key"), QString()).toString();
@@ -197,8 +197,8 @@ void LastFmScrobblerPlugin::gotToken(const QString &token)
 
 void LastFmScrobblerPlugin::gotSessionKey(const QString &session)
 {
-    QSettings settings(XdgConfigDir + QDir::separator() + QLatin1String("lastfmscrobbler.conf"),
-                       QSettings::IniFormat,this);
+    const QString configFile = Settings::configDir() + QLatin1String("/lastfmscrobbler.conf");
+    QSettings settings(configFile, QSettings::IniFormat,this);
     settings.setValue(QLatin1String("key"), session);
 
     LastFm::Global::session_key = session;

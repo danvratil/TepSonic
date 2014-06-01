@@ -20,10 +20,12 @@
  */
 
 #include "settings.h"
-#include "constants.h"
 
 #include <QSettings>
 #include <QTimer>
+#include <QStandardPaths>
+#include <QDebug>
+#include <QDir>
 
 using namespace TepSonic;
 
@@ -43,7 +45,9 @@ Settings *Settings::Private::instance = 0;
 
 Settings::Private::Private()
 {
-    settings = new QSettings(XdgConfigDir + QLatin1String("/main.conf"), QSettings::IniFormat);
+    const QString configFile = Settings::configDir() + QLatin1String("/main.conf");
+    qDebug() << "Config:" << configFile;
+    settings = new QSettings(configFile, QSettings::IniFormat);
     writebackTimer = new QTimer();
     writebackTimer->setInterval(100);
     writebackTimer->setSingleShot(true);
@@ -85,6 +89,35 @@ void Settings::destroy()
     Private::instance = 0;
 }
 
+QString fullStandardPath(QStandardPaths::StandardLocation location)
+{
+    const QString path = QStandardPaths::writableLocation(location) + QLatin1String("/tepsonic");
+    QDir dir(path);
+    if (!dir.exists()) {
+        dir.mkpath(path);
+    }
+    return path;
+}
+
+QString Settings::configDir()
+{
+    static QString s_configDir;
+    if (s_configDir.isEmpty()) {
+        s_configDir = fullStandardPath(QStandardPaths::ConfigLocation);
+    }
+    return s_configDir;
+}
+
+QString Settings::dataDir()
+{
+    static QString s_dataDir;
+    if (s_dataDir.isEmpty()) {
+        s_dataDir = fullStandardPath(QStandardPaths::DataLocation);
+    }
+    return s_dataDir;
+}
+
+
 #define DECLARESETTINGSGETTER(type, getter, group, option, default) \
 type Settings::getter() const \
 { \
@@ -125,7 +158,7 @@ DECLAREOPTION(QString, collectionsMySQLUsername, setCollectionsMySQLUsername,
 DECLAREOPTION(QString, collectionsMySQLPassword, setCollectionsMySQLPassword,
               "Collections", "MySQL/Password", QString())
 
-DECLAREOPTION(QString, collectionsStorageEngine, setCollectionsStorageEngine,
+DECLAREOPTION(int, collectionsStorageEngine, setCollectionsStorageEngine,
               "Collections", "StorageEngine", QLatin1String("SQLite"))
 
 

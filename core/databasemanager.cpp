@@ -18,7 +18,7 @@
  */
 
 #include "databasemanager.h"
-#include "constants.h"
+#include "settings.h"
 
 #include <QDebug>
 #include <QDir>
@@ -49,17 +49,12 @@ DatabaseManager *DatabaseManager::instance()
 
 DatabaseManager::DatabaseManager()
 {
-    QSettings settings(QString(XdgConfigDir).append(QLatin1String("/main.conf")), QSettings::IniFormat);
-    m_driverType = (DriverTypes)settings.value(QLatin1String("Collections/StorageEngine"), 0).toInt();
-    settings.beginGroup(QLatin1String("Collections"));
-    settings.beginGroup(QLatin1String("MySQL"));
-    m_server = settings.value(QLatin1String("Server"), QLatin1String("127.0.0.1")).toString();
-    m_username = settings.value(QLatin1String("Username"), QString()).toString();
-    m_password = settings.value(QLatin1String("Password"), QString()).toString();
-    m_db = settings.value(QLatin1String("Database"), QLatin1String("tepsonic")).toString();
-    settings.endGroup();
-    settings.endGroup();
-
+    Settings *settings = Settings::instance();
+    m_driverType = static_cast<DatabaseManager::DriverTypes>(settings->collectionsStorageEngine());
+    m_server = settings->collectionsMySQLServer();
+    m_username = settings->collectionsMySQLUsername();
+    m_password = settings->collectionsMySQLPassword();
+    m_db = settings->collectionsMySQLDatabase();
     connectToDB();
 }
 
@@ -77,19 +72,15 @@ void DatabaseManager::connectToDB()
     case SQLite: {
         m_sqlDb = QSqlDatabase::addDatabase(QLatin1String("QSQLITE"));
         // If the DB file does not exist, try to create it
-        if (!QFile::exists(QString(XdgConfigDir) + QDir::separator() + QLatin1String("collection.db"))) {
-            // First check, if ~/.config/tepsonic exists, eventually create it
-            QDir configdir;
-            if (!configdir.exists(QString(XdgConfigDir)))
-                configdir.mkdir(QString(XdgConfigDir));
+        QFile dbFile(Settings::dataDir() + QLatin1String("/collection.db"));
+        if (!dbFile.exists()) {
             // Now check if the DB file exist and try to create it
-            QFile file(QString(XdgConfigDir) + QDir::separator() + QLatin1String("collection.db"));
-            if (!file.open(QIODevice::WriteOnly)) {
+            if (!dbFile.open(QIODevice::WriteOnly)) {
                 qDebug() << "Failed to create new database file!";
                 return;
             }
         }
-        m_sqlDb.setDatabaseName(QString(XdgConfigDir) + QDir::separator() + QLatin1String("collection.db"));
+        m_sqlDb.setDatabaseName(dbFile.fileName());
     }
     break;
     }

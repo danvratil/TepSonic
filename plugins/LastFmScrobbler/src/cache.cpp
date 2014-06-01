@@ -21,8 +21,7 @@
 #include "scrobbler.h"
 #include "track.h"
 #include "lastfm.h"
-
-#include <core/constants.h>
+#include <core/settings.h>
 
 #include <QDomDocument>
 #include <QNetworkRequest>
@@ -44,7 +43,8 @@ Cache::Cache(Scrobbler *scrobbler):
 Cache::~Cache()
 {
     // Save the cache
-    QFile file(XdgConfigDir + QDir::separator() + QLatin1String("lastfmcache.xml"));
+    const QString cacheFile = Settings::dataDir() + QLatin1String("/lastfmcache.xml");
+    QFile file(cacheFile);
     if (!file.open(QIODevice::WriteOnly)) {
         return;
     }
@@ -181,7 +181,8 @@ void Cache::loadCache()
     qDeleteAll(m_cache);
     m_cache.clear();
 
-    QFile file(XdgConfigDir + QDir::separator() + QLatin1String("lastfmcache.xml"));
+    const QString configFile = Settings::dataDir() + QLatin1String("/lastfmcache.xml");
+    QFile file(configFile);
     if (!file.open(QIODevice::ReadOnly)) {
         return;
     }

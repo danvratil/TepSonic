@@ -33,7 +33,6 @@
 #include "ui_pluginspage.h"
 #include "ui_shortcutspage.h"
 
-#include <core/constants.h>
 #include <core/pluginsmanager.h>
 #include <core/player.h>
 #include <core/abstractplugin.h>

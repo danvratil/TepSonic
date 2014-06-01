@@ -43,6 +43,9 @@ class TEPSONIC_CORE_EXPORT Settings
 
     void destroy();
 
+    static QString configDir();
+    static QString dataDir();
+
 #define DECLAREPROPERTY(type, getter, setter) \
     type getter() const; \
     void setter(const type &value);
@@ -57,7 +60,7 @@ class TEPSONIC_CORE_EXPORT Settings
     DECLAREPROPERTY(QString, collectionsMySQLUsername, setCollectionsMySQLUsername)
     DECLAREPROPERTY(QString, collectionsMySQLPassword, setCollectionsMySQLPassword)
 
-    DECLAREPROPERTY(QString, collectionsStorageEngine, setCollectionsStorageEngine)
+    DECLAREPROPERTY(int, collectionsStorageEngine, setCollectionsStorageEngine)
 
     /* === Session === */
     DECLAREPROPERTY(bool, sessionRestore, setSessionRestore)

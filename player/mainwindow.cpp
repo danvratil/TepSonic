@@ -23,7 +23,6 @@
 #include "taskmanager.h"
 #include "metadataeditor.h"
 
-#include <core/constants.h>
 #include <core/actionmanager.h>
 #include <core/playlist.h>
 #include <core/abstractplugin.h>
@@ -119,7 +118,8 @@ MainWindow::MainWindow():
 
     // Load last playlist
     if (Settings::instance()->sessionRestore()) {
-        Player::instance()->playlist()->loadPlaylist(XdgConfigDir + QLatin1String("/last.m3u"));
+        const QString playlistFile = Settings::configDir() + QLatin1String("/last.m3u");
+        Player::instance()->playlist()->loadPlaylist(playlistFile);
         Player::instance()->setRandomMode(Settings::instance()->playerRandomMode());
         Player::instance()->setRepeatMode(static_cast<Player::RepeatMode>(Settings::instance()->playerRepeatMode()));
     }
@@ -156,7 +156,8 @@ MainWindow::~MainWindow()
     }
 
     // Save current playlist to file
-    Player::instance()->playlist()->savePlaylist(XdgConfigDir + QLatin1String("/last.m3u"));
+    const QString playlistFile = Settings::configDir() +  QLatin1String("/last.m3u");
+    Player::instance()->playlist()->savePlaylist(playlistFile);
 
     delete m_ui;
 }

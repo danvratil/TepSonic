@@ -28,7 +28,6 @@
 #include <QString>
 #include <QDebug>
 
-#include <core/constants.h>
 #include <core/player.h>
 #include <core/playlist.h>
 #include <core/pluginsmanager.h>

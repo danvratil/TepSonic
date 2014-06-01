@@ -18,7 +18,6 @@
  */
 
 #include "filesystemview.h"
-#include "constants.h"
 
 #include <core/settings.h>
 #include <core/supportedformats.h>

@@ -19,8 +19,8 @@
 
 #include "player.h"
 #include "actionmanager.h"
-#include "constants.h"
 #include "playlist.h"
+#include "settings.h"
 
 #include <QtCore/QSettings>
 
@@ -88,7 +88,8 @@ Player::Private::~Private()
 
 void Player::Private::loadEffects()
 {
-    const QSettings settings(QString(XdgConfigDir).append(QLatin1String("/main.conf")), QSettings::IniFormat);
+    const QString configFile = Settings::configDir() + QLatin1String("/main.conf");
+    const QSettings settings(configFile, QSettings::IniFormat);
     const QList<Phonon::EffectDescription> availableEffects = Phonon::BackendCapabilities::availableAudioEffects();
     for (int i = 0; i < availableEffects.count(); i++) {
         Phonon::Effect *effect = new Phonon::Effect(availableEffects.at(i));
@@ -355,7 +356,8 @@ Playlist* Player::playlist() const
 
 void Player::setDefaultOutputDevice()
 {
-    const QSettings settings(QString(XdgConfigDir).append(QLatin1String("/main.conf")), QSettings::IniFormat);
+    const QString configFile = Settings::configDir() + QLatin1String("/main.conf");
+    const QSettings settings(configFile, QSettings::IniFormat);
     const int index = settings.value(QLatin1String("Preferences/OutputDevice")).toInt();
 
     const QList<Phonon::AudioOutputDevice> devices = Phonon::BackendCapabilities::availableAudioOutputDevices();

@@ -119,7 +119,7 @@ void CollectionsPage::loadSettings()
     m_ui->enableCollectionsCheckbox->setChecked(Settings::instance()->collectionsEnabled());
     m_ui->autoupdateCollectionsCheckbox->setChecked(Settings::instance()->collectionsAutoRebuild());
     m_ui->collectionsPathsList->addItems(Settings::instance()->collectionsSourcePaths());
-    m_ui->dbEngineCombo->setCurrentText(Settings::instance()->collectionsStorageEngine());
+    m_ui->dbEngineCombo->setCurrentIndex(Settings::instance()->collectionsStorageEngine());
 
     m_ui->mysqlServerEdit->setText(Settings::instance()->collectionsMySQLServer());
     m_ui->mysqlUsernameEdit->setText(Settings::instance()->collectionsMySQLUsername());
@@ -139,7 +139,7 @@ void CollectionsPage::saveSettings()
         items.append(m_ui->collectionsPathsList->item(i)->text());
     }
     Settings::instance()->setCollectionsSourcePaths(items);
-    Settings::instance()->setCollectionsStorageEngine(m_ui->dbEngineCombo->currentText());
+    Settings::instance()->setCollectionsStorageEngine(m_ui->dbEngineCombo->currentIndex());
 
     Settings::instance()->setCollectionsMySQLServer(m_ui->mysqlServerEdit->text());
     Settings::instance()->setCollectionsMySQLUsername(m_ui->mysqlUsernameEdit->text());

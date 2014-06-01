@@ -1,6 +1,3 @@
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/constants.h.cmake
-               ${CMAKE_CURRENT_BINARY_DIR}/constants.h)
-
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}
                     ${CMAKE_CURRENT_BINARY_DIR}
 )
@@ -9,7 +6,6 @@ set(core_SRCS
     abstractplugin.cpp
     actionmanager.cpp
     collectionmodel.cpp
-    constants.cpp
     databasemanager.cpp
     m3u.cpp
     metadata.cpp
@@ -25,7 +21,6 @@ set(core_HDRS
     abstractplugin.h
     actionmanager.h
     collectionmodel.h
-    ${CMAKE_CURRENT_BINARY_DIR}/constants.h
     databasemanager.h
     m3u.h
     metadata.h
