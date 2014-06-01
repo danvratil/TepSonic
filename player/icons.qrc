@@ -15,10 +15,6 @@
         <file alias="quit">../icons/application-exit.png</file>
         <file alias="mainIcon">../icons/TepSonic-Tray.png</file>
         <file alias="appIcon">../icons/TepSonic-Main.png</file>
-        <file alias="collections">../icons/collections.png</file>
-        <file alias="player">../icons/player.png</file>
-        <file alias="plugins">../icons/plugins.png</file>
-        <file alias="shortcuts">../icons/shortcuts.png</file>
         <file alias="goHome">../icons/go-home.png</file>
 	<file alias="goNext">../icons/go-next.png</file>
 	<file alias="goUp">../icons/go-up.png</file>

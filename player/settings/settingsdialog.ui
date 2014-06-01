@@ -51,25 +51,51 @@
        <property name="dragDropMode">
         <enum>QAbstractItemView::NoDragDrop</enum>
        </property>
+       <property name="alternatingRowColors">
+        <bool>false</bool>
+       </property>
        <property name="iconSize">
         <size>
-         <width>80</width>
-         <height>80</height>
+         <width>48</width>
+         <height>48</height>
         </size>
+       </property>
+       <property name="textElideMode">
+        <enum>Qt::ElideNone</enum>
        </property>
        <property name="movement">
         <enum>QListView::Static</enum>
        </property>
+       <property name="isWrapping" stdset="0">
+        <bool>true</bool>
+       </property>
+       <property name="resizeMode">
+        <enum>QListView::Fixed</enum>
+       </property>
+       <property name="gridSize">
+        <size>
+         <width>100</width>
+         <height>80</height>
+        </size>
+       </property>
        <property name="viewMode">
         <enum>QListView::IconMode</enum>
+       </property>
+       <property name="uniformItemSizes">
+        <bool>true</bool>
+       </property>
+       <property name="wordWrap">
+        <bool>false</bool>
+       </property>
+       <property name="selectionRectVisible">
+        <bool>false</bool>
        </property>
        <item>
         <property name="text">
          <string>Player</string>
         </property>
         <property name="icon">
-         <iconset resource="../icons.qrc">
-          <normaloff>:/icons/player</normaloff>:/icons/player</iconset>
+         <iconset theme="preferences-desktop-sound"/>
         </property>
        </item>
        <item>
@@ -77,9 +103,7 @@
          <string>Collections</string>
         </property>
         <property name="icon">
-         <iconset>
-          <normalon>:/icons/collections</normalon>
-         </iconset>
+         <iconset theme="server-database"/>
         </property>
        </item>
        <item>
@@ -87,8 +111,7 @@
          <string>Plugins</string>
         </property>
         <property name="icon">
-         <iconset resource="../icons.qrc">
-          <normaloff>:/icons/plugins</normaloff>:/icons/plugins</iconset>
+         <iconset theme="preferences-plugin"/>
         </property>
        </item>
        <item>
@@ -96,8 +119,7 @@
          <string>Shortcuts</string>
         </property>
         <property name="icon">
-         <iconset resource="../icons.qrc">
-          <normaloff>:/icons/shortcuts</normaloff>:/icons/shortcuts</iconset>
+         <iconset theme="preferences-desktop-keyboard"/>
         </property>
        </item>
       </widget>
