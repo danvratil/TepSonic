@@ -23,12 +23,21 @@
 #include <QString>
 #include <QSharedDataPointer>
 #include <QList>
+#include <QMetaType>
 
 #include <taglib/fileref.h>
 
 #include "tepsonic-core-export.h"
 
 class QSqlQuery;
+
+namespace TepSonic
+{
+class MetaData;
+}
+
+TEPSONIC_CORE_EXPORT QDataStream &operator<<(QDataStream &stream, const TepSonic::MetaData &metadata);
+TEPSONIC_CORE_EXPORT QDataStream &operator>>(QDataStream &stream, TepSonic::MetaData &metadata);
 
 namespace TepSonic
 {
@@ -74,8 +83,15 @@ class TEPSONIC_CORE_EXPORT MetaData
   private:
     class Private;
     QSharedDataPointer<Private> d;
+
+    friend QDataStream & ::operator<<(QDataStream &stream, const TepSonic::MetaData &metadata);
+    friend QDataStream & ::operator>>(QDataStream &stream, TepSonic::MetaData &metadata);
 };
 
 } // namespace TepSonic
+
+Q_DECLARE_METATYPE(TepSonic::MetaData);
+
+
 
 #endif // TEPSONIC_METADATA_H

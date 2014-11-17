@@ -153,9 +153,8 @@ void PlaylistView::mouseMoveEvent(QMouseEvent *event)
 
     for (int i = 0; i < selection.indexes().size(); i++) {
         const QModelIndex index = selection.indexes().at(i);
-        for (int j = 0; j < model()->columnCount(); j++)  {
-            stream << index.sibling(index.row(), j).data().toString();
-        }
+        stream << index.data(Playlist::MetaDataRole).value<MetaData>();
+
         // Remove the row from view
         model()->removeRow(selection.indexes().at(i).row());
     }
@@ -250,23 +249,7 @@ void PlaylistView::dropEvent(QDropEvent *event)
         MetaData metadata;
         QString s;
         while (!stream.atEnd()) {
-            stream >> s;
-            metadata.setFileName(s);
-            stream >> s;
-            metadata.setTrackNumber(s.toUInt());
-            stream >> s;
-            metadata.setArtist(s);
-            stream >> s;
-            metadata.setTitle(s);
-            stream >> s;
-            metadata.setAlbum(s);
-            stream >> s;
-            metadata.setGenre(s);
-            stream >> s;
-            metadata.setYear(s.toUInt());
-            stream >> s;
-            metadata.setBitrate(s.toInt());
-
+            stream >> metadata;
             metadataList << metadata;
         }
         Player::instance()->playlist()->insert(metadataList, row);

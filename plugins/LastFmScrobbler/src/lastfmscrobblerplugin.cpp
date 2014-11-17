@@ -39,8 +39,6 @@
 #include <QDateTime>
 #include <QtPlugin>
 
-Q_DECLARE_METATYPE(TepSonic::MetaData);
-
 using namespace TepSonic;
 
 LastFmScrobblerPlugin::LastFmScrobblerPlugin():

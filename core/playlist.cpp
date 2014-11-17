@@ -40,8 +40,6 @@
 
 using namespace TepSonic;
 
-Q_DECLARE_METATYPE(MetaData);
-
 class Playlist::Private
 {
   public:
@@ -233,10 +231,10 @@ QVariant Playlist::data(const QModelIndex &index, int role) const
         return QVariant();
     }
 
-    d->itemsLock->lockForRead();
-    const MetaData metaData = d->items.at(index.row());
-    d->itemsLock->unlock();
     if (role == Playlist::MetaDataRole) {
+        d->itemsLock->lockForRead();
+        const MetaData metaData = d->items.at(index.row());
+        d->itemsLock->unlock();
         return QVariant::fromValue(metaData);
     }
 

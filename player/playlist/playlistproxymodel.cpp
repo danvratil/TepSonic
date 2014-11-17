@@ -22,8 +22,6 @@
 #include <core/playlist.h>
 #include <core/player.h>
 
-Q_DECLARE_METATYPE(TepSonic::MetaData)
-
 using namespace TepSonic;
 
 PlaylistProxyModel::PlaylistProxyModel(QObject *parent):
@@ -77,11 +75,15 @@ QVariant PlaylistProxyModel::headerData(int section, Qt::Orientation orientation
 
 QVariant PlaylistProxyModel::data(const QModelIndex &index, int role) const
 {
-    if (role != Qt::DisplayRole) {
+    if (role != Qt::DisplayRole && role != Playlist::MetaDataRole) {
         return QVariant();
     }
 
     const QModelIndex sourceIndex = sourceModel()->index(index.row(), 0);
+    if (role == Playlist::MetaDataRole) {
+            return sourceModel()->data(sourceIndex, role);
+    }
+
     const MetaData metaData = sourceModel()->data(sourceIndex, Playlist::MetaDataRole).value<MetaData>();
     switch (index.column()) {
         case 0:

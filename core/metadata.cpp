@@ -263,4 +263,35 @@ void MetaData::setBitrate(int bitrate)
     d->bitrate = bitrate;
 }
 
+QDataStream &operator<<(QDataStream &stream, const MetaData &metadata)
+{
+    stream << metadata.d->filename
+           << metadata.d->trackNumber
+           << metadata.d->artist
+           << metadata.d->title
+           << metadata.d->album
+           << metadata.d->genre
+           << metadata.d->length
+           << metadata.d->year
+           << metadata.d->bitrate;
+    return stream;
+}
+
+QDataStream &operator>>(QDataStream &stream, MetaData &metadata)
+{
+    qint64 length;
+    stream >> metadata.d->filename
+           >> metadata.d->trackNumber
+           >> metadata.d->artist
+           >> metadata.d->title
+           >> metadata.d->album
+           >> metadata.d->genre
+           >> length
+           >> metadata.d->year
+           >> metadata.d->bitrate;
+
+    metadata.setLength(length);
+
+    return stream;
+}
 
