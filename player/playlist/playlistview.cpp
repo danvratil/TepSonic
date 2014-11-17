@@ -159,7 +159,7 @@ void PlaylistView::mouseMoveEvent(QMouseEvent *event)
         model()->removeRow(selection.indexes().at(i).row());
     }
 
-    mimeData->setData(QLatin1String("data/tepsonic-playlist-items"), encodedData);
+    mimeData->setData(QLatin1String("application/x.vnd.tepsonic.MetaData"), encodedData);
     drag->setMimeData(mimeData);
 
     drag->exec(Qt::MoveAction);
@@ -227,8 +227,8 @@ void PlaylistView::dropEvent(QDropEvent *event)
     }
 
     // Drop from internal move
-    if (event->mimeData()->hasFormat(QLatin1String("data/tepsonic-playlist-items"))) {
-        QByteArray encodedData = event->mimeData()->data(QLatin1String("data/tepsonic-playlist-items"));
+    if (event->mimeData()->hasFormat(QLatin1String("application/x.vnd.tepsonic.MetaData"))) {
+        QByteArray encodedData = event->mimeData()->data(QLatin1String("application/x.vnd.tepsonic.MetaData"));
         QDataStream stream(&encodedData, QIODevice::ReadOnly);
 
         Playlist *model = Player::instance()->playlist();
