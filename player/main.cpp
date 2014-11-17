@@ -1,6 +1,6 @@
 /*
  * TEPSONIC
- * Copyright 2013 Daniel Vrátil <dan@progdan.cz>
+ * Copyright 2013 Daniel Vrátil <me@dvratil.cz>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -41,7 +41,7 @@ int main(int argc, char *argv[])
 {
     QApplication tepsonic(argc, argv);
     tepsonic.setApplicationName(QLatin1String("TepSonic"));
-    tepsonic.setOrganizationName(QLatin1String("Dan Vrátil"));
+    tepsonic.setOrganizationName(QLatin1String("Daniel Vrátil"));
     tepsonic.setApplicationVersion(QLatin1String(TEPSONIC_VERSION));
     tepsonic.setWindowIcon(QIcon(QStringLiteral(":/icons/mainIcon")));
 

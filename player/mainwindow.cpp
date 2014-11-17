@@ -1,6 +1,6 @@
 /*
  * TEPSONIC
- * Copyright 2013 Daniel Vrátil <dan@progdan.cz>
+ * Copyright 2013 Daniel Vrátil <me@dvratil.cz>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -351,7 +351,7 @@ void MainWindow::aboutTepSonic()
                   "2 of the License, or (at your option) any later version.</p>"
                   "<h2>Developers:</h2><p>%3</p>"
                   "<h2>Artwork:</h2><p>%4</p>"
-                  "<p>&copy; 2009 - 2013 <a href=\"mailto:dan@progdan.cz\">Daniel Vrátil</a></p>")
+                  "<p>&copy; 2009 - 2013 <a href=\"mailto:me@dvratil.cz\">Daniel Vrátil</a></p>")
                   .arg(QApplication::applicationName(),
                        QApplication::applicationVersion(),
                        developers.join(QLatin1String(", ")),

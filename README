@@ -1,6 +1,6 @@
  TEPSONIC
 ==========
- Author: Dan Vratil <dan@progdan.cz>
+ Author: Daniel Vratil <me@dvratil.cz>
  Homepage: http://danvratil.github.io/TepSonic
 
  TepSonic is just yet another audio player. It is based on Qt5 and as an audio 

@@ -1,6 +1,6 @@
 /*
  * TEPSONIC
- * Copyright 2013 Daniel Vrátil <dan@progdan.cz>
+ * Copyright 2013 Daniel Vrátil <me@dvratil.cz>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -40,7 +40,7 @@ namespace LastFm {
 class LastFmScrobblerPlugin : public TepSonic::AbstractPlugin
 {
     Q_OBJECT
-    Q_PLUGIN_METADATA(IID "cz.progdan.tepsonic.plugins.LastFmScrobbler"
+    Q_PLUGIN_METADATA(IID "cz.dvratil.tepsonic.plugins.LastFmScrobbler"
                       FILE "LastFmScrobbler.json")
 
   public:

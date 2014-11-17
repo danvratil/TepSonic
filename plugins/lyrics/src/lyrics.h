@@ -1,6 +1,6 @@
 /*
  * TEPSONIC
- * Copyright 2013 Daniel Vrátil <dan@progdan.cz>
+ * Copyright 2013 Daniel Vrátil <me@dvratil.cz>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -37,7 +37,7 @@ class QModelIndex;
 class LyricsPlugin : public TepSonic::AbstractPlugin
 {
     Q_OBJECT
-    Q_PLUGIN_METADATA(IID "cz.progdan.tepsonic.plugins.Lyrics"
+    Q_PLUGIN_METADATA(IID "cz.dvratil.tepsonic.plugins.Lyrics"
                       FILE "Lyrics.json")
 
   public:

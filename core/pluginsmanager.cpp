@@ -1,6 +1,6 @@
 /*
  * TEPSONIC
- * Copyright 2013 Daniel Vrátil <dan@progdan.cz>
+ * Copyright 2013 Daniel Vrátil <me@dvratil.cz>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -138,7 +138,7 @@ PluginsManager::Plugin *PluginsManager::Private::tryLoadPlugin(const QString &fi
     }
 
     const QString iid = data[QLatin1String("IID")].toString();
-    if (!iid.startsWith(QLatin1String("cz.progdan.tepsonic.plugins"))) {
+    if (!iid.startsWith(QLatin1String("cz.dvratil.tepsonic.plugins"))) {
         qWarning() << filePath << "is not a valid TepSonic plugin file";
         return 0;
     }

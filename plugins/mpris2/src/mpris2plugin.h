@@ -1,6 +1,6 @@
 /*
  * TEPSONIC
- * Copyright 2013 Daniel Vrátil <dan@progdan.cz>
+ * Copyright 2013 Daniel Vrátil <me@dvratil.cz>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -27,7 +27,7 @@ class QDBusAbstractAdaptor;
 class MPRIS2Plugin : public TepSonic::AbstractPlugin
 {
     Q_OBJECT
-    Q_PLUGIN_METADATA(IID "cz.progdan.tepsonic.plugins.MPRIS2"
+    Q_PLUGIN_METADATA(IID "cz.dvratil.tepsonic.plugins.MPRIS2"
                       FILE "MPRIS2Plugin.json")
 
   public:
