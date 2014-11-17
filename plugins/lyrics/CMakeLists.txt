@@ -25,9 +25,9 @@ set(lyricsplugin_SRCS
 #set(lyricsplugin_TSS)
 #tepsonic_add_translations(tepsonic_lyricsplugin ${lyricsplugin_TSS})
 
-add_library(tepsonic_lyricsplugin SHARED
-            ${lyricsplugin_SRCS}
-            ${lyricsplugin_QMOC_SRCS}
+tepsonic_add_plugin(tepsonic_lyricsplugin
+                    ${lyricsplugin_SRCS}
+                    ${lyricsplugin_QMOC_SRCS}
 )
 
 target_link_libraries(tepsonic_lyricsplugin

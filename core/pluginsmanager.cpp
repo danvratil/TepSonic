@@ -97,7 +97,7 @@ void PluginsManager::Private::loadPlugins()
         qDebug() << "Searching plugins in " << tepsonicPluginsDir;
         QDir dir(tepsonicPluginsDir);
         // Temporary list to avoid duplicate loading of plugins
-        //dir.setNameFilters(QStringList() << QLatin1String("libtepsonic_*"));
+        dir.setNameFilters(QStringList() << QLatin1String("tepsonic_*"));
         dir.setFilter(QDir::Files | QDir::NoSymLinks);
 
         const QStringList plugins = dir.entryList();

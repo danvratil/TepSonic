@@ -15,3 +15,9 @@ macro (tepsonic_add_translations _target _languages)
     endforeach  ()
     add_dependencies(${_target} ${_translations})
 endmacro ()
+
+
+macro (tepsonic_add_plugin _target)
+    add_library(${_target} MODULE ${ARGN})
+    set_target_properties(${_target} PROPERTIES PREFIX "")
+endmacro()

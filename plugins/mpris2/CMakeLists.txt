@@ -23,9 +23,9 @@ set(mpris2plugin_SRCS
     src/mprismediaplayer2player.cpp
 )
 
-add_library(tepsonic_mpris2plugin SHARED
-            ${mpris2plugin_SRCS}
-            ${mpris2plugin_QMOC_SRCS}
+tepsonic_add_plugin(tepsonic_mpris2plugin
+                    ${mpris2plugin_SRCS}
+                    ${mpris2plugin_QMOC_SRCS}
 )
 
 target_link_libraries(tepsonic_mpris2plugin

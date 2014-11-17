@@ -29,10 +29,11 @@ set(lastfmscrobbler_QUIS
 
 qt5_wrap_ui(lastfmscrobbler_QUIS_HDRS ${lastfmscrobbler_QUIS})
 
-add_library(tepsonic_lastfmscrobbler SHARED
-            ${lastfmscrobbler_SRCS}
-            ${lastfmscrobbler_QUIS_HDRS}
-            ${lastfmscrobbler_QMOC_SRCS}
+
+tepsonic_add_plugin(tepsonic_lastfmscrobbler
+                    ${lastfmscrobbler_SRCS}
+                    ${lastfmscrobbler_QUIS_HDRS}
+                    ${lastfmscrobbler_QMOC_SRCS}
 )
 
 target_link_libraries(tepsonic_lastfmscrobbler
